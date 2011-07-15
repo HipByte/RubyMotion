@@ -1,8 +1,10 @@
-platforms_dir = ENV['platforms_dir']
-sdk_version = ENV['sdk_version']
+PLATFORMS_DIR = ENV['platforms_dir']
+SDK_VERSION = ENV['sdk_version']
+
+verbose(true)
 
 task :default => :all
-task :all => [:vm_files, :bridgesupport]
+task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
 
 task :vm_files do
   install '../vm/miniruby', 'ruby'
@@ -16,15 +18,66 @@ task :vm_files do
   install '../vm/.simulator-objs/libmacruby-static.a', 'iPhoneSimulator'
 end
 
-task :bridgesupport do
+task :bridgesupport_files do
   frameworks = %w{UIKit Foundation CoreGraphics}
-  platform_dev_path = "#{platforms_dir}/iPhoneSimulator.platform/Developer"
-  sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
+  platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
+  sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{SDK_VERSION}.sdk"
   sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
   mkdir_p 'BridgeSupport'
   frameworks.each do |framework|
     dest = "BridgeSupport/#{framework}.bridgesupport"
-    sh "gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{sdk_version}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}" unless File.exist?(dest)
+    unless File.exist?(dest)
+      sh "gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{sdk_version}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
+    end
+  end
+end
+
+def generate_bs_static_stub(file, include_directive)
+  require 'rubygems'
+  require 'nokogiri'
+
+  text = "#import <#{include_directive}>\n\n"
+
+  doc = Nokogiri::XML(File.read(file))
+  doc.xpath("/signatures/function[@inline=\"true\"]").each do |node|
+    name = node['name'].to_s
+    retval = node.xpath('./retval')[0]['declared_type'].to_s
+    args = node.xpath('./arg').map { |node| node['declared_type'].to_s }
+
+    proto = "#{retval} __concrete__#{name}("
+    proto << (0...args.size).to_a.map { |i| "#{args[i]} arg#{i}" }.join(', ')
+    proto << ")"
+
+    func = ''
+    func << proto
+    func << "\n{\n  "
+    func << "  return " if retval != 'void'
+    func << name << '('
+    func << (0...args.size).to_a.map { |i| "arg#{i}" }.join(', ')
+    func << ");\n}\n\n"
+
+    text << func
+  end
+
+  text
+end
+
+task :bridgesupport_static_stubs do
+  Dir.glob('BridgeSupport/*.bridgesupport') do |bs_path|
+    framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
+
+    code = "BridgeSupport/#{framework}_stubs.m"
+    File.open(code, 'w') { |io| io.write(generate_bs_static_stub(bs_path, "UIKit/UIKit.h")) } unless File.exist?(code)
+
+    [%w{iPhoneOS armv6 armv7}, %w{iPhoneSimulator i386}].each do |platform, *archs|
+      obj = "#{platform}/#{framework}_stubs.o"
+      next if File.exist?(obj)
+      platform_dev = "#{PLATFORMS_DIR}/#{platform}.platform/Developer"
+      cflags = "-isysroot #{platform_dev}/SDKs/#{platform}#{SDK_VERSION}.sdk "
+      cflags << archs.map { |a| "-arch #{a}" }.join(' ')
+      cflags << " -miphoneos-version-min=#{SDK_VERSION}"
+      sh "#{platform_dev}/usr/bin/llvm-gcc #{cflags} #{code} -c -o #{obj}"
+    end
   end
 end
 

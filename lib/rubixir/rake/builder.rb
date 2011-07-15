@@ -127,7 +127,12 @@ EOS
       objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
       main_exec = File.join(build_dir, "main")
       frameworks = config.frameworks.map { |x| "-framework #{x}" }.join(' ')
-      sh "#{cxx} -o #{main_exec} #{objs_list} #{arch_flags} -isysroot \"#{sdk}\" -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks}" 
+      framework_stubs_objs = []
+      config.frameworks.each do |framework|
+        stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
+        framework_stubs_objs << stubs_obj if File.exist?(stubs_obj)
+      end
+      sh "#{cxx} -o #{main_exec} #{objs_list} #{arch_flags} -isysroot \"#{sdk}\" -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{framework_stubs_objs.join(' ')}" 
     end
   end
 end
