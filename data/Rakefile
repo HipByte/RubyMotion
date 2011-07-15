@@ -1,0 +1,33 @@
+platforms_dir = ENV['platforms_dir']
+sdk_version = ENV['sdk_version']
+
+task :default => :all
+task :all => [:vm_files, :bridgesupport]
+
+task :vm_files do
+  install '../vm/miniruby', 'ruby'
+  install '/usr/local/bin/llc', 'llc'
+  mkdir_p 'iPhoneOS'
+  install '../vm/.ios-objs/kernel-armv6.bc', 'iPhoneOS'
+  install '../vm/.ios-objs/kernel-armv7.bc', 'iPhoneOS'
+  install '../vm/.ios-objs/libmacruby-static.a', 'iPhoneOS'
+  mkdir_p 'iPhoneSimulator'
+  install '../vm/.simulator-objs/kernel-i386.bc', 'iPhoneSimulator'
+  install '../vm/.simulator-objs/libmacruby-static.a', 'iPhoneSimulator'
+end
+
+task :bridgesupport do
+  frameworks = %w{UIKit Foundation CoreGraphics}
+  platform_dev_path = "#{platforms_dir}/iPhoneSimulator.platform/Developer"
+  sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
+  sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
+  mkdir_p 'BridgeSupport'
+  frameworks.each do |framework|
+    dest = "BridgeSupport/#{framework}.bridgesupport"
+    sh "gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{sdk_version}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}" unless File.exist?(dest)
+  end
+end
+
+task :clean do
+  %w{ruby llc iPhoneOS iPhoneSimulator BridgeSupport}.each { |path| rm_rf(path) }
+end

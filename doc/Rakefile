@@ -1,0 +1,11 @@
+platforms_dir = ENV['platforms_dir']
+sdk_version = ENV['sdk_version']
+
+task :default => :all
+task :all do
+  # TODO
+end
+
+task :clean do
+  # TODO
+end
