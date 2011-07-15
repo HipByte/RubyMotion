@@ -1,3 +1,5 @@
+verbose(true)
+
 DOCSET_PATHS = %w{
   /Library/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiOS4_3.iOSLibrary.docset/Contents/Resources/Documents/documentation/UIKit/Reference
   /Library/Developer/Documentation/DocSets/com.apple.adc.documentation.AppleiOS4_3.iOSLibrary.docset/Contents/Resources/Documents/documentation/Cocoa/Reference  
