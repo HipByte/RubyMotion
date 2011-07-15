@@ -1,6 +1,5 @@
 PLATFORMS_DIR = '/Developer/Platforms'
 SDK_VERSION = '4.3'
-
 PROJECT_VERSION = '0.0.4'
 
 def rake(dir, cmd='all')
@@ -12,16 +11,35 @@ end
 targets = %w{vm data doc}
 
 task :default => :all
+desc "Build everything"
 task :all => targets
 
 targets.each do |target|
+  desc "Build target #{target}"
   task target do
     rake(target)
   end
 end
 
+desc "Clean all targets"
 task :clean do
   targets.each { |target| rake(target, 'clean') }
+  rm_rf 'pkg'
+end
+
+desc "Generate source code archive"
+task :archive do
+  base = "rubixir-#{PROJECT_VERSION}"
+  rm_rf "/tmp/#{base}"
+  sh "git archive --format=tar --prefix=#{base}/ HEAD | (cd /tmp && tar xf -)"
+  Dir.chdir('vm') do
+    sh "git archive --format=tar HEAD | (cd /tmp/#{base}/vm && tar xf -)"
+  end
+  Dir.chdir('/tmp') do
+    sh "tar -czf #{base}.tgz #{base}"
+  end
+  sh "mv /tmp/#{base}.tgz ."
+  sh "du -h #{base}.tgz"
 end
 
 require 'rubygems'
