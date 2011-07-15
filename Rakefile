@@ -31,7 +31,7 @@ end
 
 desc "Generate source code archive"
 task :archive do
-  base = "rubixir-#{PROJECT_VERSION}"
+  base = "rubixir-head"
   rm_rf "/tmp/#{base}"
   sh "git archive --format=tar --prefix=#{base}/ HEAD | (cd /tmp && tar xf -)"
   Dir.chdir('vm') do
