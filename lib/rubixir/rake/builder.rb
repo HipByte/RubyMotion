@@ -25,25 +25,33 @@ module Rubixir
           bs_flags << "--uses-bs \"" + bs_path + "\" "
         end
       end
- 
+
+      files_compiled = false
       objs = []
       config.files.each do |path|
-        # Generate init function.
-        init_func = "MREP_#{`uuidgen`.strip.gsub('-', '')}"
-    
+        obj = File.join(build_dir, "#{path}.o")
+        should_rebuild = (!File.exist?(obj) or File.mtime(path) > File.mtime(obj))
+ 
+        # Generate or retrieve init function.
+        init_func = should_rebuild ? "MREP_#{`uuidgen`.strip.gsub('-', '')}" : `nm #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
+        objs << [obj, init_func]
+
+        next unless should_rebuild   
+        files_compiled = true
+ 
         arch_objs = []
         archs.each do |arch|
           # Locate arch kernel.
           kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
           raise "Can't locate kernel file" unless File.exist?(kernel)
-    
+ 
           # Prepare build_dir. 
           bc = File.join(build_dir, "#{path}.#{arch}.bc")
           FileUtils.mkdir_p(File.dirname(bc))
-    
+
           # LLVM bitcode.
           sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
-    
+ 
           # Assembly.
           asm = File.join(build_dir, "#{path}.#{arch}.s")
           llc_arch = case arch
@@ -53,22 +61,23 @@ module Rubixir
             else; arch
           end
           sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh"
-    
+ 
           # Object.
-          obj = File.join(build_dir, "#{path}.#{arch}.o")
-          sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{obj}\""
-    
-          arch_objs << obj
+          arch_obj = File.join(build_dir, "#{path}.#{arch}.o")
+          sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+ 
+          arch_objs << arch_obj
         end
-    
+ 
         # Assemble fat binary.
         arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
-        obj = File.join(build_dir, "#{path}.o")
         sh "lipo -create #{arch_objs_list} -output \"#{obj}\""
-    
-        objs << [obj, init_func]
       end
-    
+
+      # No need to rebuild the main executable in case no source files changed as well as the static library.
+      main_exec = File.join(build_dir, "main")
+      return if !files_compiled and File.exist?(main_exec) and File.mtime(main_exec) > File.mtime(File.join(datadir, platform, 'libmacruby-static.a'))
+
       # Generate main file.
       main_txt = <<EOS
 #import <UIKit/UIKit.h>
@@ -115,17 +124,16 @@ EOS
     rb_exit(retval);
 }
 EOS
-    
+ 
       # Compile main file.
       main = File.join(build_dir, 'main.mm')
       File.open(main, 'w') { |io| io.write(main_txt) }
       main_o = File.join(build_dir, 'main.o')
       arch_flags = archs.map { |x| "-arch #{x}" }.join(' ')
       sh "#{cxx} \"#{main}\" #{arch_flags} -fexceptions -fblocks -isysroot \"#{sdk}\" -miphoneos-version-min=4.3 -fobjc-legacy-dispatch -fobjc-abi-version=2 -c -o \"#{main_o}\""
-    
+
       # Link executable.
       objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
-      main_exec = File.join(build_dir, "main")
       frameworks = config.frameworks.map { |x| "-framework #{x}" }.join(' ')
       framework_stubs_objs = []
       config.frameworks.each do |framework|
