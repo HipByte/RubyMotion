@@ -51,8 +51,9 @@ gem_spec = Gem::Specification.new do |spec|
   files.concat(Dir.glob('./lib/**/*'))
   files.concat(Dir.glob('./data/**/*').reject { |path| File.basename(path) =~ /(Rakefile|_stubs.m)/ })
   files.concat(Dir.glob('./doc/html/**/*'))
-  files.concat(Dir.glob('./sample/**/*').select { |path| File.basename(path) != 'build' })
+  files.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   files.reject! { |path| /^\./.match(File.basename(path)) }
+  files.reject! { |path| File.directory?(path) }
 
   spec.name = 'rubixir'
   spec.summary = 'Ruby runtime for iOS'
