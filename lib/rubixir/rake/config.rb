@@ -89,8 +89,6 @@ module Rubixir
 	<true/>
 	<key>MinimumOSVersion</key>
 	<string>#{@sdk_version}</string>
-	<key>NSMainNibFile</key>
-	<string></string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>
