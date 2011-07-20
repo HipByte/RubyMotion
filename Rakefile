@@ -1,6 +1,6 @@
 PLATFORMS_DIR = '/Developer/Platforms'
 SDK_VERSION = '4.3'
-PROJECT_VERSION = '0.0.5'
+PROJECT_VERSION = '0.0.6'
 
 verbose(true)
 
@@ -49,7 +49,10 @@ require 'rake/gempackagetask'
 gem_spec = Gem::Specification.new do |spec|
   files = []
   files.concat(Dir.glob('./lib/**/*'))
-  files.concat(Dir.glob('./data/**/*').reject { |path| File.basename(path) =~ /(Rakefile|_stubs.m)/ })
+  files.concat(Dir.glob('./data/BridgeSupport/*.bridgesupport'))
+  files.concat(%w{./data/deploy ./data/llc ./data/ruby})
+  files.concat(Dir.glob('./data/iPhoneOS/*'))
+  files.concat(Dir.glob('./data/iPhoneSimulator/*'))
   files.concat(Dir.glob('./doc/html/**/*'))
   files.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   files.reject! { |path| /^\./.match(File.basename(path)) }

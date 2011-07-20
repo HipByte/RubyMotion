@@ -27,8 +27,9 @@ end
 
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
+  app = Rubixir::CONFIG.app_bundle('iPhoneSimulator', true)
   sim = File.join(Rubixir::CONFIG.platform_dir('iPhoneSimulator'), '/Developer/Applications/iPhone Simulator.app/Contents/MacOS/iPhone Simulator')
-  sh "\"#{sim}\" -SimulateApplication \"#{Rubixir::CONFIG.app_bundle('iPhoneSimulator', true)}\""
+  sh "\"#{sim}\" -SimulateApplication \"#{app}\""
 end
 
 desc "Create an .ipa package"
@@ -45,8 +46,9 @@ task :package => ['build:ios'] do
 end
 
 desc "Deploy on the device"
-task :deploy do
-  # TODO
+task :deploy => :package do
+  deploy = File.join(Rubixir::CONFIG.datadir, 'deploy')
+  sh "#{deploy} #{Rubixir::CONFIG.archive}"
 end
 
 desc "Clear build objects"

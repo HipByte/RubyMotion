@@ -16,6 +16,10 @@ module Rubixir
       @bundle_signature = '????'
     end
 
+    def datadir
+      File.expand_path(File.join(File.dirname(__FILE__), '../../../data'))
+    end
+
     def platform_dir(platform)
       File.join(@platforms_dir, platform + '.platform')
     end

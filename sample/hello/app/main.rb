@@ -6,7 +6,7 @@ class MyView < UIView
       text = "ZOMG!"
     else
       bgcolor = UIColor.blackColor
-      text = @touches ? "Touched #{@touches} times!" : "Hello Ruby!"
+      text = @touches ? "Touched #{@touches} times!" : "Hello Rubixir!"
     end
 
     bgcolor.set 

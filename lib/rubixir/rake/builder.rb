@@ -1,7 +1,7 @@
 module Rubixir
   class Builder
     def build(config, platform)
-      datadir = File.join(File.dirname(__FILE__), '../../../data')
+      datadir = config.datadir
       libstatic = File.join(datadir, 'libmacruby-static.a')
       archs = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
         path.scan(/kernel-(.+).bc$/)[0][0]
