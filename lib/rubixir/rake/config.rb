@@ -114,7 +114,7 @@ DATA
 
     def codesign_certificate
       @codesign_certificate ||= begin
-        certs = `/usr/bin/security -q find-certificate`.scan(/"iPhone Developer: [^"]+"/).uniq
+        certs = `/usr/bin/security -q find-certificate -a`.scan(/"iPhone Developer: [^"]+"/).uniq
         if certs.size == 0
           $stderr.puts "can't find any iPhone Developer certificate in the keychain"
           exit 1
