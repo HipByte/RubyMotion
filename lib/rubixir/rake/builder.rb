@@ -197,7 +197,8 @@ PLIST
       end
  
       # Do the codesigning.
-      sh "/usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{bundle_path}\""
+      codesign_allocate = File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')
+      sh "CODESIGN_ALLOCATE=\"#{codesign_allocate}\" /usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{bundle_path}\""
     end
   end
 end
