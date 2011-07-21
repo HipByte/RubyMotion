@@ -1,30 +1,130 @@
 #import <Foundation/Foundation.h>
-#include "MobileDevice.h"
+#include <dlfcn.h>
 
-CFStringRef AMDeviceGetName(struct am_device *dev);
+typedef void *am_device_t;
+typedef void *afc_conn_t;
+typedef void *afc_fileref_t;
+typedef void *am_device_notif_context_t;
+
+static am_device_t
+am_device_from_notif_context(am_device_notif_context_t info)
+{
+    return *(void **)info; 
+}
+
+typedef void (*am_device_subscribe_cb)(am_device_notif_context_t info);
+
+#define SET_FUNC(name) \
+    static fptr_##name _##name = NULL
+
+#define LOOKUP_FUNC(handler, name) \
+    do { \
+	_##name = (fptr_##name)(dlsym(handler, #name)); \
+	if (_##name == NULL) { \
+	    printf("can't lookup function %s\n", #name); \
+	    exit(1); \
+	} \
+    } \
+    while (0)
+
+typedef int (*fptr_AMDeviceNotificationSubscribe)(am_device_subscribe_cb,
+	int, int, int, void **);
+SET_FUNC(AMDeviceNotificationSubscribe);
+
+typedef CFStringRef (*fptr_AMDeviceGetName)(am_device_t);
+SET_FUNC(AMDeviceGetName);
+
+typedef int (*fptr_AMDeviceConnect)(am_device_t);
+SET_FUNC(AMDeviceConnect);
+
+typedef int (*fptr_AMDeviceValidatePairing)(am_device_t);
+SET_FUNC(AMDeviceValidatePairing);
+
+typedef int (*fptr_AMDeviceStartSession)(am_device_t);
+SET_FUNC(AMDeviceStartSession);
+
+typedef int (*fptr_AMDeviceStartService)(am_device_t, CFStringRef, int *,
+	void *);
+SET_FUNC(AMDeviceStartService);
+
+typedef int (*fptr_AFCConnectionOpen)(int, void *, afc_conn_t *conn);
+SET_FUNC(AFCConnectionOpen);
+
+typedef int (*fptr_AFCDirectoryCreate)(afc_conn_t, const char *);
+SET_FUNC(AFCDirectoryCreate);
+
+typedef int (*fptr_AFCFileRefOpen)(afc_conn_t, const char *, int,
+	afc_fileref_t *);
+SET_FUNC(AFCFileRefOpen);
+
+typedef int (*fptr_AFCFileRefWrite)(afc_conn_t, afc_fileref_t, const void *,
+	size_t);
+SET_FUNC(AFCFileRefWrite);
+
+typedef int (*fptr_AFCFileRefClose)(afc_conn_t, afc_fileref_t);
+SET_FUNC(AFCFileRefClose);
 
 static void
-die(const char *func, int retcode)
+init_private_funcs(void)
 {
-    printf("%s() error: code %d\n", func, retcode);
-    exit(1);
+    void *handler = dlopen("/System/Library/PrivateFrameworks/MobileDevice.framework/MobileDevice", 0);
+    LOOKUP_FUNC(handler, AMDeviceNotificationSubscribe);
+    LOOKUP_FUNC(handler, AMDeviceGetName);
+    LOOKUP_FUNC(handler, AMDeviceConnect);
+    LOOKUP_FUNC(handler, AMDeviceValidatePairing);
+    LOOKUP_FUNC(handler, AMDeviceStartSession);
+    LOOKUP_FUNC(handler, AMDeviceStartService);
+    LOOKUP_FUNC(handler, AFCConnectionOpen);
+    LOOKUP_FUNC(handler, AFCDirectoryCreate);
+    LOOKUP_FUNC(handler, AFCFileRefOpen);
+    LOOKUP_FUNC(handler, AFCFileRefWrite);
+    LOOKUP_FUNC(handler, AFCFileRefClose);
 }
+
+#define LOG(fmt, ...) \
+    do { \
+	fprintf(stderr, "log: "); \
+	fprintf(stderr, fmt, ##__VA_ARGS__); \
+	fprintf(stderr, "\n"); \
+    } \
+    while (0)
+
+#define PERFORM(what, call) \
+    do { \
+	LOG(what); \
+	int code = call; \
+	if (code != 0) { \
+	    fprintf(stderr, "error when %s: code %d\n", what, code); \
+	    exit(1); \
+	} \
+    } \
+    while (0)
 
 static void
 send_plist(NSFileHandle *handle, id plist)
 {
-    NSData *data = [NSPropertyListSerialization dataWithPropertyList:plist format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
+    NSError *error = nil;
+    NSData *data = [NSPropertyListSerialization dataWithPropertyList:plist
+	format:NSPropertyListXMLFormat_v1_0 options:0 error:&error];
+    if (data == nil) {
+	fprintf(stderr, "error when serializing property list %s: %s\n",
+		[[plist description] UTF8String],
+		[[error description] UTF8String]);
+	exit(1);
+    }
+
     uint32_t nlen = CFSwapInt32HostToBig([data length]);
-    [handle writeData:[[[NSData alloc] initWithBytes:&nlen length:sizeof(nlen)] autorelease]];
+    [handle writeData:[[[NSData alloc] initWithBytes:&nlen
+	length:sizeof(nlen)] autorelease]];
     [handle writeData:data];
 }
 
 static id
 read_plist(NSFileHandle *handle)
 {
-    NSData *datalen = [handle availableData];
+    NSData *datalen = [handle readDataOfLength:4];
     if ([datalen length] < 4) {
-	printf("error: datalen packet not found\n");
+	fprintf(stderr, "error: datalen packet not found\n");
 	exit(1);
     }
     uint32_t *lenp = (uint32_t *)[datalen bytes];
@@ -32,86 +132,76 @@ read_plist(NSFileHandle *handle)
 
     NSMutableData *data = [NSMutableData data];
     while (true) {
-	NSData *chunk = [handle availableData];
-	if (chunk == nil || [chunk length] == 0) {
+	NSData *chunk = [handle readDataOfLength:len];
+	if (chunk == nil) {
 	    break;
 	}
 	[data appendData:chunk];
-	if ([data length] >= len) {
+	if ([chunk length] == len) {
 	    break;
 	}
+	len -= [data length];
     }
 
-    return [NSPropertyListSerialization propertyListWithData:data options:0 format:NULL error:nil];
+    NSError *error = nil;
+    id plist = [NSPropertyListSerialization propertyListWithData:data
+	options:0 format:NULL error:&error];
+    if (plist == nil) {
+	fprintf(stderr, "error when deserializing property list data %s: %s\n",
+		[[data description] UTF8String],
+		[[error description] UTF8String]);
+	exit(1);
+    }
+    return plist;
 }
 
 static NSString *app_package_path = nil;
 static NSData *app_package_data = nil;
 
 static void
-device_go(struct am_device *dev)
+device_go(am_device_t dev)
 {
-    printf("connecting to device\n");
-    int retcode = AMDeviceConnect(dev);
-    if (retcode != 0) {
-	die("AMDeviceConnect", retcode);
-    }
+    PERFORM("connecting to device", _AMDeviceConnect(dev));
+    PERFORM("pairing device", _AMDeviceValidatePairing(dev));
+    PERFORM("creating lockdown session", _AMDeviceStartSession(dev));
 
-    printf("pairing device\n");
-    retcode = AMDeviceValidatePairing(dev);
-    if (retcode != 0) {
-	die("AMDeviceValidatePairing", retcode);
-    }
+    int afc_fd = 0;
+    PERFORM("starting file copy service", _AMDeviceStartService(dev,
+		CFSTR("com.apple.afc"), &afc_fd, NULL));
+    assert(afc_fd > 0);
 
-    printf("creating lockdown session\n");
-    retcode = AMDeviceStartSession(dev);
-    if (retcode != 0) {
-	die("AMDeviceStartSession", retcode);
-    }
+    afc_conn_t afc_conn = NULL;
+    PERFORM("opening file copy connection", _AFCConnectionOpen(afc_fd, 0,
+		&afc_conn));
+    assert(afc_conn != NULL);
 
-    printf("starting afc service\n");
-    struct afc_connection *conn = NULL;
-    retcode = AMDeviceStartService(dev, CFSTR("com.apple.afc"), &conn, NULL);
-    if (retcode != 0) {
-	die("AMDeviceStartService", retcode);
-    }
-    assert(conn != NULL);
+    NSString *staging_dir = @"PublicStaging";
+    NSString *remote_pkg_path = [NSString stringWithFormat:@"%@/%@",
+	     staging_dir, [app_package_path lastPathComponent]];
+    PERFORM("creating staging directory", _AFCDirectoryCreate(afc_conn,
+		[staging_dir fileSystemRepresentation]));
 
-    printf("opening afc connection\n");
-    struct afc_connection *afc = NULL;
-    retcode = AFCConnectionOpen(conn, 0, &afc);
-    if (retcode != 0) {
-	die("AFCConnectionOpen", retcode);
-    }
-    assert(afc != NULL);
+    afc_fileref_t afc_fileref = NULL;
+    PERFORM("opening remove package path", _AFCFileRefOpen(afc_conn,
+		[remote_pkg_path fileSystemRepresentation], 0x3 /* write */,
+		&afc_fileref));
+    assert(afc_fileref != NULL);
 
-    printf("copying package into public staging directory\n");
-    NSString *remote_pkg_path = [NSString stringWithFormat:@"PublicStaging/%@", [app_package_path lastPathComponent]];
-    AFCDirectoryCreate(afc, "PublicStaging");
-    afc_file_ref fileref;
-    retcode = AFCFileRefOpen(afc, (char *)[remote_pkg_path fileSystemRepresentation], 0x3 /* write */, &fileref);
-    if (retcode != 0) {
-	die("AFCFileRefOpen", retcode);
-    }
-    retcode = AFCFileRefWrite(afc, fileref, (void *)[app_package_data bytes], [app_package_data length]);
-    if (retcode != 0) {
-	die("AFCFileRefWrite", retcode);
-    }
-    retcode = AFCFileRefClose(afc, fileref);
-    if (retcode != 0) {
-	die("AFCFileRefClose", retcode);
-    }
+    PERFORM("writing data", _AFCFileRefWrite(afc_conn, afc_fileref,
+		[app_package_data bytes], [app_package_data length]));
 
-    printf("starting installer proxy service\n");
-    struct afc_connection *ipc = NULL;
-    retcode = AMDeviceStartService(dev, CFSTR("com.apple.mobile.installation_proxy"), &ipc, NULL);
-    if (retcode != 0) {
-	die("AMDeviceStartService", retcode);
-    }
-    assert(ipc != NULL);
-    NSFileHandle *handle = [[NSFileHandle alloc] initWithFileDescriptor:(int)ipc closeOnDealloc:NO];
+    PERFORM("closing remote package path", _AFCFileRefClose(afc_conn,
+		afc_fileref));
 
-    printf("send install command\n");
+    int ipc_fd = 0;
+    PERFORM("starting installer proxy service", _AMDeviceStartService(dev,
+		CFSTR("com.apple.mobile.installation_proxy"), &ipc_fd, NULL));
+    assert(ipc_fd > 0);
+
+    NSFileHandle *handle = [[NSFileHandle alloc] initWithFileDescriptor:ipc_fd
+	closeOnDealloc:NO];
+
+    LOG("sending install command");
     send_plist(handle, [NSDictionary dictionaryWithObjectsAndKeys:
 	    @"Install", @"Command",
 	    remote_pkg_path, @"PackagePath",
@@ -123,24 +213,29 @@ device_go(struct am_device *dev)
 	    break;
 	}
 	id percent = [plist objectForKey:@"PercentComplete"];
-	if (percent == nil) {
+	id status = [plist objectForKey:@"Status"];
+	int percent_int = percent == nil
+	    ? 100 : [percent intValue];
+	const char *status_str = status == nil
+	    ? "Unknown" : [status UTF8String];
+	LOG("progress report: %d%% status: %s", percent_int, status_str);
+	if (percent_int == 100) {
 	    break;
 	}
-	printf("progress... %d%%...\n", [percent intValue]);
     }
 
-    printf("complete!\n");
+    LOG("package has been successfully installed on device");
     [handle release];
 }
 
 static void
-device_subscribe_cb(struct am_device_notification_callback_info *info)
+device_subscribe_cb(am_device_notif_context_t ctx)
 {
-    CFStringRef name = AMDeviceGetName(info->dev);
+    am_device_t dev = am_device_from_notif_context(ctx);
+    CFStringRef name = _AMDeviceGetName(dev);
     if (name != NULL) {
-	printf("found usb mobile device %s\n", [(id)name UTF8String]);
-
-	device_go(info->dev);
+	LOG("found usb mobile device %s", [(id)name UTF8String]);
+	device_go(dev);
 	exit(0);
     }
 }
@@ -149,25 +244,29 @@ int
 main(int argc, char **argv)
 {
     if (argc != 2) {
-	printf("usage: %s <path-to-app>\n", argv[0]);
+	fprintf(stderr, "usage: %s <path-to-app>\n", argv[0]);
 	exit(1);
     }
 
-    [[NSAutoreleasePool alloc] init];
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     app_package_path = [[NSString stringWithUTF8String:argv[1]] retain];
-    app_package_data = [[NSData dataWithContentsOfFile:app_package_path] retain];
+    app_package_data =
+	[[NSData dataWithContentsOfFile:app_package_path] retain];
     if (app_package_data == nil) {
-	printf("can't read data from %s\n", [app_package_path fileSystemRepresentation]);
+	fprintf(stderr, "can't read data from %s\n",
+		[app_package_path fileSystemRepresentation]);
 	exit(1);
     }
 
-    struct am_device_notification *notif = NULL;
-    const int retcode = AMDeviceNotificationSubscribe(device_subscribe_cb, 0, 0, 0, &notif);
-    if (retcode != 0) {
-	die("AMDeviceNotificationSubscribe", retcode);
-    }
+    init_private_funcs();
 
-    printf("waiting for devices to show up\n");
+    void *notif = NULL;
+    PERFORM("subscribing to device notification",
+	    _AMDeviceNotificationSubscribe(device_subscribe_cb, 0, 0, 0,
+		&notif));
+
     [[NSRunLoop mainRunLoop] run];
+
+    [pool release];
     return 0;
 }
