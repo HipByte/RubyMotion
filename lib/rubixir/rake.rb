@@ -48,7 +48,8 @@ end
 desc "Deploy on the device"
 task :deploy => :package do
   deploy = File.join(Rubixir::CONFIG.datadir, 'deploy')
-  sh "#{deploy} #{Rubixir::CONFIG.archive}"
+  flags = Rake.application.options.trace ? '-d' : ''
+  sh "#{deploy} #{flags} #{Rubixir::CONFIG.archive}"
 end
 
 desc "Clear build objects"

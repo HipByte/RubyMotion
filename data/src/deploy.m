@@ -81,11 +81,15 @@ init_private_funcs(void)
     LOOKUP_FUNC(handler, AFCFileRefClose);
 }
 
+static bool debug_mode = false;
+
 #define LOG(fmt, ...) \
     do { \
-	fprintf(stderr, "log: "); \
-	fprintf(stderr, fmt, ##__VA_ARGS__); \
-	fprintf(stderr, "\n"); \
+	if (debug_mode) { \
+	    fprintf(stderr, "log: "); \
+	    fprintf(stderr, fmt, ##__VA_ARGS__); \
+	    fprintf(stderr, "\n"); \
+	} \
     } \
     while (0)
 
@@ -224,7 +228,7 @@ device_go(am_device_t dev)
 	}
     }
 
-    LOG("package has been successfully installed on device");
+    fprintf(stderr, "package has been successfully installed on device\n");
     [handle release];
 }
 
@@ -234,22 +238,40 @@ device_subscribe_cb(am_device_notif_context_t ctx)
     am_device_t dev = am_device_from_notif_context(ctx);
     CFStringRef name = _AMDeviceGetName(dev);
     if (name != NULL) {
-	LOG("found usb mobile device %s", [(id)name UTF8String]);
+	fprintf(stderr, "found usb mobile device %s\n", [(id)name UTF8String]);
 	device_go(dev);
 	exit(0);
     }
 }
 
+static void
+usage(void)
+{
+    fprintf(stderr, "usage: deploy [-d] <path-to-app>\n");
+    exit(1);
+}
+
 int
 main(int argc, char **argv)
 {
-    if (argc != 2) {
-	fprintf(stderr, "usage: %s <path-to-app>\n", argv[0]);
-	exit(1);
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    for (int i = 1; i < argc; i++) {
+	if (strcmp(argv[i], "-d") == 0) {
+	    debug_mode = true;
+	}
+	else {
+	    if (app_package_path != nil) {
+		usage();
+	    }
+	    app_package_path = [[NSString stringWithUTF8String:argv[i]] retain];
+	} 
     }
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    app_package_path = [[NSString stringWithUTF8String:argv[1]] retain];
+    if (app_package_path == nil) {
+	usage();
+    }
+
     app_package_data =
 	[[NSData dataWithContentsOfFile:app_package_path] retain];
     if (app_package_data == nil) {
