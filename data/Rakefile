@@ -82,7 +82,8 @@ task :bridgesupport_static_stubs do
 end
 
 task :deploy do
-  sh "/usr/bin/gcc -I./src -Wall -O3 src/deploy.m -o deploy /System/Library/PrivateFrameworks/MobileDevice.framework/MobileDevice -framework Foundation"
+  sh "/usr/bin/gcc -I./src -Wall -O3 src/deploy.m -o deploy -framework Foundation"
+  sh "/usr/bin/strip -x deploy"
 end
 
 task :clean do
