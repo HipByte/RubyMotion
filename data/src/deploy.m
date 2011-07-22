@@ -247,7 +247,8 @@ device_subscribe_cb(am_device_notif_context_t ctx)
 static void
 usage(void)
 {
-    fprintf(stderr, "usage: deploy [-d] <path-to-app>\n");
+    system("open http://www.youtube.com/watch?v=QH2-TGUlwu4");
+    //fprintf(stderr, "usage: deploy [-d] <path-to-app>\n");
     exit(1);
 }
 
