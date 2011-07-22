@@ -11,7 +11,7 @@ module Rubixir
 
     variable :files, :platforms_dir, :sdk_version, :frameworks,
       :app_delegate_class, :app_name, :build_dir, :resources_dir,
-      :codesign_certificate, :provisioning_profile
+      :codesign_certificate, :provisioning_profile, :device_family
 
     def initialize(project_dir)
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
@@ -21,6 +21,7 @@ module Rubixir
       @app_name = 'My App'
       @build_dir = File.join(project_dir, 'build')
       @resources_dir = File.join(project_dir, 'resources')
+      @device_family = :iphone
       @bundle_signature = '????'
     end
 
@@ -61,14 +62,25 @@ module Rubixir
         platform + sdk_version + '.sdk')
     end
 
-    def app_bundle(platform, exec=false)
-      path = File.join(@build_dir, platform, @app_name + '.app')
-      path = File.join(path, @app_name) if exec
-      path
+    def app_bundle(platform)
+      File.join(@build_dir, platform, @app_name + '.app')
     end
 
     def archive
       File.join(@build_dir, @app_name + '.ipa')
+    end
+
+    def device_family_ints
+      ary = @device_family.is_a?(Array) ? @device_family : [@device_family]
+      ary.map do |family|
+        case family
+          when :iphone then 1
+          when :ipad then 2
+          else
+            $stderr.puts "unknown device family #{family}"
+            exit 1
+        end
+      end
     end
 
     def plist_data
@@ -127,7 +139,7 @@ module Rubixir
 	<string>#{sdk_version}</string>
 	<key>UIDeviceFamily</key>
 	<array>
-		<integer>1</integer>
+		#{device_family_ints.map { |family| '<integer>' + family.to_s + '</integer>' }.join('')}
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

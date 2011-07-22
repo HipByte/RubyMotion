@@ -1,6 +1,6 @@
 PLATFORMS_DIR = '/Developer/Platforms'
 SDK_VERSION = '4.3'
-PROJECT_VERSION = '0.0.7'
+PROJECT_VERSION = '0.0.8'
 
 verbose(true)
 
@@ -50,7 +50,7 @@ gem_spec = Gem::Specification.new do |spec|
   files = []
   files.concat(Dir.glob('./lib/**/*'))
   files.concat(Dir.glob('./data/BridgeSupport/*.bridgesupport'))
-  files.concat(%w{./data/deploy ./data/llc ./data/ruby})
+  files.concat(%w{./data/deploy ./data/sim ./data/llc ./data/ruby})
   files.concat(Dir.glob('./data/iPhoneOS/*'))
   files.concat(Dir.glob('./data/iPhoneSimulator/*'))
   files.concat(Dir.glob('./doc/html/**/*'))

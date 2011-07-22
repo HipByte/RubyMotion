@@ -2,3 +2,4 @@ $:.unshift('../../lib')
 require 'rubixir/rake'
 
 Rubixir::CONFIG.app_name = 'Hello'
+Rubixir::CONFIG.device_family = :iphone

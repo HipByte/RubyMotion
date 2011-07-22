@@ -4,7 +4,7 @@ SDK_VERSION = ENV['sdk_version']
 verbose(true)
 
 task :default => :all
-task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs, :deploy]
+task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs, :deploy, :sim]
 
 task :vm_files do
   install '../vm/miniruby', 'ruby'
@@ -86,6 +86,11 @@ task :deploy do
   sh "/usr/bin/strip -x deploy"
 end
 
+task :sim do
+  sh "/usr/bin/gcc -I./src -std=c99 -Wall -O3 src/sim.m -o sim -framework Foundation"
+  sh "/usr/bin/strip -x sim"
+end
+
 task :clean do
-  %w{ruby llc iPhoneOS iPhoneSimulator BridgeSupport deploy}.each { |path| rm_rf(path) }
+  %w{ruby llc iPhoneOS iPhoneSimulator BridgeSupport deploy sim}.each { |path| rm_rf(path) }
 end

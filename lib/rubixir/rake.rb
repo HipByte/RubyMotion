@@ -27,9 +27,10 @@ end
 
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
-  app = Rubixir::CONFIG.app_bundle('iPhoneSimulator', true)
-  sim = File.join(Rubixir::CONFIG.platform_dir('iPhoneSimulator'), '/Developer/Applications/iPhone Simulator.app/Contents/MacOS/iPhone Simulator')
-  sh "\"#{sim}\" -SimulateApplication \"#{app}\""
+  sim = File.join(Rubixir::CONFIG.datadir, 'sim')
+  app = Rubixir::CONFIG.app_bundle('iPhoneSimulator')
+  family = Rubixir::CONFIG.device_family_ints[0]
+  sh "#{sim} #{family} #{Rubixir::CONFIG.sdk_version} \"#{app}\""
 end
 
 desc "Create an .ipa package"
