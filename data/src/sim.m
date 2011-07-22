@@ -28,7 +28,6 @@
 	exit(1);
     }
     //fprintf(stderr, "*** simulator session started\n");
-    system("open -a \"iPhone Simulator\"");
 }
 
 @end
@@ -122,6 +121,9 @@ main(int argc, char **argv)
 		[[error description] UTF8String]);
 	exit(1);
     }
+
+    // Open simulator to the foreground.
+    system("open -a \"iPhone Simulator\"");
 
     [[NSRunLoop mainRunLoop] run];
     return 0;
