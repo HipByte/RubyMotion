@@ -1,19 +1,36 @@
 module Rubixir
   class Config
-    attr_accessor :files, :platforms_dir, :sdk_version, :frameworks,
+    VARS = []
+
+    def self.variable(*syms)
+      syms.each do |sym|
+        attr_accessor sym
+        VARS << sym.to_s
+      end
+    end    
+
+    variable :files, :platforms_dir, :sdk_version, :frameworks,
       :app_delegate_class, :app_name, :build_dir, :resources_dir,
       :codesign_certificate, :provisioning_profile
 
     def initialize(project_dir)
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
       @platforms_dir = '/Developer/Platforms'
-      @sdk_version = '4.3'
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @app_delegate_class = 'AppDelegate'
       @app_name = 'My App'
       @build_dir = File.join(project_dir, 'build')
       @resources_dir = File.join(project_dir, 'resources')
       @bundle_signature = '????'
+    end
+
+    def variables
+      map = {}
+      VARS.each do |sym|
+        val = send(sym) rescue "ERROR"
+        map[sym] = val
+      end
+      map
     end
 
     def datadir
@@ -24,9 +41,24 @@ module Rubixir
       File.join(@platforms_dir, platform + '.platform')
     end
 
+    def sdk_version
+      @sdk_version ||= begin
+        versions = Dir.glob(File.join(platforms_dir, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk')).map do |path|
+          File.basename(path).scan(/iPhoneOS(.*)\.sdk/)[0][0]
+        end
+        if versions.size == 0
+          $stderr.puts "can't locate any iPhone SDK"
+          exit 1
+        elsif versions.size > 1
+          $stderr.puts "found #{versions.size} SDKs, will use the latest one"
+        end
+        versions.max
+      end
+    end
+
     def sdk(platform)
       File.join(platform_dir(platform), 'Developer/SDKs',
-        platform + @sdk_version + '.sdk')
+        platform + sdk_version + '.sdk')
     end
 
     def app_bundle(platform, exec=false)
@@ -80,11 +112,11 @@ module Rubixir
 	<key>DTPlatformName</key>
 	<string>iphoneos</string>
 	<key>DTPlatformVersion</key>
-	<string>#{@sdk_version}</string>
+	<string>#{sdk_version}</string>
 	<key>DTSDKBuild</key>
 	<string>8H7</string>
 	<key>DTSDKName</key>
-	<string>iphoneos#{@sdk_version}</string>
+	<string>iphoneos#{sdk_version}</string>
 	<key>DTXcode</key>
 	<string>0402</string>
 	<key>DTXcodeBuild</key>
@@ -92,7 +124,7 @@ module Rubixir
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MinimumOSVersion</key>
-	<string>#{@sdk_version}</string>
+	<string>#{sdk_version}</string>
 	<key>UIDeviceFamily</key>
 	<array>
 		<integer>1</integer>

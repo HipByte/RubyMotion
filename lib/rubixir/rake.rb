@@ -56,3 +56,11 @@ desc "Clear build objects"
 task :clean do
   rm_rf(Rubixir::CONFIG.build_dir)
 end
+
+desc "Show project config"
+task :config do
+  map = Rubixir::CONFIG.variables
+  map.keys.sort.each do |key|
+    puts key.ljust(20) + " = #{map[key].inspect}"
+  end
+end
