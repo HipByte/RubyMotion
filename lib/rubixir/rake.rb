@@ -36,14 +36,14 @@ end
 desc "Create an .ipa package"
 task :package => ['build:ios'] do
   tmp = "/tmp/ipa_root"
-  rm_rf tmp
-  mkdir_p "#{tmp}/Payload"
-  cp_r Rubixir::CONFIG.app_bundle('iPhoneOS'), "#{tmp}/Payload"
+  sh "/bin/rm -rf #{tmp}"
+  sh "/bin/mkdir -p #{tmp}/Payload"
+  sh "/bin/cp -r \"#{Rubixir::CONFIG.app_bundle('iPhoneOS')}\" #{tmp}/Payload"
   Dir.chdir(tmp) do
     sh "/bin/chmod -R 755 Payload"
-    sh "/usr/bin/zip -r archive.zip Payload"
+    sh "/usr/bin/zip -q -r archive.zip Payload"
   end
-  cp "#{tmp}/archive.zip", Rubixir::CONFIG.archive
+  sh "/bin/cp #{tmp}/archive.zip \"#{Rubixir::CONFIG.archive}\""
 end
 
 desc "Deploy on the device"
