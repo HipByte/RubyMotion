@@ -255,7 +255,7 @@ usage(void)
 int
 main(int argc, char **argv)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    /*NSAutoreleasePool *pool =*/ [[NSAutoreleasePool alloc] init];
 
     for (int i = 1; i < argc; i++) {
 	if (strcmp(argv[i], "-d") == 0) {
@@ -288,8 +288,9 @@ main(int argc, char **argv)
 	    _AMDeviceNotificationSubscribe(device_subscribe_cb, 0, 0, 0,
 		&notif));
 
-    [[NSRunLoop mainRunLoop] run];
+    // Run one second, should be enough to catch an attached device.
+    [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
 
-    [pool release];
-    return 0;
+    fprintf(stderr, "error: can't find any device\n");
+    return 1;
 }
