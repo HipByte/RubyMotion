@@ -48,6 +48,7 @@ require 'rubygems'
 require 'rake/gempackagetask'
 gem_spec = Gem::Specification.new do |spec|
   files = []
+  files << './bin/rubixir'
   files.concat(Dir.glob('./lib/**/*'))
   files.concat(Dir.glob('./data/BridgeSupport/*.bridgesupport'))
   files.concat(%w{./data/deploy ./data/sim ./data/llc ./data/ruby})
@@ -68,7 +69,7 @@ DESCRIPTION
   #spec.homepage = 'todo'
   spec.version = PROJECT_VERSION
   spec.files = files
-  #spec.executable = 'rubixir'
+  spec.executable = 'rubixir'
 end
 
 Rake::GemPackageTask.new(gem_spec) do |pkg|
