@@ -216,6 +216,11 @@ device_go(am_device_t dev)
 	if (plist == nil) {
 	    break;
 	}
+	id error = [plist objectForKey:@"Error"];
+	if (error != nil) {
+	    fprintf(stderr, "error: %s\n", [[error description] UTF8String]);
+	    exit(1);
+	}
 	id percent = [plist objectForKey:@"PercentComplete"];
 	id status = [plist objectForKey:@"Status"];
 	int percent_int = percent == nil
