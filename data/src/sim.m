@@ -123,7 +123,7 @@ main(int argc, char **argv)
     }
 
     // Open simulator to the foreground.
-    system("open -a \"iPhone Simulator\"");
+    system("/usr/bin/open -a \"iPhone Simulator\"");
 
     [[NSRunLoop mainRunLoop] run];
     return 0;
