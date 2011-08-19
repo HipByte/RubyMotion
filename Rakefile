@@ -69,7 +69,7 @@ DESCRIPTION
   #spec.homepage = 'todo'
   spec.version = PROJECT_VERSION
   spec.files = files
-  spec.executable = 'rubixir'
+  spec.executables = ['rubixir']
 end
 
 Rake::GemPackageTask.new(gem_spec) do |pkg|
