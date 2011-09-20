@@ -27,7 +27,7 @@ task :bridgesupport_files do
   frameworks.each do |framework|
     dest = "BridgeSupport/#{framework}.bridgesupport"
     unless File.exist?(dest)
-      sh "gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{SDK_VERSION}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
+      sh "gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{SDK_VERSION} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{SDK_VERSION}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
     end
   end
 end
