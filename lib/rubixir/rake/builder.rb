@@ -144,7 +144,7 @@ EOS
         stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
         framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
       end
-      sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} -isysroot \"#{sdk}\" -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{framework_stubs_objs.join(' ')}"
+      sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks}"
 
       # Create bundle/Info.plist.
       bundle_info_plist = File.join(bundle_path, 'Info.plist')
