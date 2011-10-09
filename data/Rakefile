@@ -19,7 +19,7 @@ task :vm_files do
 end
 
 task :bridgesupport_files do
-  frameworks = %w{UIKit Foundation CoreGraphics}
+  frameworks = %w{UIKit Foundation CoreGraphics CoreLocation MapKit AddressBook}
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
   sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{SDK_VERSION}.sdk"
   sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
@@ -32,11 +32,12 @@ task :bridgesupport_files do
   end
 end
 
-def generate_bs_static_stub(file, include_directive)
+def generate_bs_static_stub(file, includes)
   require 'rubygems'
   require 'nokogiri'
 
-  text = "#import <#{include_directive}>\n\n"
+  text = ''
+  includes.each { |inc| text << "#import <#{inc}>\n" }
 
   doc = Nokogiri::XML(File.read(file))
   doc.xpath("/signatures/function[@inline=\"true\"]").each do |node|
@@ -67,7 +68,8 @@ task :bridgesupport_static_stubs do
     framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
 
     code = "BridgeSupport/#{framework}_stubs.m"
-    File.open(code, 'w') { |io| io.write(generate_bs_static_stub(bs_path, "UIKit/UIKit.h")) } unless File.exist?(code)
+    includes = ['UIKit/UIKit.h', "#{framework}/#{framework}.h"]
+    File.open(code, 'w') { |io| io.write(generate_bs_static_stub(bs_path, includes)) } unless File.exist?(code)
 
     [%w{iPhoneOS armv6 armv7}, %w{iPhoneSimulator i386}].each do |platform, *archs|
       obj = "#{platform}/#{framework}_stubs.o"
@@ -75,8 +77,8 @@ task :bridgesupport_static_stubs do
       platform_dev = "#{PLATFORMS_DIR}/#{platform}.platform/Developer"
       cflags = "-isysroot #{platform_dev}/SDKs/#{platform}#{SDK_VERSION}.sdk "
       cflags << archs.map { |a| "-arch #{a}" }.join(' ')
-      cflags << " -miphoneos-version-min=#{SDK_VERSION}"
-      sh "#{platform_dev}/usr/bin/llvm-gcc #{cflags} #{code} -c -o #{obj}"
+      cflags << " -miphoneos-version-min=#{SDK_VERSION} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
+      sh "#{platform_dev}/usr/bin/gcc #{cflags} #{code} -c -o #{obj}"
     end
   end
 end
