@@ -1,15 +1,33 @@
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <sys/param.h>
+#import <signal.h>
 
 @interface Delegate : NSObject
 @end
+
+static BOOL debug_mode = NO;
+static NSTask *gdb_task = nil;
+static BOOL debugger_killed_session = NO;
+
+static void
+sigforwarder(int sig)
+{
+    if (gdb_task != nil) {
+	kill([gdb_task processIdentifier], sig);
+    }
+}
 
 @implementation Delegate
 
 - (void)session:(id)session didEndWithError:(NSError *)error
 {
-    if (error == nil) {
+    if (gdb_task != nil) {
+	[gdb_task terminate];
+	[gdb_task waitUntilExit];
+    }
+
+    if (error == nil || debugger_killed_session) {
 	//fprintf(stderr, "*** simulator session ended without error\n");
 	exit(0);
     }
@@ -27,6 +45,29 @@
 		[[error description] UTF8String]);
 	exit(1);
     }
+
+    if (debug_mode) {
+	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
+		@selector(simulatedApplicationPID));
+	if (pidNumber == nil || ![pidNumber isKindOfClass:[NSNumber class]]) {
+	    fprintf(stderr, "can't get simulated application PID\n");
+	    exit(1);
+	}
+
+	// Forward ^C to gdb.
+	signal(SIGINT, sigforwarder);
+
+	NSString *gdb_path = @"/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin";
+
+	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"--pid", [pidNumber description], nil]] retain];
+	[gdb_task waitUntilExit];
+	gdb_task = nil;
+
+	debugger_killed_session = YES;
+	((void (*)(id, SEL, NSTimeInterval))objc_msgSend)(session,
+	    @selector(requestEndWithTimeout:), 0);
+    }
+
     //fprintf(stderr, "*** simulator session started\n");
 }
 
@@ -44,13 +85,15 @@ main(int argc, char **argv)
 {
     [[NSAutoreleasePool alloc] init];
 
-    if (argc != 4) {
+    if (argc != 5) {
 	usage();
     }
 
-    NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[1])];
-    NSString *sdk_version = [NSString stringWithUTF8String:argv[2]];
-    NSString *app_path = [NSString stringWithUTF8String:realpath(argv[3], NULL)];
+    debug_mode = atoi(argv[1]) == 1 ? YES : NO;
+    NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
+    NSString *sdk_version = [NSString stringWithUTF8String:argv[3]];
+    NSString *app_path = [NSString stringWithUTF8String:realpath(argv[4], NULL)];
+
 
     [[NSBundle bundleWithPath:@"/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/iPhoneSimulatorRemoteClient.framework"] load];
 
@@ -87,7 +130,7 @@ main(int argc, char **argv)
 	@selector(setSimulatedApplicationLaunchEnvironment:),
 	[NSDictionary dictionary]);
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
-	@selector(setSimulatedApplicationShouldWaitForDebugger:), NO);
+	@selector(setSimulatedApplicationShouldWaitForDebugger:), debug_mode);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedDeviceFamily:), device_family);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
