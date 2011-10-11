@@ -32,7 +32,9 @@ module Rubixir
       FileUtils.mkdir_p(objs_build_dir)
       config.files.each do |path|
         obj = File.join(objs_build_dir, "#{path}.o")
-        should_rebuild = (!File.exist?(obj) or File.mtime(path) > File.mtime(obj))
+        should_rebuild = (!File.exist?(obj) \
+            or File.mtime(path) > File.mtime(obj) \
+            or File.mtime(ruby) > File.mtime(obj))
  
         # Generate or retrieve init function.
         init_func = should_rebuild ? "MREP_#{`uuidgen`.strip.gsub('-', '')}" : `nm #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
