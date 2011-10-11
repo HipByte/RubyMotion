@@ -1,0 +1,7 @@
+$:.unshift('../../lib')
+require 'rubixir/rake'
+
+Rubixir::CONFIG.app_name = 'mapview'
+Rubixir::CONFIG.frameworks << 'CoreLocation'
+Rubixir::CONFIG.frameworks << 'MapKit'
+Rubixir::CONFIG.frameworks << 'AddressBook'
