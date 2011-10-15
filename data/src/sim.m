@@ -57,9 +57,28 @@ sigforwarder(int sig)
 	// Forward ^C to gdb.
 	signal(SIGINT, sigforwarder);
 
-	NSString *gdb_path = @"/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin";
 
-	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"--pid", [pidNumber description], nil]] retain];
+	// Create the gdb commands file (used to 'continue' the process).
+	NSString *cmds_path = [NSString pathWithComponents:
+	    [NSArray arrayWithObjects:NSTemporaryDirectory(), @"_simgdbcmds",
+	    nil]];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:cmds_path]) {
+	    NSError *error = nil;
+	    if (![@"continue\n" writeToFile:cmds_path atomically:YES
+		    encoding:NSASCIIStringEncoding error:&error]) {
+		fprintf(stderr,
+			"can't write gdb commands file into path %s: %s\n",
+			[cmds_path UTF8String],
+			[[error description] UTF8String]);
+		exit(1);
+	    }
+	}
+
+	// Run the gdb process.
+	NSString *gdb_path = @"/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin";
+	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
+	    arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"--pid",
+	    [pidNumber description], @"-x", cmds_path, nil]] retain];
 	[gdb_task waitUntilExit];
 	gdb_task = nil;
 
