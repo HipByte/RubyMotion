@@ -19,7 +19,7 @@ task :vm_files do
 end
 
 task :bridgesupport_files do
-  frameworks = %w{UIKit Foundation CoreGraphics CoreLocation MapKit AddressBook}
+  frameworks = %w{UIKit Foundation CoreGraphics CoreLocation MapKit AddressBook OpenGLES}
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
   sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{SDK_VERSION}.sdk"
   sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
@@ -68,7 +68,12 @@ task :bridgesupport_static_stubs do
     framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
 
     code = "BridgeSupport/#{framework}_stubs.m"
-    includes = ['UIKit/UIKit.h', "#{framework}/#{framework}.h"]
+    includes = case framework
+      when 'OpenGLES'
+        ['OpenGLES/EAGLDrawable.h']
+      else
+        ['UIKit/UIKit.h', "#{framework}/#{framework}.h"]
+    end
     File.open(code, 'w') { |io| io.write(generate_bs_static_stub(bs_path, includes)) } unless File.exist?(code)
 
     [%w{iPhoneOS armv6 armv7}, %w{iPhoneSimulator i386}].each do |platform, *archs|
