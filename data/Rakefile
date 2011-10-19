@@ -19,7 +19,7 @@ task :vm_files do
 end
 
 task :bridgesupport_files do
-  frameworks = %w{UIKit Foundation CoreGraphics CoreLocation MapKit AddressBook OpenGLES}
+  frameworks = %w{UIKit Foundation CoreGraphics CoreLocation MapKit AddressBook OpenGLES AVFoundation}
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
   sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{SDK_VERSION}.sdk"
   sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
