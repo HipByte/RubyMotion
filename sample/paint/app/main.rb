@@ -1,6 +1,10 @@
 class PaintView < UIView
   def initWithFrame(ect)
     if super
+      path = NSBundle.mainBundle.pathForResource('erase', ofType:'caf')
+      url = NSURL.fileURLWithPath(path)
+      @eraseSound = AVAudioPlayer.alloc.initWithContentsOfURL(url,
+        error:nil)
       @paths = []
     end
     self
@@ -48,6 +52,7 @@ class PaintView < UIView
   def motionEnded(motion, withEvent:event)
     if motion == UIEventSubtypeMotionShake
       @paths.clear
+      @eraseSound.play
       setNeedsDisplay
     end
   end
