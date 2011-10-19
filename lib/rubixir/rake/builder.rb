@@ -155,6 +155,15 @@ EOS
 
       # Create bundle/PkgInfo.
       File.open(File.join(bundle_path, 'PkgInfo'), 'w') { |io| io.write(config.pkginfo_data) }
+
+      # Copy resources.
+      Dir.glob(File.join(config.resources_dir, '*')).each do |res_path|
+        next if res_path[0] == '.'
+        dest_path = File.join(bundle_path, File.basename(res_path))
+        if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+          sh "/bin/cp \"#{res_path}\" \"#{dest_path}\""
+        end
+      end
     end
 
     def codesign(config, platform)
