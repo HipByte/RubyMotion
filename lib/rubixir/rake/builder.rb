@@ -30,9 +30,11 @@ module Rubixir
       objs = []
       objs_build_dir = File.join(build_dir, 'objs')
       FileUtils.mkdir_p(objs_build_dir)
-      config.files.each do |path|
+      project_file_changed = File.mtime(config.project_file) > File.mtime(objs_build_dir)
+      config.ordered_build_files.each do |path|
         obj = File.join(objs_build_dir, "#{path}.o")
-        should_rebuild = (!File.exist?(obj) \
+        should_rebuild = (project_file_changed \
+            or !File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
  

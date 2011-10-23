@@ -7,14 +7,29 @@ module Rubixir
         attr_accessor sym
         VARS << sym.to_s
       end
-    end    
+    end
 
-    variable :files, :platforms_dir, :sdk_version, :frameworks,
+    class Deps < Hash
+      def []=(key, val)
+        key = relpath(key)
+        val = [val] unless val.is_a?(Array)
+        val = val.map { |x| relpath(x) }
+        super
+      end
+
+      def relpath(path)
+        /^\./.match(path) ? path : File.join('.', path)
+      end
+    end
+
+    variable :files, :dependencies, :platforms_dir, :sdk_version, :frameworks,
       :app_delegate_class, :app_name, :build_dir, :resources_dir,
       :codesign_certificate, :provisioning_profile, :device_family
 
     def initialize(project_dir)
+      @project_dir = project_dir
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
+      @dependencies = Deps.new
       @platforms_dir = '/Developer/Platforms'
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @app_delegate_class = 'AppDelegate'
@@ -32,6 +47,26 @@ module Rubixir
         map[sym] = val
       end
       map
+    end
+
+    attr_reader :project_dir
+
+    def project_file
+      File.join(@project_dir, 'Rakefile')
+    end
+
+    def ordered_build_files
+      ary = []
+      @files.each do |file|
+        deps = @dependencies[file]
+        if deps
+          deps.each do |dep|
+            ary << dep unless ary.index(dep)
+          end
+        end
+        ary << file unless ary.index(file)
+      end
+      ary
     end
 
     def datadir
