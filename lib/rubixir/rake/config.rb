@@ -22,14 +22,14 @@ module Rubixir
       end
     end
 
-    variable :files, :dependencies, :platforms_dir, :sdk_version, :frameworks,
+    variable :files, :platforms_dir, :sdk_version, :frameworks,
       :app_delegate_class, :app_name, :build_dir, :resources_dir,
       :codesign_certificate, :provisioning_profile, :device_family
 
     def initialize(project_dir)
       @project_dir = project_dir
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
-      @dependencies = Deps.new
+      @dependencies = {}
       @platforms_dir = '/Developer/Platforms'
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @app_delegate_class = 'AppDelegate'
@@ -53,6 +53,14 @@ module Rubixir
 
     def project_file
       File.join(@project_dir, 'Rakefile')
+    end
+
+    def files_dependencies(deps_hash)
+      p = lambda { |x| /^\./.match(x) ? x : File.join('.', x) }
+      deps_hash.each do |path, deps|
+        deps = [deps] unless deps.is_a?(Array)
+        @dependencies[p.call(path)] = deps.map(&p)
+      end
     end
 
     def ordered_build_files
