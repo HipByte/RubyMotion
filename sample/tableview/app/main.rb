@@ -1,30 +1,57 @@
-class CatTableController
+class TableController
   def initialize
-    @cats = {}
-    @cats['Tabby'] = ['Cerise', 'Kiwi']
-    @cats['Awesome'] = ['Nyan']
+    @data = {}
+    @data['Trappist'] = [
+      'Chimay',
+      'Orval',
+      'Rochefort',
+      'Westmalle',
+      'Westvleteren',
+      'Achel'
+    ]
+    @data['Abbaye'] = [
+      "Abbaye de Saint-Martin",
+      "Abdij Dendermonde",
+      "Abdij St.-Pieter",
+      "Affligem",
+      "Baudeloo",
+      "Bornem",
+      "Bonne-Espérance",
+      "Cambron",
+      "Ename",
+      "Floreffe",
+      "Grimbergen",
+      "Keizersberg",
+      "Leffe",
+      "Maredsous",
+      "Postel",
+      "St.-Feuillien",
+      "Steenbrugge",
+      "Tongerlo",
+      "Val-Dieu"
+    ]
   end
 
   def numberOfSectionsInTableView(tableView)
-    @cats.keys.size
+    @data.keys.size
   end
 
   def tableView(tableView, numberOfRowsInSection:section)
-    sectionKey = @cats.keys[section]
-    @cats[sectionKey].size
+    sectionKey = @data.keys[section]
+    @data[sectionKey].size
   end
 
   def tableView(tableView, titleForHeaderInSection:section)
-    @cats.keys[section]
+    @data.keys[section]
   end
 
   CELLID = 'CellIdentifier'
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
-    sectionKey = @cats.keys[indexPath.section]
-    cat = @cats[sectionKey][indexPath.row]
+    sectionKey = @data.keys[indexPath.section]
+    row = @data[sectionKey][indexPath.row]
 
     cell = tableView.dequeueReusableCellWithIdentifier(CELLID) || UITableViewCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:CELLID)
-    cell.textLabel.text = cat
+    cell.textLabel.text = row
     cell
   end
 end
@@ -36,7 +63,7 @@ class AppDelegate
     tvrect = window.bounds
     tv = UITableView.alloc.initWithFrame(tvrect, style:UITableViewStylePlain)
     tv.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth
-    tv.dataSource = tv.delegate = CatTableController.new
+    tv.dataSource = tv.delegate = TableController.new
     window.addSubview(tv)
 
     window.makeKeyAndVisible
