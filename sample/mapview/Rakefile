@@ -1,7 +1,9 @@
 $:.unshift('../../lib')
 require 'rubixir/rake'
 
-Rubixir::CONFIG.app_name = 'mapview'
-Rubixir::CONFIG.frameworks << 'CoreLocation'
-Rubixir::CONFIG.frameworks << 'MapKit'
-Rubixir::CONFIG.frameworks << 'AddressBook'
+Motion::App.setup do |app|
+  app.name = 'mapview'
+  app.frameworks << 'CoreLocation'
+  app.frameworks << 'MapKit'
+  app.frameworks << 'AddressBook'
+end

@@ -1,5 +1,6 @@
 $:.unshift('../../lib')
 require 'rubixir/rake'
 
-Rubixir::CONFIG.app_name = 'TableView'
-Rubixir::CONFIG.device_family = :iphone
+Motion::App.setup do |app|
+  app.name = 'TableView'
+end

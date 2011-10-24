@@ -1,4 +1,4 @@
-module Rubixir
+module Motion
   class Builder
     def build(config, platform)
       datadir = config.datadir
@@ -120,7 +120,7 @@ EOS
 	rb_vm_print_current_exception();
 	rb_exit(1);
     }
-    int retval = UIApplicationMain(argc, argv, nil, @"AppDelegate");
+    int retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
     [pool release];
     rb_exit(retval);
 }
@@ -136,11 +136,11 @@ EOS
       end
 
       # Prepare bundle.
-      bundle_path = File.join(build_dir, config.app_name + '.app')
+      bundle_path = File.join(build_dir, config.name + '.app')
       FileUtils.mkdir_p(bundle_path)
 
       # Link executable.
-      main_exec = File.join(bundle_path, config.app_name)
+      main_exec = File.join(bundle_path, config.name)
       objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
       frameworks = config.frameworks.map { |x| "-framework #{x}" }.join(' ')
       framework_stubs_objs = []
@@ -169,7 +169,7 @@ EOS
     end
 
     def codesign(config, platform)
-      bundle_path = File.join(config.build_dir, platform, config.app_name + '.app')
+      bundle_path = File.join(config.build_dir, platform, config.name + '.app')
       raise unless File.exist?(bundle_path)
 
       # Create bundle/ResourceRules.plist.

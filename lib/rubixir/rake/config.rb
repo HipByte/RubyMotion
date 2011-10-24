@@ -1,4 +1,4 @@
-module Rubixir
+module Motion
   class Config
     VARS = []
 
@@ -23,7 +23,7 @@ module Rubixir
     end
 
     variable :files, :platforms_dir, :sdk_version, :frameworks,
-      :app_delegate_class, :app_name, :build_dir, :resources_dir,
+      :delegate_class, :name, :build_dir, :resources_dir,
       :codesign_certificate, :provisioning_profile, :device_family
 
     def initialize(project_dir)
@@ -32,8 +32,8 @@ module Rubixir
       @dependencies = {}
       @platforms_dir = '/Developer/Platforms'
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
-      @app_delegate_class = 'AppDelegate'
-      @app_name = 'My App'
+      @delegate_class = 'AppDelegate'
+      @name = 'My App'
       @build_dir = File.join(project_dir, 'build')
       @resources_dir = File.join(project_dir, 'resources')
       @device_family = :iphone
@@ -106,11 +106,11 @@ module Rubixir
     end
 
     def app_bundle(platform)
-      File.join(@build_dir, platform, @app_name + '.app')
+      File.join(@build_dir, platform, @name + '.app')
     end
 
     def archive
-      File.join(@build_dir, @app_name + '.ipa')
+      File.join(@build_dir, @name + '.ipa')
     end
 
     def device_family_ints
@@ -137,15 +137,15 @@ module Rubixir
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>#{@app_name}</string>
+	<string>#{@name}</string>
 	<key>CFBundleExecutable</key>
-	<string>#{@app_name}</string>
+	<string>#{@name}</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.omgwtf.#{@app_name}</string>
+	<string>com.omgwtf.#{@name}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>#{@app_name}</string>
+	<string>#{@name}</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleResourceSpecification</key>
