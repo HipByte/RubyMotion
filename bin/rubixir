@@ -55,7 +55,9 @@ class RubixirCommandLine
 require 'rubygems'
 require 'rubixir/rake'
 
-Rubixir::CONFIG.app_name = '#{@app_name}'
+Motion::App.setup do |app|
+  app.name = '#{@app_name}'
+end
 EOS
       end
       Dir.mkdir('app')
