@@ -60,6 +60,6 @@ desc "Show project config"
 task :config do
   map = Motion::App.config.variables
   map.keys.sort.each do |key|
-    puts key.ljust(20) + " = #{map[key].inspect}"
+    puts key.ljust(22) + " : #{map[key].inspect}"
   end
 end
