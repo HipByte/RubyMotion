@@ -24,7 +24,8 @@ module Motion
 
     variable :files, :platforms_dir, :sdk_version, :frameworks,
       :delegate_class, :name, :build_dir, :resources_dir,
-      :codesign_certificate, :provisioning_profile, :device_family
+      :codesign_certificate, :provisioning_profile, :device_family,
+      :interface_orientations
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -38,6 +39,7 @@ module Motion
       @resources_dir = File.join(project_dir, 'resources')
       @device_family = :iphone
       @bundle_signature = '????'
+      @interface_orientations = [:portrait, :landscape_left, :landscape_right]
     end
 
     def variables
@@ -120,7 +122,21 @@ module Motion
           when :iphone then 1
           when :ipad then 2
           else
-            $stderr.puts "unknown device family #{family}"
+            $stderr.puts "unknown device family `#{family}'"
+            exit 1
+        end
+      end
+    end
+
+    def interface_orientations_consts
+      @interface_orientations.map do |ori|
+        case ori
+          when :portrait then 'UIInterfaceOrientationPortrait'
+          when :landscape_left then 'UIInterfaceOrientationLandscapeLeft'
+          when :landscape_right then 'UIInterfaceOrientationLandscapeRight'
+          when :portrait_upside_down then 'UIInterfaceOrientationPortraitUpsideDown'
+          else
+            $stderr.puts "unknown interface orientation `#{ori}'"
             exit 1
         end
       end
@@ -186,9 +202,7 @@ module Motion
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
+		#{interface_orientations_consts.map { |ori| '<string>' + ori + '</string>' }.join('')}
 	</array>
 </dict>
 </plist>
