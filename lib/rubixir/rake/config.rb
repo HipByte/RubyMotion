@@ -25,7 +25,7 @@ module Motion
     variable :files, :platforms_dir, :sdk_version, :frameworks,
       :delegate_class, :name, :build_dir, :resources_dir,
       :codesign_certificate, :provisioning_profile, :device_family,
-      :interface_orientations
+      :interface_orientations, :version
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -40,6 +40,7 @@ module Motion
       @device_family = :iphone
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
+      @version = '1.0'
     end
 
     def variables
@@ -167,7 +168,7 @@ module Motion
 	<key>CFBundleResourceSpecification</key>
 	<string>ResourceRules.plist</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0</string>
+	<string>#{@version}</string>
 	<key>CFBundleSignature</key>
 	<string>#{@bundle_signature}</string>
 	<key>CFBundleSupportedPlatforms</key>
@@ -175,7 +176,7 @@ module Motion
 		<string>iPhoneOS</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>#{@version}</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvmgcc42</string>
 	<key>DTPlatformBuild</key>
