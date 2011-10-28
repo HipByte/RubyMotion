@@ -1,12 +1,14 @@
 class MyView < UIView
   def drawRect(rect)
     if @moved
-      red, green, blue = rand(100), rand(100), rand(100)
-      bgcolor = UIColor.colorWithRed(red/100.0, green:green/100.0, blue:blue/100.0, alpha:1.0)
+      bgcolor = begin
+        red, green, blue = rand(100), rand(100), rand(100)
+        UIColor.colorWithRed(red/100.0, green:green/100.0, blue:blue/100.0, alpha:1.0)
+      end
       text = "ZOMG!"
     else
       bgcolor = UIColor.blackColor
-      text = @touches ? "Touched #{@touches} times!" : "Hello Rubixir!"
+      text = @touches ? "Touched #{@touches} times!" : "Hello RubyMotion!"
     end
 
     bgcolor.set 
