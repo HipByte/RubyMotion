@@ -57,14 +57,13 @@ sigforwarder(int sig)
 	// Forward ^C to gdb.
 	signal(SIGINT, sigforwarder);
 
-
 	// Create the gdb commands file (used to 'continue' the process).
 	NSString *cmds_path = [NSString pathWithComponents:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(), @"_simgdbcmds",
 	    nil]];
-	if (![[NSFileManager defaultManager] fileExistsAtPath:cmds_path]) {
+	//if (![[NSFileManager defaultManager] fileExistsAtPath:cmds_path]) {
 	    NSError *error = nil;
-	    if (![@"continue\n" writeToFile:cmds_path atomically:YES
+	    if (![@"set breakpoint pending on\nbreak rb_exc_raise\ncontinue\n" writeToFile:cmds_path atomically:YES
 		    encoding:NSASCIIStringEncoding error:&error]) {
 		fprintf(stderr,
 			"can't write gdb commands file into path %s: %s\n",
@@ -72,7 +71,7 @@ sigforwarder(int sig)
 			[[error description] UTF8String]);
 		exit(1);
 	    }
-	}
+	//}
 
 	// Run the gdb process.
 	NSString *gdb_path = @"/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin";
@@ -111,8 +110,8 @@ main(int argc, char **argv)
     debug_mode = atoi(argv[1]) == 1 ? YES : NO;
     NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
     NSString *sdk_version = [NSString stringWithUTF8String:argv[3]];
-    NSString *app_path = [NSString stringWithUTF8String:realpath(argv[4], NULL)];
-
+    NSString *app_path =
+	[NSString stringWithUTF8String:realpath(argv[4], NULL)];
 
     [[NSBundle bundleWithPath:@"/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/iPhoneSimulatorRemoteClient.framework"] load];
 
