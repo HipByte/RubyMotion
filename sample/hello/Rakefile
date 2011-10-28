@@ -3,5 +3,4 @@ require 'rubixir/rake'
 
 Motion::App.setup do |app|
   app.name = 'Hello'
-  app.device_family = :iphone
 end
