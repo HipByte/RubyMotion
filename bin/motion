@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-$:.unshift(File.join(File.dirname(__FILE__), '../lib'))
+$:.unshift(File.join(File.dirname(File.readlink(__FILE__)), '../lib'))
 require 'motion/version'
 
 class Command
@@ -78,6 +78,8 @@ class MotionMainCommand
   def initialize(args)
     arg = args.shift
     case arg
+      when '-h', '--help'
+        usage
       when '-v', '--version'
         $stdout.puts Motion::Version
         exit 1
@@ -86,14 +88,15 @@ class MotionMainCommand
         exit 1
     end
     command = Commands.find { |command| command.name == arg }
-    show_usage unless command
+    usage unless command
     exit command.run(args) ? 0 : 1
   end
 
-  def show_usage
+  def usage
     $stderr.puts 'Usage:'
+    $stderr.puts "  #{File.basename(__FILE__)} [-h, --help]"
     $stderr.puts "  #{File.basename(__FILE__)} [-v, --version]"
-    $stderr.puts "  #{File.basename(__FILE__)} command <arguments...>"
+    $stderr.puts "  #{File.basename(__FILE__)} <command> [<args...>]"
     $stderr.puts ''
     $stderr.puts 'Commands:'
     Commands.each do |command|
