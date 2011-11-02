@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
-$:.unshift(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
+$motion_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
+$:.unshift($motion_libdir)
 require 'motion/version'
 
 class Command
@@ -32,13 +33,11 @@ class CreateCommand < Command
       return false
     end
 
-    motion_libdir = File.expand_path(File.join(__FILE__, '../../lib'))
- 
     Dir.mkdir(app_name)
     Dir.chdir(app_name) do
       File.open('Rakefile', 'w') do |io|
         io.puts <<EOS
-$:.unshift(\"#{motion_libdir}\")
+$:.unshift(\"#{$motion_libdir}\")
 require 'motion/rake'
 
 Motion::App.setup do |app|
