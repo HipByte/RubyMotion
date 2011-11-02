@@ -6,11 +6,12 @@ verbose(true)
 
 def rake(dir, cmd='all')
   Dir.chdir(dir) do
-    sh "rake platforms_dir=#{PLATFORMS_DIR} sdk_version=#{SDK_VERSION} #{cmd}"
+    debug = ENV['DEBUG'] ? 'optz_level=0' : ''
+    sh "rake platforms_dir=#{PLATFORMS_DIR} sdk_version=#{SDK_VERSION} project_version=#{PROJECT_VERSION} #{debug} #{cmd}"
   end
 end
 
-targets = %w{vm data doc}
+targets = %w{vm lib data doc}
 
 task :default => :all
 desc "Build everything"
@@ -31,7 +32,7 @@ end
 
 desc "Generate source code archive"
 task :archive do
-  base = "rubixir-head"
+  base = "rubymotion-head"
   rm_rf "/tmp/#{base}"
   sh "git archive --format=tar --prefix=#{base}/ HEAD | (cd /tmp && tar xf -)"
   Dir.chdir('vm') do
@@ -44,35 +45,30 @@ task :archive do
   sh "du -h #{base}.tgz"
 end
 
-require 'rubygems'
-require 'rake/gempackagetask'
-gem_spec = Gem::Specification.new do |spec|
+desc "Install"
+task :install do
+  binaries = ['./bin/motion']
+  data = []
+  data.concat(Dir.glob('./lib/**/*'))
+  data.concat(Dir.glob('./data/BridgeSupport/*.bridgesupport'))
+  data.concat(%w{./data/deploy ./data/sim ./data/llc ./data/ruby})
+  data.concat(Dir.glob('./data/iPhoneOS/*'))
+  data.concat(Dir.glob('./data/iPhoneSimulator/*'))
+  data.concat(Dir.glob('./doc/html/**/*'))
+  data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
+  data.reject! { |path| /^\./.match(File.basename(path)) }
+  data.reject! { |path| File.directory?(path) }
+
   files = []
-  files << './bin/rubixir'
-  files.concat(Dir.glob('./lib/**/*'))
-  files.concat(Dir.glob('./data/BridgeSupport/*.bridgesupport'))
-  files.concat(%w{./data/deploy ./data/sim ./data/llc ./data/ruby})
-  files.concat(Dir.glob('./data/iPhoneOS/*'))
-  files.concat(Dir.glob('./data/iPhoneSimulator/*'))
-  files.concat(Dir.glob('./doc/html/**/*'))
-  files.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
-  files.reject! { |path| /^\./.match(File.basename(path)) }
-  files.reject! { |path| File.directory?(path) }
+  binaries.each { |x| files << [x, 0755] }
+  data.each { |x| files << [x, 0644] }
 
-  spec.name = 'rubixir'
-  spec.summary = 'Ruby runtime for iOS'
-  spec.description = <<-DESCRIPTION
-Rubixir is an implementation of the Ruby language for the iOS mobile platform.
-DESCRIPTION
-  #spec.author = 'todo'
-  #spec.email = 'todo'
-  #spec.homepage = 'todo'
-  spec.version = PROJECT_VERSION
-  spec.files = files
-  spec.executables = ['rubixir']
-end
-
-Rake::GemPackageTask.new(gem_spec) do |pkg|
-  pkg.need_zip = false
-  pkg.need_tar = true
+  destdir = (ENV['DESTDIR'] || '/')
+  destdir = File.join(destdir, '/Developer/Motion')
+  files.each do |path, mode|
+    pathdir = File.join(destdir, File.dirname(path))
+    mkdir_p pathdir unless File.exist?(pathdir)
+    cp path, File.join(destdir, path)
+    chmod mode, File.join(destdir, path)
+  end
 end
