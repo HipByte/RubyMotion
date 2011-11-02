@@ -59,12 +59,13 @@ task :install do
   data.reject! { |path| /^\./.match(File.basename(path)) }
   data.reject! { |path| File.directory?(path) }
 
+  motiondir = '/Library/Motion'
   destdir = (ENV['DESTDIR'] || '/')
-  motiondir = File.join(destdir, '/Library/Motion')
+  destmotiondir = File.join(destdir, motiondir)
   install = proc do |path, mode|
-    pathdir = File.join(motiondir, File.dirname(path))
+    pathdir = File.join(destmotiondir, File.dirname(path))
     mkdir_p pathdir unless File.exist?(pathdir)
-    destpath = File.join(motiondir, path)
+    destpath = File.join(destmotiondir, path)
     cp path, destpath
     chmod mode, destpath
     destpath
@@ -73,7 +74,8 @@ task :install do
   bindir = File.join(destdir, '/usr/bin')
   mkdir_p bindir
   binaries.each do |path|
-    destpath = install.call(path, 0755)
+    install.call(path, 0755)
+    destpath = File.join(motiondir, path)
     ln_sf destpath, File.join(bindir, File.basename(path))
   end
 
