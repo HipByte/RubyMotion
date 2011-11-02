@@ -1,0 +1,27 @@
+verbose(true)
+
+task :default => :all
+task :all => [:files, :deploy, :sim]
+
+task :files do
+  install '../vm/miniruby', 'ruby'
+  install '/usr/local/bin/llc', 'llc'  
+end
+
+task :deploy do
+  if !File.exist?('deploy') or File.mtime('deploy.m') > File.mtime('deploy')
+    sh "/usr/bin/gcc -I./src -std=c99 -Wall -O3 deploy.m -o deploy -framework Foundation"
+    sh "/usr/bin/strip -x deploy"
+  end
+end
+
+task :sim do
+  if !File.exist?('sim') or File.mtime('sim.m') > File.mtime('sim')
+    sh "/usr/bin/gcc -I./src -std=c99 -Wall -O3 sim.m -o sim -framework Foundation"
+    sh "/usr/bin/strip -x sim"
+  end
+end
+
+task :clean do
+  %w{ruby llc deploy sim}.each { |path| rm_rf(path) }
+end
