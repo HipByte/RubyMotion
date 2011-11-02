@@ -1,8 +1,8 @@
 $:.unshift('../../lib')
-require 'rubixir/rake'
+require 'motion/rake'
 
 Motion::App.setup do |app|
-  app.name = 'mapview'
+  app.name = 'MapView'
   app.frameworks << 'CoreLocation'
   app.frameworks << 'MapKit'
   app.frameworks << 'AddressBook'
