@@ -1,6 +1,6 @@
 PLATFORMS_DIR = '/Developer/Platforms'
 SDK_VERSION = '4.3'
-PROJECT_VERSION = '0.0.11'
+PROJECT_VERSION = '0.12'
 
 verbose(true)
 
