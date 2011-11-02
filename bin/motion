@@ -2,7 +2,7 @@
 
 require 'optparse'
 
-class RubixirCommandLine
+class MotionCommandLine
   def initialize(argv)
     @argv = argv
     OptionParser.new do |opts|
@@ -47,13 +47,15 @@ class RubixirCommandLine
       $stderr.puts "Directory `#{@app_name}' already exists"
       exit 1
     end
+
+    motion_libdir = File.expand_path(File.join(__FILE__, '../../lib'))
  
     Dir.mkdir(@app_name)
     Dir.chdir(@app_name) do
       File.open('Rakefile', 'w') do |io|
         io.puts <<EOS
-require 'rubygems'
-require 'rubixir/rake'
+$:.unshift(\"#{motion_libdir}\")
+require 'motion/rake'
 
 Motion::App.setup do |app|
   app.name = '#{@app_name}'
@@ -86,4 +88,4 @@ EOS
   end
 end
 
-RubixirCommandLine.new(ARGV).run
+MotionCommandLine.new(ARGV).run
