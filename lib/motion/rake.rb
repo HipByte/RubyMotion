@@ -1,6 +1,6 @@
-require 'rubixir/rake/app'
-require 'rubixir/rake/config'
-require 'rubixir/rake/builder'
+require 'motion/rake/app'
+require 'motion/rake/config'
+require 'motion/rake/builder'
 
 desc "Build the project, then run the simulator"
 task :default => :simulator
