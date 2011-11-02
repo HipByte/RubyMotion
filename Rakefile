@@ -81,3 +81,11 @@ task :install do
     install.call(path, 0644)
   end
 end
+
+desc "Generate .pkg"
+task :package do
+  ENV['DESTDIR'] = '/tmp/Motion'
+  rm_rf '/tmp/Motion'
+  Rake::Task[:install].invoke
+  sh "/Developer/usr/bin/packagemaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{PROJECT_VERSION}.pkg\" --version #{PROJECT_VERSION}"
+end
