@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-$:.unshift(File.join(File.dirname(File.readlink(__FILE__)), '../lib'))
+$:.unshift(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
 require 'motion/version'
 
 class Command
