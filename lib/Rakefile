@@ -1,0 +1,16 @@
+PROJECT_VERSION = ENV['project_version']
+
+verbose(true)
+
+task :default => :all
+task :all => [:version_file]
+
+task :version_file do
+  File.open('motion/version.rb', 'w') do |io|
+    io.puts <<EOS
+module Motion
+  Version = \"#{PROJECT_VERSION}\"
+end
+EOS
+  end
+end
