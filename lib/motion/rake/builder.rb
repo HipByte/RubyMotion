@@ -6,8 +6,8 @@ module Motion
       archs = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
         path.scan(/kernel-(.+).bc$/)[0][0]
       end
-      ruby = File.join(datadir, 'ruby')
-      llc = File.join(datadir, 'llc')
+      ruby = File.join(config.bindir, 'ruby')
+      llc = File.join(config.bindir, 'llc')
 
       # Locate SDK.
       sdk = config.sdk(platform)

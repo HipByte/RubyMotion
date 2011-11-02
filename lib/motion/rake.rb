@@ -23,7 +23,7 @@ end
 
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
-  sim = File.join(Motion::App.config.datadir, 'sim')
+  sim = File.join(Motion::App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
   app = Motion::App.config.app_bundle('iPhoneSimulator')
   family = Motion::App.config.device_family_ints[0]
@@ -46,7 +46,7 @@ end
 
 desc "Deploy on the device"
 task :deploy => :package do
-  deploy = File.join(Motion::App.config.datadir, 'deploy')
+  deploy = File.join(Motion::App.config.bindir, 'deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   sh "#{deploy} #{flags} \"#{Motion::App.config.archive}\""
 end

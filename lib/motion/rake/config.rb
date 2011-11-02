@@ -80,6 +80,10 @@ module Motion
       ary
     end
 
+    def bindir
+      File.expand_path(File.join(File.dirname(__FILE__), '../../../bin'))
+    end
+
     def datadir
       File.expand_path(File.join(File.dirname(__FILE__), '../../../data'))
     end

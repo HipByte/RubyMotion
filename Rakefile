@@ -1,6 +1,6 @@
 PLATFORMS_DIR = '/Developer/Platforms'
 SDK_VERSION = '4.3'
-PROJECT_VERSION = '0.12'
+PROJECT_VERSION = '0.14'
 
 verbose(true)
 
@@ -11,7 +11,7 @@ def rake(dir, cmd='all')
   end
 end
 
-targets = %w{vm lib data doc}
+targets = %w{vm bin lib data doc}
 
 task :default => :all
 desc "Build everything"
@@ -47,11 +47,12 @@ end
 
 desc "Install"
 task :install do
-  binaries = ['./bin/motion']
+  public_binaries = ['./bin/motion']
+  binaries = public_binaries.dup.concat(['./bin/deploy', './bin/sim',
+    './bin/llc', './bin/ruby'])
   data = []
-  data.concat(Dir.glob('./lib/**/*'))
+  data.concat(Dir.glob('./lib/motion/**/*'))
   data.concat(Dir.glob('./data/BridgeSupport/*.bridgesupport'))
-  data.concat(%w{./data/deploy ./data/sim ./data/llc ./data/ruby})
   data.concat(Dir.glob('./data/iPhoneOS/*'))
   data.concat(Dir.glob('./data/iPhoneSimulator/*'))
   data.concat(Dir.glob('./doc/html/**/*'))
@@ -71,16 +72,14 @@ task :install do
     destpath
   end
 
+  binaries.each { |path| install.call(path, 0755) }
+  data.each { |path| install.call(path, 0644) }
+
   bindir = File.join(destdir, '/usr/bin')
   mkdir_p bindir
-  binaries.each do |path|
-    install.call(path, 0755)
+  public_binaries.each do |path|
     destpath = File.join(motiondir, path)
     ln_sf destpath, File.join(bindir, File.basename(path))
-  end
-
-  data.each do |path|
-    install.call(path, 0644)
   end
 end
 
