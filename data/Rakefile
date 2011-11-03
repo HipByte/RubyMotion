@@ -11,14 +11,17 @@ task :vm_files do
     ios = File.join(sdk_version, 'iPhoneOS')
     mkdir_p ios
     objs = "../vm/iPhoneOS#{sdk_version}.objs"
-    install File.join(objs, 'kernel-armv6.bc'), ios
-    install File.join(objs, 'kernel-armv7.bc'), ios
+    Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
+      install path, ios
+    end
     install File.join(objs, 'libmacruby-static.a'), ios
     
     sim = File.join(sdk_version, 'iPhoneSimulator')
     mkdir_p sim
     objs = "../vm/iPhoneSimulator#{sdk_version}.objs"
-    install File.join(objs, 'kernel-i386.bc'), sim
+    Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
+      install path, sim
+    end
     install File.join(objs, 'libmacruby-static.a'), sim
   end
 end
