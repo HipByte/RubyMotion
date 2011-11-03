@@ -39,7 +39,6 @@ end
 desc "Clean all targets"
 task :clean do
   targets.each { |target| rake(target, 'clean') }
-  rm_rf 'pkg'
 end
 
 desc "Generate source code archive"
