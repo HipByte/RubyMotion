@@ -1,13 +1,25 @@
 PLATFORMS_DIR = '/Developer/Platforms'
-SDK_VERSION = '4.3'
-PROJECT_VERSION = '0.15'
+PROJECT_VERSION = '0.16'
+
+sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
+  File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
+end
+ios_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk')).map do |path|
+  File.basename(path).scan(/^iPhoneOS(.+)\.sdk$/)[0][0]
+end
+SDK_VERSIONS = (sim_sdks & ios_sdks)
+
+if SDK_VERSIONS.empty?
+  $stderr.puts "Can't locate any SDK"
+  exit 1
+end
 
 verbose(true)
 
 def rake(dir, cmd='all')
   Dir.chdir(dir) do
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
-    sh "rake platforms_dir=#{PLATFORMS_DIR} sdk_version=#{SDK_VERSION} project_version=#{PROJECT_VERSION} #{debug} #{cmd}"
+    sh "rake platforms_dir=\"#{PLATFORMS_DIR}\" sdk_versions=\"#{SDK_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{cmd}"
   end
 end
 
@@ -52,9 +64,11 @@ task :install do
     './bin/llc', './bin/ruby'])
   data = []
   data.concat(Dir.glob('./lib/motion/**/*'))
-  data.concat(Dir.glob('./data/BridgeSupport/*.bridgesupport'))
-  data.concat(Dir.glob('./data/iPhoneOS/*'))
-  data.concat(Dir.glob('./data/iPhoneSimulator/*'))
+  SDK_VERSIONS.each do |sdk_version|
+    data.concat(Dir.glob("./data/#{sdk_version}/BridgeSupport/*.bridgesupport"))
+    data.concat(Dir.glob("./data/#{sdk_version}/iPhoneOS/*"))
+    data.concat(Dir.glob("./data/#{sdk_version}/iPhoneSimulator/*"))
+  end
   data.concat(Dir.glob('./doc/html/**/*'))
   data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   data.reject! { |path| /^\./.match(File.basename(path)) }

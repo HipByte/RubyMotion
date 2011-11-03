@@ -85,7 +85,7 @@ module Motion
     end
 
     def datadir
-      File.expand_path(File.join(File.dirname(__FILE__), '../../../data'))
+      File.expand_path(File.join(File.dirname(__FILE__), '../../../data', sdk_version))
     end
 
     def platform_dir(platform)
@@ -100,8 +100,8 @@ module Motion
         if versions.size == 0
           $stderr.puts "can't locate any iPhone SDK"
           exit 1
-        elsif versions.size > 1
-          $stderr.puts "found #{versions.size} SDKs, will use the latest one"
+        #elsif versions.size > 1
+        #  $stderr.puts "found #{versions.size} SDKs, will use the latest one"
         end
         versions.max
       end

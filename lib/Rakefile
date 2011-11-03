@@ -14,3 +14,7 @@ end
 EOS
   end
 end
+
+task :clean do
+  rm_rf 'motion/version.rb'
+end

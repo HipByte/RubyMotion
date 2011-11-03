@@ -1,5 +1,5 @@
 PLATFORMS_DIR = ENV['platforms_dir']
-SDK_VERSION = ENV['sdk_version']
+SDK_VERSIONS = ENV['sdk_versions'].split(',')
 
 verbose(true)
 
@@ -7,25 +7,34 @@ task :default => :all
 task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
 
 task :vm_files do
-  mkdir_p 'iPhoneOS'
-  install '../vm/.ios-objs/kernel-armv6.bc', 'iPhoneOS'
-  install '../vm/.ios-objs/kernel-armv7.bc', 'iPhoneOS'
-  install '../vm/.ios-objs/libmacruby-static.a', 'iPhoneOS'
-  mkdir_p 'iPhoneSimulator'
-  install '../vm/.simulator-objs/kernel-i386.bc', 'iPhoneSimulator'
-  install '../vm/.simulator-objs/libmacruby-static.a', 'iPhoneSimulator'
+  SDK_VERSIONS.each do |sdk_version|
+    ios = File.join(sdk_version, 'iPhoneOS')
+    mkdir_p ios
+    objs = "../vm/iPhoneOS#{sdk_version}.objs"
+    install File.join(objs, 'kernel-armv6.bc'), ios
+    install File.join(objs, 'kernel-armv7.bc'), ios
+    install File.join(objs, 'libmacruby-static.a'), ios
+    
+    sim = File.join(sdk_version, 'iPhoneSimulator')
+    mkdir_p sim
+    objs = "../vm/iPhoneSimulator#{sdk_version}.objs"
+    install File.join(objs, 'kernel-i386.bc'), sim
+    install File.join(objs, 'libmacruby-static.a'), sim
+  end
 end
 
 task :bridgesupport_files do
   frameworks = %w{UIKit Foundation CoreGraphics CoreLocation MapKit AddressBook OpenGLES AVFoundation}
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
-  sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{SDK_VERSION}.sdk"
-  sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
-  mkdir_p 'BridgeSupport'
-  frameworks.each do |framework|
-    dest = "BridgeSupport/#{framework}.bridgesupport"
-    unless File.exist?(dest)
-      sh "gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{SDK_VERSION} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{SDK_VERSION}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
+  SDK_VERSIONS.each do |sdk_version|
+    sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
+    sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
+    mkdir_p "#{sdk_version}/BridgeSupport"
+    frameworks.each do |framework|
+      dest = "#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
+      unless File.exist?(dest)
+        sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
+      end
     end
   end
 end
@@ -62,30 +71,32 @@ def generate_bs_static_stub(file, includes)
 end
 
 task :bridgesupport_static_stubs do
-  Dir.glob('BridgeSupport/*.bridgesupport') do |bs_path|
-    framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
-
-    code = "BridgeSupport/#{framework}_stubs.m"
-    includes = case framework
-      when 'OpenGLES'
-        ['OpenGLES/EAGLDrawable.h']
-      else
-        ['UIKit/UIKit.h', "#{framework}/#{framework}.h"]
-    end
-    File.open(code, 'w') { |io| io.write(generate_bs_static_stub(bs_path, includes)) } unless File.exist?(code)
-
-    [%w{iPhoneOS armv6 armv7}, %w{iPhoneSimulator i386}].each do |platform, *archs|
-      obj = "#{platform}/#{framework}_stubs.o"
-      next if File.exist?(obj)
-      platform_dev = "#{PLATFORMS_DIR}/#{platform}.platform/Developer"
-      cflags = "-isysroot #{platform_dev}/SDKs/#{platform}#{SDK_VERSION}.sdk "
-      cflags << archs.map { |a| "-arch #{a}" }.join(' ')
-      cflags << " -miphoneos-version-min=#{SDK_VERSION} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
-      sh "#{platform_dev}/usr/bin/gcc #{cflags} #{code} -c -o #{obj}"
+  SDK_VERSIONS.each do |sdk_version|
+    Dir.glob("#{sdk_version}/BridgeSupport/*.bridgesupport") do |bs_path|
+      framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
+  
+      code = "#{sdk_version}/BridgeSupport/#{framework}_stubs.m"
+      includes = case framework
+        when 'OpenGLES'
+          ['OpenGLES/EAGLDrawable.h']
+        else
+          ['UIKit/UIKit.h', "#{framework}/#{framework}.h"]
+      end
+      File.open(code, 'w') { |io| io.write(generate_bs_static_stub(bs_path, includes)) } unless File.exist?(code)
+  
+      [%w{iPhoneOS armv6 armv7}, %w{iPhoneSimulator i386}].each do |platform, *archs|
+        obj = "#{sdk_version}/#{platform}/#{framework}_stubs.o"
+        next if File.exist?(obj)
+        platform_dev = "#{PLATFORMS_DIR}/#{platform}.platform/Developer"
+        cflags = "-isysroot #{platform_dev}/SDKs/#{platform}#{sdk_version}.sdk "
+        cflags << archs.map { |a| "-arch #{a}" }.join(' ')
+        cflags << " -miphoneos-version-min=#{sdk_version} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
+        sh "#{platform_dev}/usr/bin/gcc #{cflags} #{code} -c -o #{obj}"
+      end
     end
   end
 end
 
 task :clean do
-  %w{iPhoneOS iPhoneSimulator BridgeSupport}.each { |path| rm_rf(path) }
+  SDK_VERSIONS.each { |path| rm_rf(path) }
 end
