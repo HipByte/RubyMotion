@@ -65,7 +65,7 @@ module Motion
             when /^arm/; 'arm'
             else; arch
           end
-          sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh"
+          sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh -disable-cfi"
  
           # Object.
           arch_obj = File.join(objs_build_dir, "#{path}.#{arch}.o")
