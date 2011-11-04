@@ -110,21 +110,23 @@ main(int argc, char **argv)
     ruby_init();
     ruby_init_loadpath();
     ruby_script(progname);
+    int retval = 0;
     try {
-      void *self = rb_vm_top_self();
+        void *self = rb_vm_top_self();
 EOS
       objs.each do |_, init_func|
         main_txt << "#{init_func}(self, 0);\n"
       end
       main_txt << <<EOS
+        retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
+        rb_exit(retval);
     }
     catch (...) {
 	rb_vm_print_current_exception();
-	rb_exit(1);
+        retval = 1;
     }
-    int retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
     [pool release];
-    rb_exit(retval);
+    return retval;
 }
 EOS
  
@@ -134,7 +136,7 @@ EOS
       main_o = File.join(objs_build_dir, 'main.o')
       if !(File.exist?(main) and File.exist?(main_o) and File.read(main) == main_txt)
         File.open(main, 'w') { |io| io.write(main_txt) }
-        sh "#{cxx} \"#{main}\" #{arch_flags} -fexceptions -fblocks -isysroot \"#{sdk}\" -miphoneos-version-min=4.3 -fobjc-legacy-dispatch -fobjc-abi-version=2 -c -o \"#{main_o}\""
+        sh "#{cxx} \"#{main}\" #{arch_flags} -fexceptions -fblocks -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -fobjc-legacy-dispatch -fobjc-abi-version=2 -c -o \"#{main_o}\""
       end
 
       # Prepare bundle.
@@ -150,7 +152,7 @@ EOS
         stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
         framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
       end
-      sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks}"
+      sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks}"
 
       # Create bundle/Info.plist.
       bundle_info_plist = File.join(bundle_path, 'Info.plist')
