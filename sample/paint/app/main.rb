@@ -24,11 +24,11 @@ class PaintView < UIView
   end
 
   def touchesBegan(touches, withEvent:event)
-    bp = UIBezierPath.alloc.init#bezierPath
+    bp = UIBezierPath.alloc.init
     bp.lineWidth = 3.0
     random_color = begin
-      red, green, blue = rand(100), rand(100), rand(100)
-      UIColor.alloc.initWithRed(red/100.0, green:green/100.0, blue:blue/100.0, alpha:1.0)
+      red, green, blue = rand(100)/100.0, rand(100)/100.0, rand(100)/100.0
+      UIColor.alloc.initWithRed(red/100.0, green:green, blue:blue, alpha:1.0)
     end
     @paths << [bp, random_color]
   end
@@ -49,30 +49,33 @@ class PaintView < UIView
     @previousPoint = nil
   end
 
+  def eraseContent
+    @paths.clear
+    @eraseSound.play
+    setNeedsDisplay
+  end
+end
+
+class PaintViewController < UIViewController
+  def loadView
+    self.view = PaintView.alloc.init
+  end
+
   def canBecomeFirstResponder
     true
   end
 
   def motionEnded(motion, withEvent:event)
-    if motion == UIEventSubtypeMotionShake
-      @paths.clear
-      @eraseSound.play
-      setNeedsDisplay
-    end
+    self.view.eraseContent if motion == UIEventSubtypeMotionShake
   end
 end
 
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
-    window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.applicationFrame)
-
-    pvrect = window.bounds
-    pv = PaintView.alloc.initWithFrame(pvrect)
-    pv.multipleTouchEnabled = true
-    pv.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth
-    window.addSubview(pv)
-    pv.becomeFirstResponder
-
+    window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
+    window.rootViewController = PaintViewController.alloc.init
+    window.rootViewController.wantsFullScreenLayout = true
     window.makeKeyAndVisible
+    return true
   end
 end

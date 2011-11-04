@@ -1,5 +1,5 @@
-class TableController
-  def initialize
+class TableController < UITableViewController
+  def viewDidLoad
     @data = {}
     @data['Trappist'] = [
       'Chimay',
@@ -30,6 +30,7 @@ class TableController
       "Tongerlo",
       "Val-Dieu"
     ]
+    view.dataSource = view.delegate = self
   end
 
   def numberOfSectionsInTableView(tableView)
@@ -59,13 +60,9 @@ end
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.applicationFrame)
-
-    tvrect = window.bounds
-    tv = UITableView.alloc.initWithFrame(tvrect, style:UITableViewStylePlain)
-    tv.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth
-    tv.dataSource = tv.delegate = TableController.new
-    window.addSubview(tv)
-
+    window.rootViewController = TableController.alloc.initWithStyle(UITableViewStylePlain)
+    window.rootViewController.wantsFullScreenLayout = true
     window.makeKeyAndVisible
+    return true
   end
 end

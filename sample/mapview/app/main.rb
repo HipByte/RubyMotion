@@ -10,17 +10,15 @@ class Beer
   def coordinate; @coordinate; end
 end
 
-class AppDelegate
-  def application(application, didFinishLaunchingWithOptions:launchOptions)
-    window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.applicationFrame)
+class MapViewController < UIViewController
+  def loadView
+    self.view = MKMapView.alloc.init
+  end
 
-    mvrect = window.bounds
-    mv = MKMapView.alloc.initWithFrame(mvrect)
-    mv.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth
- 
+  def viewDidLoad 
     # Center on Brussels.
     region = MKCoordinateRegionMake(CLLocationCoordinate2D.new(50.85, 4.35), MKCoordinateSpanMake(3.1, 3.1))
-    mv.setRegion(region)
+    self.view.setRegion(region)
 
     beers = [
       Beer.new(50.016667, 4.316667, 'Chimay'),
@@ -30,9 +28,16 @@ class AppDelegate
       Beer.new(50.895942, 2.721262, 'Westvleteren'),
       Beer.new(51.298800, 5.488570, 'Achel')
     ]
-    beers.each { |beer| mv.addAnnotation(beer) }
+    beers.each { |beer| self.view.addAnnotation(beer) }
+  end
+end
 
-    window.addSubview(mv)
+class AppDelegate
+  def application(application, didFinishLaunchingWithOptions:launchOptions)
+    window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
+    window.rootViewController = MapViewController.alloc.init
+    window.rootViewController.wantsFullScreenLayout = true
     window.makeKeyAndVisible
+    return true
   end
 end

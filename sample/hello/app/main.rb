@@ -1,4 +1,4 @@
-class MyView < UIView
+class HelloView < UIView
   def drawRect(rect)
     if @moved
       bgcolor = begin
@@ -32,11 +32,18 @@ class MyView < UIView
   end
 end
 
+class HelloViewController < UIViewController
+  def loadView
+    self.view = HelloView.alloc.init
+  end
+end
+
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
-    view = MyView.alloc.initWithFrame(window.frame)
-    window.addSubview(view)
+    window.rootViewController = HelloViewController.alloc.init
+    window.rootViewController.wantsFullScreenLayout = true
     window.makeKeyAndVisible
+    return true
   end
 end
