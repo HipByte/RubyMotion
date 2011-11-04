@@ -1,5 +1,7 @@
 module Motion
   class Builder
+    include Rake::DSL if Rake.const_defined?(:DSL)
+
     def build(config, platform)
       datadir = config.datadir
       libstatic = File.join(datadir, 'libmacruby-static.a')
