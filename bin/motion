@@ -52,6 +52,7 @@ EOS
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     puts "Hello World!"
+    return true
   end
 end
 EOS
