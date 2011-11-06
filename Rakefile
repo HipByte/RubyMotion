@@ -1,5 +1,5 @@
 PLATFORMS_DIR = '/Developer/Platforms'
-PROJECT_VERSION = '0.18'
+PROJECT_VERSION = '0.19'
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
@@ -61,7 +61,7 @@ task :install do
   public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/deploy', './bin/sim',
     './bin/llc', './bin/ruby'])
-  data = []
+  data = ['./NEWS']
   data.concat(Dir.glob('./lib/motion/**/*'))
   SDK_VERSIONS.each do |sdk_version|
     data.concat(Dir.glob("./data/#{sdk_version}/BridgeSupport/*.bridgesupport"))
