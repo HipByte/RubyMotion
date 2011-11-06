@@ -25,7 +25,7 @@ module Motion
     variable :files, :platforms_dir, :sdk_version, :frameworks,
       :delegate_class, :name, :build_dir, :resources_dir,
       :codesign_certificate, :provisioning_profile, :device_family,
-      :interface_orientations, :version
+      :interface_orientations, :version, :icons
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -41,6 +41,7 @@ module Motion
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @version = '1.0'
+      @icons = []
     end
 
     def variables
@@ -118,7 +119,7 @@ module Motion
           File.basename(path).scan(/iPhoneOS(.*)\.sdk/)[0][0]
         end
         if versions.size == 0
-          $stderr.puts "can't locate any iPhone SDK"
+          $stderr.puts "Can't find an iOS SDK in `#{platforms_dir}'"
           exit 1
         #elsif versions.size > 1
         #  $stderr.puts "found #{versions.size} SDKs, will use the latest one"
@@ -147,7 +148,7 @@ module Motion
           when :iphone then 1
           when :ipad then 2
           else
-            $stderr.puts "unknown device family `#{family}'"
+            $stderr.puts "Unknown device_family value: `#{family}'"
             exit 1
         end
       end
@@ -161,7 +162,7 @@ module Motion
           when :landscape_right then 'UIInterfaceOrientationLandscapeRight'
           when :portrait_upside_down then 'UIInterfaceOrientationPortraitUpsideDown'
           else
-            $stderr.puts "unknown interface orientation `#{ori}'"
+            $stderr.puts "Unknown interface_orientation value: `#{ori}'"
             exit 1
         end
       end
@@ -221,6 +222,10 @@ module Motion
 	<true/>
 	<key>MinimumOSVersion</key>
 	<string>#{sdk_version}</string>
+        <key>CFBundleIconFiles</key>
+        <array>
+                #{icons.map { |icon| '<string>' + icon + '</string>' }.join('')}
+        </array>
 	<key>UIDeviceFamily</key>
 	<array>
 		#{device_family_ints.map { |family| '<integer>' + family.to_s + '</integer>' }.join('')}
@@ -242,10 +247,10 @@ DATA
       @codesign_certificate ||= begin
         certs = `/usr/bin/security -q find-certificate -a`.scan(/"iPhone Developer: [^"]+"/).uniq
         if certs.size == 0
-          $stderr.puts "can't find any iPhone Developer certificate in the keychain"
+          $stderr.puts "Can't find an iPhone Developer certificate in the keychain"
           exit 1
         elsif certs.size > 1
-          $stderr.puts "found #{certs.size} iPhone Developer certificates, will use the first one (#{certs[0]})"
+          $stderr.puts "Found #{certs.size} iPhone Developer certificates, will use the first one: `#{certs[0]}'"
         end
         certs[0][1..-2] # trim trailing `"` characters
       end 
@@ -255,10 +260,10 @@ DATA
       @provisioning_profile ||= begin
         paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision"))
         if paths.size == 0
-          $stderr.puts "can't find any provisioning profile"
+          $stderr.puts "Can't find a provisioning profile"
           exit 1
         elsif paths.size > 1
-          $stderr.puts "found #{paths.size} provisioning profiles, will use the first one (#{paths[0]})"
+          $stderr.puts "Found #{paths.size} provisioning profiles, will use the first one: `#{paths[0]}'"
         end
         paths[0]
       end
