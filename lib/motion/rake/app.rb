@@ -11,6 +11,7 @@ module Motion
 
       def setup
         yield config
+        config.validate
       end
 
       def build(platform)

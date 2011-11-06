@@ -52,6 +52,22 @@ module Motion
       map
     end
 
+    def validate
+      # sdk_version
+      ['iPhoneSimulator', 'iPhoneOS'].each do |platform|
+        sdk_path = File.join(platforms_dir, platform + '.platform',
+            "Developer/SDKs/#{platform}#{sdk_version}.sdk")
+        unless File.exist?(sdk_path)
+          $stderr.puts "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
+          exit 1
+        end
+      end
+      unless File.exist?(datadir)
+        $stderr.puts "iOS SDK #{sdk_version} is not supported by this version of RubyMotion"
+        exit 1
+      end
+    end
+
     attr_reader :project_dir
 
     def project_file
@@ -80,12 +96,16 @@ module Motion
       ary
     end
 
+    def motiondir
+      File.expand_path(File.join(File.dirname(__FILE__), '../../..'))
+    end
+
     def bindir
-      File.expand_path(File.join(File.dirname(__FILE__), '../../../bin'))
+      File.join(motiondir, 'bin')
     end
 
     def datadir
-      File.expand_path(File.join(File.dirname(__FILE__), '../../../data', sdk_version))
+      File.join(motiondir, 'data', sdk_version)
     end
 
     def platform_dir(platform)
