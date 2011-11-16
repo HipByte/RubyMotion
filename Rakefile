@@ -68,7 +68,8 @@ task :install do
     data.concat(Dir.glob("./data/#{sdk_version}/iPhoneOS/*"))
     data.concat(Dir.glob("./data/#{sdk_version}/iPhoneSimulator/*"))
   end
-  data.concat(Dir.glob('./doc/html/**/*'))
+  data.concat(Dir.glob('./doc/*.html'))
+  data.concat(Dir.glob('./doc/docset/**/*'))
   data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   data.reject! { |path| /^\./.match(File.basename(path)) }
   data.reject! { |path| File.directory?(path) }
