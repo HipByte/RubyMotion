@@ -1,0 +1,293 @@
+h1. RubyMotion Reference Manual
+
+h2. Abstract
+
+This is the RubyMotion reference manual. It documents the latest available version of RubyMotion. This manual closely follows changes in RubyMotion, and it should always be up-to-date.
+
+This is an exaustive manual that covers all the technical aspects of RubyMotion that you need to be aware of in order to develop applications with it. It is not meant to be a guide or a tutorial. Tutorials are available from the same documentation center.
+
+Basic knowledge of the Ruby language and programming concepts are required for this guide.
+
+h2. Getting Started
+
+h3. Overview
+
+RubyMotion is a framework that permits the development of iOS applications using the Ruby programming language.
+
+"iOS":http://www.apple.com/ios/ is Apple's mobile operating system, powering a variety of devices such as iPhone, iPod touch and iPad. Developers can write applications for iOS and submit them to the App Store, Apple's application distribution system.
+
+Conceptually, RubyMotion is a combination of three modules:
+
+* *Runtime*: a custom implementation of the Ruby language for iOS, tightly integrated with the native iOS runtime and customized for embedded devices constrains.
+* *Tool*: a command-line toolchain to create and manage RubyMotion projects.
+* *Library*: a high-level Ruby library sitting on top of the iOS SDK that facilitates the development of applications.
+
+h3. Installation
+
+An evaluation version of RubyMotion can be downloaded from "http://rubymotion.com":http://rubymotion.com. This version allows you to create and build projects, and run them through the iOS simulator.
+
+A license must be purchased in order to build projects for iOS hardware. This is needed for applications to be tested on device and submitted to the App Store.
+
+RubyMotion installs itself into +/Library/Motion+. A symbolic link to the command-line interface is created as +/usr/bin/motion+.
+
+h3. Software Updates
+
+Software updates can be applied via the command-line.
+
+<pre>
+$ sudo motion update
+</pre>
+
+This command will grab the latest version of RubyMotion from the network and install it. You must be connected to the Internet to perform that command.
+
+You can always see the version number of the version of RubyMotion installed on your computer.
+
+<pre>
+$ motion -v
+1.0
+</pre>
+
+h2. Runtime
+
+The RubyMotion runtime implements the Ruby language functionality required during the execution of an application. The object model, builtin classes and memory management system are part of the runtime.
+
+Althrough similars in appearance, the RubyMotion runtime has a completely different implementation than "CRuby":http://www.ruby-lang.org/en/, the mainstream implementation. We will cover the main differences in the following sections.
+
+The key feature of the RubyMotion runtime is its tight integration with iOS, which makes applications very efficient.
+
+RubyMotion follows the Ruby 1.9 language specifications.
+
+h3. Object Model
+
+The object model of RubyMotion is based on "Objective-C":http://en.wikipedia.org/wiki/Objective-C, the underlying language runtime of the iOS SDK. Objective-C is an object-oriented flavor of C that has been, like Ruby, heavily influenced by the "Smalltalk":http://en.wikipedia.org/wiki/Smalltalk language.
+
+Sharing a common ancestor, the object models of Ruby and Objective-C are conceptually similar. For instance, both languages have the notion of open classes, single inheritance, and single dynamic message dispatch. 
+
+RubyMotion implements the Ruby object model by using the "Objective-C runtime":http://developer.apple.com/library/ios/#documentation/Cocoa/Reference/ObjCRuntimeRef/Reference/reference.html, the library that powers the Objective-C language, and indirectly, the iOS SDK APIs.
+
+In RubyMotion, Ruby classes, methods and objects are respectively Objective-C classes, methods and objects. And reciprocally, Objective-C classes, methods and objects are available in Ruby as if they were native.
+
+By sharing the same object model infrastructure, Objective-C and RubyMotion APIs can be interchangeable at no additional performance expense.
+
+h3. Builtin Classes
+
+The builtin classes of RubyMotion are based on the "Foundation framework":http://developer.apple.com/library/ios/#documentation/Cocoa/Reference/Foundation/ObjC_classic/_index.html, the base layer of iOS.
+
+The Foundation framework is an Objective-C framework, but due to the fact that RubyMotion is based on the Objective-C runtime, the classes that it defines can be naturally re-used in RubyMotion.
+
+Foundation exports the root object class +NSObject+, which is also used in RubyMotion as the root class of all classes. +Object+ is an alias to +NSObject+.
+
+<pre>
+class Hello; end
+Hello.ancestors	# => [Hello, NSObject, Kernel]
+</pre>
+
+Foundation also provides a set of primitive object classes, which are used as the base of Ruby builtin classes.
+
+|_<. Ruby Class |_<. Subclass of |
+| +String+ | +NSMutableString+ (mutable version of +NSString+) |
+| +Array+ | +NSMutableArray+ (mutable version of +NSArray+) |
+| +Hash+ | +NSMutableDictionary+ (mutable version of +NSDictionary+) |
+| +Numeric+ | +NSNumber+ |
+| +Time+ | +NSDate+ |
+
+A consequence of hosting the Ruby builtin classes on Foundation is that instances respond to more messages. For instance, the +NSString+ class defines the +-uppercaseString+ method. Since the +String+ class is a subclass of +NSString+, strings created in Ruby also respond to that method.
+
+<pre>
+'hello'.uppercaseString # => 'HELLO
+</pre>
+
+Respectively, the Ruby interface of these builtin classes is implemented on their Foundation counterparts. As an example, +Array+'s +each+ method is implemented on +NSArray+. This allows primitive types to always respond to the same interface, regardless of where they come from. +each+ will always work on all arrays.
+
+<pre>
+def iterate(ary)
+  ary.each { |x| p x }
+end
+
+iterate [42]
+iterate NSArray.arrayWithObject(42)
+</pre>
+
+But the main purpose of this design is to allow the exchange of primitive types between Objective-C and Ruby at no cost, since they don't have to be converted. This is important as most of the types going to be exchanged in a typical application will likely be builtin types. As an example, a +String+ object created in Ruby can have its memory address passed as the argument of an Objective-C method that expects an +NSString+.
+
+h4. Mutability
+
+The Foundation framework ships a set of classes that have both mutable and immutable variants. Mutable objects can be modified, while immutable objects can't.
+
+Immutable types in RubyMotion behave like frozen objects. As in traditional Ruby, the +freeze+ message can be sent on collection types to prevent them from being modified later on.
+
+As an example, changing the content of an +NSString+ is prohibited, and an exception will be raised by the system if doing so. However, it is possible to change the content of an +NSMutableString+ instance.
+
+<pre>
+NSString.new.strip!           # raises RuntimeError: can't modify frozen/immutable string
+NSMutableString.new.strip!    # works
+</pre>
+
+Strings created in RubyMotion inherit from +NSMutableString+, so they can be modified. The same goes for arrays and hashes.
+
+However, the developer must be careful that it is very common in iOS SDK APIs to return immutable types. In these cases, the +dup+ or +mutableCopy+ messages can be sent to the object in order to get a mutable version of it, that can be modified.
+
+h3. Memory Management
+
+RubyMotion provides automatic memory management; the developer does not need to reclaim unused objects.
+
+Since memory is limited on iOS hardware, the developer must be careful about not creating large object graphs.
+
+RubyMotion implements a form of garbage collection called reference counting. An object has an initial reference count of zero, is incremented when a reference to it is created, and decremented when a reference is destroyed. When the count reaches zero, the object's memory is reclaimed by the collector.
+
+Object cycles, when two or more objects refer to each other, are handled by the garbage collector.
+
+RubyMotion's memory management system is designed to simplify the development process. Unlike traditional Objective-C programming, object references are automatically created and destroyed by the system. Similarly, because object cycles will be garbage-collected, the developer does not need to keep in mind the entire object graph of his project and use weak references.
+
+h4. Objective-C Objects
+
+Objects created by Objective-C APIs are automatically managed by RubyMotion. There is no need to send the +retain+, +release+ or +autorelease+ messages to them.
+
+<pre>
+def dates
+  puts NSDate.alloc.init
+  puts NSDate.date
+end
+
+dates # both NSDate objects created above will be garbage-collected.
+</pre>
+
+h4. CoreFoundation Objects
+
+Objects created by CoreFoundation-style APIs must be explicitely destroyed by the developer, by calling the +CFRelease()+ function. RubyMotion will not garbage-collect them otherwise.
+
+<pre>
+attributed_string = CFAttributedStringCreate(nil, 'Hello World', {})
+do_something(attributed_string)
+
+# At this point, the CFAttributedString object is leaking, we need to manually destroy it.
+CFRelease(attributed_string)
+attributed_string = nil
+</pre>
+
+h3. Concurrency
+
+The ability to run code concurrently became critical as multicore processors appeared on iOS devices. RubyMotion has been designed around this purpose.
+
+RubyMotion has the concept of virtual machine objects, which wrap the state of a thread of execution. A piece of code is running through a virtual machine.
+
+Virtual machines don't have locks, and there can be multiple virtual machines running at the same time, concurrently.
+
+Unlike some Ruby implementations, race conditions are possible in RubyMotion, since there is no Global Interpreter Lock (GIL) to prohibit threads from running concurrently. The developer must be careful to secure concurrent access to shared resources.
+
+Different options are available to write concurrent code in RubyMotion.
+
+h4. Threads and Mutexes
+
+The +Thread+ class spawns a new POSIX thread that will run concurrently with other threads. The +Mutex+ class wraps a POSIX mutex, and can be used to isolate concurrent access to a shared resource.
+
+h4. Grand Central Dispatch
+
+RubyMotion wraps the "Grand Central Dispatch":http://developer.apple.com/library/ios/#documentation/Performance/Reference/GCD_libdispatch_Ref/Reference/reference.html (GCD) concurrency library under the +Dispatch+ module. It is possible to execute both synchronously and asynchronously blocks of code under concurrent or serial queues.
+
+Albeit more complicated to comprehend than regular threads, sometimes GCD offers a more elegant way to run code concurrently. GCD maintains for the developer a pool of threads and its APIs are architectured to avoid the need to use mutexes.
+
+== h2. Using the iOS SDK==
+== h3. Objective-C APIs==
+== h3. C APIs==
+== h3. Pointers==
+== h3. Blocks==
+
+h2. Project Management
+
+h3. Creation
+
+RubyMotion projects are created by passing the +create+ command to +/usr/bin/motion+. RubyMotion projects are directories.
+
+<pre>
+$ motion create Hello
+$ cd Hello
+$ ls
+Rakefile app resources
+</pre>
+
+The following table explains the anatomy of a project directory.
+
+|_<. File/Directory |_<. Purpose |
+|+Rakefile+ | This file contains the configuration of the project, as well as a default set of tasks. It can be edited to change the configuration or add new tasks. |
+| +app/+ | This directory contains the Ruby code of the project. In a new project, a +main.rb+ file is created automatically. |
+| +resources/+ | This directory contains the resources files of the project, such as images or sounds. In a new project, this directory is empty. |
+
+h3. Configuration
+
+The +rake config+ task will dump the project configuration. Each configuration variable has a sensible default value that can be manually overriden in the +Rakefile+ file.
+
+|_<. Variable |_<. Discussion |
+|+name+ | Project name, as a +String+. The default value is the name passed to +motion create+. |
+|+version+ | Project version, as a +String+. The default value is +'1.0'+. |
+|+delegate_class+ | Name of the application delegate class, as a +String+. The default value is +'AppDelegate'+ and the class is defined in +app/main.rb+.|
+|+files+ | Project files, as an +Array+. The default value is the result of the following expression: +Dir.glob('./app/**/*.rb')+ (every +.rb+ file in the +app+ directory). |
+|+frameworks+ | iOS frameworks to link against, as an +Array+. The default value is +['UIKit', 'Foundation', 'CoreGraphics']+. |
+|+build_dir+ | Directory for build products, as a +String+. The directory will be created by the build system if it does not exist yet. The default value is +'build'+.|
+|+resources_dir+ | Directory for resources files, as a +String+. The default value is +'resources'+. |
+|+icons+ | List of resource files to use for icons, as an +Array+. The files must conform to the "HIG guidelines":http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html. The default value is +[]+, an empty array. |
+|+device_family+ | Family of devices to support. Possible values can be: +iphone+, +ipad+ or +[:iphone, :ipad]+ (for a universal application). The default value is +:iphone+.|
+|+interface_orientations+ | Supported interface orientations. Value must be an +Array+ of one or more of the following symbols: +:portrait+, +:landscape_left+, :+landscape_right+:, and +:portrait_upside_down+. The default value is +[:portrait, :landscape_left, :landscape_right]+. |
+|+platforms_dir+ | Platforms directory where to find SDKs, as a +String+. The default value is +'/Developer/Platforms'+. |
+|+sdk_version+ | Version number of SDK to target, as a +String+. The default value is the version number of the most recent SDK in +platforms_dir+. Example: +'5.0'+|
+|+codesign_certificate+ | The name of the certificate to use for codesigning, as a +String+. The default value is the first iPhone Developer certificate found in keychain. Example: +'iPhone Developer: Darth Vader (A3LKZY369Q)'+.|
+|+provisioning_profile+ | Path to the provisioning profile to use for deployment, as a +String+. The default value is the first +.mobileprovision+ file found in +~/Library/MobileDevice/Provisioning+. |
+
+Custom values for the configuration settings can be added by tweaking the +Motion::App.setup+ block in the +Rakefile+ file.
+
+As an example, let's take the configuration block of a fictional video player application for the iPad. The device family setting has to change from its default value, iPhone, to iPad. Also, the application makes use of an additional framework, AVFoundation, for audio-video functionality.
+
+<pre>
+Motion::App.setup do |app|
+  app.name = 'Awesome Video Player'
+  app.device_family = :ipad
+  app.frameworks << 'AVFoundation'
+end
+</pre>
+
+h3. Build
+
+The +rake build+ task builds the project into the temporary +build+ directory. Two different versions of the project will be built, one to run in the iOS simulator (on the Mac itself) and one to run on the iOS device.
+
+The following steps are performed:
+
+# It compiles each Ruby source code file into optimized machine code, translating the Ruby syntax tree into an intermediate representation language (using "LLVM":http://llvm.org/), then assembly. The compiler will generate code for either the Intel 32-bit (+i386+) or ARM (+armv6+, +armv7+) instruction sets and ABIs depending on the target.
+# It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that your project uses.
+# It creates an +.app+ bundle and copies the executable there. The +Info.plist+ file is generated based on the project configuration. Each resource file in the +resources+ directory is copied in the bundle.
+# It codesigns the bundle based on the certificate and provisioning profile specified in the project configuration.
+
+Normally the user does not need to explicitly build the project, as the +build+ task is a dependency of the other tasks.
+
+h3. Simulation
+
+The +rake simulator+ task builds the project for the iOS simulator, and runs the application in the simulator.
+
+The default +rake+ task is a shortcut to +rake simulator+.
+
+h3. Archiving
+
+The +rake archive+ task builds the project for the iOS device, and generates in the +build+ directory an +.ipa+ archive suitable for ad-hoc distribution or submissions to the App Store.
+
+<pre>
+$ rake archive
+$ file build/Hello.ipa 
+build/Hello.ipa: Zip archive data, at least v1.0 to extract
+</pre>
+
+h3. Deployment
+
+The +rake deploy+ task uploads an archive version of the application to an iOS device.
+
+There must be one iOS device connected via USB to the Mac. The deployment task will attempt to upload the application to the first discovered iOS device on the USB channel.
+
+The process will fail in the following cases:
+* No iOS device was found on USB.
+* The project builds on a version of iOS greater than the version of iOS running on the device.
+* The project doesn't use the appropriate certificate and provisioning profile linked to the device.
+* There is a USB connection issue when talking to the device.
+
+Otherwise, the process returns successfully and the application is then available on the device springboard.
+
+h2. Library
+
+TBD.
