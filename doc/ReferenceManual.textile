@@ -122,12 +122,12 @@ Foundation comes with the root object class, +NSObject+, as well as a set of pri
 Here is a table showing the ancestors chain of a newly created class, +Hello+, as well as some of the Ruby builtin classes.
 
 |_<. Ruby Class |_<. Ancestors |
-| +Hello+ | +NSObject+, +Kernel+ |
-| +String+ | +NSMutableString+, +NSString+, +Comparable+, +NSObject+, +Kernel+ |
-| +Array+ | +NSMutableArray+, +NSArray+, +Enumerable+, +NSObject+, +Kernel+ |
-| +Hash+ | +NSMutableDictionary+, +NSDictionary+, +Enumerable+, +NSObject+, +Kernel+ |
-| +Numeric+ | +Comparable+, +NSNumber+, +NSValue+, +NSObject+, +Kernel+ |
-| +Time+ | +Comparable+, +NSDate+, +NSObject+, +Kernel+ |
+| +Hello+ | +NSObject+ → +Kernel+ |
+| +String+ | +NSMutableString+ → +NSString+ → +Comparable+ → +NSObject+ → +Kernel+ |
+| +Array+ | +NSMutableArray+ → +NSArray+ → +Enumerable+ → +NSObject+ → +Kernel+ |
+| +Hash+ | +NSMutableDictionary+ → +NSDictionary+ → +Enumerable+ → +NSObject+ → +Kernel+ |
+| +Numeric+ | +Comparable+ → +NSNumber+ → +NSValue+ → +NSObject+ → +Kernel+ |
+| +Time+ | +Comparable+ → +NSDate+ → +NSObject+ → +Kernel+ |
 
 A direct consequence of hosting the Ruby builtin classes on Foundation is that instances respond to more messages. For instance, the +NSString+ class defines the +uppercaseString+ method. Since the +String+ class is a subclass of +NSString+, strings created in Ruby also respond to that method.
 
@@ -167,26 +167,35 @@ However, the developer must be careful that it is very common for iOS SDK APIs t
 
 h3. Interfacing with C
 
+One does not need to be a C programmer in order to use RubyMotion, however some basic notions, explained in this section, will be required.
+
 Objective-C is a superset of the C language. Objective-C methods can therefore accept and return C types.
 
 Also, while Objective-C is the main programming language used in the iOS SDK, some frameworks are only available in C APIs.
 
-RubyMotion comes with an interface that allows Ruby to deal with the C part of APIs. This support is automatic; the developer just needs to provide the list of libraries or frameworks that will be used in the project.
+RubyMotion comes with an interface that allows Ruby to deal with the C part of APIs. 
 
 h4. Basic Types
 
-Basic C types cannot be created from Ruby directly, but are automatically converted to equivalent Ruby types. 
+C, and indirectly Objective-C, has a set of basic types. It is common in iOS SDK APIs to accept or return these types.
 
-An equivalent Ruby type is returned from APIs returning basic C types, and equivalent Ruby types can be passed as arguments to APIs expecting basic C types.
-
-In the following piece of code, the +initWithInt:+ message, expecting a C +int+, is sent, passing a +Fixnum+. After, the +intValue+ message, returning a C +int+, is performed, and a +Fixnum+ is returned back.
+An example are the following methods of +NSFileHandle+, which both respectively accept and return the C integer type, +int+.
 
 <pre>
-number = NSNumber.alloc.initWithInt(42)
-number.intValue # => 42
+- (id)initWithFileDescriptor:(int)fd;
+- (int)fileDescriptor;
 </pre>
 
-The following table describes all basic C types and how they integrate in RubyMotion.
+Basic C types cannot be created from Ruby directly, but are automatically converted from and to equivalent Ruby types. 
+
+The following piece of code uses the two +NSFileHandle+ methods described above. The first one, +initWithFileDescriptor:+, is called by passing a +Fixnum+. The second one, +fileDescriptor+, is called and a +Fixnum+ is returned back to Ruby.
+
+<pre>
+handle = NSFileHandle.alloc.initWithFileDescriptor(2)
+handle.fileDescriptor # => 2
+</pre>
+
+This table describes all basic C types and discusses how they are converted from and to Ruby types.
 
 |_<. C Type |_<. From Ruby to C |_<. From C to Ruby |
 | +bool+ |/2. If the object is +false+ or +nil+, +false+, otherwise, +true+. Note: the +0+ fixnum will evaluate to +true+. |/2. Either +true+ or +false+. |
@@ -203,9 +212,9 @@ When using an API that returns the +void+ C type, RubyMotion will return +nil+.
 
 h4. Structures
 
-C structures are mapped to classes in RubyMotion. Structures can be created in Ruby and passed to APIs expecting structures, either by value or reference. Similarly, APIs returning structures will return an instance of the appropriate structure class.
+C structures are mapped to classes in RubyMotion. Structures can be created in Ruby and passed to APIs expecting C structures. Similarly, APIs returning C structures will return an instance of the appropriate structure class.
 
-Structure classes are automatically created by RubyMotion for the developer. A structure class has accessor methods for each field of the C structure it wraps.
+A structure class has an accessor method for each field of the C structure it wraps.
 
 As an example, the following piece of code creates a +CGPoint+ structure, sets its +x+ and +y+ fields, then passes it to the +drawAtPoint:withFont:+ method.
 
@@ -233,32 +242,38 @@ h4. Enumerations and Constants
 
 C enumerations and constants are mapped as constants of the +Object+ class.
 
-For instance, both +NSNotFound+ and +CGRectNull+, respectively an enumeration and a constant, are available in Ruby.
-
-Note: some enumerations or constants start with a lower case letter in C. In Ruby, constant names must always start with a capital letter, so the case must be corrected accordingly in the Ruby code.
-
-As an example, the +kABPersonEmailProperty+ constant defined in the AddressBook framework must be accessed as +KABPersonEmailProperty+ in Ruby.
+For instance, both +NSNotFound+ and +CGRectNull+, respectively an enumeration and a constant defined by Foundation, can be directly accessed.
 
 <pre>
-kABPersonEmailProperty # not good
-KABPersonEmailProperty # good
+if ary.indexOfObject(obj) == NSNotFound
+  # ...
+end
+# ...
+view = UIView.alloc.initWithFrame(CGRectNull)
+</pre>
+
+Note: some enumerations or constants defined in the iOS SDK may start with a lower-case letter, like +kCLLocationAccuracyBest+ (starting with +k+). Because Ruby constants must always start with a capital letter, their names must be corrected by changing the case of the first letter, becoming +KCLLocationAccuracyBest+ (starting with +K+) in Ruby.
+
+<pre>
+locationManager.desiredAccuracy = kCLLocationAccuracyBest # NameError: undefined local variable or method
+locationManager.desiredAccuracy = KCLLocationAccuracyBest # works
 </pre>
 
 h4. Functions
 
-C functions are automatically available as methods of the +Object+ class. Inline functions, which are implemented in the framework header files, are also supported.
+C functions are available as methods of the +Object+ class. Inline functions, which are implemented in the framework header files, are also supported.
 
-As an example, the +CGMakePoint+ function can be used in Ruby.
+As an example, the +CGMakePoint+ function can be used in Ruby to create a +CGRect+ structure.
 
 <pre>
 pt = CGMakePoint(100, 200)
 'Hello'.drawAtPoint(pt, withFont: font)
 </pre>
 
-Note: most functions in the iOS SDK start by a capital letter. For those who have no argument, it is important to explicitely use parenthesis, to avoid the expression to be interpreted as a constant lookup.
+Note: most functions in the iOS SDK start by a capital letter. For those who accept no argument, it is important to explicitely use parentheses when calling them, in order to avoid the expression to be evaluated as a constant lookup.
 
 <pre>
-NSHomeDirectory   # raises NameError: uninitialized constant NSHomeDirectory
+NSHomeDirectory   # NameError: uninitialized constant NSHomeDirectory
 NSHomeDirectory() # works
 </pre>
 
@@ -284,14 +299,41 @@ unless data.writeToFile(path, options: mask, error: error_ptr)
   # De-reference the pointer.
   error = error_ptr[0]
 
-  # Now we use the error object.
+  # Now we can use the `error' object.
   $stderr.puts "Error when writing data: #{error}"
 end
 </pre>
 
-h4. Function Pointers and Blocks
+In the case above, we need a pointer to an object. +Pointer.new+ can also be used to create pointers to various types, including the basic C types, but also structures. 
 
-h4. Variable Arguments
++Pointer.new+ accepts either a +String+, which should be one of the "Objective-C runtime types":http://developer.apple.com/library/ios/#documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html, or a +Symbol+, which should be a shortcut. We recommend the use of shortcuts.
+
+Following is a table summarizing the pointers one can create.
+
+|_<. C Type Pointer |_<. Runtime Type String |_<. Shortcut Symbol |
+| +id * + | +'@'+ | +:object+ |
+| +char * + | +'c'+ | +:char+ |
+| +unsigned char * + | +'C'+ | +:uchar+ |
+| +short * + | +'s'+ | +:short+ |
+| +unsigned short * + | +'s'+ | +:ushort+ |
+| +int * + | +'i'+ | +:int+ |
+| +unsigned int * + | +'I'+ | +:uint+ |
+| +long * + | +'l'+ | +:long+ |
+| +unsigned long * + | +'L'+ | +:ulong+ |
+| +long long * + | +'q'+ | +:long_long+ |
+| +unsigned long long * + | +'Q'+ | +:ulong_long+ |
+| +float * + | +'f'+ | +:float+ |
+| +double * + | +'d'+ | +:double+ |
+
+RubyMotion supports the creation of structure pointers, by passing their runtime type accordingly to +Pointer.new+, which can be retrieved by sending the +type+ message to the structure class in question. For instance, the following snippet creates a pointer to a +CGRect+ structure.
+
+<pre>
+rect_ptr = Pointer.new(CGRect.type)
+</pre>
+
+Pointers to C characters, also called C strings, are automatically converted from and to +String+ objects by RubyMotion.
+
+h4. Function Pointers and Blocks
 
 h3. Memory Management
 
