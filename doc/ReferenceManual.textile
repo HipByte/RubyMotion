@@ -4,7 +4,7 @@ h2. Abstract
 
 This is the RubyMotion reference manual. It documents the latest available version of RubyMotion. This manual closely follows changes in RubyMotion, and it should always be up-to-date.
 
-This is an exaustive manual that covers all the technical aspects of RubyMotion that you need to be aware of in order to develop applications with it. It is not meant to be a guide or a tutorial. Tutorials are available from the same documentation center.
+This is an exaustive manual that covers all the technical aspects of RubyMotion that the developer needs to be aware of in order to develop applications with it. It is not meant to be a guide or a tutorial. Tutorials are available from the same documentation center.
 
 Basic knowledge of the Ruby language and programming concepts are required for this guide.
 
@@ -24,7 +24,7 @@ Conceptually, RubyMotion is a combination of three modules:
 
 h3. Installation
 
-An evaluation version of RubyMotion can be downloaded from "http://rubymotion.com":http://rubymotion.com. This version allows you to create and build projects, and run them through the iOS simulator.
+An evaluation version of RubyMotion can be downloaded from "http://rubymotion.com":http://rubymotion.com. This version can create and build projects, and run them through the iOS simulator.
 
 A license must be purchased in order to build projects for iOS hardware. This is needed for applications to be tested on device and submitted to the App Store.
 
@@ -40,7 +40,7 @@ $ sudo motion update
 
 This command will grab the latest version of RubyMotion from the network and install it. You must be connected to the Internet to perform that command.
 
-You can always see the version number of the version of RubyMotion installed on your computer.
+You can always see the version number of the version of RubyMotion installed on the computer.
 
 <pre>
 $ motion -v
@@ -69,29 +69,67 @@ In RubyMotion, Ruby classes, methods and objects are respectively Objective-C cl
 
 By sharing the same object model infrastructure, Objective-C and RubyMotion APIs can be interchangeable at no additional performance expense.
 
+h4. Objective-C Messages
+
+RubyMotion lets the developer send and define Objective-C messages.
+
+An Objective-C message, also called a selector, can look different than a typical Ruby message, if it contains more than one argument.
+
+Unlike Ruby messages, Objective-C messages contain keywords. Each argument has a keyword associated to it, and the final Objective-C message is the combination of all keywords.
+
+Let's take the following piece of Objective-C code which draws a string.
+
+<pre>
+[string drawAtPoint:point withFont:font];
+</pre>
+
+In this code, +string+, +point+ and +font+ are variables. The message keywords are +drawAtPoint:+ and +withFont:+. The complete message is +drawAtPoint:withFont:+ , which is sent to the +string+ object, passing the +point+ and +font+ arguments.
+
+Objective-C messages can be sent from RubyMotion using a similar syntax.
+
+<pre>
+string.drawAtPoint(point, withFont: font)
+</pre>
+
+It is important to keep in mind that the message being sent here is +drawAtPoint:withFont:+. To illustrate more, the same message can be manually dispatched using the +send+ method.
+
+<pre>
+string.send(:'drawAtPoint:withFont:', point, font)
+</pre>
+
+Objective-C messages can also be defined in RubyMotion. Let's imagine we are building a class that should act as a proxy for our drawing code. The following piece of code defines the +drawAtPoint:withFont:+ message on the +DrawingProxy+ class.
+
+<pre>
+class DrawingProxy
+  def drawAtPoint(point, withFont: font)
+    @str.drawAtPoint(point, withFont:font)
+  end
+end
+</pre>
+
+The syntax used to define Objective-C selectors was added to RubyMotion and is not part of the Ruby standard.
+
 h3. Builtin Classes
 
-The builtin classes of RubyMotion are based on the "Foundation framework":http://developer.apple.com/library/ios/#documentation/Cocoa/Reference/Foundation/ObjC_classic/_index.html, the base layer of iOS.
+Some of the builtin classes of RubyMotion are based on the "Foundation framework":http://developer.apple.com/library/ios/#documentation/Cocoa/Reference/Foundation/ObjC_classic/_index.html, the base layer of iOS.
 
 The Foundation framework is an Objective-C framework, but due to the fact that RubyMotion is based on the Objective-C runtime, the classes that it defines can be naturally re-used in RubyMotion.
 
-Foundation exports the root object class +NSObject+, which is also used in RubyMotion as the root class of all classes. +Object+ is an alias to +NSObject+.
+Foundation class names typically start with the +NS+ prefix, which arguably stands for NeXTSTEP, the system for which the framework was originally built.
 
-<pre>
-class Hello; end
-Hello.ancestors	# => [Hello, NSObject, Kernel]
-</pre>
+Foundation comes with the root object class, +NSObject+, as well as a set of primitive object classes. In RubyMotion, +Object+ is an alias to +NSObject+, making +NSObject+ the root class of all Ruby classes. Also, some of the builtin classes inherit from Foundation types.
 
-Foundation also provides a set of primitive object classes, which are used as the base of Ruby builtin classes.
+Here is a table showing the ancestors chain of a newly created class, +Hello+, as well as some of the Ruby builtin classes.
 
-|_<. Ruby Class |_<. Subclass of |
-| +String+ | +NSMutableString+ (mutable version of +NSString+) |
-| +Array+ | +NSMutableArray+ (mutable version of +NSArray+) |
-| +Hash+ | +NSMutableDictionary+ (mutable version of +NSDictionary+) |
-| +Numeric+ | +NSNumber+ |
-| +Time+ | +NSDate+ |
+|_<. Ruby Class |_<. Ancestors |
+| +Hello+ | +NSObject+, +Kernel+ |
+| +String+ | +NSMutableString+, +NSString+, +Comparable+, +NSObject+, +Kernel+ |
+| +Array+ | +NSMutableArray+, +NSArray+, +Enumerable+, +NSObject+, +Kernel+ |
+| +Hash+ | +NSMutableDictionary+, +NSDictionary+, +Enumerable+, +NSObject+, +Kernel+ |
+| +Numeric+ | +Comparable+, +NSNumber+, +NSValue+, +NSObject+, +Kernel+ |
+| +Time+ | +Comparable+, +NSDate+, +NSObject+, +Kernel+ |
 
-A consequence of hosting the Ruby builtin classes on Foundation is that instances respond to more messages. For instance, the +NSString+ class defines the +-uppercaseString+ method. Since the +String+ class is a subclass of +NSString+, strings created in Ruby also respond to that method.
+A direct consequence of hosting the Ruby builtin classes on Foundation is that instances respond to more messages. For instance, the +NSString+ class defines the +uppercaseString+ method. Since the +String+ class is a subclass of +NSString+, strings created in Ruby also respond to that method.
 
 <pre>
 'hello'.uppercaseString # => 'HELLO
@@ -108,7 +146,7 @@ iterate [42]
 iterate NSArray.arrayWithObject(42)
 </pre>
 
-But the main purpose of this design is to allow the exchange of primitive types between Objective-C and Ruby at no cost, since they don't have to be converted. This is important as most of the types going to be exchanged in a typical application will likely be builtin types. As an example, a +String+ object created in Ruby can have its memory address passed as the argument of an Objective-C method that expects an +NSString+.
+But the main purpose of this design is to allow the exchange of primitive types between Objective-C and Ruby at no performance cost, since they don't have to be converted. This is important as most of the types that will be exchanged in a typical application are likely going to be builtin types. A +String+ object created in Ruby can have its memory address passed as the argument of an Objective-C method that expects an +NSString+.
 
 h4. Mutability
 
@@ -123,46 +161,179 @@ NSString.new.strip!           # raises RuntimeError: can't modify frozen/immutab
 NSMutableString.new.strip!    # works
 </pre>
 
-Strings created in RubyMotion inherit from +NSMutableString+, so they can be modified. The same goes for arrays and hashes.
+Strings created in RubyMotion inherit from +NSMutableString+, so they can be modifiedby default. The same goes for arrays and hashes.
 
-However, the developer must be careful that it is very common in iOS SDK APIs to return immutable types. In these cases, the +dup+ or +mutableCopy+ messages can be sent to the object in order to get a mutable version of it, that can be modified.
+However, the developer must be careful that it is very common for iOS SDK APIs to return immutable types. In these cases, the +dup+ or +mutableCopy+ messages can be sent to the object in order to get a mutable version of it, that can be modified later on.
+
+h3. Interfacing with C
+
+Objective-C is a superset of the C language. Objective-C methods can therefore accept and return C types.
+
+Also, while Objective-C is the main programming language used in the iOS SDK, some frameworks are only available in C APIs.
+
+RubyMotion comes with an interface that allows Ruby to deal with the C part of APIs. This support is automatic; the developer just needs to provide the list of libraries or frameworks that will be used in the project.
+
+h4. Basic Types
+
+Basic C types cannot be created from Ruby directly, but are automatically converted to equivalent Ruby types. 
+
+An equivalent Ruby type is returned from APIs returning basic C types, and equivalent Ruby types can be passed as arguments to APIs expecting basic C types.
+
+In the following piece of code, the +initWithInt:+ message, expecting a C +int+, is sent, passing a +Fixnum+. After, the +intValue+ message, returning a C +int+, is performed, and a +Fixnum+ is returned back.
+
+<pre>
+number = NSNumber.alloc.initWithInt(42)
+number.intValue # => 42
+</pre>
+
+The following table describes all basic C types and how they integrate in RubyMotion.
+
+|_<. C Type |_<. From Ruby to C |_<. From C to Ruby |
+| +bool+ |/2. If the object is +false+ or +nil+, +false+, otherwise, +true+. Note: the +0+ fixnum will evaluate to +true+. |/2. Either +true+ or +false+. |
+| +BOOL+ |||
+| +char+ |/5. If the object is a +Fixnum+ or a +Bignum+, the value is returned. If the object is +true+ or +false+, +1+ or +0+ are respectively returned. If the object responds to the +to_i+ message, it is sent and the result is returned.|/5. Either a +Fixnum+ or a +Bignum+ object.|
+| +short+ |||
+| +int+ |||
+| +long+ |||
+| +long_long+ |||
+| +float+ |/2. If the object is a +Float+, the value is returned. If the object is +true+ or +false+, +1.0+ or +0.0+ are respectively returned. If the object responds to the +to_f+ message, it is sent and the result is returned.|/2. A +Float+ object.|
+| +double+ |||
+
+When using an API that returns the +void+ C type, RubyMotion will return +nil+.
+
+h4. Structures
+
+C structures are mapped to classes in RubyMotion. Structures can be created in Ruby and passed to APIs expecting structures, either by value or reference. Similarly, APIs returning structures will return an instance of the appropriate structure class.
+
+Structure classes are automatically created by RubyMotion for the developer. A structure class has accessor methods for each field of the C structure it wraps.
+
+As an example, the following piece of code creates a +CGPoint+ structure, sets its +x+ and +y+ fields, then passes it to the +drawAtPoint:withFont:+ method.
+
+<pre>
+pt = CGPoint.new
+pt.x = 100
+pt.y = 200
+'Hello'.drawAtPoint(pt, withFont: font)
+</pre>
+
+It is possible to pass the field values directly to the constructor.
+
+<pre>
+pt = CGPoint.new(100, 200)
+'Hello'.drawAtPoint(pt, withFont: font)
+</pre>
+
+RubyMotion will also accept arrays as a convenience. They must contain the same number and type of objects expected in the structure.
+
+<pre>
+'Hello'.drawAtPoint([100, 200], withFont: font)
+</pre>
+
+h4. Enumerations and Constants
+
+C enumerations and constants are mapped as constants of the +Object+ class.
+
+For instance, both +NSNotFound+ and +CGRectNull+, respectively an enumeration and a constant, are available in Ruby.
+
+Note: some enumerations or constants start with a lower case letter in C. In Ruby, constant names must always start with a capital letter, so the case must be corrected accordingly in the Ruby code.
+
+As an example, the +kABPersonEmailProperty+ constant defined in the AddressBook framework must be accessed as +KABPersonEmailProperty+ in Ruby.
+
+<pre>
+kABPersonEmailProperty # not good
+KABPersonEmailProperty # good
+</pre>
+
+h4. Functions
+
+C functions are automatically available as methods of the +Object+ class. Inline functions, which are implemented in the framework header files, are also supported.
+
+As an example, the +CGMakePoint+ function can be used in Ruby.
+
+<pre>
+pt = CGMakePoint(100, 200)
+'Hello'.drawAtPoint(pt, withFont: font)
+</pre>
+
+Note: most functions in the iOS SDK start by a capital letter. For those who have no argument, it is important to explicitely use parenthesis, to avoid the expression to be interpreted as a constant lookup.
+
+<pre>
+NSHomeDirectory   # raises NameError: uninitialized constant NSHomeDirectory
+NSHomeDirectory() # works
+</pre>
+
+h4. Pointers
+
+Pointers are a very basic data type of C. Conceptually, a pointer is a memory address that can point to an object.
+
+In the iOS SDK, pointers are typically used as arguments to return objects by reference. As an example, the +error+ argument of this +NSData+ method expects a pointer that will be set to an +NSError+ object in case of failure.
+
+<pre>
+- (BOOL)writeToFile:(NSString *)path options:(NSDataWritingOptions)mask error:(NSError **)errorPtr
+</pre>
+
+RubyMotion introduces the +Pointer+ class in order to create and manipulate pointers. The type of the pointer to create must be provided in the +new+ constructor. A pointer instance responds to +[]+ to dereference its memory address, and +[]=+ to assign it to a new value.
+
+The +NSData+ method above can be used like this in Ruby.
+
+<pre>
+# Create a new pointer to the object type.
+error_ptr = Pointer.new(:object)
+
+unless data.writeToFile(path, options: mask, error: error_ptr)
+  # De-reference the pointer.
+  error = error_ptr[0]
+
+  # Now we use the error object.
+  $stderr.puts "Error when writing data: #{error}"
+end
+</pre>
+
+h4. Function Pointers and Blocks
+
+h4. Variable Arguments
 
 h3. Memory Management
 
 RubyMotion provides automatic memory management; the developer does not need to reclaim unused objects.
 
-Since memory is limited on iOS hardware, the developer must be careful about not creating large object graphs.
+Since memory can be limited on iOS hardware, the developer must be careful about not creating large object graphs.
 
 RubyMotion implements a form of garbage collection called reference counting. An object has an initial reference count of zero, is incremented when a reference to it is created, and decremented when a reference is destroyed. When the count reaches zero, the object's memory is reclaimed by the collector.
 
 Object cycles, when two or more objects refer to each other, are handled by the garbage collector.
 
-RubyMotion's memory management system is designed to simplify the development process. Unlike traditional Objective-C programming, object references are automatically created and destroyed by the system. Similarly, because object cycles will be garbage-collected, the developer does not need to keep in mind the entire object graph of his project and use weak references.
+RubyMotion's memory management system is designed to simplify the development process. Unlike traditional Objective-C programming, object references are automatically created and destroyed by the system. Similarly, because object cycles will be garbage-collected, the developer does not need to keep in mind the entire object graph of his project and accordingly use weak references.
+
+h4. Immediate Types
+
+The +Fixnum+ and +Float+ types in RubyMotion are immediates; they don't use memory resources to be created. The runtime uses a technique called "tagged pointers":http://en.wikipedia.org/wiki/Tagged_pointer to implement this.
+
+The ability to use these types without affecting the memory usage is important as a sizable part of a real-world app is spent in control drawing, which can make intensive use of arithmetic algorithms.
 
 h4. Objective-C Objects
 
 Objects created by Objective-C APIs are automatically managed by RubyMotion. There is no need to send the +retain+, +release+ or +autorelease+ messages to them.
 
-<pre>
-def dates
-  puts NSDate.alloc.init
-  puts NSDate.date
-end
+The following piece of code allocates two +NSDate+ objects using different constructions. In typical Objective-C, the returned objects would need to be differently managed. In RubyMotion, both objects will be entitled to garbage-collection.
 
-dates # both NSDate objects created above will be garbage-collected.
+<pre>
+date1 = NSDate.alloc.init
+date2 = NSDate.date
 </pre>
 
 h4. CoreFoundation Objects
 
-Objects created by CoreFoundation-style APIs must be explicitely destroyed by the developer, by calling the +CFRelease()+ function. RubyMotion will not garbage-collect them otherwise.
+Objects created by CoreFoundation-style APIs must be explicitely released by the developer, by using the +CFRelease()+ function. RubyMotion will not garbage-collect them otherwise.
 
 <pre>
 attributed_string = CFAttributedStringCreate(nil, 'Hello World', {})
 do_something(attributed_string)
 
-# At this point, the CFAttributedString object is leaking, we need to manually destroy it.
+# At this point, attributed_string is leaking, we need to manually release it.
 CFRelease(attributed_string)
-attributed_string = nil
+
+# Now, attributed_string is entitled to garbage-collection.
 </pre>
 
 h3. Concurrency
@@ -173,7 +344,7 @@ RubyMotion has the concept of virtual machine objects, which wrap the state of a
 
 Virtual machines don't have locks, and there can be multiple virtual machines running at the same time, concurrently.
 
-Unlike some Ruby implementations, race conditions are possible in RubyMotion, since there is no Global Interpreter Lock (GIL) to prohibit threads from running concurrently. The developer must be careful to secure concurrent access to shared resources.
+Unlike some Ruby implementations, race conditions are possible in RubyMotion, since there is no "Global Interpreter Lock":http://en.wikipedia.org/wiki/Global_Interpreter_Lock (GIL) to prohibit threads from running concurrently. The developer must be careful to secure concurrent access to shared resources.
 
 Different options are available to write concurrent code in RubyMotion.
 
@@ -186,12 +357,6 @@ h4. Grand Central Dispatch
 RubyMotion wraps the "Grand Central Dispatch":http://developer.apple.com/library/ios/#documentation/Performance/Reference/GCD_libdispatch_Ref/Reference/reference.html (GCD) concurrency library under the +Dispatch+ module. It is possible to execute both synchronously and asynchronously blocks of code under concurrent or serial queues.
 
 Albeit more complicated to comprehend than regular threads, sometimes GCD offers a more elegant way to run code concurrently. GCD maintains for the developer a pool of threads and its APIs are architectured to avoid the need to use mutexes.
-
-== h2. Using the iOS SDK==
-== h3. Objective-C APIs==
-== h3. C APIs==
-== h3. Pointers==
-== h3. Blocks==
 
 h2. Project Management
 
@@ -252,7 +417,7 @@ The +rake build+ task builds the project into the temporary +build+ directory. T
 The following steps are performed:
 
 # It compiles each Ruby source code file into optimized machine code, translating the Ruby syntax tree into an intermediate representation language (using "LLVM":http://llvm.org/), then assembly. The compiler will generate code for either the Intel 32-bit (+i386+) or ARM (+armv6+, +armv7+) instruction sets and ABIs depending on the target.
-# It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that your project uses.
+# It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that the project uses.
 # It creates an +.app+ bundle and copies the executable there. The +Info.plist+ file is generated based on the project configuration. Each resource file in the +resources+ directory is copied in the bundle.
 # It codesigns the bundle based on the certificate and provisioning profile specified in the project configuration.
 
