@@ -278,11 +278,13 @@ a:hover, a:focus {
 }
 
 pre, code {
-  margin: 1.5em 0;
   overflow: auto;
   color: #222;
   background: #EEE;
-  padding: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 6px;
+  padding-bottom: 6px;
   border: 1px solid #CCC;
 }
 
@@ -312,6 +314,7 @@ table th, table td {
 }
 
 table th {
+  font-size: 15px;
   background: #EEE;
   font-weight: bold;
   padding: 0.5em 1em;
@@ -391,7 +394,7 @@ task :all => [:guides, :docset]
 task :guides do
   Dir.glob('*.textile').each do |src|
     dest = File.basename(src, '.textile') + '.html'
-    if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
+    if !File.exist?(dest) or File.mtime(src) > File.mtime(dest) or File.mtime(__FILE__) > File.mtime(dest)
       GuideGenerator.new(src, dest).run
     end 
   end
