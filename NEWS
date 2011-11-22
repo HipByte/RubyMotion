@@ -1,6 +1,11 @@
+= RubyMotion 0.20 =
+
+  * Fix misc GC bugs.
+  * Add tweets sample code.
+  * Add reference manual (doc/ReferenceManual.html).
+
 = RubyMotion 0.19 =
 
   * Add support for app icons. Icon files can be created and copied into the
     resources directory, then their filenames can be added to app.icons.
-
   * Validate given sdk_version config variable.
