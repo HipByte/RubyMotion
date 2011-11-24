@@ -1,45 +1,57 @@
-class Tweet
+class Tweet  
   def initialize(dict)
     @author = NSString.alloc.initWithString(dict['from_user_name']) # workaround gc bug
     @message = NSString.alloc.initWithString(dict['text']) # workaround gc bug
     @profile_image_url = NSString.alloc.initWithString(dict['profile_image_url']) # workaround gc bug
     @profile_image = nil
   end
-
-  def load_profile_picture(table_view, row)
-    Dispatch::Queue.concurrent.async do
-      profile_image_data = NSData.alloc.initWithContentsOfURL(NSURL.URLWithString(@profile_image_url))
-      if profile_image_data
-        Dispatch::Queue.main.sync do
-          @profile_image = UIImage.alloc.initWithData(profile_image_data)
-          index_path = NSIndexPath.indexPathForRow(row, inSection:0)
-          table_view.reloadRowsAtIndexPaths([index_path], withRowAnimation:false)
-        end
-      end
-    end
-  end
-
-  def height(table_view)
-    @height ||= begin
-      constrain = CGSize.new(table_view.frame.size.width - 57, 1000)
-      size = @message.sizeWithFont(UIFont.systemFontOfSize(14), constrainedToSize:constrain)
-      [57, size.height + 8].max
-    end
-  end
-
-  def prepareCell(cell)
-    cell.imageView.image = @profile_image
-    cell.textLabel.text = @message
-  end
+ 
+  attr_reader :author, :message, :profile_image_url
+  attr_accessor :profile_image
 end
 
 class TweetCell < UITableViewCell
+  CellID = 'CellIdentifier'
+  MessageFontSize = 14
+
+  def self.cellForTweet(tweet, inTableView:tableView)
+    cell = tableView.dequeueReusableCellWithIdentifier(TweetCell::CellID) || TweetCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:CellID)
+    cell.fillWithTweet(tweet, inTableView:tableView)
+    cell
+  end
+ 
   def initWithStyle(style, reuseIdentifier:cellid)
     if super
       self.textLabel.numberOfLines = 0
-      self.textLabel.font = UIFont.systemFontOfSize(14)
+      self.textLabel.font = UIFont.systemFontOfSize(MessageFontSize)
     end
     self
+  end
+ 
+  def fillWithTweet(tweet, inTableView:tableView)
+    self.textLabel.text = tweet.message
+    
+    unless tweet.profile_image
+      self.imageView.image = nil
+      Dispatch::Queue.concurrent.async do
+        profile_image_data = NSData.alloc.initWithContentsOfURL(NSURL.URLWithString(tweet.profile_image_url))
+        if profile_image_data
+          tweet.profile_image = UIImage.alloc.initWithData(profile_image_data)
+          Dispatch::Queue.main.sync do
+            self.imageView.image = tweet.profile_image
+            tableView.delegate.reloadRowForTweet(tweet)
+          end
+        end
+      end
+    else
+      self.imageView.image = tweet.profile_image
+    end
+  end
+
+  def self.heightForTweet(tweet, width)
+    constrain = CGSize.new(width - 57, 1000)
+    size = tweet.message.sizeWithFont(UIFont.systemFontOfSize(MessageFontSize), constrainedToSize:constrain)
+    [57, size.height + 8].max
   end
 
   def layoutSubviews
@@ -99,9 +111,6 @@ class TweetsController < UITableViewController
 
   def load_tweets(tweets)
     @tweets = tweets
-    @tweets.each_with_index do |tweet, idx|
-      tweet.load_profile_picture(self.view, idx)
-    end
     view.reloadData
   end
  
@@ -115,16 +124,19 @@ class TweetsController < UITableViewController
   end
 
   def tableView(tableView, heightForRowAtIndexPath:indexPath)
-    @tweets[indexPath.row].height(tableView)
+    TweetCell.heightForTweet(@tweets[indexPath.row], tableView.frame.size.width)
   end
 
-  CellID = 'CellIdentifier'
   def tableView(tableView, cellForRowAtIndexPath:indexPath)
-    cell = tableView.dequeueReusableCellWithIdentifier(CellID) || TweetCell.alloc.initWithStyle(UITableViewCellStyleDefault, reuseIdentifier:CellID)
-
     tweet = @tweets[indexPath.row]
-    tweet.prepareCell(cell)
-    return cell
+    TweetCell.cellForTweet(tweet, inTableView:tableView)
+  end
+  
+  def reloadRowForTweet(tweet)
+    row = @tweets.index(tweet)
+    if row
+      view.reloadRowsAtIndexPaths([NSIndexPath.indexPathForRow(row, inSection:0)], withRowAnimation:false)
+    end
   end
 end
 
