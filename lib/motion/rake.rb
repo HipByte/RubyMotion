@@ -31,8 +31,8 @@ task :simulator => ['build:simulator'] do
   sh "#{sim} #{debug} #{family} #{sdk_version} \"#{app}\""
 end
 
-desc "Create an .ipa package"
-task :package => ['build:ios'] do
+desc "Create an .ipa archive"
+task :archive => ['build:ios'] do
   tmp = "/tmp/ipa_root"
   sh "/bin/rm -rf #{tmp}"
   sh "/bin/mkdir -p #{tmp}/Payload"
@@ -45,7 +45,7 @@ task :package => ['build:ios'] do
 end
 
 desc "Deploy on the device"
-task :deploy => :package do
+task :deploy => :archive do
   deploy = File.join(Motion::App.config.bindir, 'deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   sh "#{deploy} #{flags} \"#{Motion::App.config.archive}\""
