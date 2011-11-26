@@ -30,7 +30,7 @@ module Motion
       end
 
       objs = []
-      objs_build_dir = File.join(build_dir, 'objs')
+      objs_build_dir = File.join(build_dir, config.sdk_version + '-sdk-objs')
       FileUtils.mkdir_p(objs_build_dir)
       project_file_changed = File.mtime(config.project_file) > File.mtime(objs_build_dir)
       config.ordered_build_files.each do |path|
@@ -140,7 +140,7 @@ EOS
       end
 
       # Prepare bundle.
-      bundle_path = File.join(build_dir, config.name + '.app')
+      bundle_path = config.app_bundle(platform)
       FileUtils.mkdir_p(bundle_path)
 
       # Link executable.
