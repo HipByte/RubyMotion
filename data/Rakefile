@@ -27,7 +27,7 @@ task :vm_files do
 end
 
 task :bridgesupport_files do
-  frameworks = %w{UIKit Foundation CoreGraphics QuartzCore CoreLocation MapKit AddressBook OpenGLES AVFoundation}
+  frameworks = %w{UIKit Foundation CoreGraphics QuartzCore CoreLocation MapKit AddressBook OpenGLES AVFoundation QuickLook}
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
   SDK_VERSIONS.each do |sdk_version|
     sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
