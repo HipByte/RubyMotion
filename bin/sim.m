@@ -62,8 +62,12 @@ sigforwarder(int sig)
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(), @"_simgdbcmds",
 	    nil]];
 	//if (![[NSFileManager defaultManager] fileExistsAtPath:cmds_path]) {
+	    NSString *cmds = @"set breakpoint pending on\nbreak rb_exc_raise\n";
+	    if (getenv("no_continue") == NULL) {
+		cmds = [cmds stringByAppendingString:@"continue\n"];
+	    }
 	    NSError *error = nil;
-	    if (![@"set breakpoint pending on\nbreak rb_exc_raise\ncontinue\n" writeToFile:cmds_path atomically:YES
+	    if (![cmds writeToFile:cmds_path atomically:YES
 		    encoding:NSASCIIStringEncoding error:&error]) {
 		fprintf(stderr,
 			"can't write gdb commands file into path %s: %s\n",

@@ -1,3 +1,10 @@
+= RubyMotion 0.22 =
+
+  * Add the `no_continue' environment variable for `rake sim debug=1'.
+  * Fix a bug when retrieving some C constants (wrong pointer dereferencing).
+  * Fix a couple bugs when compiling setter methods (/^set[A-Z]/).
+  * Add support for QuickLook.framework.
+
 = RubyMotion 0.21 =
 
   * Rename the `package' rake task to `archive'.
