@@ -335,6 +335,8 @@ Pointers to C characters, also called C strings, are automatically converted fro
 
 h4. Function Pointers and Blocks
 
+TBD
+
 h3. Memory Management
 
 RubyMotion provides automatic memory management; the developer does not need to reclaim unused objects.
@@ -419,6 +421,7 @@ The following table explains the anatomy of a project directory.
 |+Rakefile+ | This file contains the configuration of the project, as well as a default set of tasks. It can be edited to change the configuration or add new tasks. |
 | +app/+ | This directory contains the Ruby code of the project. In a new project, a +main.rb+ file is created automatically. |
 | +resources/+ | This directory contains the resources files of the project, such as images or sounds. In a new project, this directory is empty. |
+| +vendor/+ | This directory contains the source code of 3rd-party libraries that your project uses. In a new project, this directory is empty. |
 
 h3. Configuration
 
@@ -432,6 +435,7 @@ The +rake config+ task will dump the project configuration. Each configuration v
 |+frameworks+ | iOS frameworks to link against, as an +Array+. The default value is +['UIKit', 'Foundation', 'CoreGraphics']+. |
 |+build_dir+ | Directory for build products, as a +String+. The directory will be created by the build system if it does not exist yet. The default value is +'build'+.|
 |+resources_dir+ | Directory for resources files, as a +String+. The default value is +'resources'+. |
+|+vendor_dir+ | Directory for 3rd-party libraries, as a +String+. The default value is +'vendor'+. |
 |+icons+ | List of resource files to use for icons, as an +Array+. The files must conform to the "HIG guidelines":http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html. The default value is +[]+, an empty array. |
 |+device_family+ | Family of devices to support. Possible values can be: +iphone+, +ipad+ or +[:iphone, :ipad]+ (for a universal application). The default value is +:iphone+.|
 |+interface_orientations+ | Supported interface orientations. Value must be an +Array+ of one or more of the following symbols: +:portrait+, +:landscape_left+, :+landscape_right+:, and +:portrait_upside_down+. The default value is +[:portrait, :landscape_left, :landscape_right]+. |
@@ -452,6 +456,19 @@ Motion::App.setup do |app|
 end
 </pre>
 
+h3. Vendoring
+
+The iOS SDK has a significant amount of functionality built-in that one can use from a RubyMotion project, however, sometimes a developer will need to use a 3rd-party library that implements a missing feature of iOS.
+
+In order to use a 3rd-party library in a RubyMotion project, the following steps must be observed.
+
+# The library must be copied into its own directory inside the +vendor+ directory.
+# The library directory must have a +Rakefile+ that responds to both +iphoneos+ and +iphonesimulator+ tasks. These tasks are responsible for building the source code of the library for the respective platform, and copy the resulted +.a+ static library archive into the relative +build+ directory, under a sub-directory named after the platform. For example, the iPhoneOS +foo.a+ library should be in +build/iPhoneOS/foo.a+, while the iPhoneSimulator one should be in +build/iPhoneSimulator/foo.a+.
+
+The RubyMotion build system will take care of building each 3rd-party library in +vendor+ and link the code into the application's executable.
+
+As vendoring Xcode-based projects is common, RubyMotion comes with a default +Rakefile+ that does most of the work. _TODO_
+
 h3. Build
 
 The +rake build+ task builds the project into the temporary +build+ directory. Two different versions of the project will be built, one to run in the iOS simulator (on the Mac itself) and one to run on the iOS device.
@@ -459,7 +476,7 @@ The +rake build+ task builds the project into the temporary +build+ directory. T
 The following steps are performed:
 
 # It compiles each Ruby source code file into optimized machine code, translating the Ruby syntax tree into an intermediate representation language (using "LLVM":http://llvm.org/), then assembly. The compiler will generate code for either the Intel 32-bit (+i386+) or ARM (+armv6+, +armv7+) instruction sets and ABIs depending on the target.
-# It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that the project uses.
+# It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that the project uses, as well as 3rd-party libraries present in the +vendor+ directory.
 # It creates an +.app+ bundle and copies the executable there. The +Info.plist+ file is generated based on the project configuration. Each resource file in the +resources+ directory is copied in the bundle.
 # It codesigns the bundle based on the certificate and provisioning profile specified in the project configuration.
 
