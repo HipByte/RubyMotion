@@ -21,14 +21,30 @@ module Motion
       build_dir = File.join(config.build_dir, platform)
   
       # Prepare the list of BridgeSupport files needed. 
-      bs_flags = ''
+      bs_files = []
       config.frameworks.each do |framework|
         bs_path = File.join(datadir, 'BridgeSupport', framework + '.bridgesupport')
         if File.exist?(bs_path)
-          bs_flags << "--uses-bs \"" + bs_path + "\" "
+          bs_files << bs_path
         end
       end
 
+      # Build vendor libraries.
+      vendor_libs = []
+      Dir.glob(File.join(config.vendor_dir, '*')).each do |vendor_lib|
+        platform_task = platform.downcase
+        Dir.chdir(vendor_lib) do
+          sh "rake #{platform_task}"
+          Dir.glob(File.join('build', platform, '*.a')).each do |path|
+            vendor_libs << File.expand_path(path)
+          end
+          Dir.glob('*.bridgesupport').each do |path|
+            bs_files << File.expand_path(path)
+          end
+        end
+      end
+
+      # Build object files.
       objs = []
       objs_build_dir = File.join(build_dir, config.sdk_version + '-sdk-objs')
       FileUtils.mkdir_p(objs_build_dir)
@@ -57,6 +73,7 @@ module Motion
           FileUtils.mkdir_p(File.dirname(bc))
 
           # LLVM bitcode.
+          bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
           sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
  
           # Assembly.
@@ -152,7 +169,7 @@ EOS
         stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
         framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
       end
-      sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks}"
+      sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
 
       # Create bundle/Info.plist.
       bundle_info_plist = File.join(bundle_path, 'Info.plist')

@@ -23,7 +23,7 @@ module Motion
     end
 
     variable :files, :platforms_dir, :sdk_version, :frameworks,
-      :delegate_class, :name, :build_dir, :resources_dir,
+      :delegate_class, :name, :build_dir, :resources_dir, :vendor_dir,
       :codesign_certificate, :provisioning_profile, :device_family,
       :interface_orientations, :version, :icons
 
@@ -37,6 +37,7 @@ module Motion
       @name = 'My App'
       @build_dir = File.join(project_dir, 'build')
       @resources_dir = File.join(project_dir, 'resources')
+      @vendor_dir = File.join(project_dir, 'vendor')
       @device_family = :iphone
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
