@@ -27,19 +27,27 @@ targets = %w{vm bin lib data doc}
 
 task :default => :all
 desc "Build everything"
-task :all => targets
+task :all => :build
 
 targets.each do |target|
   desc "Build target #{target}"
-  task target do
+  task "build:#{target}" do
     rake(target)
   end
 end
 
-desc "Clean all targets"
-task :clean do
-  targets.each { |target| rake(target, 'clean') }
+desc "Build all targets"
+task :build => targets.map { |x| "build:#{x}" }
+
+targets.each do |target|
+  desc "Clean target #{target}"
+  task "clean:#{target}" do
+    rake(target, 'clean')
+  end
 end
+
+desc "Clean all targets"
+task :clean => targets.map { |x| "clean:#{x}" }
 
 desc "Generate source code archive"
 task :archive do
