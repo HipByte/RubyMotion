@@ -1,3 +1,8 @@
+= RubyMotion 0.23 =
+
+  * Add basic support for vendor libraries. See doc/ReferenceManual.html for
+    how it works.
+
 = RubyMotion 0.22 =
 
   * Add the `no_continue' environment variable for `rake sim debug=1'.
