@@ -107,7 +107,11 @@ class DrawingProxy
 end
 </pre>
 
-The syntax used to define Objective-C selectors was added to RubyMotion and is not part of the Ruby standard.
+Note: The syntax used to define Objective-C selectors was added to RubyMotion and is not part of the Ruby standard.
+
+h4. Reading Objective-C Interfaces
+
+TBD
 
 h3. Builtin Classes
 
