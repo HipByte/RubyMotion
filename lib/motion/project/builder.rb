@@ -1,4 +1,4 @@
-module Motion
+module Motion; module Project;
   class Builder
     include Rake::DSL if Rake.const_defined?(:DSL)
 
@@ -235,4 +235,4 @@ PLIST
       sh "CODESIGN_ALLOCATE=\"#{codesign_allocate}\" /usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{bundle_path}\""
     end
   end
-end
+end; end

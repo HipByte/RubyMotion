@@ -1,12 +1,12 @@
-module Motion
+module Motion; module Project
   class App
     class << self
       def config
-        @config ||= Motion::Config.new('.')
+        @config ||= Motion::Project::Config.new('.')
       end
 
       def builder
-        @builder ||= Motion::Builder.new
+        @builder ||= Motion::Project::Builder.new
       end
 
       def setup
@@ -23,4 +23,4 @@ module Motion
       end
     end
   end
-end
+end; end

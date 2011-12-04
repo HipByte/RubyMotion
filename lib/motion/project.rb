@@ -1,20 +1,22 @@
-require 'motion/rake/app'
-require 'motion/rake/config'
-require 'motion/rake/builder'
+require 'motion/project/app'
+require 'motion/project/config'
+require 'motion/project/builder'
 
 desc "Build the project, then run the simulator"
 task :default => :simulator
 
+App = Motion::Project::App
+
 namespace :build do
   desc "Build the simulator version"
   task :simulator do
-    Motion::App.build('iPhoneSimulator')
+    App.build('iPhoneSimulator')
   end
 
   desc "Build the iOS version"
   task :ios do
-    Motion::App.build('iPhoneOS')
-    Motion::App.codesign('iPhoneOS')
+    App.build('iPhoneOS')
+    App.codesign('iPhoneOS')
   end
 
   desc "Build everything"
@@ -23,11 +25,11 @@ end
 
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
-  sim = File.join(Motion::App.config.bindir, 'sim')
+  sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
-  app = Motion::App.config.app_bundle('iPhoneSimulator')
-  family = Motion::App.config.device_family_ints[0]
-  sdk_version = Motion::App.config.sdk_version
+  app = App.config.app_bundle('iPhoneSimulator')
+  family = App.config.device_family_ints[0]
+  sdk_version = App.config.sdk_version
   sh "#{sim} #{debug} #{family} #{sdk_version} \"#{app}\""
 end
 
@@ -36,29 +38,29 @@ task :archive => ['build:ios'] do
   tmp = "/tmp/ipa_root"
   sh "/bin/rm -rf #{tmp}"
   sh "/bin/mkdir -p #{tmp}/Payload"
-  sh "/bin/cp -r \"#{Motion::App.config.app_bundle('iPhoneOS')}\" #{tmp}/Payload"
+  sh "/bin/cp -r \"#{App.config.app_bundle('iPhoneOS')}\" #{tmp}/Payload"
   Dir.chdir(tmp) do
     sh "/bin/chmod -R 755 Payload"
     sh "/usr/bin/zip -q -r archive.zip Payload"
   end
-  sh "/bin/cp #{tmp}/archive.zip \"#{Motion::App.config.archive}\""
+  sh "/bin/cp #{tmp}/archive.zip \"#{App.config.archive}\""
 end
 
 desc "Deploy on the device"
 task :deploy => :archive do
-  deploy = File.join(Motion::App.config.bindir, 'deploy')
+  deploy = File.join(App.config.bindir, 'deploy')
   flags = Rake.application.options.trace ? '-d' : ''
-  sh "#{deploy} #{flags} \"#{Motion::App.config.archive}\""
+  sh "#{deploy} #{flags} \"#{App.config.archive}\""
 end
 
 desc "Clear build objects"
 task :clean do
-  rm_rf(Motion::App.config.build_dir)
+  rm_rf(App.config.build_dir)
 end
 
 desc "Show project config"
 task :config do
-  map = Motion::App.config.variables
+  map = App.config.variables
   map.keys.sort.each do |key|
     puts key.ljust(22) + " : #{map[key].inspect}"
   end

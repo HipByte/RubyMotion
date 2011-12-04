@@ -1,4 +1,4 @@
-module Motion
+module Motion; module Project
   class Config
     VARS = []
 
@@ -270,4 +270,4 @@ DATA
       end
     end
   end
-end
+end; end

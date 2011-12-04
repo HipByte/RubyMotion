@@ -38,9 +38,9 @@ class CreateCommand < Command
       File.open('Rakefile', 'w') do |io|
         io.puts <<EOS
 $:.unshift(\"#{$motion_libdir}\")
-require 'motion/rake'
+require 'motion/project'
 
-Motion::App.setup do |app|
+Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = '#{app_name}'
 end
