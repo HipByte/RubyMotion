@@ -166,7 +166,7 @@ EOS
 
       # Create bundle/Info.plist.
       bundle_info_plist = File.join(bundle_path, 'Info.plist')
-      File.open(bundle_info_plist, 'w') { |io| io.write(config.plist_data) }
+      File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data) }
       sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
 
       # Create bundle/PkgInfo.
@@ -225,7 +225,8 @@ PLIST
  
       # Do the codesigning.
       codesign_allocate = File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')
-      sh "CODESIGN_ALLOCATE=\"#{codesign_allocate}\" /usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{bundle_path}\""
+      entitlement_opt = File.exist?('Entitlements.plist') ? '--entitlements Entitlements.plist' : ''
+      sh "CODESIGN_ALLOCATE=\"#{codesign_allocate}\" /usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" #{entitlement_opt} \"#{bundle_path}\""
     end
   end
 end; end

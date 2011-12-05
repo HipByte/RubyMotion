@@ -1,3 +1,5 @@
+require 'motion/plist'
+
 module Motion; module Project
   class Config
     VARS = []
@@ -179,75 +181,30 @@ module Motion; module Project
       end
     end
 
-    def plist_data
-<<DATA
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>BuildMachineOSBuild</key>
-	<string>#{`sw_vers -buildVersion`.strip}</string>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
-	<key>CFBundleDisplayName</key>
-	<string>#{@name}</string>
-	<key>CFBundleExecutable</key>
-	<string>#{@name}</string>
-	<key>CFBundleIdentifier</key>
-	<string>#{@identifier}</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>#{@name}</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleResourceSpecification</key>
-	<string>ResourceRules.plist</string>
-	<key>CFBundleShortVersionString</key>
-	<string>#{@version}</string>
-	<key>CFBundleSignature</key>
-	<string>#{@bundle_signature}</string>
-	<key>CFBundleSupportedPlatforms</key>
-	<array>
-		<string>iPhoneOS</string>
-	</array>
-	<key>CFBundleVersion</key>
-	<string>#{@version}</string>
-	<key>DTCompiler</key>
-	<string>com.apple.compilers.llvmgcc42</string>
-	<key>DTPlatformBuild</key>
-	<string>8H7</string>
-	<key>DTPlatformName</key>
-	<string>iphoneos</string>
-	<key>DTPlatformVersion</key>
-	<string>#{sdk_version}</string>
-	<key>DTSDKBuild</key>
-	<string>8H7</string>
-	<key>DTSDKName</key>
-	<string>iphoneos#{sdk_version}</string>
-	<key>DTXcode</key>
-	<string>0402</string>
-	<key>DTXcodeBuild</key>
-	<string>4A2002a</string>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>MinimumOSVersion</key>
-	<string>#{sdk_version}</string>
-        <key>CFBundleIconFiles</key>
-        <array>
-                #{icons.map { |icon| '<string>' + icon + '</string>' }.join('')}
-        </array>
-	<key>UIDeviceFamily</key>
-	<array>
-		#{device_family_ints.map { |family| '<integer>' + family.to_s + '</integer>' }.join('')}
-	</array>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		#{interface_orientations_consts.map { |ori| '<string>' + ori + '</string>' }.join('')}
-	</array>
-</dict>
-</plist>
-DATA
+    def info_plist
+      @info_plist ||= {
+        'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
+        'MinimumOSVersion' => sdk_version,
+        'CFBundleDevelopmentRegion' => 'en',
+        'CFBundleName' => @name,
+        'CFBundleDisplayName' => @name,
+        'CFBundleExecutable' => @name, 
+        'CFBundleIdentifier' => @identifier,
+        'CFBundleInfoDictionaryVersion' => '6.0',
+        'CFBundlePackageType' => 'APPL',
+        'CFBundleResourceSpecification' => 'ResourceRules.plist',
+        'CFBundleShortVersionString' => @version,
+        'CFBundleSignature' => @bundle_signature,
+        'CFBundleSupportedPlatforms' => ['iPhoneOS'],
+        'CFBundleVersion' => @version,
+        'CFBundleIconFiles' => icons,
+        'UIDeviceFamily' => device_family_ints.map { |x| x.to_s },
+        'UISupportedInterfaceOrientations' => interface_orientations_consts
+      }
+    end
+
+    def info_plist_data
+      Motion::PropertyList.to_s(info_plist)
     end
 
     def pkginfo_data
