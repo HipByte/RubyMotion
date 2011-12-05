@@ -433,6 +433,7 @@ The +rake config+ task will dump the project configuration. Each configuration v
 |_<. Variable |_<. Discussion |
 |+name+ | Project name, as a +String+. The default value is the name passed to +motion create+. |
 |+version+ | Project version, as a +String+. The default value is +'1.0'+. |
+|+identifier+ | Project identifier, as a +String+, in reverse DNS format. The default value is the concatenation of +"com.yourcompany."+ and the +name+ variable. |
 |+delegate_class+ | Name of the application delegate class, as a +String+. The default value is +'AppDelegate'+ and the class is defined in +app/main.rb+.|
 |+files+ | Project files, as an +Array+. The default value is the result of the following expression: +Dir.glob('./app/**/*.rb')+ (every +.rb+ file in the +app+ directory). |
 |+frameworks+ | iOS frameworks to link against, as an +Array+. The default value is +['UIKit', 'Foundation', 'CoreGraphics']+. |
