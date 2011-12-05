@@ -1,35 +1,43 @@
+= RubyMotion 0.24 =
+
+  * Reorganized the rake interface. Existing projects should use
+    `motion/project' instead of `motion/rake', and use `Motion::Project::App'
+    instead of `Motion::App'.
+  * Refined support for vendor libraries. Updated doc/ReferenceManual.html.
+  * Added documentation about `files_dependencies' in doc/ReferenceManual.html.
+
 = RubyMotion 0.23 =
 
-  * Add basic support for vendor libraries. See doc/ReferenceManual.html for
+  * Added basic support for vendor libraries. See doc/ReferenceManual.html for
     how it works.
 
 = RubyMotion 0.22 =
 
-  * Add the `no_continue' environment variable for `rake sim debug=1'.
-  * Fix a bug when retrieving some C constants (wrong pointer dereferencing).
-  * Fix a couple bugs when compiling setter methods (/^set[A-Z]/).
-  * Add support for QuickLook.framework.
+  * Added the `no_continue' environment variable for `rake sim debug=1'.
+  * Fixed a bug when retrieving some C constants (wrong pointer dereferencing).
+  * Fixed a couple bugs when compiling setter methods (/^set[A-Z]/).
+  * Added support for QuickLook.framework.
 
 = RubyMotion 0.21 =
 
-  * Rename the `package' rake task to `archive'.
-  * Fix the build system to use a different build directory per SDK version.
-  * Add support for QuartzCore.framework.
-  * Fix a crash when attempting to freeze certain objects (associative
+  * Renamed the `package' rake task to `archive'.
+  * Fixed the build system to use a different build directory per SDK version.
+  * Added support for QuartzCore.framework.
+  * Fixed a crash when attempting to freeze certain objects (associative
     reference assertion).
   * Better tweets sample code (thanks Johannes Fahrenkrug).
-  * Add support for attr_*.
-  * Fix a crash when converting int64 CFNumbers into Ruby types.
+  * Added support for attr_*.
+  * Fixed a crash when converting int64 CFNumbers into Ruby types.
 
 = RubyMotion 0.20 =
 
-  * Fix misc GC bugs.
-  * Add tweets sample code.
-  * Add reference manual (doc/ReferenceManual.html).
+  * Fixed misc GC bugs.
+  * Added tweets sample code.
+  * Added reference manual (doc/ReferenceManual.html).
 
 = RubyMotion 0.19 =
 
-  * Add support for app icons. Icon files can be created and copied into the
+  * Added support for app icons. Icon files can be created and copied into the
     resources directory, then their filenames can be added to app.icons.
   * Validate given sdk_version config variable.
 
