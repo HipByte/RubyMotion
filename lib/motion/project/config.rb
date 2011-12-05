@@ -23,7 +23,7 @@ module Motion; module Project
     end
 
     variable :files, :platforms_dir, :sdk_version, :frameworks,
-      :delegate_class, :name, :build_dir, :resources_dir,
+      :delegate_class, :name, :build_dir, :resources_dir, :identifier,
       :codesign_certificate, :provisioning_profile, :device_family,
       :interface_orientations, :version, :icons
 
@@ -34,7 +34,7 @@ module Motion; module Project
       @platforms_dir = '/Developer/Platforms'
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @delegate_class = 'AppDelegate'
-      @name = 'My App'
+      @name = 'Untitled'
       @build_dir = File.join(project_dir, 'build')
       @resources_dir = File.join(project_dir, 'resources')
       @device_family = :iphone
@@ -148,6 +148,10 @@ module Motion; module Project
       File.join(@build_dir, @name + '.ipa')
     end
 
+    def identifier
+      @identifier ||= "com.yourcompany.#{@name.gsub(/\s/, '')}"
+    end
+
     def device_family_ints
       ary = @device_family.is_a?(Array) ? @device_family : [@device_family]
       ary.map do |family|
@@ -190,7 +194,7 @@ module Motion; module Project
 	<key>CFBundleExecutable</key>
 	<string>#{@name}</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.omgwtf.#{@name}</string>
+	<string>#{@identifier}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
