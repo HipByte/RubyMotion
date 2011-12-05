@@ -2,7 +2,9 @@
 
   * Updated doc/ReferenceManual.html to track the new changes and also to
     mention the `files_dependencies' config setting.
-  * Added the `identifier' config setting.
+  * Added the `info_plist' config setting, which exposes the Info.plist as
+    a Hash object that can be changed (for advanced settings).
+  * Added the `identifier' config setting, reverse DNS name for an app.
   * Reorganized the rake interface. Existing projects should migrate from
     `motion/rake' to `motion/project', and from `Motion::App' to
     `Motion::Project::App'.
