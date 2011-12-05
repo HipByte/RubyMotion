@@ -463,7 +463,7 @@ Motion::Project::App.setup do |app|
 end
 </pre>
 
-h4. File Dependencies
+h4. Files Dependencies
 
 By default, RubyMotion will compile files in the regular sorting order of the filesystem. When a RubyMotion application starts, the main scope of each file will then be executed in that specific order.
 
@@ -524,6 +524,28 @@ Motion::Project::App.setup do |app|
       :target => 'OAuth2Client',
       :configuration => 'Release')
   app.frameworks << 'Security' # OAuth2Client depends on Security.framework
+end
+</pre>
+
+h4. Advanced Info.plist Settings
+
+An iOS app has its configuration described into the +Info.plist+ file, which is located inside the application bundle.
+
+In a RubyMotion project, the +Info.plist+ file is derived from the configuration object exposed in the +Rakefile+ file. For example, the +CFBundleName+ variable in +Info.plist+ is derived from the +name+ variable in the +Rakefile+. Most of the time, the configuration object will let the developer control the necessary settings of his project.
+
+However, it might happen that the developer will want to change advanced settings of a project. The +Rakefile+ interface does not cover all the possibilities, but it exposes the internal +Info.plist+ data structure.
+
+As an example, our video player might need to register a custom URI scheme, so that it can open custom URLs from the web browser. For instance, +x-videoplayer://play+. The "Info.plist reference":http://developer.apple.com/library/ios/#documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html suggests that the +CFBundleURLTypes+ key should be used.
+
+In order to manually set the +CFBundleURLTypes+ key, the +info_plist+ method can be used, which returns a +Hash+ object which can be changed.
+
+<pre>
+Motion::Project::App.setup do |app|
+  # ...
+  app.info_plist['CFBundleURLTypes'] = [
+    { 'CFBundleURLName' => 'com.mycompany.x-videoplayer',
+      'CFBundleURLSchemes' => ['x-videoplayer'] }
+  ]
 end
 </pre>
 
