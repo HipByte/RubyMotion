@@ -83,12 +83,12 @@ Let's take the following piece of Objective-C code which draws a string.
 [string drawAtPoint:point withFont:font];
 </pre>
 
-In this code, +string+, +point+ and +font+ are variables. The message keywords are +drawAtPoint:+ and +withFont:+. The complete message is +drawAtPoint:withFont:+ , which is sent to the +string+ object, passing the +point+ and +font+ arguments.
+In this code, +string+, +point+ and +font+ are variables. The message keywords are +drawAtPoint:+ and +withFont:+. The complete message is the combination of these keywords, +drawAtPoint:withFont:+ , which is sent to the +string+ object, passing the +point+ and +font+ objects as arguments.
 
 Objective-C messages can be sent from RubyMotion using a similar syntax.
 
 <pre>
-string.drawAtPoint(point, withFont: font)
+string.drawAtPoint(point, withFont:font)
 </pre>
 
 It is important to keep in mind that the message being sent here is +drawAtPoint:withFont:+. To illustrate more, the same message can be manually dispatched using the +send+ method.
@@ -101,7 +101,7 @@ Objective-C messages can also be defined in RubyMotion. Let's imagine we are bui
 
 <pre>
 class DrawingProxy
-  def drawAtPoint(point, withFont: font)
+  def drawAtPoint(point, withFont:font)
     @str.drawAtPoint(point, withFont:font)
   end
 end
@@ -110,6 +110,10 @@ end
 Note: The syntax used to define Objective-C selectors was added to RubyMotion and is not part of the Ruby standard.
 
 h4. Reading Objective-C Interfaces
+
+TBD
+
+h4. Shortcuts
 
 TBD
 
@@ -154,9 +158,9 @@ But the main purpose of this design is to allow the exchange of primitive types 
 
 h4. Mutability
 
-The Foundation framework ships a set of classes that have both mutable and immutable variants. Mutable objects can be modified, while immutable objects can't.
+The Foundation framework ships a set of classes that have both mutable and immutable variants. Mutable objects can be modified, while immutable objects cannot.
 
-Immutable types in RubyMotion behave like frozen objects. As in traditional Ruby, the +freeze+ message can be sent on collection types to prevent them from being modified later on.
+Immutable Foundation types in RubyMotion behave like frozen objects (objects which received the +freeze+ message).
 
 As an example, changing the content of an +NSString+ is prohibited, and an exception will be raised by the system if doing so. However, it is possible to change the content of an +NSMutableString+ instance.
 
@@ -436,7 +440,7 @@ The +rake config+ task will dump the project configuration. Each configuration v
 |+identifier+ | Project identifier, as a +String+, in reverse DNS format. The default value is the concatenation of +"com.yourcompany."+ and the +name+ variable. |
 |+delegate_class+ | Name of the application delegate class, as a +String+. The default value is +'AppDelegate'+ and the class is defined in +app/main.rb+.|
 |+files+ | Project files, as an +Array+. The default value is the result of the following expression: +Dir.glob('./app/**/*.rb')+ (every +.rb+ file in the +app+ directory). |
-|+frameworks+ | iOS frameworks to link against, as an +Array+. The default value is +['UIKit', 'Foundation', 'CoreGraphics']+. |
+|+frameworks+ | The names of iOS frameworks to link against, as an +Array+. It should contain the names of public iOS frameworks, typically present in +/System/Library/Frameworks+. The default value is +['UIKit', 'Foundation', 'CoreGraphics']+. |
 |+build_dir+ | Directory for build products, as a +String+. The directory will be created by the build system if it does not exist yet. The default value is +'build'+.|
 |+resources_dir+ | Directory for resources files, as a +String+. The default value is +'resources'+. |
 |+icons+ | List of resource files to use for icons, as an +Array+. The files must conform to the "HIG guidelines":http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html. The default value is +[]+, an empty array. |
@@ -474,7 +478,7 @@ class Bar < Foo
 end
 </pre>
 
-In the example above, by default +bar.rb+ will be executed before +foo.rb+, resulting in a constant lookup error, because the +Foo+ isn't defined yet when we execute +bar.rb+.
+In the example above, using the default order, +bar.rb+ will be compiled before +foo.rb+, resulting in a constant lookup error, because the +Foo+ constant has not been defined yet when we execute the code in +bar.rb+.
 
 To fix that problem, the +files_dependencies+ method can be used in the +Rakefile+. This method accepts a +Hash+ which should be a set of files dependencies.
 
