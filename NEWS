@@ -1,10 +1,12 @@
 = RubyMotion 0.24 =
 
-  * Reorganized the rake interface. Existing projects should use
-    `motion/project' instead of `motion/rake', and use `Motion::Project::App'
-    instead of `Motion::App'.
-  * Refined support for vendor libraries. Updated doc/ReferenceManual.html.
-  * Added documentation about `files_dependencies' in doc/ReferenceManual.html.
+  * Updated doc/ReferenceManual.html to track the new changes and also to
+    mention the `files_dependencies' config setting.
+  * Added the `identifier' config setting.
+  * Reorganized the rake interface. Existing projects should migrate from
+    `motion/rake' to `motion/project', and from `Motion::App' to
+    `Motion::Project::App'.
+  * Refined support for vendor libraries.
 
 = RubyMotion 0.23 =
 
