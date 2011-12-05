@@ -1,6 +1,7 @@
 require 'motion/project/app'
 require 'motion/project/config'
 require 'motion/project/builder'
+require 'motion/project/vendor'
 
 desc "Build the project, then run the simulator"
 task :default => :simulator

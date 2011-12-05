@@ -23,7 +23,7 @@ module Motion; module Project
     end
 
     variable :files, :platforms_dir, :sdk_version, :frameworks,
-      :delegate_class, :name, :build_dir, :resources_dir, :vendor_dir,
+      :delegate_class, :name, :build_dir, :resources_dir,
       :codesign_certificate, :provisioning_profile, :device_family,
       :interface_orientations, :version, :icons
 
@@ -37,7 +37,6 @@ module Motion; module Project
       @name = 'My App'
       @build_dir = File.join(project_dir, 'build')
       @resources_dir = File.join(project_dir, 'resources')
-      @vendor_dir = File.join(project_dir, 'vendor')
       @device_family = :iphone
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
@@ -82,6 +81,13 @@ module Motion; module Project
         deps = [deps] unless deps.is_a?(Array)
         @dependencies[p.call(path)] = deps.map(&p)
       end
+    end
+
+    attr_reader :vendor_projects
+
+    def vendor_project(path, type, opts={})
+      @vendor_projects ||= []
+      @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
     end
 
     def ordered_build_files

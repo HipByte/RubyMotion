@@ -31,18 +31,11 @@ module Motion; module Project;
 
       # Build vendor libraries.
       vendor_libs = []
-      Dir.glob(File.join(config.vendor_dir, '*')).each do |vendor_lib|
-        platform_task = platform.downcase
-        Dir.chdir(vendor_lib) do
-          sh "rake #{platform_task}"
-          Dir.glob(File.join('build', platform, '*.a')).each do |path|
-            vendor_libs << File.expand_path(path)
-          end
-          Dir.glob('*.bridgesupport').each do |path|
-            bs_files << File.expand_path(path)
-          end
-        end
-      end
+      config.vendor_projects.each do |vendor_project|
+        vendor_project.build(platform, archs)
+        vendor_libs.concat(vendor_project.libs)
+        bs_files.concat(vendor_project.bs_files)
+      end 
 
       # Build object files.
       objs = []
