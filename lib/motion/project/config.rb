@@ -44,6 +44,7 @@ module Motion; module Project
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @version = '1.0'
       @icons = []
+      @vendor_projects = []
     end
 
     def variables
@@ -88,7 +89,6 @@ module Motion; module Project
     attr_reader :vendor_projects
 
     def vendor_project(path, type, opts={})
-      @vendor_projects ||= []
       @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
     end
 
@@ -189,7 +189,7 @@ module Motion; module Project
         'CFBundleName' => @name,
         'CFBundleDisplayName' => @name,
         'CFBundleExecutable' => @name, 
-        'CFBundleIdentifier' => @identifier,
+        'CFBundleIdentifier' => identifier,
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
