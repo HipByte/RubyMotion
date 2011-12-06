@@ -1,3 +1,7 @@
+= RubyMotion 0.25 =
+
+  * Fix regressions in the build system.
+
 = RubyMotion 0.24 =
 
   * Updated doc/ReferenceManual.html to track the new changes and also to
