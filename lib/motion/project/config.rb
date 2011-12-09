@@ -27,7 +27,8 @@ module Motion; module Project
     variable :files, :platforms_dir, :sdk_version, :frameworks,
       :delegate_class, :name, :build_dir, :resources_dir, :identifier,
       :codesign_certificate, :provisioning_profile, :device_family,
-      :interface_orientations, :version, :icons
+      :interface_orientations, :version, :icons, :seed_id,
+      :entitlements
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -45,6 +46,7 @@ module Motion; module Project
       @version = '1.0'
       @icons = []
       @vendor_projects = []
+      @entitlements = {}
     end
 
     def variables
@@ -252,6 +254,24 @@ module Motion; module Project
         end
         paths[0]
       end
+    end
+
+    def seed_id
+      @seed_id ||= begin
+        txt = File.read(provisioning_profile)
+        seed_ids = txt.scan(/<key>\s*ApplicationIdentifierPrefix\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
+        if seed_ids.size == 0
+          $stderr.puts "Can't find an application seed ID in the provisioning profile"
+          exit 1
+        elsif seed_ids.size > 1
+          $stderr.puts "Found #{seed_ids.size} seed IDs in the provisioning profile, will use the last one: `#{seed_ids.last}'"
+        end
+        seed_ids.last
+      end
+    end
+
+    def entitlements_data
+      Motion::PropertyList.to_s(entitlements)
     end
   end
 end; end

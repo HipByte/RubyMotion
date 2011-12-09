@@ -221,11 +221,14 @@ PLIST
       File.open(File.join(bundle_path, "embedded.mobileprovision"), 'w') do |io|
         io.write(File.read(config.provisioning_profile))
       end
+
+      # Create the entitlements file.
+      entitlements = File.join(config.build_dir, platform, "Entitlements.plist")
+      File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
  
       # Do the codesigning.
       codesign_allocate = File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')
-      entitlement_opt = File.exist?('Entitlements.plist') ? '--entitlements Entitlements.plist' : ''
-      sh "CODESIGN_ALLOCATE=\"#{codesign_allocate}\" /usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" #{entitlement_opt} \"#{bundle_path}\""
+      sh "CODESIGN_ALLOCATE=\"#{codesign_allocate}\" /usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
     end
   end
 end; end
