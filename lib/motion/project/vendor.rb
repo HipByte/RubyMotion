@@ -52,6 +52,15 @@ module Motion; module Project;
           end
         end
 
+        # Generate the bridgesupport file if we need to.
+        bs_file = File.expand_path(File.basename(@path) + '.bridgesupport')
+        headers_dir = opts.delete(:headers_dir)
+        if !File.exist?(bs_file) and headers_dir
+          Dir.chdir(headers_dir) do
+            sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-I.\" *.h -o \"#{bs_file}\""
+          end 
+        end
+
         @bs_files.clear
         @bs_files.concat(Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) })
 
