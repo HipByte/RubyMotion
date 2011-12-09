@@ -1,12 +1,26 @@
+= RubyMotion 0.26 =
+
+  * Updated doc/ReferenceManual.html to track the new changes.
+  * Added the `entitlements' config setting, which exposes the
+    Entitlements.plist file as a Hash object that can be changed.
+  * Added the `seed_id' config setting, the provisioning app identifier.
+  * Improved the build system so that if the build_dir cannot be created, a
+    temporary build directory will be used instead. This can happen when trying
+    to build a project on a read-only directory.
+  * Fixed a bug where resource files would not be copied if the default rake
+    runs with Ruby 1.9.
+  * Added a new key to `vendor_project' with :xcode: `headers_dir'. Should be
+    set to the path that contains headers files.
+
 = RubyMotion 0.25 =
 
-  * Fix regressions in the build system.
+  * Fixed regressions in the build system.
 
 = RubyMotion 0.24 =
 
   * Updated doc/ReferenceManual.html to track the new changes and also to
     mention the `files_dependencies' config setting.
-  * Added the `info_plist' config setting, which exposes the Info.plist as
+  * Added the `info_plist' config setting, which exposes the Info.plist file as
     a Hash object that can be changed (for advanced settings).
   * Added the `identifier' config setting, reverse DNS name for an app.
   * Reorganized the rake interface. Existing projects should migrate from
