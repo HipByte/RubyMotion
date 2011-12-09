@@ -37,8 +37,8 @@ module Motion; module Project
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
-      @build_dir = File.join(project_dir, 'build')
       @resources_dir = File.join(project_dir, 'resources')
+      @build_dir = File.join(project_dir, 'build')
       @device_family = :iphone
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
@@ -70,6 +70,23 @@ module Motion; module Project
         $stderr.puts "iOS SDK #{sdk_version} is not supported by this version of RubyMotion"
         exit 1
       end
+    end
+
+    def build_dir
+      tried = false
+      begin
+        FileUtils.mkdir_p(@build_dir)
+      rescue Errno::EACCES
+        raise if tried
+        require 'digest/sha1'
+        hash = Digest::SHA1.hexdigest(File.expand_path(project_dir))
+        tmp = File.join(ENV['TMPDIR'], hash)
+        $stderr.puts "Cannot create build_dir `#{@build_dir}'. Check the permissions. Using temporary build directory instead: `#{tmp}'"
+        @build_dir = tmp
+        tried = true
+        retry
+      end
+      @build_dir
     end
 
     attr_reader :project_dir
