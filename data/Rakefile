@@ -26,14 +26,18 @@ task :vm_files do
   end
 end
 
+EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'CoreAudio', 'IOKit']
 task :bridgesupport_files do
-  frameworks = %w{UIKit Foundation CoreGraphics QuartzCore CoreLocation MapKit AddressBook OpenGLES AVFoundation QuickLook}
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
   SDK_VERSIONS.each do |sdk_version|
     sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
     sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
     mkdir_p "#{sdk_version}/BridgeSupport"
-    frameworks.each do |framework|
+
+    Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
+      framework = File.basename(framework_path, '.framework')
+      next if EXCLUDED_FRAMEWORKS.include?(framework)
+      next unless File.exist?(File.join(framework_path, framework))
       dest = "#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
       unless File.exist?(dest)
         sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
@@ -50,6 +54,7 @@ def generate_bs_static_stub(file, includes)
   includes.each { |inc| text << "#import <#{inc}>\n" }
 
   doc = Nokogiri::XML(File.read(file))
+  did_something = false
   doc.xpath("/signatures/function[@inline=\"true\"]").each do |node|
     name = node['name'].to_s
     retval = node.xpath('./retval')[0]['declared_type'].to_s
@@ -68,9 +73,11 @@ def generate_bs_static_stub(file, includes)
     func << ");\n}\n\n"
 
     text << func
+
+    did_something = true
   end
 
-  text
+  did_something ? text : nil
 end
 
 task :bridgesupport_static_stubs do
@@ -85,8 +92,12 @@ task :bridgesupport_static_stubs do
         else
           ['UIKit/UIKit.h', "#{framework}/#{framework}.h"]
       end
-      File.open(code, 'w') { |io| io.write(generate_bs_static_stub(bs_path, includes)) } unless File.exist?(code)
-  
+      unless File.exist?(code)
+        text = generate_bs_static_stub(bs_path, includes)
+        next unless text
+        File.open(code, 'w') { |io| io.write(text) }
+      end
+
       [%w{iPhoneOS armv6 armv7}, %w{iPhoneSimulator i386}].each do |platform, *archs|
         obj = "#{sdk_version}/#{platform}/#{framework}_stubs.o"
         next if File.exist?(obj)
