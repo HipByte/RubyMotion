@@ -531,15 +531,15 @@ end
 
 h4. Advanced Info.plist Settings
 
-An iOS app has its configuration described into the +Info.plist+ file, which is located inside the application bundle.
+An iOS app has its configuration described into the +Info.plist+ file, which is located inside the application bundle. This file contains a set of keys and values. It is fully documented in the "Info.plist reference":http://developer.apple.com/library/ios/#documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html guide.
 
 In a RubyMotion project, the +Info.plist+ file is derived from the configuration object exposed in the +Rakefile+ file. For example, the +CFBundleName+ variable in +Info.plist+ is derived from the +name+ variable in the +Rakefile+. Most of the time, the configuration object will let the developer control the necessary settings of his project.
 
-However, it might happen that the developer will want to change advanced settings of a project. The +Rakefile+ interface does not cover all the possibilities, but it exposes the internal +Info.plist+ data structure.
+However, it might happen that the developer will want to change an advanced setting of a project. The +Rakefile+ interface does not cover all the possible settings, but it exposes the internal +Info.plist+ data structure that one can modify if needed.
 
-As an example, our video player might need to register a custom URI scheme, so that it can open custom URLs from the web browser. For instance, +x-videoplayer://play+. The "Info.plist reference":http://developer.apple.com/library/ios/#documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html suggests that the +CFBundleURLTypes+ key should be used.
+As an example, our video player might need to register a custom URI scheme, so that it can open custom URLs from the web browser, for instance, +x-videoplayer://play+. The +Rakefile+ configuration object does not provide support for this.
 
-In order to manually set the +CFBundleURLTypes+ key, the +info_plist+ method can be used, which returns a +Hash+ object which can be changed.
+The reference suggests that the +CFBundleURLTypes+ key should be used. The key can be manually set by using the +info_plist+ method, which returns a mutable +Hash+ object.
 
 <pre>
 Motion::Project::App.setup do |app|
