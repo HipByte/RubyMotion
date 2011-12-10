@@ -525,7 +525,7 @@ Motion::Project::App.setup do |app|
       :xcodeproj => 'OAuth2Client.xcodeproj',
       :target => 'OAuth2Client',
       :configuration => 'Release',
-      :headers_dir = 'Sources/OAuth2Client')
+      :headers_dir => 'Sources/OAuth2Client')
   app.frameworks << 'Security' # OAuth2Client depends on Security.framework
 end
 </pre>
