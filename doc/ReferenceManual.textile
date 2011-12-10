@@ -509,7 +509,7 @@ Here is a table summarizing project types and key/value objects. At the time of 
 || +:scheme+ | Name of the scheme to build. If not provided, the default scheme will be used. Cannot be used at the same time than +:target+. |
 || +:configuration+ | Name of the configuration to build. If not provided, +"Release"+ will be used. |
 || +:headers_dir+ | Path to the directory that contains public headers files, declaring APIs that will be used by the RubyMotion project. The path should be relative to the path provided to +vendor_project+, for example +"Sources/Headers"+. This key is optional. |
-|| +:products+ | An +Array+ containing names of products to use by the RubyMotion project, for example +["libfoo.a"]+. If not provided, all +.a+ libraries built will be used. |
+|| +:products+ | An +Array+ containing names of products to use by the RubyMotion project, for example +["libfoo.a"]+. This key can be used when the project builds more than one product and the developer wants to filter what will be used by the app. If not provided, all +.a+ libraries built will be used. |
 
 As an example, assuming our video player project wants to make use of the OAuth2Client 3rd-library library, a +vendor+ directory would be created and the OAuth2Client source code would be added there.
 
