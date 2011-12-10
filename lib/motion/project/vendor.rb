@@ -36,18 +36,28 @@ module Motion; module Project;
             end
             projs[0]
           end
-          target = opts.delete(:target) || File.basename(xcodeproj, '.xcodeproj')
+          target = opts.delete(:target)
+          scheme = opts.delete(:scheme)
+          if target and scheme
+            $stderr.puts "Both :target and :scheme are provided"
+            exit 1
+          end
           configuration = opts.delete(:configuration) || 'Release'
-  
+ 
           # Build project into `build' directory. We delete the build directory each time because
           # Xcode is too stupid to be trusted to use the same build directory for different
           # platform builds.
           rm_rf 'build'
-          sh "/usr/bin/xcodebuild -target #{target} -configuration #{configuration} -sdk #{platform.downcase}#{@config.sdk_version} #{archs.map { |x| '-arch ' + x }.join(' ')} CONFIGURATION_BUILD_DIR=build build"
+          xcopts = ''
+          xcopts << "-target \"#{target}\" " if target
+          xcopts << "-scheme \"#{scheme}\" " if scheme
+          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{archs.map { |x| '-arch ' + x }.join(' ')} CONFIGURATION_BUILD_DIR=build build"
   
           # Copy .a files into the platform build directory.
+          prods = opts.delete(:products)
           Dir.glob('build/*.a').each do |lib|
-            lib = File.readlink(lib)
+            next if prods and !prods.include?(File.basename(lib))
+            lib = File.readlink(lib) if File.symlink?(lib)
             sh "/bin/cp \"#{lib}\" \"#{build_dir}\""      
           end
         end
