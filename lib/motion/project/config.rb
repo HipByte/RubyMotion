@@ -24,7 +24,7 @@ module Motion; module Project
       end
     end
 
-    variable :files, :platforms_dir, :sdk_version, :frameworks,
+    variable :files, :platforms_dir, :sdk_version, :frameworks, :libs,
       :delegate_class, :name, :build_dir, :resources_dir, :identifier,
       :codesign_certificate, :provisioning_profile, :device_family,
       :interface_orientations, :version, :icons, :seed_id,
@@ -36,6 +36,7 @@ module Motion; module Project
       @dependencies = {}
       @platforms_dir = '/Developer/Platforms'
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
+      @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
       @resources_dir = File.join(project_dir, 'resources')
