@@ -441,6 +441,7 @@ The +rake config+ task will dump the project configuration. Each configuration v
 |+delegate_class+ | Name of the application delegate class, as a +String+. The default value is +'AppDelegate'+ and the class is defined in +app/main.rb+.|
 |+files+ | Project files, as an +Array+. The default value is the result of the following expression: +Dir.glob('./app/**/*.rb')+ (every +.rb+ file in the +app+ directory). |
 |+frameworks+ | The names of iOS frameworks to link against, as an +Array+. It should contain the names of public iOS frameworks, typically present in +/System/Library/Frameworks+. The default value is +['UIKit', 'Foundation', 'CoreGraphics']+. |
+| +libs+ | Path of libraries to link against, as an +Array+. It should contain paths to system libraries, for example +"/usr/lib/libz.dylib"+. The default value is +[]+, an empty array. |
 |+build_dir+ | Path to the directory for build products, as a +String+. It must be relative to the project directory. The directory will be created by the build system if it does not exist yet. If it cannot be created, a temporary directory will be used instead. The default value is +'build'+.|
 |+resources_dir+ | Directory for resources files, as a +String+. It must be relative to the project directory. The default value is +'resources'+. |
 |+icons+ | List of names of resource files to use for icons, as an +Array+. For example, +["Icon.png", "Icon-72.png", "Icon@2x.png"]+. The files must conform to the "HIG guidelines":http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html. The default value is +[]+, an empty array. |
@@ -503,10 +504,12 @@ The +vendor_project+ method can be called from the +Rakefile+. Its first argumen
 Here is a table summarizing project types and key/value objects. At the time of writing, only Xcode-based projects are supported.
 
 |_<. Project Type |_<. Key |_<. Discussion |
-|/4. +:xcode+ | +:xcodeproj+ | Name of the Xcode project file to use. Optional if there is one +.xcodeproj+ file in the directory. |
-|| +:target+ | Name of the target to build. Optional if there is one target in the Xcode project file. |
-|| +:configuration+ | Name of the configuration to build. If not provided, will use +"Release"+. |
+|/6. +:xcode+ | +:xcodeproj+ | Name of the Xcode project file to use. Optional if there is one +.xcodeproj+ file in the directory. |
+|| +:target+ | Name of the target to build. If not provided, the default target will be used. Cannot be used at the same time than +:scheme+. |
+|| +:scheme+ | Name of the scheme to build. If not provided, the default scheme will be used. Cannot be used at the same time than +:target+. |
+|| +:configuration+ | Name of the configuration to build. If not provided, +"Release"+ will be used. |
 || +:headers_dir+ | Path to the directory that contains public headers files, declaring APIs that will be used by the RubyMotion project. The path should be relative to the path provided to +vendor_project+, for example +"Sources/Headers"+. This key is optional. |
+|| +:products+ | An +Array+ containing names of products to use by the RubyMotion project, for example +["libfoo.a"]+. If not provided, all +.a+ libraries built will be used. |
 
 As an example, assuming our video player project wants to make use of the OAuth2Client 3rd-library library, a +vendor+ directory would be created and the OAuth2Client source code would be added there.
 
@@ -522,9 +525,7 @@ Then, the +Rakefile+ can be modified as such.
 Motion::Project::App.setup do |app|
   # ...
   app.vendor_project('vendor/OAuth2Client', :xcode,
-      :xcodeproj => 'OAuth2Client.xcodeproj',
       :target => 'OAuth2Client',
-      :configuration => 'Release',
       :headers_dir => 'Sources/OAuth2Client')
   app.frameworks << 'Security' # OAuth2Client depends on Security.framework
 end
