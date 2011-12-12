@@ -1,3 +1,18 @@
+= RubyMotion 0.28 =
+
+  * Fixed a bug when using APIs dealing with pointers to anonymous C structs.
+    Example: AVFoundation's copyCGImageAtTime:actualTime:error:.
+  * Fixed a bug in the build system when copying resource files into the app
+    bundle, where directories inside resources_dir would not be copied.
+  * Fixed the plist generator to generate properly-indented plists.
+  * Updated doc/ReferenceManual.html to track the changes above.
+  * Added the `libs' config setting, the list of libraries to link against.
+    Empty by default, can be used in case a project requires a specific C
+    library, for example libz.dylib.
+  * Added the `scheme' and `products' keys of `vendor_project'.
+  * Fixed a bug where the `xcodeproj' key of `vendor_project' would not be taken
+    into account.
+
 = RubyMotion 0.27 =
 
   * Add support for most iOS frameworks.
