@@ -4,33 +4,37 @@ module Motion
     class << self
       def to_s(plist)
         str = <<EOS
-  <?xml version="1.0" encoding="UTF-8"?>
-  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-  <plist version="1.0">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
 EOS
-        cat_element(plist, str)
-        str << '</plist>'
+        cat_element(plist, str, 1)
+        str << "</plist>\n"
         return str
       end
-  
-      def cat_element(plist, str)
+ 
+      def indent_line(line, indent)
+        ("\t" * indent) + line + "\n"
+      end
+ 
+      def cat_element(plist, str, indent)
         case plist
           when Hash
-            str << '<dict>'
+            str << indent_line("<dict>", indent)
             plist.each do |key, val|
               raise "Hash key must be a string" unless key.is_a?(String)
-              str << "<key>#{key}</key>"
-              cat_element(val, str)
+              str << indent_line("<key>#{key}</key>", indent + 1)
+              cat_element(val, str, indent + 1)
             end
-            str << '</dict>'
+            str << indent_line("</dict>", indent)
           when Array
-            str << '<array>'
+            str << indent_line("<array>", indent)
             plist.each do |elem|
-              cat_element(elem, str)
+              cat_element(elem, str, indent + 1)
             end
-            str << '</array>'
+            str << indent_line("</array>", indent)
           when String
-            str << "<string>#{plist}</string>"
+            str << indent_line("<string>#{plist}</string>", indent)
           else
             raise "Invalid plist object (must be either a Hash, Array or String)"
         end
