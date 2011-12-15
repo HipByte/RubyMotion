@@ -582,7 +582,7 @@ The following steps are performed:
 
 # It compiles each Ruby source code file into optimized machine code, translating the Ruby syntax tree into an intermediate representation language (using "LLVM":http://llvm.org/), then assembly. The compiler will generate code for either the Intel 32-bit (+i386+) or ARM (+armv6+, +armv7+) instruction sets and ABIs depending on the target.
 # It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that the project uses, as well as 3rd-party libraries vendored from the configuration.
-# It creates an +.app+ bundle and copies the executable there. The +Info.plist+ file is generated based on the project configuration. Each resource file in the +resources+ directory is copied in the bundle.
+# It creates an +.app+ bundle and copies the executable there. The +Info.plist+ file is generated based on the project configuration. Each resource file in the +resources+ directory is copied in the bundle. Old resource files, that have been deleted since from the project, will not be present in the application bundle.
 # It codesigns the bundle based on the certificate, the provisioning profile and the entitlements specified in the project configuration.
 
 Normally the user does not need to explicitly build the project, as the +build+ task is a dependency of the other tasks.
