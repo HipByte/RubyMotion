@@ -1,3 +1,13 @@
+= RubyMotion 0.29 =
+
+  * Improved some error messages.
+  * Added support for CFTypes. Before, nil values would be returned instead.
+  * Added support for C-level blocks and function pointers arguments.
+  * Fixed a bug when trying to retrieve compiled stubs for method types that
+    include type modifiers (like `const'). Example: NSValue's valueWithPointer:.
+  * Fixed a bug when the build system would fail when attempting to copy
+    resource files, if resources_dir does not exist.
+
 = RubyMotion 0.28 =
 
   * Fixed a bug when using APIs dealing with pointers to anonymous C structs.
@@ -15,7 +25,7 @@
 
 = RubyMotion 0.27 =
 
-  * Add support for most iOS frameworks.
+  * Added support for most iOS frameworks.
 
 = RubyMotion 0.26 =
 
