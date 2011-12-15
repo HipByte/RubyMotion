@@ -26,11 +26,22 @@ end
 
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
+  app = App.config.app_bundle('iPhoneSimulator')
+  sdk_version = App.config.sdk_version
+
+  # Cleanup the simulator application sandbox, to avoid having old resource files there.
+  sim_apps = File.expand_path("~/Library/Application Support/iPhone Simulator/#{sdk_version}/Applications")
+  Dir.glob("#{sim_apps}/**/*.app").each do |app_bundle|
+    if File.basename(app_bundle) == File.basename(app)
+      rm_rf File.dirname(app_bundle)
+      break
+    end  
+  end
+
+  # Launch the simulator.
   sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
-  app = App.config.app_bundle('iPhoneSimulator')
   family = App.config.device_family_ints[0]
-  sdk_version = App.config.sdk_version
   sh "#{sim} #{debug} #{family} #{sdk_version} \"#{app}\""
 end
 
