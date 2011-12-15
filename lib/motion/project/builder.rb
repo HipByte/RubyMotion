@@ -151,6 +151,7 @@ EOS
 
       # Prepare bundle.
       bundle_path = config.app_bundle(platform)
+      FileUtils.rm_rf(bundle_path)
       FileUtils.mkdir_p(bundle_path)
 
       # Link executable.
@@ -172,7 +173,7 @@ EOS
       # Create bundle/PkgInfo.
       File.open(File.join(bundle_path, 'PkgInfo'), 'w') { |io| io.write(config.pkginfo_data) }
 
-      # Copy resources, re-create subdirectories.
+      # Copy resources, handle subdirectories.
       if File.exist?(config.resources_dir)
         resources_files = Dir.chdir(config.resources_dir) do
           Dir.glob('**/*').reject { |x| File.directory?(x) }
@@ -180,10 +181,8 @@ EOS
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)
           dest_path = File.join(bundle_path, res)
-          if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
-            FileUtils.mkdir_p(File.dirname(dest_path))
-            FileUtils.cp(res_path, File.dirname(dest_path))
-          end
+          FileUtils.mkdir_p(File.dirname(dest_path))
+          FileUtils.cp(res_path, File.dirname(dest_path))
         end
       end
     end
