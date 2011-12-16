@@ -3,8 +3,6 @@ require 'motion/project'
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
-  app.name = 'MapView'
-  app.frameworks << 'CoreLocation'
-  app.frameworks << 'MapKit'
-  app.frameworks << 'AddressBook'
+  app.name = 'Beers'
+  app.frameworks += ['CoreLocation', 'MapKit', 'AddressBook']
 end
