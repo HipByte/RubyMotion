@@ -1,3 +1,15 @@
+= RubyMotion 0.30 =
+
+  * Fixed a bug where deploying large applications would fail during install.
+  * Fixed a bug where boolean values (true/false) would not be allowed in the
+    `plist' Hash (thanks Matt Aimonetti).
+  * Merged `tableview' and `mapview' samples into a new sample: `beers', which
+    also demonstrates the use of a tab bar controller and webview.
+  * Fixed a bug in the build system where old resource files, that have since
+    been deleted from the project, would still be present in the app bundle.
+  * Fixed the `simulator' task to empty the app sandbox directory before
+    running the simulator, to make sure old resource files will not be present.
+
 = RubyMotion 0.29 =
 
   * Improved some error messages.
