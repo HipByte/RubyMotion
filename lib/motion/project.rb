@@ -47,15 +47,19 @@ end
 
 desc "Create an .ipa archive"
 task :archive => ['build:ios'] do
-  tmp = "/tmp/ipa_root"
-  sh "/bin/rm -rf #{tmp}"
-  sh "/bin/mkdir -p #{tmp}/Payload"
-  sh "/bin/cp -r \"#{App.config.app_bundle('iPhoneOS')}\" #{tmp}/Payload"
-  Dir.chdir(tmp) do
-    sh "/bin/chmod -R 755 Payload"
-    sh "/usr/bin/zip -q -r archive.zip Payload"
+  app_bundle = App.config.app_bundle('iPhoneOS')
+  archive = App.config.archive
+  if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
+    tmp = "/tmp/ipa_root"
+    sh "/bin/rm -rf #{tmp}"
+    sh "/bin/mkdir -p #{tmp}/Payload"
+    sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
+    Dir.chdir(tmp) do
+      sh "/bin/chmod -R 755 Payload"
+      sh "/usr/bin/zip -q -r archive.zip Payload"
+    end
+    sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
   end
-  sh "/bin/cp #{tmp}/archive.zip \"#{App.config.archive}\""
 end
 
 desc "Deploy on the device"
