@@ -430,6 +430,12 @@ The following table explains the anatomy of a project directory.
 | +app/+ | This directory contains the Ruby code of the project. In a new project, a +main.rb+ file is created automatically. |
 | +resources/+ | This directory contains the resources files of the project, such as images or sounds. In a new project, this directory is empty. |
 
+RubyMotion projects are managed by the +rake+ tool. Essential tasks will be covered in the following sections. To see the full list of available tasks:
+
+<pre>
+$ rake -T
+</pre> 
+
 h3. Configuration
 
 The +rake config+ task will dump the project configuration. Each configuration variable has a sensible default value that can be manually overriden in the +Rakefile+ file.
