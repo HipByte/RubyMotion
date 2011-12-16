@@ -35,8 +35,12 @@ EOS
             str << indent_line("</array>", indent)
           when String
             str << indent_line("<string>#{plist}</string>", indent)
+          when TrueClass
+            str << indent_line("<true/>", indent)
+          when FalseClass
+            str << indent_line("<false/>", indent)
           else
-            raise "Invalid plist object (must be either a Hash, Array or String)"
+            raise "Invalid plist object (must be either a Hash, Array, String, or boolean true/false value)"
         end
       end
     end
