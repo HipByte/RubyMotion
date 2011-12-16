@@ -1,7 +1,7 @@
 class BeerMap < UIViewController
   def init
     if super
-      self.tabBarItem = UITabBarItem.alloc.initWithTitle('Map', image:nil, tag:1)
+      self.tabBarItem = UITabBarItem.alloc.initWithTitle('Map', image:UIImage.imageNamed('map.png'), tag:1)
     end
     self
   end

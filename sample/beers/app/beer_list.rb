@@ -1,7 +1,7 @@
 class BeerList < UITableViewController
   def init
     if super
-      self.tabBarItem = UITabBarItem.alloc.initWithTitle('List', image:nil, tag:1)
+      self.tabBarItem = UITabBarItem.alloc.initWithTitle('List', image:UIImage.imageNamed('list.png'), tag:1)
     end
     self
   end
