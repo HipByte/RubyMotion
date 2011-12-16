@@ -174,6 +174,11 @@ device_go(am_device_t dev)
 		CFSTR("com.apple.afc"), &afc_fd, NULL));
     assert(afc_fd > 0);
 
+    int ipc_fd = 0;
+    PERFORM("starting installer proxy service", _AMDeviceStartService(dev,
+		CFSTR("com.apple.mobile.installation_proxy"), &ipc_fd, NULL));
+    assert(ipc_fd > 0);
+
     afc_conn_t afc_conn = NULL;
     PERFORM("opening file copy connection", _AFCConnectionOpen(afc_fd, 0,
 		&afc_conn));
@@ -186,7 +191,7 @@ device_go(am_device_t dev)
 		[staging_dir fileSystemRepresentation]));
 
     afc_fileref_t afc_fileref = NULL;
-    PERFORM("opening remove package path", _AFCFileRefOpen(afc_conn,
+    PERFORM("opening remote package path", _AFCFileRefOpen(afc_conn,
 		[remote_pkg_path fileSystemRepresentation], 0x3 /* write */,
 		&afc_fileref));
     assert(afc_fileref != NULL);
@@ -196,11 +201,6 @@ device_go(am_device_t dev)
 
     PERFORM("closing remote package path", _AFCFileRefClose(afc_conn,
 		afc_fileref));
-
-    int ipc_fd = 0;
-    PERFORM("starting installer proxy service", _AMDeviceStartService(dev,
-		CFSTR("com.apple.mobile.installation_proxy"), &ipc_fd, NULL));
-    assert(ipc_fd > 0);
 
     NSFileHandle *handle = [[NSFileHandle alloc] initWithFileDescriptor:ipc_fd
 	closeOnDealloc:NO];
