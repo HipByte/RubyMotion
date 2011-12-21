@@ -30,12 +30,14 @@ task :simulator => ['build:simulator'] do
   sdk_version = App.config.sdk_version
 
   # Cleanup the simulator application sandbox, to avoid having old resource files there.
-  sim_apps = File.expand_path("~/Library/Application Support/iPhone Simulator/#{sdk_version}/Applications")
-  Dir.glob("#{sim_apps}/**/*.app").each do |app_bundle|
-    if File.basename(app_bundle) == File.basename(app)
-      rm_rf File.dirname(app_bundle)
-      break
-    end  
+  if ENV['clean']
+    sim_apps = File.expand_path("~/Library/Application Support/iPhone Simulator/#{sdk_version}/Applications")
+    Dir.glob("#{sim_apps}/**/*.app").each do |app_bundle|
+      if File.basename(app_bundle) == File.basename(app)
+        rm_rf File.dirname(app_bundle)
+        break
+      end  
+    end
   end
 
   # Launch the simulator.
