@@ -599,6 +599,18 @@ The +rake simulator+ task builds the project for the iOS simulator, and runs the
 
 The default +rake+ task is a shortcut to +rake simulator+.
 
+h4. Cleaning Simulator Sandbox
+
+Each application lives in its own directory inside the iOS simulator sandbox. This directory contains the application bundle, but also the +Documents+ and +Library+ folders, which store the state. When running an application through the simulator, the sandbox will be created if it doesn't exist, otherwise, the application will be copied into the existing sandbox.
+
+Sometimes, the developer may want to clean the application sandbox before running the simulator, in order to start from a fresh state. For instance, if resource files are removed from the project, or if the application has state data that has to be cleaned up.
+
+To perform that, the +clean+ environment variable can be set to any value, which will trigger the removal of the application sandbox before running the simulator.
+
+<pre>
+$ rake simulator clean=1
+</pre>
+
 h3. Archiving
 
 The +rake archive+ task builds the project for the iOS device, and generates in the +build+ directory an +.ipa+ archive suitable for ad-hoc distribution or submissions to the App Store.
