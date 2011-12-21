@@ -1,3 +1,20 @@
+= RubyMotion 0.31 =
+
+  * Fixed the build system to avoid copying resource files each time.
+  * Fixed a bug where some class method calling stubs would not be properly
+    precompiled, such as NSTimer
+    +scheduledTimerWithTimeInterval:target:selector:userInfo:repeats:.
+  * Added a `prerendered_icon' config setting, which, when set to true,
+    disables the reflective shine effect applied by default on the icons
+    files (thanks Watson).
+  * Changed the `simulator' task to honor the `device_family' environment
+    variable, which can be used to force the device family to be used by the
+    simulator when running a universal app. Values can be 'iphone' or 'ipad'.
+    (Thanks Matt Aimonetti for the idea.)
+  * Fixed the `simulator' task to no longer remove the app sandbox directory
+    by default. Instead, the `clean' environment variable must be provided.
+    (For example, `$ rake simulator clean=1').
+
 = RubyMotion 0.30 =
 
   * Fixed a bug where deploying large applications would fail during install.
