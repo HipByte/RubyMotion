@@ -151,7 +151,6 @@ EOS
 
       # Prepare bundle.
       bundle_path = config.app_bundle(platform)
-      FileUtils.rm_rf(bundle_path)
       FileUtils.mkdir_p(bundle_path)
 
       # Link executable.
@@ -174,15 +173,39 @@ EOS
       File.open(File.join(bundle_path, 'PkgInfo'), 'w') { |io| io.write(config.pkginfo_data) }
 
       # Copy resources, handle subdirectories.
+      reserved_app_bundle_files = [
+        '_CodeSignature/CodeResources', 'CodeResources', 'embedded.mobileprovision',
+        'Info.plist', 'PkgInfo', 'ResourceRules.plist',
+        config.name
+      ]
+      resources_files = []
       if File.exist?(config.resources_dir)
         resources_files = Dir.chdir(config.resources_dir) do
           Dir.glob('**/*').reject { |x| File.directory?(x) }
         end
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)
+          if reserved_app_bundle_files.include?(res)
+            $stderr.puts "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
+            exit 1
+          end
           dest_path = File.join(bundle_path, res)
-          FileUtils.mkdir_p(File.dirname(dest_path))
-          FileUtils.cp(res_path, File.dirname(dest_path))
+          if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+            FileUtils.mkdir_p(File.dirname(dest_path))
+p "copy #{res_path} #{dest_path}"
+            FileUtils.cp(res_path, File.dirname(dest_path))
+          end
+        end
+      end
+
+      # Delete old resource files.
+      Dir.chdir(bundle_path) do
+        Dir.glob('**/*').each do |bundle_res|
+          next if File.directory?(bundle_res)
+          next if reserved_app_bundle_files.include?(bundle_res)
+          next if resources_files.include?(bundle_res)
+          $stderr.puts "File `#{bundle_res}' found in app bundle but not in `#{config.resources_dir}', removing..."
+          FileUtils.rm_rf(bundle_res)
         end
       end
     end
