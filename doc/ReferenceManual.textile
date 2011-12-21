@@ -585,7 +585,7 @@ h3. Build
 
 The +rake build+ task builds the project into the temporary +build+ directory. Two different versions of the project will be built, one to run in the iOS simulator (on the Mac itself) and one to run on the iOS device.
 
-The following steps are performed:
+The following steps are performed during the build process:
 
 # It compiles each Ruby source code file into optimized machine code, translating the Ruby syntax tree into an intermediate representation language (using "LLVM":http://llvm.org/), then assembly. The compiler will generate code for either the Intel 32-bit (+i386+) or ARM (+armv6+, +armv7+) instruction sets and ABIs depending on the target.
 # It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that the project uses, as well as 3rd-party libraries vendored from the configuration.
@@ -593,6 +593,8 @@ The following steps are performed:
 # It codesigns the bundle based on the certificate, the provisioning profile and the entitlements specified in the project configuration.
 
 Normally the user does not need to explicitly build the project, as the +build+ task is a dependency of the other tasks.
+
+The +rake clean+ task empties the +build+ directory.
 
 h3. Simulation
 
@@ -612,7 +614,7 @@ The +device_family+ environment variable can be set to either +iphone+ or +ipad+
 $ rake simulator device_family=ipad
 </pre>
 
-h4. Cleaning Simulator Sandbox
+h4. Cleaning the Sandbox
 
 Each application lives in its own directory inside the iOS simulator sandbox. This directory contains the application bundle, but also the +Documents+ and +Library+ folders, which store the state. When running an application through the simulator, the sandbox will be created if it doesn't exist, otherwise, the application will be copied into the existing sandbox.
 
