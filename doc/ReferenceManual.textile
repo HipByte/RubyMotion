@@ -600,6 +600,18 @@ The +rake simulator+ task builds the project for the iOS simulator, and runs the
 
 The default +rake+ task is a shortcut to +rake simulator+.
 
+h4. Universal Applications
+
+A universal application targets both the iPhone and iPad device families (see the +device_family+ project configuration setting for more details).
+
+In this case, it can be convenient to specify which device family the simulator should use. By default, the simulator will use the first device family provided in the project configuration setting.
+
+The +device_family+ environment variable can be set to either +iphone+ or +ipad+ to change this default. For example, forcing a universal application to run on the iPad.
+
+<pre>
+$ rake simulator device_family=ipad
+</pre>
+
 h4. Cleaning Simulator Sandbox
 
 Each application lives in its own directory inside the iOS simulator sandbox. This directory contains the application bundle, but also the +Documents+ and +Library+ folders, which store the state. When running an application through the simulator, the sandbox will be created if it doesn't exist, otherwise, the application will be copied into the existing sandbox.
