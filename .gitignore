@@ -1,4 +1,4 @@
-*.sw[pon]
+*.sw[ponm]
 .DS_Store
 
 bin/deploy
