@@ -27,8 +27,8 @@ module Motion; module Project
     variable :files, :platforms_dir, :sdk_version, :frameworks, :libs,
       :delegate_class, :name, :build_dir, :resources_dir, :identifier,
       :codesign_certificate, :provisioning_profile, :device_family,
-      :interface_orientations, :version, :icons, :seed_id,
-      :entitlements
+      :interface_orientations, :version, :icons, :prerendered_icon,
+      :seed_id, :entitlements
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -46,6 +46,7 @@ module Motion; module Project
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @version = '1.0'
       @icons = []
+      @prerendered_icon = false
       @vendor_projects = []
       @entitlements = {}
     end
@@ -218,6 +219,12 @@ module Motion; module Project
         'CFBundleSupportedPlatforms' => ['iPhoneOS'],
         'CFBundleVersion' => @version,
         'CFBundleIconFiles' => icons,
+        'CFBundleIcons' => {
+          'CFBundlePrimaryIcon' => {
+            'CFBundleIconFiles' => icons,
+            'UIPrerenderedIcon' => prerendered_icon,
+          }
+        },
         'UIDeviceFamily' => device_family_ints.map { |x| x.to_s },
         'UISupportedInterfaceOrientations' => interface_orientations_consts
       }
