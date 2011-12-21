@@ -175,17 +175,19 @@ module Motion; module Project
       @identifier ||= "com.yourcompany.#{@name.gsub(/\s/, '')}"
     end
 
+    def device_family_int(family)
+      case family
+        when :iphone then 1
+        when :ipad then 2
+        else
+          $stderr.puts "Unknown device_family value: `#{family}'"
+          exit 1
+      end
+    end
+
     def device_family_ints
       ary = @device_family.is_a?(Array) ? @device_family : [@device_family]
-      ary.map do |family|
-        case family
-          when :iphone then 1
-          when :ipad then 2
-          else
-            $stderr.puts "Unknown device_family value: `#{family}'"
-            exit 1
-        end
-      end
+      ary.map { |family| device_family_int(family) }
     end
 
     def interface_orientations_consts

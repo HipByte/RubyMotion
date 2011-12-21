@@ -40,11 +40,18 @@ task :simulator => ['build:simulator'] do
     end
   end
 
+  # Prepare the device family.
+  family_int =
+    if family = ENV['device_family']
+      App.config.device_family_int(family.downcase.intern)
+    else
+      App.config.device_family_ints[0]
+    end
+
   # Launch the simulator.
   sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
-  family = App.config.device_family_ints[0]
-  sh "#{sim} #{debug} #{family} #{sdk_version} \"#{app}\""
+  sh "#{sim} #{debug} #{family_int} #{sdk_version} \"#{app}\""
 end
 
 desc "Create an .ipa archive"
