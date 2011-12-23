@@ -25,10 +25,10 @@ module Motion; module Project
     end
 
     variable :files, :platforms_dir, :sdk_version, :frameworks, :libs,
-      :delegate_class, :name, :build_dir, :resources_dir, :identifier,
-      :codesign_certificate, :provisioning_profile, :device_family,
-      :interface_orientations, :version, :icons, :prerendered_icon,
-      :seed_id, :entitlements
+      :delegate_class, :name, :build_dir, :resources_dir, :specs_dir,
+      :identifier, :codesign_certificate, :provisioning_profile,
+      :device_family, :interface_orientations, :version, :icons,
+      :prerendered_icon, :seed_id, :entitlements
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -41,6 +41,7 @@ module Motion; module Project
       @name = 'Untitled'
       @resources_dir = File.join(project_dir, 'resources')
       @build_dir = File.join(project_dir, 'build')
+      @specs_dir = File.join(project_dir, 'spec')
       @device_family = :iphone
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
@@ -125,6 +126,12 @@ module Motion; module Project
         ary << file unless ary.index(file)
       end
       ary
+    end
+
+    attr_accessor :spec_mode
+
+    def spec_files
+      Dir.glob(File.join(specs_dir, '**', '*.rb'))
     end
 
     def motiondir

@@ -38,62 +38,68 @@ module Motion; module Project;
       end 
 
       # Build object files.
-      objs = []
       objs_build_dir = File.join(build_dir, config.sdk_version + '-sdk-objs')
       FileUtils.mkdir_p(objs_build_dir)
       project_file_changed = File.mtime(config.project_file) > File.mtime(objs_build_dir)
-      config.ordered_build_files.each do |path|
-        obj = File.join(objs_build_dir, "#{path}.o")
+      build_file = Proc.new do |path|
+        obj ||= File.join(objs_build_dir, "#{path}.o")
         should_rebuild = (project_file_changed \
             or !File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
  
         # Generate or retrieve init function.
-        init_func = should_rebuild ? "MREP_#{`uuidgen`.strip.gsub('-', '')}" : `nm #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
-        objs << [obj, init_func]
+        init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `/usr/bin/nm #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
 
-        next unless should_rebuild   
- 
-        arch_objs = []
-        archs.each do |arch|
-          # Locate arch kernel.
-          kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
-          raise "Can't locate kernel file" unless File.exist?(kernel)
- 
-          # Prepare build_dir. 
-          bc = File.join(objs_build_dir, "#{path}.#{arch}.bc")
-          FileUtils.mkdir_p(File.dirname(bc))
-
-          # LLVM bitcode.
-          bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
-          sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
- 
-          # Assembly.
-          asm = File.join(objs_build_dir, "#{path}.#{arch}.s")
-          llc_arch = case arch
-            when 'i386'; 'x86'
-            when 'x86_64'; 'x86-64'
-            when /^arm/; 'arm'
-            else; arch
+        if should_rebuild
+          FileUtils.mkdir_p(File.dirname(obj))
+          arch_objs = []
+          archs.each do |arch|
+            # Locate arch kernel.
+            kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
+            raise "Can't locate kernel file" unless File.exist?(kernel)
+   
+            # LLVM bitcode.
+            bc = File.join(objs_build_dir, "#{path}.#{arch}.bc")
+            bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
+   
+            # Assembly.
+            asm = File.join(objs_build_dir, "#{path}.#{arch}.s")
+            llc_arch = case arch
+              when 'i386'; 'x86'
+              when 'x86_64'; 'x86-64'
+              when /^arm/; 'arm'
+              else; arch
+            end
+            sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh -disable-cfi"
+   
+            # Object.
+            arch_obj = File.join(objs_build_dir, "#{path}.#{arch}.o")
+            sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+   
+            arch_objs << arch_obj
           end
-          sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh -disable-cfi"
- 
-          # Object.
-          arch_obj = File.join(objs_build_dir, "#{path}.#{arch}.o")
-          sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
- 
-          arch_objs << arch_obj
+   
+          # Assemble fat binary.
+          arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
+          sh "lipo -create #{arch_objs_list} -output \"#{obj}\""
         end
- 
-        # Assemble fat binary.
-        arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
-        sh "lipo -create #{arch_objs_list} -output \"#{obj}\""
+
+        [obj, init_func]
+      end
+      objs = app_objs = config.ordered_build_files.map { |path| build_file.call(path) }
+      if config.spec_mode
+        # Build spec files too.
+        objs << build_file.call(File.expand_path(File.join(File.dirname(__FILE__), '../spec.rb')))
+        spec_objs = config.spec_files.map { |path| build_file.call(path) }
+        objs += spec_objs
       end
 
       # Generate main file.
       main_txt = <<EOS
 #import <UIKit/UIKit.h>
+
 extern "C" {
     void ruby_sysinit(int *, char ***);
     void ruby_init(void);
@@ -112,6 +118,36 @@ EOS
       end
       main_txt << <<EOS
 }
+EOS
+
+      if config.spec_mode
+        main_txt << <<EOS
+@interface SpecLauncher : NSObject
+@end
+
+@implementation SpecLauncher
+
++ (id)launcher
+{
+    SpecLauncher *launcher = [[self alloc] init];
+    [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidFinishLaunchingNotification object:nil];
+    return launcher; 
+}
+
+- (void)appLaunched:(id)notification
+{
+EOS
+        spec_objs.each do |_, init_func|
+          main_txt << "#{init_func}(self, 0);\n"
+        end
+        main_txt << "[NSClassFromString(@\"Bacon\") performSelector:@selector(run)];\n"
+        main_txt << <<EOS
+}
+
+@end
+EOS
+      end
+      main_txt << <<EOS
 int
 main(int argc, char **argv)
 {
@@ -124,9 +160,10 @@ main(int argc, char **argv)
     try {
         void *self = rb_vm_top_self();
 EOS
-      objs.each do |_, init_func|
+      app_objs.each do |_, init_func|
         main_txt << "#{init_func}(self, 0);\n"
       end
+      main_txt << "[SpecLauncher launcher];\n" if config.spec_mode
       main_txt << <<EOS
         retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
         rb_exit(retval);

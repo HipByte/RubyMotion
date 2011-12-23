@@ -71,6 +71,13 @@ task :archive => ['build:ios'] do
   end
 end
 
+desc "Run specs"
+task :spec do
+  App.config.name += '_spec'
+  App.config.spec_mode = true
+  Rake::Task["simulator"].invoke
+end
+
 desc "Deploy on the device"
 task :deploy => :archive do
   deploy = File.join(App.config.bindir, 'deploy')
