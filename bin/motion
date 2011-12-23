@@ -58,6 +58,16 @@ end
 EOS
       end
       Dir.mkdir('resources')
+      Dir.mkdir('spec')
+      File.open('spec/main_spec.rb', 'w') do |io|
+        io.puts <<EOS
+describe "Application '#{app_name}'" do
+  it "has one window" do
+    UIApplication.sharedApplication.windows.should == 1
+  end
+end
+EOS
+      end
     end
   end
 end
