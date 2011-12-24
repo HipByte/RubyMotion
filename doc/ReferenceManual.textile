@@ -630,7 +630,7 @@ $ rake simulator clean=1
 
 h3. Testing
 
-RubyMotion has built-in "Behavior-Driven Development":http://en.wikipedia.org/wiki/Behavior_Driven_Development functionality that the developer can use to cover the specifications of an application. RubyMotion uses a flavor of the "Bacon":https://github.com/alloy/MacBacon framework modified to integrate better with the iOS system.
+RubyMotion has built-in "Behavior-Driven Development":http://en.wikipedia.org/wiki/Behavior_Driven_Development functionality that the developer can use to cover the specifications of an application. RubyMotion uses a flavor of the "Bacon":https://github.com/alloy/MacBacon framework slightly modified to integrate better with the iOS system.
  
 Specification files are written in the +spec+ directory.
 
