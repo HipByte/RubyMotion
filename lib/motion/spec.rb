@@ -1,8 +1,9 @@
 # Bacon -- small RSpec clone.
 #
 # "Truth will sooner come out from error than from confusion." ---Francis Bacon
-
-# Copyright (C) 2007, 2008 Christian Neukirchen <purl.org/net/chneukirchen>
+#
+# Copyright (C) 2011 Eloy Durán eloy.de.enige@gmail.com
+# Copyright (C) 2007 - 2011 Christian Neukirchen <purl.org/net/chneukirchen>
 #
 # Bacon is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
