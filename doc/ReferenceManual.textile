@@ -420,7 +420,7 @@ RubyMotion projects are created by passing the +create+ command to +/usr/bin/mot
 $ motion create Hello
 $ cd Hello
 $ ls
-Rakefile app resources
+Rakefile app resources spec
 </pre>
 
 The following table explains the anatomy of a project directory.
@@ -429,6 +429,7 @@ The following table explains the anatomy of a project directory.
 |+Rakefile+ | This file contains the configuration of the project, as well as a default set of tasks. It can be edited to change the configuration or add new tasks. |
 | +app/+ | This directory contains the Ruby code of the project. In a new project, a +main.rb+ file is created automatically. |
 | +resources/+ | This directory contains the resources files of the project, such as images or sounds. In a new project, this directory is empty. |
+| +spec/+ | This directory contains the specification files of the application. In a new project, a default specification file is created automatically. |
 
 RubyMotion projects are managed by the +rake+ tool. Essential tasks will be covered in the following sections. To see the full list of available tasks:
 
@@ -450,6 +451,7 @@ The +rake config+ task will dump the project configuration. Each configuration v
 | +libs+ | Library paths to link against, as an +Array+. It should contain paths to public, system libraries, for example +"/usr/lib/libz.dylib"+. The default value is +[]+, an empty array. |
 |+build_dir+ | Path to the directory for build products, as a +String+. It must be relative to the project directory. The directory will be created by the build system if it does not exist yet. If it cannot be created, a temporary directory will be used instead. The default value is +'build'+.|
 |+resources_dir+ | Directory for resources files, as a +String+. It must be relative to the project directory. The default value is +'resources'+. |
+|+specs_dir+ | Directory for specification files, as a +String+. It must be relative to the project directory. The default value is +'spec'+. |
 |+icons+ | List of names of resource files to use for icons, as an +Array+. For example, +["Icon.png", "Icon-72.png", "Icon@2x.png"]+. The files must conform to the "HIG guidelines":http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html. The default value is +[]+, an empty array. |
 |+prerendered_icon+ | Whether the image files in +icons+ are already pre-rendered according to the HIG guidelines. If +false+, iOS will apply a reflective shine effect on the icons. The default value is +false+. |
 |+device_family+ | Family of devices to support. Possible values can be: +iphone+, +ipad+ or +[:iphone, :ipad]+ (for a universal application). The default value is +:iphone+.|
@@ -624,6 +626,40 @@ To perform that, the +clean+ environment variable can be set to any value, which
 
 <pre>
 $ rake simulator clean=1
+</pre>
+
+h3. Testing
+
+RubyMotion has built-in "Behavior-Driven Development":http://en.wikipedia.org/wiki/Behavior_Driven_Development functionality that the developer can use to cover the specifications of an application. RubyMotion uses a flavor of the "Bacon":https://github.com/alloy/MacBacon framework modified to integrate better with the iOS system.
+ 
+Specification files are written in the +spec+ directory.
+
+The +rake spec+ task will build a special version of the project that will execute all specification files right after the application launches. A summary will then be printed on the standard output terminal, and the application will exit.
+
+Note: +rake spec+ currently only works with the simulator.
+
+Specification files have full access to the iOS SDK as well as the application classes. Here is a spec that makes sure the application has one active window.
+
+<pre>
+$ cat spec/main_spec.rb 
+describe "My Awesome App" do
+  it "should have a window" do
+    app = UIApplication.sharedApplication
+    app.windows.size.should == 1
+  end
+end
+</pre>
+
+Assuming the application is properly implemented to follow that specification, +rake spec+ will gracefully exit with a status error of 0.
+
+<pre>
+$ rake spec
+[...]
+My Awesome App
+  - should have a window
+
+1 specifications (1 requirements), 0 failures, 0 errors
+$ 
 </pre>
 
 h3. Archiving
