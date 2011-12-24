@@ -9,6 +9,15 @@
 static BOOL debug_mode = NO;
 static NSTask *gdb_task = nil;
 static BOOL debugger_killed_session = NO;
+static id current_session = nil;
+
+static void
+sigterminate(int sig)
+{
+    assert(current_session != nil);
+    ((void (*)(id, SEL, double))objc_msgSend)(current_session,
+	@selector(requestEndWithTimeout:), 0.0);
+}
 
 static void
 sigforwarder(int sig)
@@ -185,6 +194,12 @@ main(int argc, char **argv)
 	fprintf(stderr, "*** can't start simulator: %s\n",
 		[[error description] UTF8String]);
 	exit(1);
+    }
+
+    if (!debug_mode) {
+	// ^C should terminate the request.
+	current_session = session;
+	signal(SIGINT, sigterminate);
     }
 
     // Open simulator to the foreground.
