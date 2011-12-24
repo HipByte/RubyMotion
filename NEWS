@@ -1,3 +1,10 @@
+= RubyMotion 0.32 =
+
+  * Fixed a bug where canceling the `rake simulator' task with ^C would not
+    properly terminate the simulator session.
+  * Added basic spec framework integration. See doc/ReferenceManual.html for
+    more information.
+
 = RubyMotion 0.31 =
 
   * Fixed the build system to avoid copying resource files each time.
