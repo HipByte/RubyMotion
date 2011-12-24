@@ -11,6 +11,11 @@ module Motion; module Project;
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
 
+      if config.spec_mode and config.spec_files.empty?
+        $stderr.puts "No spec files in `#{config.specs_dir}'"
+        exit 1
+      end
+
       # Locate SDK.
       sdk = config.sdk(platform)
 
