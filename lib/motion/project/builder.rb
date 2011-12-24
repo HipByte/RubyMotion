@@ -130,16 +130,11 @@ EOS
 + (id)launcher
 {
     SpecLauncher *launcher = [[self alloc] init];
-    [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidFinishLaunchingNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
     return launcher; 
 }
 
 - (void)appLaunched:(id)notification
-{
-    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.1];
-}
-
-- (void)runSpecs
 {
 EOS
         spec_objs.each do |_, init_func|
