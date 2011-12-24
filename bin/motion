@@ -63,7 +63,8 @@ EOS
         io.puts <<EOS
 describe "Application '#{app_name}'" do
   it "has one window" do
-    UIApplication.sharedApplication.windows.should == 1
+    app = UIApplication.sharedApplication
+    app.windows.size.should == 1
   end
 end
 EOS
