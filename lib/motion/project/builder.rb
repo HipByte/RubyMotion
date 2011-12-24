@@ -136,6 +136,11 @@ EOS
 
 - (void)appLaunched:(id)notification
 {
+    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.1];
+}
+
+- (void)runSpecs
+{
 EOS
         spec_objs.each do |_, init_func|
           main_txt << "#{init_func}(self, 0);\n"
