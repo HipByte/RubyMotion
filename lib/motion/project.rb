@@ -3,6 +3,8 @@ require 'motion/project/config'
 require 'motion/project/builder'
 require 'motion/project/vendor'
 
+Rake.verbose(false) unless Rake.verbose == true
+
 desc "Build the project, then run the simulator"
 task :default => :simulator
 
@@ -51,6 +53,7 @@ task :simulator => ['build:simulator'] do
   # Launch the simulator.
   sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
+  App.info 'Simulate', app
   sh "#{sim} #{debug} #{family_int} #{sdk_version} \"#{app}\""
 end
 
@@ -59,6 +62,7 @@ task :archive => ['build:ios'] do
   app_bundle = App.config.app_bundle('iPhoneOS')
   archive = App.config.archive
   if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
+    App.info 'Create', archive
     tmp = "/tmp/ipa_root"
     sh "/bin/rm -rf #{tmp}"
     sh "/bin/mkdir -p #{tmp}/Payload"
@@ -80,6 +84,7 @@ end
 
 desc "Deploy on the device"
 task :deploy => :archive do
+  App.info 'Deploy', App.config.archive
   deploy = File.join(App.config.bindir, 'deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   sh "#{deploy} #{flags} \"#{App.config.archive}\""
@@ -87,6 +92,7 @@ end
 
 desc "Clear build objects"
 task :clean do
+  App.info 'Delete', App.config.build_dir
   rm_rf(App.config.build_dir)
 end
 

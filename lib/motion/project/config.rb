@@ -86,7 +86,7 @@ module Motion; module Project
         require 'digest/sha1'
         hash = Digest::SHA1.hexdigest(File.expand_path(project_dir))
         tmp = File.join(ENV['TMPDIR'], hash)
-        $stderr.puts "Cannot create build_dir `#{@build_dir}'. Check the permissions. Using temporary build directory instead: `#{tmp}'"
+        App.warn "Cannot create build_dir `#{@build_dir}'. Check the permissions. Using a temporary build directory instead: `#{tmp}'"
         @build_dir = tmp
         tried = true
         retry
@@ -254,7 +254,7 @@ module Motion; module Project
           $stderr.puts "Can't find an iPhone Developer certificate in the keychain"
           exit 1
         elsif certs.size > 1
-          $stderr.puts "Found #{certs.size} iPhone Developer certificates, will use the first one: `#{certs[0]}'"
+          App.warn "Found #{certs.size} iPhone Developer certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
         end
         certs[0][1..-2] # trim trailing `"` characters
       end 
@@ -267,7 +267,7 @@ module Motion; module Project
           $stderr.puts "Can't find a provisioning profile"
           exit 1
         elsif paths.size > 1
-          $stderr.puts "Found #{paths.size} provisioning profiles, will use the first one: `#{paths[0]}'"
+          App.warn "Found #{paths.size} provisioning profiles. Set the `provisioning_profile' project setting. Will use the first one: `#{paths[0]}'"
         end
         paths[0]
       end
@@ -281,7 +281,7 @@ module Motion; module Project
           $stderr.puts "Can't find an application seed ID in the provisioning profile"
           exit 1
         elsif seed_ids.size > 1
-          $stderr.puts "Found #{seed_ids.size} seed IDs in the provisioning profile, will use the last one: `#{seed_ids.last}'"
+          App.warn "Found #{seed_ids.size} seed IDs in the provisioning profile. Set the `seed_id' project setting. Will use the last one: `#{seed_ids.last}'"
         end
         seed_ids.last
       end

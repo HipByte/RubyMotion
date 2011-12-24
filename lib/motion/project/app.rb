@@ -21,6 +21,16 @@ module Motion; module Project
       def codesign(platform)
         builder.codesign(config, platform)
       end
+
+      def warn(msg)
+        $stderr.puts "WARNING!".rjust(10) + ' ' + msg
+      end
+
+      def info(what, msg)
+        unless Rake.verbose
+          $stderr.puts what.rjust(10) + ' ' + msg 
+        end
+      end
     end
   end
 end; end

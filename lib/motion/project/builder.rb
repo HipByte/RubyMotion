@@ -4,7 +4,6 @@ module Motion; module Project;
 
     def build(config, platform)
       datadir = config.datadir
-      libstatic = File.join(datadir, 'libmacruby-static.a')
       archs = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
         path.scan(/kernel-(.+).bc$/)[0][0]
       end
@@ -57,6 +56,7 @@ module Motion; module Project;
         init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `/usr/bin/nm #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
 
         if should_rebuild
+          App.info 'Compile', path
           FileUtils.mkdir_p(File.dirname(obj))
           arch_objs = []
           archs.each do |arch|
@@ -193,26 +193,42 @@ EOS
 
       # Prepare bundle.
       bundle_path = config.app_bundle(platform)
-      FileUtils.mkdir_p(bundle_path)
+      unless File.exist?(bundle_path)
+        App.info 'Create', bundle_path
+        FileUtils.mkdir_p(bundle_path)
+      end
 
       # Link executable.
       main_exec = File.join(bundle_path, config.name)
-      objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
-      frameworks = config.frameworks.map { |x| "-framework #{x}" }.join(' ')
-      framework_stubs_objs = []
-      config.frameworks.each do |framework|
-        stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
-        framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
+      if !File.exist?(main_exec) \
+          or File.mtime(config.project_file) > File.mtime(main_exec) \
+          or objs.any? { |path, _| File.mtime(path) > File.mtime(main_exec) } \
+          or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
+        App.info 'Link', main_exec
+        objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
+        frameworks = config.frameworks.map { |x| "-framework #{x}" }.join(' ')
+        framework_stubs_objs = []
+        config.frameworks.each do |framework|
+          stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
+          framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
+        end
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
       end
-      sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
 
       # Create bundle/Info.plist.
       bundle_info_plist = File.join(bundle_path, 'Info.plist')
-      File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data) }
-      sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
+      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
+        App.info 'Create', bundle_info_plist
+        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data) }
+        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
+      end
 
       # Create bundle/PkgInfo.
-      File.open(File.join(bundle_path, 'PkgInfo'), 'w') { |io| io.write(config.pkginfo_data) }
+      bundle_pkginfo = File.join(bundle_path, 'PkgInfo')
+      if !File.exist?(bundle_pkginfo) or File.mtime(config.project_file) > File.mtime(bundle_pkginfo)
+        App.info 'Create', bundle_pkginfo
+        File.open(bundle_pkginfo, 'w') { |io| io.write(config.pkginfo_data) }
+      end
 
       # Copy resources, handle subdirectories.
       reserved_app_bundle_files = [
@@ -234,6 +250,7 @@ EOS
           dest_path = File.join(bundle_path, res)
           if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
             FileUtils.mkdir_p(File.dirname(dest_path))
+            App.info 'Copy', res_path
             FileUtils.cp(res_path, File.dirname(dest_path))
           end
         end
@@ -257,8 +274,10 @@ EOS
 
       # Create bundle/ResourceRules.plist.
       resource_rules_plist = File.join(bundle_path, 'ResourceRules.plist')
-      File.open(resource_rules_plist, 'w') do |io|
-        io.write(<<-PLIST)
+      unless File.exist?(resource_rules_plist)
+        App.info 'Create', resource_rules_plist
+        File.open(resource_rules_plist, 'w') do |io|
+          io.write(<<-PLIST)
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -285,20 +304,25 @@ EOS
 </dict>
 </plist>
 PLIST
+        end
       end
 
       # Copy the provisioning profile.
-      File.open(File.join(bundle_path, "embedded.mobileprovision"), 'w') do |io|
-        io.write(File.read(config.provisioning_profile))
+      bundle_provision = File.join(bundle_path, "embedded.mobileprovision")
+      if !File.exist?(bundle_provision) or File.mtime(config.provisioning_profile) > File.mtime(bundle_provision)
+        App.info 'Create', bundle_provision
+        FileUtils.cp config.provisioning_profile, bundle_provision
       end
 
-      # Create the entitlements file.
-      entitlements = File.join(config.build_dir, platform, "Entitlements.plist")
-      File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
- 
-      # Do the codesigning.
-      codesign_allocate = File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')
-      sh "CODESIGN_ALLOCATE=\"#{codesign_allocate}\" /usr/bin/codesign -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
+      # Codesign.
+      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
+      if File.mtime(config.project_file) > File.mtime(bundle_path) \
+          or !system("#{codesign_cmd} --verify \"#{bundle_path}\" >& /dev/null")
+        App.info 'Codesign', bundle_path
+        entitlements = File.join(config.build_dir, platform, "Entitlements.plist")
+        File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
+        sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
+      end
     end
   end
 end; end
