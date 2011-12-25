@@ -23,7 +23,8 @@ module Motion; module Project
       end
 
       def log(what, msg)
-        $stderr.puts what.rjust(10) + ' ' + msg 
+        what = "\e[1m" + what.rjust(10) + "\e[0m" # bold
+        $stderr.puts what + ' ' + msg 
       end
 
       def warn(msg)
