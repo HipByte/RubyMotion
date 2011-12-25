@@ -62,9 +62,12 @@ EOS
       File.open('spec/main_spec.rb', 'w') do |io|
         io.puts <<EOS
 describe "Application '#{app_name}'" do
+  before do
+    @app = UIApplication.sharedApplication
+  end
+
   it "has one window" do
-    app = UIApplication.sharedApplication
-    app.windows.size.should == 1
+    @app.windows.size.should == 1
   end
 end
 EOS
