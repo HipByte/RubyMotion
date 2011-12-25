@@ -82,6 +82,7 @@ init_private_funcs(void)
 }
 
 static bool debug_mode = false;
+static bool discovery_mode = false;
 
 #define LOG(fmt, ...) \
     do { \
@@ -159,6 +160,7 @@ read_plist(NSFileHandle *handle)
     return plist;
 }
 
+static NSString *device_id = nil;
 static NSString *app_package_path = nil;
 static NSData *app_package_data = nil;
 
@@ -233,7 +235,7 @@ device_go(am_device_t dev)
 	}
     }
 
-    fprintf(stderr, "package has been successfully installed on device\n");
+    LOG("package has been successfully installed on device");
     [handle release];
 }
 
@@ -243,9 +245,15 @@ device_subscribe_cb(am_device_notif_context_t ctx)
     am_device_t dev = am_device_from_notif_context(ctx);
     CFStringRef name = _AMDeviceGetName(dev);
     if (name != NULL) {
-	fprintf(stderr, "found usb mobile device %s\n", [(id)name UTF8String]);
-	device_go(dev);
-	exit(0);
+	if (discovery_mode) {
+	    printf("%s\n", [(id)name UTF8String]);
+	    exit(0);
+	}
+	else if ([(id)name isEqualToString:device_id]) {
+	    LOG("found usb mobile device %s", [(id)name UTF8String]);
+	    device_go(dev);
+	    exit(0);
+	}
     }
 }
 
@@ -266,24 +274,34 @@ main(int argc, char **argv)
 	if (strcmp(argv[i], "-d") == 0) {
 	    debug_mode = true;
 	}
+	else if (strcmp(argv[i], "-D") == 0) {
+	    discovery_mode = true;
+	}
 	else {
-	    if (app_package_path != nil) {
-		usage();
+	    if (device_id == nil) {
+		device_id = [[NSString stringWithUTF8String:argv[i]] retain];
 	    }
-	    app_package_path = [[NSString stringWithUTF8String:argv[i]] retain];
+	    else {
+		if (app_package_path != nil) {
+		    usage();
+		}
+		app_package_path = [[NSString stringWithUTF8String:argv[i]]
+		    retain];
+	    }
 	} 
     }
 
-    if (app_package_path == nil) {
-	usage();
-    }
-
-    app_package_data =
-	[[NSData dataWithContentsOfFile:app_package_path] retain];
-    if (app_package_data == nil) {
-	fprintf(stderr, "can't read data from %s\n",
-		[app_package_path fileSystemRepresentation]);
-	exit(1);
+    if (!discovery_mode) {
+	if (device_id == nil || app_package_path == nil) {
+	    usage();
+	}
+	app_package_data =
+	    [[NSData dataWithContentsOfFile:app_package_path] retain];
+	if (app_package_data == nil) {
+	    fprintf(stderr, "can't read data from %s\n",
+		    [app_package_path fileSystemRepresentation]);
+	    exit(1);
+	}
     }
 
     init_private_funcs();
@@ -294,8 +312,12 @@ main(int argc, char **argv)
 		&notif));
 
     // Run one second, should be enough to catch an attached device.
-    [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
+    [[NSRunLoop mainRunLoop] runUntilDate:
+	[NSDate dateWithTimeIntervalSinceNow:1]];
 
-    fprintf(stderr, "error: can't find any device\n");
-    return 1;
+    if (!discovery_mode) {
+	fprintf(stderr, "error: can't find device ID %s\n",
+		[device_id UTF8String]);
+    }
+    exit(1);
 }

@@ -11,8 +11,7 @@ module Motion; module Project;
       llc = File.join(config.bindir, 'llc')
 
       if config.spec_mode and config.spec_files.empty?
-        $stderr.puts "No spec files in `#{config.specs_dir}'"
-        exit 1
+        App.fail "No spec files in `#{config.specs_dir}'"
       end
 
       # Locate SDK.
@@ -141,6 +140,12 @@ EOS
 
 - (void)appLaunched:(id)notification
 {
+    // Give a bit of time to the simulator to attach...
+    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.1];
+}
+
+- (void)runSpecs
+{
 EOS
         spec_objs.each do |_, init_func|
           main_txt << "#{init_func}(self, 0);\n"
@@ -244,8 +249,7 @@ EOS
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)
           if reserved_app_bundle_files.include?(res)
-            $stderr.puts "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
-            exit 1
+            App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
           end
           dest_path = File.join(bundle_path, res)
           if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)

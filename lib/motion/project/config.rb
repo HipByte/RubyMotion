@@ -26,9 +26,9 @@ module Motion; module Project
 
     variable :files, :platforms_dir, :sdk_version, :frameworks, :libs,
       :delegate_class, :name, :build_dir, :resources_dir, :specs_dir,
-      :identifier, :codesign_certificate, :provisioning_profile,
-      :device_family, :interface_orientations, :version, :icons,
-      :prerendered_icon, :seed_id, :entitlements
+      :identifier, :codesign_certificate, :provisioning_profile, :device_family,
+      :interface_orientations, :version, :icons, :prerendered_icon, :seed_id,
+      :entitlements
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -55,8 +55,12 @@ module Motion; module Project
     def variables
       map = {}
       VARS.each do |sym|
-        val = send(sym) rescue "ERROR"
-        map[sym] = val
+        map[sym] =
+          begin
+            send(sym)
+          rescue Exception
+            'Error'
+          end
       end
       map
     end
@@ -67,13 +71,11 @@ module Motion; module Project
         sdk_path = File.join(platforms_dir, platform + '.platform',
             "Developer/SDKs/#{platform}#{sdk_version}.sdk")
         unless File.exist?(sdk_path)
-          $stderr.puts "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
-          exit 1
+          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
         end
       end
       unless File.exist?(datadir)
-        $stderr.puts "iOS SDK #{sdk_version} is not supported by this version of RubyMotion"
-        exit 1
+        App.fail "iOS SDK #{sdk_version} is not supported by this version of RubyMotion"
       end
     end
 
@@ -156,8 +158,7 @@ module Motion; module Project
           File.basename(path).scan(/iPhoneOS(.*)\.sdk/)[0][0]
         end
         if versions.size == 0
-          $stderr.puts "Can't find an iOS SDK in `#{platforms_dir}'"
-          exit 1
+          App.fail "Can't find an iOS SDK in `#{platforms_dir}'"
         #elsif versions.size > 1
         #  $stderr.puts "found #{versions.size} SDKs, will use the latest one"
         end
@@ -187,8 +188,7 @@ module Motion; module Project
         when :iphone then 1
         when :ipad then 2
         else
-          $stderr.puts "Unknown device_family value: `#{family}'"
-          exit 1
+          App.fail "Unknown device_family value: `#{family}'"
       end
     end
 
@@ -205,8 +205,7 @@ module Motion; module Project
           when :landscape_right then 'UIInterfaceOrientationLandscapeRight'
           when :portrait_upside_down then 'UIInterfaceOrientationPortraitUpsideDown'
           else
-            $stderr.puts "Unknown interface_orientation value: `#{ori}'"
-            exit 1
+            App.fail "Unknown interface_orientation value: `#{ori}'"
         end
       end
     end
@@ -251,8 +250,7 @@ module Motion; module Project
       @codesign_certificate ||= begin
         certs = `/usr/bin/security -q find-certificate -a`.scan(/"iPhone Developer: [^"]+"/).uniq
         if certs.size == 0
-          $stderr.puts "Can't find an iPhone Developer certificate in the keychain"
-          exit 1
+          App.fail "Can't find an iPhone Developer certificate in the keychain"
         elsif certs.size > 1
           App.warn "Found #{certs.size} iPhone Developer certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
         end
@@ -260,17 +258,33 @@ module Motion; module Project
       end 
     end
 
-    def provisioning_profile
+    def device_id
+      @device_id ||= begin
+        deploy = File.join(App.config.bindir, 'deploy')
+        device_id = `#{deploy} -D`.strip
+        if device_id.empty?
+          App.fail "Can't find an iOS device connected on USB"
+        end
+        device_id
+      end
+    end
+
+    def provisioning_profile(name = 'Dev Profile')
       @provisioning_profile ||= begin
-        paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision"))
+        paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
+          File.read(path).scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0] == name
+        end
         if paths.size == 0
-          $stderr.puts "Can't find a provisioning profile"
-          exit 1
+          App.fail "Can't find a provisioning profile named `#{name}'"
         elsif paths.size > 1
-          App.warn "Found #{paths.size} provisioning profiles. Set the `provisioning_profile' project setting. Will use the first one: `#{paths[0]}'"
+          App.warn "Found #{paths.size} provisioning profiles named `#{name}'. Set the `provisioning_profile' project setting. Will use the first one: `#{paths[0]}'"
         end
         paths[0]
       end
+    end
+
+    def provisioned_devices
+      @provisioned_devices ||= File.read(provisioning_profile).scan(/<key>\s*ProvisionedDevices\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
     end
 
     def seed_id
@@ -278,8 +292,7 @@ module Motion; module Project
         txt = File.read(provisioning_profile)
         seed_ids = txt.scan(/<key>\s*ApplicationIdentifierPrefix\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
         if seed_ids.size == 0
-          $stderr.puts "Can't find an application seed ID in the provisioning profile"
-          exit 1
+          App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
         elsif seed_ids.size > 1
           App.warn "Found #{seed_ids.size} seed IDs in the provisioning profile. Set the `seed_id' project setting. Will use the last one: `#{seed_ids.last}'"
         end

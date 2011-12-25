@@ -22,14 +22,21 @@ module Motion; module Project
         builder.codesign(config, platform)
       end
 
+      def log(what, msg)
+        $stderr.puts what.rjust(10) + ' ' + msg 
+      end
+
       def warn(msg)
-        $stderr.puts "WARNING!".rjust(10) + ' ' + msg
+        log 'WARNING!', msg
+      end
+
+      def fail(msg)
+        log 'ERROR!', msg
+        exit 1
       end
 
       def info(what, msg)
-        unless Rake.verbose
-          $stderr.puts what.rjust(10) + ' ' + msg 
-        end
+        log what, msg unless Rake.verbose
       end
     end
   end
