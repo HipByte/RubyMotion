@@ -643,7 +643,7 @@ Specification files have full access to the iOS SDK as well as the application c
 <pre>
 $ cat spec/main_spec.rb 
 describe "My Awesome App" do
-  it "should have a window" do
+  it "has a window" do
     app = UIApplication.sharedApplication
     app.windows.size.should == 1
   end
@@ -656,23 +656,27 @@ Assuming the application is properly implemented to follow that specification, +
 $ rake spec
 [...]
 My Awesome App
-  - should have a window
+  - has a window
 
 1 specifications (1 requirements), 0 failures, 0 errors
 $ 
 </pre>
 
-h3. Archiving
+h3. Deployment
 
-The +rake archive+ task builds the project for the iOS device, and generates in the +build+ directory an +.ipa+ archive suitable for ad-hoc distribution or submissions to the App Store.
+h4. Archiving
+
+The +rake archive+ task builds the project for the iOS platform, and generates in the +build+ directory an +.ipa+ archive suitable for ad-hoc distribution or submissions to the App Store.
+
+The process will fail in case there is no developer certificate or provisioning profile installed, which are required for code-signing.
 
 <pre>
 $ rake archive
 $ file build/Hello.ipa 
-build/Hello.ipa: Zip archive data, at least v1.0 to extract
+build/Hello.ipa: Zip archive data
 </pre>
 
-h3. Deployment
+h4. Install on Device
 
 The +rake deploy+ task uploads an archive version of the application to an iOS device.
 
