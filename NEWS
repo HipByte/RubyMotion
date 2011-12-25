@@ -1,3 +1,17 @@
+= RubyMotion 0.33 =
+
+  * Improved the build system. More robust. Smarter (won't try to perform
+    unnecessary tasks). More user-friendly output by default (pass `-v' to see
+    the command-line invocations as before).
+  * Fixed a compilation bug of structure constants (such as CGRectZero).
+  * Fixed `rake deploy' to fail with a proper error message in case the device
+    connected over USB is not provisioned (not mentionned in the project's
+    provisioning profile).
+  * Fixed `rake spec' to fail with a proper error message in case there are no
+    spec files to run.
+  * Fixed a race condition bug in `rake spec' when the specs would run and quit
+    before the simulator has a change to attach itself to the app. 
+
 = RubyMotion 0.32 =
 
   * Fixed a bug where canceling the `rake simulator' task with ^C would not
