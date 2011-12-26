@@ -266,7 +266,7 @@ EOS
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
-          $stderr.puts "File `#{bundle_res}' found in app bundle but not in `#{config.resources_dir}', removing..."
+          App.warn "File `#{bundle_res}' found in app bundle but not in `#{config.resources_dir}', removing"
           FileUtils.rm_rf(bundle_res)
         end
       end
