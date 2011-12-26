@@ -1,7 +1,7 @@
 module Motion; module Project
   class App
     VERBOSE =
-      begin 
+      begin
         if Rake.send(:verbose) != true
           Rake.send(:verbose, false)
           false
