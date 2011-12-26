@@ -3,8 +3,6 @@ require 'motion/project/config'
 require 'motion/project/builder'
 require 'motion/project/vendor'
 
-Rake.verbose(false) unless Rake.verbose == true
-
 desc "Build the project, then run the simulator"
 task :default => :simulator
 

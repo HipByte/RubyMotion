@@ -1,5 +1,17 @@
 module Motion; module Project
   class App
+    VERBOSE =
+      begin 
+        if Rake.send(:verbose) != true
+          Rake.send(:verbose, false)
+          false
+        else
+          true
+        end
+      rescue
+        true
+      end
+
     class << self
       def config
         @config ||= Motion::Project::Config.new('.')
@@ -37,7 +49,7 @@ module Motion; module Project
       end
 
       def info(what, msg)
-        log what, msg unless Rake.verbose
+        log what, msg unless VERBOSE
       end
     end
   end
