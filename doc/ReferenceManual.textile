@@ -659,7 +659,6 @@ My Awesome App
   - has a window
 
 1 specifications (1 requirements), 0 failures, 0 errors
-$ 
 </pre>
 
 h3. Deployment
