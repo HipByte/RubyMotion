@@ -1,3 +1,10 @@
+= RubyMotion 0.34 =
+
+  * Fixed a bug where certain informal protocol method calls would not be
+    properly pre-compiled.
+  * Fixed the build system to work with previous versions of rake, such as the
+    one that ships with OSX.
+
 = RubyMotion 0.33 =
 
   * Improved the build system. More robust. Smarter (won't try to perform
