@@ -1,3 +1,9 @@
+= RubyMotion 0.35 =
+
+  * Added symbolication support. Exception backtraces should have the file/line
+    of each entry (simulator only). Also, Ruby stack trace entries in crash
+    reports now show the class, method, file and line information (zomg!).
+
 = RubyMotion 0.34 =
 
   * Fixed a bug where certain informal protocol method calls would not be
