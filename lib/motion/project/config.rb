@@ -175,6 +175,10 @@ module Motion; module Project
       File.join(@build_dir, platform, @name + '.app')
     end
 
+    def app_bundle_dsym(platform)
+      File.join(@build_dir, platform, @name + '.dSYM')
+    end
+
     def archive
       File.join(@build_dir, @name + '.ipa')
     end

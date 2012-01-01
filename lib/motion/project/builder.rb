@@ -114,7 +114,7 @@ extern "C" {
     void rb_vm_init_jit(void);
     void rb_vm_aot_feature_provide(const char *, void *);
     void *rb_vm_top_self(void);
-    void rb_vm_print_current_exception(void);
+    void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
 EOS
       objs.each do |_, init_func|
@@ -179,8 +179,7 @@ EOS
         rb_exit(retval);
     }
     catch (...) {
-	rb_vm_print_current_exception();
-        retval = 1;
+	rb_rb2oc_exc_handler();
     }
     [pool release];
     return retval;
@@ -270,10 +269,17 @@ EOS
           FileUtils.rm_rf(bundle_res)
         end
       end
+
+      # Generate dSYM.
+      dsym_path = config.app_bundle_dsym(platform)
+      if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
+        App.info "Create", dsym_path
+        sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
+      end
     end
 
     def codesign(config, platform)
-      bundle_path = File.join(config.build_dir, platform, config.name + '.app')
+      bundle_path = config.app_bundle(platform)
       raise unless File.exist?(bundle_path)
 
       # Create bundle/ResourceRules.plist.
