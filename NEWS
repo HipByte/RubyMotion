@@ -1,3 +1,19 @@
+= RubyMotion 0.36 =
+
+  * Fixed a bug in the compiler where calls to Objective-C methods returning
+    C pointers would not be properly compiled.
+  * Fixed a bug in the compiler where calls to internal builtin Objective-C
+    extensions (such as Dispatch::Object#dispatch_object) would not be
+    properly compiled.
+  * Fixed the message of exceptions when running on the device, since we can't
+    symbolicate at runtime. Currently showing the list of callstack addresses.
+  * Fixed the backtraces of Objective-C exceptions.
+  * Added the generation of .dSYM bundles during build.
+  * Fixed uncaught exceptions to actually crash the process instead of exiting,
+    to make sure a crash report will be generated.
+  * Fixed exception backtraces to look more like those from CRuby. Removed 
+    class name from debugging metadata as it causes problems in Ruby.
+
 = RubyMotion 0.35 =
 
   * Added symbolication support. Exception backtraces should have the file/line
