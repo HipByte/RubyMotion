@@ -1,3 +1,5 @@
+require 'thread'
+
 module Motion; module Project;
   class Builder
     include Rake::DSL if Rake.const_defined?(:DSL)
@@ -92,7 +94,38 @@ module Motion; module Project;
 
         [obj, init_func]
       end
-      objs = app_objs = config.ordered_build_files.map { |path| build_file.call(path) }
+
+      # Create builders.
+      builders_count = (ENV['jobs'] ? ENV['jobs'].to_i : 1)
+      builders_count = 1 if builders_count <= 0 or builders_count > 100
+      builders = []
+      objs = []
+      objs_lock = Mutex.new
+      builders_count.times do
+        queue = []
+        th = Thread.new do
+          Thread.stop
+          while path = queue.shift
+            res = build_file.call(path)
+            objs_lock.synchronize { objs << res }
+          end
+        end
+        builders << [queue, th]
+      end
+
+      # Feed builders with work.
+      builder_i = 0
+      config.ordered_build_files.each do |path|
+        builders[builder_i][0] << path
+        builder_i += 1
+        builder_i = 0 if builder_i == builders_count
+      end
+      
+      # Start build.
+      builders.each { |queue, th| th.wakeup }
+      builders.each { |queue, th| th.join }
+
+      app_objs = objs
       if config.spec_mode
         # Build spec files too.
         objs << build_file.call(File.expand_path(File.join(File.dirname(__FILE__), '../spec.rb')))
