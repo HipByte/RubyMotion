@@ -26,13 +26,7 @@ module Motion; module Project;
       build_dir = File.join(config.build_dir, platform)
   
       # Prepare the list of BridgeSupport files needed. 
-      bs_files = []
-      config.frameworks.each do |framework|
-        bs_path = File.join(datadir, 'BridgeSupport', framework + '.bridgesupport')
-        if File.exist?(bs_path)
-          bs_files << bs_path
-        end
-      end
+      bs_files = config.bridgesupport_files
 
       # Build vendor libraries.
       vendor_libs = []

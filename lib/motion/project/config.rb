@@ -130,6 +130,35 @@ module Motion; module Project
       ary
     end
 
+    def bridgesupport_files
+      @bridgesupport_files ||= begin
+        # Compute the list of frameworks, including dependencies, that the project uses.
+        deps = []
+        slf = File.join(sdk('iPhoneSimulator'), 'System', 'Library', 'Frameworks')
+        frameworks.each do |framework|
+          framework_path = File.join(slf, framework + '.framework', framework)
+          if File.exist?(framework_path)
+            `/usr/bin/otool -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
+              # Only care about public, non-umbrella frameworks (for now).
+              if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(.+)$/) and md[1] == md[2]
+                deps << md[1]
+              end
+            end
+          end
+          deps << framework
+        end
+
+        bs_files = []
+        deps.uniq.each do |framework|
+          bs_path = File.join(datadir, 'BridgeSupport', framework + '.bridgesupport')
+          if File.exist?(bs_path)
+            bs_files << bs_path
+          end
+        end
+        bs_files
+      end
+    end
+
     attr_accessor :spec_mode
 
     def spec_files
