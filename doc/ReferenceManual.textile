@@ -470,7 +470,7 @@ As an example, let's take the configuration block of a fictional video player ap
 Motion::Project::App.setup do |app|
   app.name = 'Awesome Video Player'
   app.device_family = :ipad
-  app.frameworks << 'AVFoundation'
+  app.frameworks += ['AVFoundation']
 end
 </pre>
 
@@ -595,6 +595,22 @@ The following steps are performed during the build process:
 # It codesigns the bundle based on the certificate, the provisioning profile and the entitlements specified in the project configuration.
 
 Normally the user does not need to explicitly build the project, as the +build+ task is a dependency of the other tasks.
+
+h4. Multicore Compilation
+
+The compilation of Ruby source files into machine code takes a non-negligeable amount of time.
+
+If the machine used to build the project runs a multicore processor, which is very likely these days, the build system will try to spread the compilation tasks in parallel. This can be very useful when building a project that contains a significant number of files.
+
+The build system uses the value of the +machdep.cpu.thread_count+ sysctl kernel variable to determine  know how many compilation tasks can be executed in parallel. For example, a MacBook Pro running an Intel Core i7 processor has 4 available cores, each one being able to run 2 concurrent threads, and the build system will therefore compile 8 files at a time.
+
+It is possible to override the number of concurrent jobs the build system should use by setting the +jobs+ environment variable. It can be set to a lower number if for instance the machine is performing another CPU intensive task that should not be interrupted by the build system.
+
+<pre>
+$ rake jobs=1        # Force compilation tasks to be sequential.
+</pre>
+
+h4. Cleaning
 
 The +rake clean+ task empties the +build+ directory.
 
