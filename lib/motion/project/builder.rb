@@ -96,8 +96,13 @@ module Motion; module Project;
       end
 
       # Create builders.
-      builders_count = (ENV['jobs'] ? ENV['jobs'].to_i : 1)
-      builders_count = 1 if builders_count <= 0 or builders_count > 100
+      builders_count =
+        if jobs = ENV['jobs']
+          jobs.to_i
+        else
+          `/usr/sbin/sysctl -n machdep.cpu.thread_count`.strip.to_i
+        end
+      builders_count = 1 if builders_count < 1 
       builders = []
       objs = []
       objs_lock = Mutex.new
