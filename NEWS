@@ -1,3 +1,17 @@
+= RubyMotion 0.37 =
+
+  * Improved the build system to automatically deal with framework dependencies.
+    For example, if you're specifying 'Foundation' in app.frameworks, there is
+    no need anymore to specify 'CoreFoundation'.
+  * Added support when passing Bignum objects to Objective-C types.
+  * Improved the `build' task to run the Ruby files compilation tasks
+    concurrently based on the number of CPU threads of the machine (by reading
+    the `machdep.cpu.thread_count' sysctl variable). This improves the build
+    time of projects having a significant number of files. It is possible to
+    override the number of tasks that will run in parallel by setting the
+    `jobs' environment variable. For example, to force files to be compiled
+    sequentially: `rake jobs=1'.
+
 = RubyMotion 0.36 =
 
   * Fixed a bug in the compiler where calls to Objective-C methods returning
