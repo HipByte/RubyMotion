@@ -34,7 +34,7 @@ module Motion; module Project
       @project_dir = project_dir
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
       @dependencies = {}
-      @platforms_dir = '/Developer/Platforms'
+      @platforms_dir = File.join(`/usr/bin/xcode-select -print-path`.strip, 'Platforms')
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @libs = []
       @delegate_class = 'AppDelegate'
