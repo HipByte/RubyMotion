@@ -322,7 +322,9 @@ module Motion; module Project
     def provisioning_profile(name = /iOS Team Provisioning Profile/)
       @provisioning_profile ||= begin
         paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
-          File.read(path).scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0].match(name)
+          text = File.read(path)
+          text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+          text.scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0].match(name)
         end
         if paths.size == 0
           App.fail "Can't find a provisioning profile named `#{name}'"
@@ -334,13 +336,18 @@ module Motion; module Project
     end
 
     def provisioned_devices
-      @provisioned_devices ||= File.read(provisioning_profile).scan(/<key>\s*ProvisionedDevices\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
+      @provisioned_devices ||= begin
+        text = File.read(provisioning_profile)
+        text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+        text.scan(/<key>\s*ProvisionedDevices\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
+      end
     end
 
     def seed_id
       @seed_id ||= begin
-        txt = File.read(provisioning_profile)
-        seed_ids = txt.scan(/<key>\s*ApplicationIdentifierPrefix\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
+        text = File.read(provisioning_profile)
+        text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+        seed_ids = text.scan(/<key>\s*ApplicationIdentifierPrefix\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
         if seed_ids.size == 0
           App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
         elsif seed_ids.size > 1
