@@ -127,7 +127,7 @@ module Motion; module Project;
       objs = []
       builder_i = 0
       config.ordered_build_files.each do |path|
-        objs.unshift(builders[builder_i][0].shift)
+        objs << builders[builder_i][0].shift
         builder_i += 1
         builder_i = 0 if builder_i == builders_count
       end
