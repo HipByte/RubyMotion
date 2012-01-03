@@ -497,11 +497,11 @@ To fix that problem, the +files_dependencies+ method can be used in the +Rakefil
 <pre>
 Motion::Project::App.setup do |app|
   # ...
-  app.files_dependencies 'app/foo.rb' => 'app/bar.rb'
+  app.files_dependencies 'app/bar.rb' => 'app/foo.rb'
 end
 </pre>
 
-After this change, the build system will compile +bar.rb+ before +foo.rb+.
+After this change, the build system will compile +foo.rb+ before +bar.rb+.
 
 h4. Using 3rd-Party Libraries
 
