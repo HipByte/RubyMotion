@@ -1,3 +1,10 @@
+= RubyMotion 0.38 =
+
+  * Fixed the default provisioning profile to be one of those Xcode generates
+    by default (iOS Team Provisioning Profile).
+  * Fixed a couple bugs in the build system regarding file dependencies.
+  * Fixed the build system to work with Ruby 1.9.
+
 = RubyMotion 0.37 =
 
   * Improved the build system to automatically deal with framework dependencies.
