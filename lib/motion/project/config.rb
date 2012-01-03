@@ -103,10 +103,16 @@ module Motion; module Project
     end
 
     def files_dependencies(deps_hash)
-      p = lambda { |x| /^\./.match(x) ? x : File.join('.', x) }
+      res_path = lambda do |x|
+        path = /^\./.match(x) ? x : File.join('.', x)
+        unless @files.include?(path)
+          App.fail "Can't resolve dependency `#{x}'"
+        end
+        path
+      end
       deps_hash.each do |path, deps|
         deps = [deps] unless deps.is_a?(Array)
-        @dependencies[p.call(path)] = deps.map(&p)
+        @dependencies[res_path.call(path)] = deps.map(&res_path)
       end
     end
 
@@ -116,18 +122,29 @@ module Motion; module Project
       @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
     end
 
+    def file_dependencies(file)
+      deps = @dependencies[file]
+      if deps
+        deps = deps.map { |x| file_dependencies(x) }
+      else
+        deps = [] 
+      end
+      deps << file
+      deps 
+    end
+
     def ordered_build_files
-      ary = []
-      @files.each do |file|
-        deps = @dependencies[file]
-        if deps
-          deps.each do |dep|
-            ary << dep unless ary.index(dep)
+      @ordered_build_files ||= begin
+        flat_deps = @files.map { |file| file_dependencies(file) }.flatten
+        paths = flat_deps.dup
+        flat_deps.each do |path|
+          n = paths.count(path)
+          if n > 1
+            (n - 1).times { paths.delete_at(paths.rindex(path)) }
           end
         end
-        ary << file unless ary.index(file)
+        paths
       end
-      ary
     end
 
     def bridgesupport_files
