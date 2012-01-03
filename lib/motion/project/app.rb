@@ -35,8 +35,12 @@ module Motion; module Project
       end
 
       def log(what, msg)
-        what = "\e[1m" + what.rjust(10) + "\e[0m" # bold
-        $stderr.puts what + ' ' + msg 
+        @print_mutex ||= Mutex.new
+        # Because this method can be called concurrently, we don't want to mess any output.
+        @print_mutex.synchronize do
+          what = "\e[1m" + what.rjust(10) + "\e[0m" # bold
+          $stderr.puts what + ' ' + msg 
+        end
       end
 
       def warn(msg)
