@@ -23,7 +23,7 @@ module Motion; module Project;
       cc = File.join(config.platform_dir(platform), 'Developer/usr/bin/gcc')
       cxx = File.join(config.platform_dir(platform), 'Developer/usr/bin/g++')
     
-      build_dir = File.join(config.build_dir, platform)
+      build_dir = File.join(config.versionized_build_dir, platform)
   
       # Prepare the list of BridgeSupport files needed. 
       bs_files = config.bridgesupport_files
@@ -37,7 +37,7 @@ module Motion; module Project;
       end 
 
       # Build object files.
-      objs_build_dir = File.join(build_dir, config.sdk_version + '-sdk-objs')
+      objs_build_dir = File.join(build_dir, 'objs')
       FileUtils.mkdir_p(objs_build_dir)
       project_file_changed = File.mtime(config.project_file) > File.mtime(objs_build_dir)
       build_file = Proc.new do |path|
@@ -232,7 +232,7 @@ EOS
       main_o = File.join(objs_build_dir, 'main.o')
       if !(File.exist?(main) and File.exist?(main_o) and File.read(main) == main_txt)
         File.open(main, 'w') { |io| io.write(main_txt) }
-        sh "#{cxx} \"#{main}\" #{arch_flags} -fexceptions -fblocks -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -fobjc-legacy-dispatch -fobjc-abi-version=2 -c -o \"#{main_o}\""
+        sh "#{cxx} \"#{main}\" #{arch_flags} -fexceptions -fblocks -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.deployment_target} -fobjc-legacy-dispatch -fobjc-abi-version=2 -c -o \"#{main_o}\""
       end
 
       # Prepare bundle.
@@ -256,7 +256,7 @@ EOS
           stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
           framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
         end
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.sdk_version} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.deployment_target} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
       end
 
       # Create bundle/Info.plist.
@@ -369,7 +369,7 @@ PLIST
       if File.mtime(config.project_file) > File.mtime(bundle_path) \
           or !system("#{codesign_cmd} --verify \"#{bundle_path}\" >& /dev/null")
         App.info 'Codesign', bundle_path
-        entitlements = File.join(config.build_dir, platform, "Entitlements.plist")
+        entitlements = File.join(config.versionized_build_dir, platform, "Entitlements.plist")
         File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
         sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
       end

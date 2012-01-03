@@ -24,11 +24,11 @@ module Motion; module Project
       end
     end
 
-    variable :files, :platforms_dir, :sdk_version, :frameworks, :libs,
-      :delegate_class, :name, :build_dir, :resources_dir, :specs_dir,
-      :identifier, :codesign_certificate, :provisioning_profile, :device_family,
-      :interface_orientations, :version, :icons, :prerendered_icon, :seed_id,
-      :entitlements
+    variable :files, :platforms_dir, :sdk_version, :deployment_target,
+      :frameworks, :libs, :delegate_class, :name, :build_dir, :resources_dir,
+      :specs_dir, :identifier, :codesign_certificate, :provisioning_profile,
+      :device_family, :interface_orientations, :version, :icons,
+      :prerendered_icon, :seed_id, :entitlements
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -74,26 +74,37 @@ module Motion; module Project
           App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
         end
       end
+
+      # deployment_target
+      if deployment_target > sdk_version
+        App.fail "Deployment target `#{deployment_target}' must be equal or lesser than SDK version `#{sdk_version}'"
+      end
       unless File.exist?(datadir)
-        App.fail "iOS SDK #{sdk_version} is not supported by this version of RubyMotion"
+        App.fail "iOS deployment target #{deployment_target} is not supported by this version of RubyMotion"
       end
     end
 
     def build_dir
-      tried = false
-      begin
-        FileUtils.mkdir_p(@build_dir)
-      rescue Errno::EACCES
-        raise if tried
-        require 'digest/sha1'
-        hash = Digest::SHA1.hexdigest(File.expand_path(project_dir))
-        tmp = File.join(ENV['TMPDIR'], hash)
-        App.warn "Cannot create build_dir `#{@build_dir}'. Check the permissions. Using a temporary build directory instead: `#{tmp}'"
-        @build_dir = tmp
-        tried = true
-        retry
+      unless File.directory?(@build_dir)
+        tried = false
+        begin
+          FileUtils.mkdir_p(@build_dir)
+        rescue Errno::EACCES
+          raise if tried
+          require 'digest/sha1'
+          hash = Digest::SHA1.hexdigest(File.expand_path(project_dir))
+          tmp = File.join(ENV['TMPDIR'], hash)
+          App.warn "Cannot create build_dir `#{@build_dir}'. Check the permissions. Using a temporary build directory instead: `#{tmp}'"
+          @build_dir = tmp
+          tried = true
+          retry
+        end
       end
       @build_dir
+    end
+
+    def versionized_build_dir
+      File.join(build_dir, deployment_target)
     end
 
     attr_reader :project_dir
@@ -190,8 +201,8 @@ module Motion; module Project
       File.join(motiondir, 'bin')
     end
 
-    def datadir
-      File.join(motiondir, 'data', sdk_version)
+    def datadir(target=deployment_target)
+      File.join(motiondir, 'data', target)
     end
 
     def platform_dir(platform)
@@ -205,11 +216,17 @@ module Motion; module Project
         end
         if versions.size == 0
           App.fail "Can't find an iOS SDK in `#{platforms_dir}'"
-        #elsif versions.size > 1
-        #  $stderr.puts "found #{versions.size} SDKs, will use the latest one"
         end
-        versions.max
+        supported_vers = versions.reverse.find { |vers| File.exist?(datadir(vers)) }
+        unless supported_vers
+          App.fail "RubyMotion doesn't support any of these SDK versions: #{versions.join(', ')}"
+        end
+        supported_vers
       end
+    end
+
+    def deployment_target
+      @deployment_target ||= @sdk_version
     end
 
     def sdk(platform)
@@ -218,15 +235,15 @@ module Motion; module Project
     end
 
     def app_bundle(platform)
-      File.join(@build_dir, platform, @name + '.app')
+      File.join(versionized_build_dir, platform, @name + '.app')
     end
 
     def app_bundle_dsym(platform)
-      File.join(@build_dir, platform, @name + '.dSYM')
+      File.join(versionized_build_dir, platform, @name + '.dSYM')
     end
 
     def archive
-      File.join(@build_dir, @name + '.ipa')
+      File.join(versionized_build_dir, @name + '.ipa')
     end
 
     def identifier
@@ -263,7 +280,7 @@ module Motion; module Project
     def info_plist
       @info_plist ||= {
         'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
-        'MinimumOSVersion' => sdk_version,
+        'MinimumOSVersion' => deployment_target,
         'CFBundleDevelopmentRegion' => 'en',
         'CFBundleName' => @name,
         'CFBundleDisplayName' => @name,

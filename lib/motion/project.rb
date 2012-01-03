@@ -27,11 +27,11 @@ end
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
   app = App.config.app_bundle('iPhoneSimulator')
-  sdk_version = App.config.sdk_version
+  target = App.config.deployment_target
 
   # Cleanup the simulator application sandbox, to avoid having old resource files there.
   if ENV['clean']
-    sim_apps = File.expand_path("~/Library/Application Support/iPhone Simulator/#{sdk_version}/Applications")
+    sim_apps = File.expand_path("~/Library/Application Support/iPhone Simulator/#{target}/Applications")
     Dir.glob("#{sim_apps}/**/*.app").each do |app_bundle|
       if File.basename(app_bundle) == File.basename(app)
         rm_rf File.dirname(app_bundle)
@@ -52,7 +52,7 @@ task :simulator => ['build:simulator'] do
   sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
   App.info 'Simulate', app
-  sh "#{sim} #{debug} #{family_int} #{sdk_version} \"#{app}\""
+  sh "#{sim} #{debug} #{family_int} #{target} \"#{app}\""
 end
 
 desc "Create an .ipa archive"
