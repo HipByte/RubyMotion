@@ -103,7 +103,7 @@ module Motion; module Project;
       builders_count.times do
         queue = []
         th = Thread.new do
-          Thread.stop
+          sleep
           while path = queue.shift
             res = build_file.call(path)
             objs_lock.synchronize { objs << res }
