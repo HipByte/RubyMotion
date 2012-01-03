@@ -319,10 +319,10 @@ module Motion; module Project
       end
     end
 
-    def provisioning_profile(name = 'Dev Profile')
+    def provisioning_profile(name = /iOS Team Provisioning Profile/)
       @provisioning_profile ||= begin
         paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
-          File.read(path).scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0] == name
+          File.read(path).scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0].match(name)
         end
         if paths.size == 0
           App.fail "Can't find a provisioning profile named `#{name}'"
