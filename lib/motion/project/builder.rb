@@ -98,16 +98,15 @@ module Motion; module Project;
         end
       builders_count = 1 if builders_count < 1 
       builders = []
-      objs = []
-      objs_lock = Mutex.new
       builders_count.times do
         queue = []
         th = Thread.new do
           sleep
+          objs = []
           while path = queue.shift
-            res = build_file.call(path)
-            objs_lock.synchronize { objs << res }
+            objs.unshift(build_file.call(path))
           end
+          queue.concat(objs)
         end
         builders << [queue, th]
       end
@@ -119,14 +118,23 @@ module Motion; module Project;
         builder_i += 1
         builder_i = 0 if builder_i == builders_count
       end
-      
+ 
       # Start build.
       builders.each { |queue, th| th.wakeup }
       builders.each { |queue, th| th.join }
 
+      # Merge the result (based on build order).
+      objs = []
+      builder_i = 0
+      config.ordered_build_files.each do |path|
+        objs.unshift(builders[builder_i][0].shift)
+        builder_i += 1
+        builder_i = 0 if builder_i == builders_count
+      end
+
       app_objs = objs
       if config.spec_mode
-        # Build spec files too.
+        # Build spec files too, but sequentially.
         objs << build_file.call(File.expand_path(File.join(File.dirname(__FILE__), '../spec.rb')))
         spec_objs = config.spec_files.map { |path| build_file.call(path) }
         objs += spec_objs
