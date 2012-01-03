@@ -120,7 +120,10 @@ module Motion; module Project;
       end
  
       # Start build.
-      builders.each { |queue, th| th.wakeup }
+      builders.each do |queue, th|
+        sleep 0.01 while th.status != 'sleep'
+        th.wakeup
+      end
       builders.each { |queue, th| th.join }
 
       # Merge the result (based on build order).
