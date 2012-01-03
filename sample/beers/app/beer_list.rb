@@ -11,7 +11,7 @@ class BeerList < UITableViewController
   end
 
   def viewWillAppear(animated)
-    navigationController.setNavigationBarHidden(true, animated:false)
+    navigationController.setNavigationBarHidden(true, animated:true)
   end    
 
   def tableView(tableView, numberOfRowsInSection:section)
