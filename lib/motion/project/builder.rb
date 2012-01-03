@@ -83,7 +83,7 @@ module Motion; module Project;
    
           # Assemble fat binary.
           arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
-          sh "lipo -create #{arch_objs_list} -output \"#{obj}\""
+          sh "/usr/bin/lipo -create #{arch_objs_list} -output \"#{obj}\""
         end
 
         [obj, init_func]
