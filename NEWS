@@ -1,9 +1,20 @@
+= RubyMotion 0.39 =
+
+  * Fixed the build system to work with Ruby 1.9.3 (lulz!).
+  * Fixed a bug in the build system regarding file dependencies.
+  * Added a `deployment_target' config setting, which can be used to specify
+    which iOS version the compiler should target. It is different from
+    `sdk_version' which specify which SDK version installed the compiler will
+    use. The default value of `deployment_target' is `sdk_version'.
+  * Fixed the build system to use `xcode-select -printPath' to determine
+    the default `Platforms' directory (where SDKs are installed).
+
 = RubyMotion 0.38 =
 
   * Fixed the default provisioning profile to be one of those Xcode generates
     by default (iOS Team Provisioning Profile).
   * Fixed a couple bugs in the build system regarding file dependencies.
-  * Fixed the build system to work with Ruby 1.9.
+  * Fixed the build system to work with Ruby 1.9.2.
 
 = RubyMotion 0.37 =
 
