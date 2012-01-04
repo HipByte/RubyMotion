@@ -226,7 +226,7 @@ module Motion; module Project
     end
 
     def deployment_target
-      @deployment_target ||= @sdk_version
+      @deployment_target ||= sdk_version
     end
 
     def sdk(platform)
@@ -352,19 +352,20 @@ module Motion; module Project
       end
     end
 
+    def read_provisioned_profile_array(key)
+      text = File.read(provisioning_profile)
+      text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+      text.scan(/<key>\s*#{key}\s*<\/key>\s*<array>(.*?)\s*<\/array>/m)[0][0].scan(/<string>(.*?)<\/string>/).map { |str| str[0].strip }
+    end
+    private :read_provisioned_profile_array
+
     def provisioned_devices
-      @provisioned_devices ||= begin
-        text = File.read(provisioning_profile)
-        text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
-        text.scan(/<key>\s*ProvisionedDevices\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
-      end
+      @provisioned_devices ||= read_provisioned_profile_array('ProvisionedDevices')
     end
 
     def seed_id
       @seed_id ||= begin
-        text = File.read(provisioning_profile)
-        text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
-        seed_ids = text.scan(/<key>\s*ApplicationIdentifierPrefix\s*<\/key>\s*<array>(\s*<string>\s*([^<\s]+)\s*<\/string>)+\s*<\/array>/).map { |ary| ary[1] }
+        seed_ids = read_provisioned_profile_array('ApplicationIdentifierPrefix')
         if seed_ids.size == 0
           App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
         elsif seed_ids.size > 1
