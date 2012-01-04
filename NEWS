@@ -1,3 +1,11 @@
+= RubyMotion 0.40 =
+
+  * Fixed a bug where multiple provisioned devices or application identifiers
+    in the provisioned profile would not be taken into account (thanks Matt
+    Aimonetti for the fix).
+  * Fixed a bug where the deployment_target could incidentally be nil and
+    break the build task when generating the Info.plist file.
+
 = RubyMotion 0.39 =
 
   * Fixed the build system to work with Ruby 1.9.3 (lulz!).
