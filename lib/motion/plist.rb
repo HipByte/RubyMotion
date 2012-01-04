@@ -40,7 +40,7 @@ EOS
           when FalseClass
             str << indent_line("<false/>", indent)
           else
-            raise "Invalid plist object (must be either a Hash, Array, String, or boolean true/false value)"
+            raise "Invalid plist object of type `#{plist.class}' (must be either a Hash, Array, String, or boolean true/false value)"
         end
       end
     end
