@@ -104,7 +104,7 @@ module Motion; module Project;
           sleep
           objs = []
           while path = queue.shift
-            objs.unshift(build_file.call(path))
+            objs << build_file.call(path)
           end
           queue.concat(objs)
         end
