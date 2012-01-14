@@ -1,3 +1,14 @@
+= RubyMotion 0.41 =
+
+  * New memory management system.
+  * Fixed a bug in the simulator launcher, where environment variables would
+    not properly be propagated to the simulated app.
+  * Fixed a bug in the dependencies system, again.
+  * Fixed a problem when using attr_reader/accessor to override an Objective-C
+    method. Because the static compiler doesn't know the proper signature
+    ahead of time, we would be crashing later on. We now print a proper error
+    message and abort the program.
+
 = RubyMotion 0.40 =
 
   * Fixed a bug where multiple provisioned devices or application identifiers
