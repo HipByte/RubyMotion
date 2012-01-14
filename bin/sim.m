@@ -157,9 +157,6 @@ main(int argc, char **argv)
 	@selector(setApplicationToSimulateOnStart:), app_spec);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedApplicationLaunchArgs:), [NSArray array]);
-    ((void (*)(id, SEL, id))objc_msgSend)(config,
-	@selector(setSimulatedApplicationLaunchEnvironment:),
-	[NSDictionary dictionary]);
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
 	@selector(setSimulatedApplicationShouldWaitForDebugger:), debug_mode);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
