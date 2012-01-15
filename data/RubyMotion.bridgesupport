@@ -1,0 +1,5 @@
+<class name='NSObject'>
+  <method selector='dispatch_object'>
+    <retval declared_type='void*' type='^v'/>
+  </method>
+</class>

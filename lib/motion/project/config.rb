@@ -161,7 +161,7 @@ module Motion; module Project
     def bridgesupport_files
       @bridgesupport_files ||= begin
         # Compute the list of frameworks, including dependencies, that the project uses.
-        deps = []
+        deps = ['RubyMotion']
         slf = File.join(sdk('iPhoneSimulator'), 'System', 'Library', 'Frameworks')
         frameworks.each do |framework|
           framework_path = File.join(slf, framework + '.framework', framework)
