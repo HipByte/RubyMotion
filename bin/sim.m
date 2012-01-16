@@ -71,7 +71,7 @@ sigforwarder(int sig)
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(), @"_simgdbcmds",
 	    nil]];
 	//if (![[NSFileManager defaultManager] fileExistsAtPath:cmds_path]) {
-	    NSString *cmds = @"set breakpoint pending on\nbreak rb_exc_raise\n";
+	    NSString *cmds = @"set breakpoint pending on\nbreak rb_exc_raise\nbreak malloc_error_break\n";
 	    if (getenv("no_continue") == NULL) {
 		cmds = [cmds stringByAppendingString:@"continue\n"];
 	    }
@@ -157,6 +157,9 @@ main(int argc, char **argv)
 	@selector(setApplicationToSimulateOnStart:), app_spec);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedApplicationLaunchArgs:), [NSArray array]);
+    ((void (*)(id, SEL, id))objc_msgSend)(config,
+       @selector(setSimulatedApplicationLaunchEnvironment:),
+       [[NSProcessInfo processInfo] environment]);
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
 	@selector(setSimulatedApplicationShouldWaitForDebugger:), debug_mode);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
