@@ -1,6 +1,7 @@
 = RubyMotion 0.41 =
 
   * New memory management system.
+  * Fixed a (pretty rare) crasher in the compiler.
   * Fixed a bug in the simulator launcher, where environment variables would
     not properly be propagated to the simulated app.
   * Fixed a bug in the dependencies system, again.
