@@ -35,9 +35,7 @@ task :bridgesupport_files do
     mkdir_p "#{sdk_version}/BridgeSupport"
 
     rm_bs = "#{sdk_version}/BridgeSupport/RubyMotion.bridgesupport"
-    unless File.exist?(rm_bs)
-      cp 'RubyMotion.bridgesupport', rm_bs
-    end
+    cp 'RubyMotion.bridgesupport', rm_bs
 
     Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
       framework = File.basename(framework_path, '.framework')
