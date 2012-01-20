@@ -1,6 +1,9 @@
 = RubyMotion 0.41 =
 
-  * New memory management system.
+  * New memory management system. Similar to ARC in design, uses the existing
+    autorelease pool infrastructure. No "real" GC. Works for CF objects, no
+    need to use CFRetain/CFRelease.
+  * Fixed a memory smasher in the dispatcher.
   * Fixed a (pretty rare) crasher in the compiler.
   * Fixed a bug in the simulator launcher, where environment variables would
     not properly be propagated to the simulated app.
