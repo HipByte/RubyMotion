@@ -353,19 +353,13 @@ Since memory can be limited on iOS hardware, the developer must be careful about
 
 RubyMotion implements a form of garbage collection called reference counting. An object has an initial reference count of zero, is incremented when a reference to it is created, and decremented when a reference is destroyed. When the count reaches zero, the object's memory is reclaimed by the collector.
 
-Object cycles, when two or more objects refer to each other, are handled by the garbage collector.
+RubyMotion's memory management system is designed to simplify the development process. Unlike traditional Objective-C programming, object references are automatically created and destroyed by the system. It is very similar to Objective-C's ARC, in design, but it is differently implemented.
 
-RubyMotion's memory management system is designed to simplify the development process. Unlike traditional Objective-C programming, object references are automatically created and destroyed by the system. Similarly, because object cycles will be garbage-collected, the developer does not need to keep in mind the entire object graph of his project and accordingly use weak references.
+Object cycles, when two or more objects refer to each other, are currently not handled, but will be in future releases.
 
-h4. Immediate Types
+h4. Objective-C  and CoreFoundation Objects
 
-The +Fixnum+ and +Float+ types in RubyMotion are immediates; they don't use memory resources to be created. The runtime uses a technique called "tagged pointers":http://en.wikipedia.org/wiki/Tagged_pointer to implement this.
-
-The ability to use these types without affecting the memory usage is important as a sizable part of a real-world app is spent in control drawing, which can make intensive use of arithmetic algorithms.
-
-h4. Objective-C Objects
-
-Objects created by Objective-C APIs are automatically managed by RubyMotion. There is no need to send the +retain+, +release+ or +autorelease+ messages to them.
+Objects created by Objective-C or CoreFoundation-style APIs are automatically managed by RubyMotion. There is no need to send the +retain+, +release+ or +autorelease+ messages to them, or use the +CFRetain+ or +CFRelease+ functions.
 
 The following piece of code allocates two +NSDate+ objects using different constructions. In typical Objective-C, the returned objects would need to be differently managed. In RubyMotion, both objects will be entitled to garbage-collection.
 
@@ -374,19 +368,23 @@ date1 = NSDate.alloc.init
 date2 = NSDate.date
 </pre>
 
-h4. CoreFoundation Objects
-
-Objects created by CoreFoundation-style APIs must be explicitely released by the developer, by using the +CFRelease()+ function. RubyMotion will not garbage-collect them otherwise.
+In order to prevent an object from being collected, a reference must be created to it, such as setting an instance variable to it. This will make sure the object will be kept alive as long as the instance variable receiver is alive.
 
 <pre>
-attributed_string = CFAttributedStringCreate(nil, 'Hello World', {})
-do_something(attributed_string)
-
-# At this point, attributed_string is leaking, we need to manually release it.
-CFRelease(attributed_string)
-
-# Now, attributed_string is entitled to garbage-collection.
+@date = date1   # date1 will not be collected until the instance variable receiver is collected
 </pre>
+
+There are other ways of creating references to an object, like setting a constant, using a class variable, adding the object to a container (such as +Array+ or +Hash+), and more. Objects created in RubyMotion and passed to Objective-C APIs will also be properly referenced if needed.
+
+h4. Collection Times
+
+Object collections are triggered by the system and are not deterministic. RubyMotion is based on the existing autorelease pool infrastructure. iOS creates and destroys autorelease pools for the developer, for instance within the event run loop.
+
+h4. Immediate Types
+
+The +Fixnum+ and +Float+ types in RubyMotion are immediates; they don't use memory resources to be created. The runtime uses a technique called "tagged pointers":http://en.wikipedia.org/wiki/Tagged_pointer to implement this.
+
+The ability to use these types without affecting the memory usage is important as a sizable part of a real-world app is spent in control drawing, which can make intensive use of arithmetic algorithms.
 
 h3. Concurrency
 
