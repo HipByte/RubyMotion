@@ -159,6 +159,7 @@ main(int argc, char **argv)
 	@selector(setSimulatedApplicationLaunchArgs:), [NSArray array]);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
        @selector(setSimulatedApplicationLaunchEnvironment:),
+       //[NSDictionary dictionaryWithObjectsAndKeys:@"/usr/lib/libgmalloc.dylib", @"DYLD_INSERT_LIBRARIES", nil]);
        [[NSProcessInfo processInfo] environment]);
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
 	@selector(setSimulatedApplicationShouldWaitForDebugger:), debug_mode);
