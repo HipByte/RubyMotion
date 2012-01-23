@@ -509,7 +509,7 @@ To vendor a 3rd-party library in a RubyMotion project, the source code must be a
 
 The +vendor_project+ method can be called from the +Rakefile+. Its first argument must be the path to the 3rd-party library, for example +"vendor/OAuth2Client"+. Its second argument must be a symbol representing the project type, like +:xcode+. Other arguments can be provided as a list of key/value objects.
 
-Here is a table summarizing project types and key/value objects. At the time of writing, only Xcode-based projects are supported.
+Here is a table summarizing project types and key/value objects.
 
 |_<. Project Type |_<. Key |_<. Discussion |
 |/6. +:xcode+ | +:xcodeproj+ | Name of the Xcode project file to use. Optional if there is one +.xcodeproj+ file in the directory. |
@@ -518,6 +518,8 @@ Here is a table summarizing project types and key/value objects. At the time of 
 || +:configuration+ | Name of the configuration to build. If not provided, +"Release"+ will be used. |
 || +:headers_dir+ | Path to the directory that contains public headers files, declaring APIs that will be used by the RubyMotion project. The path should be relative to the path provided to +vendor_project+, for example +"Sources/Headers"+. This key is optional. |
 || +:products+ | An +Array+ containing the names of products to use in the RubyMotion project, for example +["libfoo.a"]+. This key can be used when the project builds more than one product and the developer wants to filter what will be used by the app. If not provided, all +.a+ libraries built will be used. |
+|/2. +:static+ | +:products+ | An +Array+ containing the names of static libraries to use. The default value is the list of all +.a+ files in the vendor project directory. |
+|| +:headers_dir+ | Path to the directory that contains public headers files, declaring APIs that will be used by the RubyMotion project. The path should be relative to the path provided to +vendor_project+, for example +"include"+. The default value is the vendor project directory.|
 
 As an example, assuming our video player project wants to make use of the OAuth2Client 3rd-library library, a +vendor+ directory would be created and the OAuth2Client source code would be added there.
 
