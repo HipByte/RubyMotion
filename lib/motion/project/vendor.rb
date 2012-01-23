@@ -11,7 +11,7 @@ module Motion; module Project;
       @bs_files = []
     end
 
-    attr_reader :libs, :bs_files
+    attr_reader :path, :libs, :bs_files
 
     def build(platform, archs)
       send gen_method('build'), platform, archs, @opts
@@ -19,6 +19,26 @@ module Motion; module Project;
 
     def clean
       send gen_method('clean')
+    end
+
+    def build_static(platform, archs, opts)
+      Dir.chdir(@path) do
+        libs = (opts.delete(:products) or Dir.glob('*.a'))
+        headers_dir = (opts.delete(:headers_dir) or '.')
+        bs_file = File.expand_path(File.basename(@path) + '.bridgesupport')
+        unless File.exist?(bs_file)
+          Dir.chdir(headers_dir) do
+            sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-I.\" *.h -o \"#{bs_file}\""
+          end
+        end
+        
+        @libs = libs.map { |x| File.expand_path(x) }
+        @bs_files = [File.expand_path(bs_file)]
+      end
+    end
+
+    def clean_static
+      # Nothing to do.
     end
 
     def build_xcode(platform, archs, opts)
@@ -71,11 +91,8 @@ module Motion; module Project;
           end 
         end
 
-        @bs_files.clear
-        @bs_files.concat(Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) })
-
-        @libs.clear
-        @libs.concat(Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) })
+        @bs_files = Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) }
+        @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
       end
     end
 
