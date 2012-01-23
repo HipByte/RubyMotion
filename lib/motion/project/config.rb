@@ -133,6 +133,10 @@ module Motion; module Project
       @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
     end
 
+    def unvendor_project(path)
+      @vendor_projects.delete_if { |x| x.path == path }
+    end
+
     def file_dependencies(file)
       deps = @dependencies[file]
       if deps
