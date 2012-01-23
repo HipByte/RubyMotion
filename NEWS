@@ -1,3 +1,17 @@
+= RubyMotion 0.42 =
+
+  * Added builtin support for TestFlight. It will be a gem once RubyMotion
+    launches. Basic documentation can be read in the file:
+    /Library/Motion/lib/motion/project/testflight.rb
+    (Thanks to Hugues Lismonde for the help.)
+  * Added the possibility to vendor 'static' projects (which contains
+    static libraries and header files). Used by the TestFlight support.
+    See the reference manual. (Thanks to Hugues Lismonde.)
+  * Fixed a bug in the compiler when attempting to precompile an Objective-C
+    method definition stub that doesn't have the same arity as the Ruby
+    definition.
+  * Fixed memory leaks (IO).
+
 = RubyMotion 0.41 =
 
   * New memory management system. Similar to ARC in design, uses the existing
