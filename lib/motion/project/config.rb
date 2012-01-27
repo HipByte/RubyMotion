@@ -238,16 +238,20 @@ module Motion; module Project
         platform + sdk_version + '.sdk')
     end
 
+    def bundle_name
+      @name + (spec_mode ? '_spec' : '')
+    end
+
     def app_bundle(platform)
-      File.join(versionized_build_dir, platform, @name + '.app')
+      File.join(versionized_build_dir, platform, bundle_name + '.app')
     end
 
     def app_bundle_dsym(platform)
-      File.join(versionized_build_dir, platform, @name + '.dSYM')
+      File.join(versionized_build_dir, platform, bundle_name + '.dSYM')
     end
 
     def archive
-      File.join(versionized_build_dir, @name + '.ipa')
+      File.join(versionized_build_dir, bundle_name + '.ipa')
     end
 
     def identifier

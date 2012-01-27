@@ -75,7 +75,6 @@ end
 
 desc "Run specs"
 task :spec do
-  App.config.name += '_spec'
   App.config.spec_mode = true
   Rake::Task["simulator"].invoke
 end

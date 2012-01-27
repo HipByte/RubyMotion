@@ -176,6 +176,7 @@ EOS
 
 + (id)launcher
 {
+    [UIApplication sharedApplication];
     SpecLauncher *launcher = [[self alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
     return launcher; 
@@ -183,7 +184,7 @@ EOS
 
 - (void)appLaunched:(id)notification
 {
-    // Give a bit of time to the simulator to attach...
+    // Give a bit of time for the simulator to attach...
     [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.1];
 }
 
@@ -213,10 +214,10 @@ main(int argc, char **argv)
     try {
         void *self = rb_vm_top_self();
 EOS
+      main_txt << "[SpecLauncher launcher];\n" if config.spec_mode
       app_objs.each do |_, init_func|
         main_txt << "#{init_func}(self, 0);\n"
       end
-      main_txt << "[SpecLauncher launcher];\n" if config.spec_mode
       main_txt << <<EOS
         retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
         rb_exit(retval);
@@ -250,6 +251,7 @@ EOS
       if !File.exist?(main_exec) \
           or File.mtime(config.project_file) > File.mtime(main_exec) \
           or objs.any? { |path, _| File.mtime(path) > File.mtime(main_exec) } \
+	  or File.mtime(main_o) > File.mtime(main_exec) \
           or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
