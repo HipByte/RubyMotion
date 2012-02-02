@@ -28,7 +28,7 @@ module Motion; module Project
       :frameworks, :libs, :delegate_class, :name, :build_dir, :resources_dir,
       :specs_dir, :identifier, :codesign_certificate, :provisioning_profile,
       :device_family, :interface_orientations, :version, :icons,
-      :prerendered_icon, :seed_id, :entitlements
+      :prerendered_icon, :seed_id, :entitlements, :fonts
 
     def initialize(project_dir)
       @project_dir = project_dir
@@ -308,6 +308,7 @@ module Motion; module Project
             'UIPrerenderedIcon' => prerendered_icon,
           }
         },
+        'UIAppFonts' => fonts,
         'UIDeviceFamily' => device_family_ints.map { |x| x.to_s },
         'UISupportedInterfaceOrientations' => interface_orientations_consts
       }
@@ -385,6 +386,14 @@ module Motion; module Project
 
     def entitlements_data
       Motion::PropertyList.to_s(entitlements)
+    end
+
+    def fonts
+      @fonts ||= begin
+        Dir.chdir(resources_dir) do
+          Dir.glob('*.{otf,ttf}')
+        end
+      end
     end
   end
 end; end
