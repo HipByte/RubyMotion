@@ -1,3 +1,18 @@
+= RubyMotion 0.43 =
+
+  * Added support for custom fonts. Introduced a `fonts' project config
+    variable which defaults to the list of *.ttf and *.otf files in the
+    resources directory. The `fonts' variable is then used when generating
+    the bundle property list.
+  * Fixed a bug in the build system where an application compiled in spec
+    mode wouldn't properly install in the Simulator due to differencies in
+    the internal property lists.
+  * Fixed a bug when messaging an Objective-C method implementing forwarding
+    through a helper wouldn't work (and trigger method missing).
+    Example: `textField.autocapitalizationType = ...'.
+  * Fixed a bug in Array#delete and friends, where erased objects would be
+    destroyed before returned back to the caller.
+
 = RubyMotion 0.42 =
 
   * Added builtin support for TestFlight. It will be a gem once RubyMotion
