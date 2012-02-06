@@ -1,3 +1,12 @@
+= RubyMotion 0.44 =
+
+  * Added support for C unions (for example, GLKVector3). Unions must be
+    created using methods or functions provided by iOS (#new won't work).
+    Unions behave like structures, and the compiler will only expose the
+    first variant/field.
+  * Better error reporting when the compiler fails to precompile a stub.
+  * Disables the TestFlight SDK when running the app in the simulator.
+
 = RubyMotion 0.43 =
 
   * Added support for custom fonts. Introduced a `fonts' project config
