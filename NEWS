@@ -1,3 +1,10 @@
+= RubyMotion 0.45 =
+
+  * Fixed a couple bugs in the internal Array erase routine, where
+    some objects could potentially leak or be double-released.
+  * Fixed a bug where the regular expression global backref object could
+    be in some cases prematurely released.
+
 = RubyMotion 0.44 =
 
   * Added support for C unions (for example, GLKVector3). Unions must be
