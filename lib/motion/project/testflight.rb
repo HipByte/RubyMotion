@@ -82,7 +82,7 @@ task :testflight => :archive do
   unless prefs.team_token
     App.fail "A value for app.testflight.team_token is mandatory"
   end
-  distribution_lists = (prefs.distribution_lists.join(',') or nil)
+  distribution_lists = (prefs.distribution_lists ? prefs.distribution_lists.join(',') : nil)
   notes = ENV['notes']
   unless notes
     App.fail "Submission notes must be provided via the `notes' environment variable. Example: rake testflight notes='w00t'"
