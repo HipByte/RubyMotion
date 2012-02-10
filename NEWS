@@ -1,5 +1,13 @@
 = RubyMotion 0.45 =
 
+  * The `rake archive' is now a shortcut to `rake archive:development'
+    and `rake archive:release'. The later builds the project, removes all
+    symbols, and also creates an `.xcarchive' file that opens with Xcode 4,
+    and can be used for an App Store submission.
+  * The `rake deploy' task has been renamed `rake device'.
+  * Updated doc/ReferenceManual.html to follow these changes.
+  * Fixed a bug in the TestFlight integration where the optional
+    distribution_lists key wasn't actually optional (thanks Matt).
   * Fixed a couple bugs in the internal Array erase routine, where
     some objects could potentially leak or be double-released.
   * Fixed a bug where the regular expression global backref object could

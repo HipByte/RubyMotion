@@ -107,8 +107,42 @@ end
 
 desc "Generate .pkg"
 task :package do
-  ENV['DESTDIR'] = '/tmp/Motion'
-  rm_rf '/tmp/Motion'
-  Rake::Task[:install].invoke
-  sh "/Developer/usr/bin/packagemaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{PROJECT_VERSION}.pkg\" --version #{PROJECT_VERSION}"
+  destdir = '/tmp/Motion'
+  pkg = "pkg/RubyMotion #{PROJECT_VERSION}.pkg"
+  if !File.exist?(destdir) or !File.exist?(pkg) or File.mtime(destdir) > File.mtime(pkg)
+    ENV['DESTDIR'] = destdir
+    rm_rf destdir
+    Rake::Task[:install].invoke
+
+    sh "/Developer/usr/bin/packagemaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{PROJECT_VERSION}.pkg\" --version #{PROJECT_VERSION}"
+    open("pkg/Latest", 'w') { |io| io.write PROJECT_VERSION }
+  end
+end
+
+desc "Push on Amazon S3"
+task :upload => :package do
+  require 'rubygems'
+  require 'aws/s3'
+
+  AWS::S3::Base.establish_connection!(
+    :access_key_id => 'AKIAI37ZXXJWNQQ5M45Q',
+    :secret_access_key => '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'
+  )
+
+  WEBSITE_BUCKET_NAME = 'data.hipbyte.com'
+
+  # Will raise an error if bucket doesn't exist
+  AWS::S3::Bucket.find WEBSITE_BUCKET_NAME
+
+  Dir.chdir('pkg') do
+    file = "Latest"
+    puts "Uploading #{file}.."
+    AWS::S3::S3Object.store('rubymotion/'+file, open(file), WEBSITE_BUCKET_NAME)
+    puts "Done!"
+
+    #file = "RubyMotion #{PROJECT_VERSION}.pkg"
+    #puts "Uploading #{file}.."
+    #AWS::S3::S3Object.store("rubymotion/" + file, open(file), WEBSITE_BUCKET_NAME)
+    #puts "Done!"
+  end
 end
