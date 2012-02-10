@@ -679,23 +679,31 @@ My Awesome App
 1 specifications (1 requirements), 0 failures, 0 errors
 </pre>
 
-h3. Deployment
+h3. Archiving
 
-h4. Archiving
+RubyMotion projects can be archived in order to be distributed and submitted to the App Store.
 
-The +rake archive+ task builds the project for the iOS platform, and generates in the +build+ directory an +.ipa+ archive suitable for ad-hoc distribution or submissions to the App Store.
+h4. Development vs Release
 
-The process will fail in case there is no developer certificate or provisioning profile installed, which are required for code-signing.
+A RubyMotion project can be built for development or release. A project is built for development when you run it in the simulator, or push it to your development device. A project is built for release when you're generating an archive for an App Store submission.
+
+Currently, the only difference between a RubyMotion app built for release and one built for development is that all symbols are stripped from the main executable. This process removes about 1MB of data from the app bundle, but at the same time, makes debugging more difficult, which is why it's not applied in development. 
+
+Sometimes, the developer may want to apply different settings in the +Rakefile+ if the project builds for release. This can be done by using the +development+ and +release+ methods on the configuration object, which will yield the given block in case the project builds for the appropriate mode.
 
 <pre>
-$ rake archive
-$ file build/Hello.ipa 
-build/Hello.ipa: Zip archive data
+Motion::Project::App.setup do |app|
+  # ...
+  app.development do
+    # This entitlement is required during development but must not be used for release.
+    app.entitlements['get-task-allow'] = true
+  end
+end
 </pre>
 
 h4. Install on Device
 
-The +rake deploy+ task uploads an archive version of the application to an iOS device.
+The +rake device+ task builds and uploads a development archive of the application to an iOS device.
 
 There must be one iOS device connected via USB to the Mac. The deployment task will attempt to upload the application to the first discovered iOS device on the USB channel.
 
@@ -706,6 +714,14 @@ The process will fail in the following cases:
 * There is a USB connection issue when talking to the device.
 
 Otherwise, the process returns successfully and the application is then available on the device springboard.
+
+h4. Distribution
+
+The +rake archive+ task can be used to generate +.ipa+ archives for both development and release modes. An +.ipa+ archive is suitable for ad-hoc distribution. 
+
+The task requires a valid certificate and provisioning profile in order to codesign the app bundle.
+
+In release mode, an +.xcarchive+ archive is also created. This file opens with the Xcode 4 organizer and allows the developer to perform an App Store submission.
 
 h2. Library
 
