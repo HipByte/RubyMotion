@@ -13,8 +13,23 @@ module Motion; module Project
       end
 
     class << self
+      def config_mode
+        @config_mode or :development
+      end
+
+      def config_mode=(mode)
+        @config_mode = mode
+      end
+
+      def configs
+        @configs ||= {
+          :development => Motion::Project::Config.new('.', :development),
+          :release => Motion::Project::Config.new('.', :release)
+        }
+      end
+
       def config
-        @config ||= Motion::Project::Config.new('.')
+        configs[config_mode]
       end
 
       def builder
@@ -22,12 +37,16 @@ module Motion; module Project
       end
 
       def setup
-        yield config
+        configs.each_value { |x| yield x }
         config.validate
       end
 
       def build(platform)
         builder.build(config, platform)
+      end
+
+      def archive
+        builder.archive(config)
       end
 
       def codesign(platform)

@@ -72,8 +72,8 @@ module Motion; module Project; class Config
   end
 end; end; end
 
-desc "Submit build to TestFlight"
-task :testflight => :archive do
+desc "Submit a development archive to TestFlight"
+task :testflight => 'archive:development' do
   # Retrieve configuration settings.
   prefs = App.config.testflight
   unless prefs.api_token

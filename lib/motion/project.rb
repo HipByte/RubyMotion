@@ -8,20 +8,20 @@ task :default => :simulator
 
 App = Motion::Project::App
 
+desc "Build everything"
+task :build => ['build:simulator', 'build:device']
+
 namespace :build do
   desc "Build the simulator version"
   task :simulator do
     App.build('iPhoneSimulator')
   end
 
-  desc "Build the iOS version"
-  task :ios do
+  desc "Build the device version"
+  task :device do
     App.build('iPhoneOS')
     App.codesign('iPhoneOS')
   end
-
-  desc "Build everything"
-  task :all => [:simulator, :ios]
 end
 
 desc "Run the simulator"
@@ -55,8 +55,10 @@ task :simulator => ['build:simulator'] do
   sh "#{sim} #{debug} #{family_int} #{target} \"#{app}\""
 end
 
-desc "Create an .ipa archive"
-task :archive => ['build:ios'] do
+desc "Create archives for everything"
+task :archive => ['archive:development', 'archive:release']
+
+def create_ipa
   app_bundle = App.config.app_bundle('iPhoneOS')
   archive = App.config.archive
   if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
@@ -73,6 +75,22 @@ task :archive => ['build:ios'] do
   end
 end
 
+namespace :archive do
+  desc "Create an .ipa archive for development"
+  task :development do
+    App.config_mode = :development
+    Rake::Task["build:device"].execute
+    App.archive
+  end
+
+  desc "Create an .ipa and .xcarchive for release (AppStore)"
+  task :release do
+    App.config_mode = :release
+    Rake::Task["build:device"].execute
+    App.archive
+  end
+end
+
 desc "Run specs"
 task :spec do
   App.config.spec_mode = true
@@ -80,7 +98,7 @@ task :spec do
 end
 
 desc "Deploy on the device"
-task :deploy => :archive do
+task :device => :archive do
   App.info 'Deploy', App.config.archive
   unless App.config.provisioned_devices.include?(App.config.device_id)
     App.fail "Connected device ID `#{App.config.device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"

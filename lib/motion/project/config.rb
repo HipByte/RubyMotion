@@ -30,7 +30,9 @@ module Motion; module Project
       :device_family, :interface_orientations, :version, :icons,
       :prerendered_icon, :seed_id, :entitlements, :fonts
 
-    def initialize(project_dir)
+    attr_accessor :spec_mode
+
+    def initialize(project_dir, build_mode)
       @project_dir = project_dir
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
       @dependencies = {}
@@ -50,6 +52,8 @@ module Motion; module Project
       @prerendered_icon = false
       @vendor_projects = []
       @entitlements = {}
+      @spec_mode = false
+      @build_mode = build_mode
     end
 
     def variables
@@ -63,6 +67,13 @@ module Motion; module Project
           end
       end
       map
+    end
+
+    def load_setup(b)
+      @setups ||= []
+      @setups << b
+      b.call self
+      validate
     end
 
     def validate
@@ -103,8 +114,28 @@ module Motion; module Project
       @build_dir
     end
 
-    def versionized_build_dir
-      File.join(build_dir, deployment_target)
+    def build_mode_name
+      @build_mode.to_s.capitalize
+    end
+
+    def development?
+      @build_mode == :development
+    end
+
+    def release?
+      @build_mode == :release
+    end
+
+    def development
+      yield if development?
+    end
+
+    def release
+      yield if release?
+    end
+
+    def versionized_build_dir(platform)
+      File.join(build_dir, platform + '-' + deployment_target + '-' + build_mode_name)
     end
 
     attr_reader :project_dir
@@ -191,8 +222,6 @@ module Motion; module Project
       end
     end
 
-    attr_accessor :spec_mode
-
     def spec_files
       Dir.glob(File.join(specs_dir, '**', '*.rb'))
     end
@@ -243,15 +272,19 @@ module Motion; module Project
     end
 
     def app_bundle(platform)
-      File.join(versionized_build_dir, platform, bundle_name + '.app')
+      File.join(versionized_build_dir(platform), bundle_name + '.app')
     end
 
     def app_bundle_dsym(platform)
-      File.join(versionized_build_dir, platform, bundle_name + '.dSYM')
+      File.join(versionized_build_dir(platform), bundle_name + '.dSYM')
+    end
+
+    def app_bundle_executable(platform)
+      File.join(app_bundle(platform), name)
     end
 
     def archive
-      File.join(versionized_build_dir, bundle_name + '.ipa')
+      File.join(versionized_build_dir('iPhoneOS'), bundle_name + '.ipa')
     end
 
     def identifier

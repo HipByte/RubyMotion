@@ -23,8 +23,9 @@ module Motion; module Project;
       cc = File.join(config.platform_dir(platform), 'Developer/usr/bin/gcc')
       cxx = File.join(config.platform_dir(platform), 'Developer/usr/bin/g++')
     
-      build_dir = File.join(config.versionized_build_dir, platform)
-  
+      build_dir = File.join(config.versionized_build_dir(platform))
+      App.info 'Build', build_dir
+ 
       # Prepare the list of BridgeSupport files needed. 
       bs_files = config.bridgesupport_files
 
@@ -77,7 +78,8 @@ module Motion; module Project;
             # Object.
             arch_obj = File.join(objs_build_dir, "#{path}.#{arch}.o")
             sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
-   
+  
+            [bc, asm].each { |x| File.unlink(x) }
             arch_objs << arch_obj
           end
    
@@ -247,7 +249,8 @@ EOS
       end
 
       # Link executable.
-      main_exec = File.join(bundle_path, config.name)
+      main_exec = config.app_bundle_executable(platform)
+      main_exec_created = false
       if !File.exist?(main_exec) \
           or File.mtime(config.project_file) > File.mtime(main_exec) \
           or objs.any? { |path, _| File.mtime(path) > File.mtime(main_exec) } \
@@ -262,6 +265,7 @@ EOS
           framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
         end
         sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.deployment_target} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
+        main_exec_created = true
       end
 
       # Create bundle/Info.plist.
@@ -321,6 +325,12 @@ EOS
         App.info "Create", dsym_path
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
       end
+
+      # Strip all symbols. Only in release mode.
+      if main_exec_created and config.release?
+        App.info "Strip", main_exec
+        sh "/usr/bin/strip \"#{main_exec}\""
+      end
     end
 
     def codesign(config, platform)
@@ -374,9 +384,56 @@ PLIST
       if File.mtime(config.project_file) > File.mtime(bundle_path) \
           or !system("#{codesign_cmd} --verify \"#{bundle_path}\" >& /dev/null")
         App.info 'Codesign', bundle_path
-        entitlements = File.join(config.versionized_build_dir, platform, "Entitlements.plist")
+        entitlements = File.join(config.versionized_build_dir(platform), "Entitlements.plist")
         File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
         sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
+      end
+    end
+
+    def archive(config)
+      # Create .ipa archive.
+      app_bundle = config.app_bundle('iPhoneOS')
+      archive = config.archive
+      if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
+        App.info 'Create', archive
+        tmp = "/tmp/ipa_root"
+        sh "/bin/rm -rf #{tmp}"
+        sh "/bin/mkdir -p #{tmp}/Payload"
+        sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
+        Dir.chdir(tmp) do
+          sh "/bin/chmod -R 755 Payload"
+          sh "/usr/bin/zip -q -r archive.zip Payload"
+        end
+        sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
+      end
+
+      # Create .xcarchive. Only in release mode.
+      if config.release?
+        xcarchive = File.join(File.dirname(app_bundle), config.name + '.xcarchive')
+        if !File.exist?(xcarchive) or File.mtime(app_bundle) > File.mtime(xcarchive)
+          App.info 'Create', xcarchive
+          apps = File.join(xcarchive, 'Products', 'Applications')
+          FileUtils.mkdir_p apps
+          sh "/bin/cp -r \"#{app_bundle}\" \"#{apps}\""
+          dsyms = File.join(xcarchive, 'dSYMs')
+          FileUtils.mkdir_p dsyms
+          sh "/bin/cp -r \"#{config.app_bundle_dsym('iPhoneOS')}\" \"#{dsyms}\""
+          app_path = "Applications/#{config.name}.app"
+          info_plist = {
+            'ApplicationProperties' => {
+              'ApplicationPath' => app_path,
+              'CFBundleIdentifier' => config.identifier,
+              'IconPaths' => config.icons.map { |x| File.join(app_path, x) },
+            },
+            'ArchiveVersion' => 1,
+            'CreationDate' => Time.now,
+            'Name' => config.name,
+            'SchemeName' => config.name
+          }
+          File.open(File.join(xcarchive, 'Info.plist'), 'w') do |io|
+            io.write Motion::PropertyList.to_s(info_plist)
+          end 
+        end
       end
     end
   end
