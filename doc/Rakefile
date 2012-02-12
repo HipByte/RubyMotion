@@ -389,7 +389,8 @@ EOS
 end
 
 task :default => :all
-task :all => [:guides, :docset]
+#task :all => [:guides, :docset]
+task :all => [:guides] # no docset in the main distribution...
 
 task :guides do
   Dir.glob('*.textile').each do |src|

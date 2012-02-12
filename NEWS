@@ -1,3 +1,9 @@
+= RubyMotion 0.46 =
+
+  * Removed the docset from the main distribution (will be online).
+  * Fixed the `rake device' task to only depend on
+    `rake archive:development' (thanks Hugues).
+
 = RubyMotion 0.45 =
 
   * The `rake archive' is now a shortcut to `rake archive:development'
