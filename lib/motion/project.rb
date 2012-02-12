@@ -98,7 +98,7 @@ task :spec do
 end
 
 desc "Deploy on the device"
-task :device => :archive do
+task :device => 'archive:development' do
   App.info 'Deploy', App.config.archive
   unless App.config.provisioned_devices.include?(App.config.device_id)
     App.fail "Connected device ID `#{App.config.device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
