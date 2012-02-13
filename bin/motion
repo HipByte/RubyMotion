@@ -1,5 +1,7 @@
 #!/usr/bin/ruby
 
+require 'fileutils'
+
 $motion_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
 $:.unshift($motion_libdir)
 require 'motion/version'
@@ -8,6 +10,17 @@ class Command
   class << self
     attr_accessor :name
     attr_accessor :help
+  
+    def die(*msg)
+      $stderr.puts msg
+      exit 1
+    end
+
+    def need_root
+      if Process.uid != 0
+        die "You need to be root to run this command."
+      end
+    end
   end
 end
 
@@ -17,20 +30,17 @@ class CreateCommand < Command
 
   def self.run(args)
     if args.size != 1
-      $stderr.puts "Please specify an app name (e.g. motion create Hello)"
-      return false 
+      die "Please specify an app name (e.g. motion create Hello)"
     end
 
     app_name = args.shift
 
     unless app_name.match(/^[a-zA-Z\d\s]+$/)
-      $stderr.puts "Invalid app name"
-      return false
+      die "Invalid app name"
     end
 
     if File.exist?(app_name)
-      $stderr.puts "Directory `#{app_name}' already exists"
-      return false
+      die "Directory `#{app_name}' already exists"
     end
 
     Dir.mkdir(app_name)
@@ -76,18 +86,87 @@ EOS
   end
 end
 
-class UpdateCommand < Command
-  self.name = 'update'
-  self.help = 'Update current distribution'
+LicensePath = '/Library/Motion/license.key'
+
+class ActivateCommand < Command
+  self.name = 'activate'
+  self.help = 'Activate the software license'
 
   def self.run(args)
-    $stderr.puts "update command not implemented yet"
-    return false
+    if args.size != 1
+      die "Please specify the license key to activate (e.g. motion activate b2e662dab891b...)"
+    end
+
+    license_key = args[0]
+    unless license_key.match(/^[a-f0-9]{40}$/)
+      die "Given license key `#{license_key}' seems invalid. It should be a string of 40 hexadecimal characters. Check the mail you received after the order, or contact us if you need any help: info@hipbyte.com"
+    end
+
+    if File.exist?(LicensePath)
+      die "Product is already activated. Delete the license file `#{LicensePath}' if you want to activate a new license."
+    end
+
+    need_root
+    File.open(LicensePath, 'w') { |io| io.write license_key }
+    puts "Product activated. Thanks for purchasing RubyMotion :-)"
+  end
+end
+
+class UpdateCommand < Command
+  self.name = 'update'
+  self.help = 'Update the software'
+
+  def self.run(args)
+    unless args.empty?
+      die "Extra arguments provided."
+    end
+
+    unless File.exist?(LicensePath)
+      die "The product has not been activated yet. Please purchase RubyMotion, then use the `motion activate' command."
+    end
+
+    need_root
+    license_key = File.read(LicensePath)
+    product_version = '0.0'#Motion::Version
+
+    $stderr.puts "Connecting to the server..."
+    curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data-hipbyte.heroku.com/update_software"
+    resp = `#{curl}`
+    unless resp.match(/^http:/)
+      die resp
+    end
+
+    $stderr.puts "Downloading software update..."
+    url = resp
+    tmp_dest = '/tmp/_rubymotion_su.pkg'
+    curl = "/usr/bin/curl -# \"#{url}\" -o #{tmp_dest}"
+    unless system(curl)
+      die "An error happened when downloading the software update."
+    end
+
+    $stderr.puts "Installing software update..."
+    installer = "/usr/sbin/installer -pkg \"#{tmp_dest}\" -target / >& /tmp/installer.stderr"
+    unless system(installer)
+      die "An error happened when installing the software update: #{File.read('/tmp/installer.stderr')}"
+    end
+    FileUtils.rm_f tmp_dest
+
+    $stderr.puts "Software update installed.\n\n"
+    news = File.read('/Library/Motion/NEWS')
+    section = 0
+    news.lines.each do |line|
+      if line.match(/^= /)
+        break if section == 1
+        section += 1
+      end
+      $stderr.puts line
+    end
+    $stderr.puts "(See the `/Library/Motion/NEWS' file for all changes.)"
   end
 end
 
 class MotionMainCommand
-  Commands = [CreateCommand, UpdateCommand]
+  Commands = [CreateCommand, ActivateCommand, UpdateCommand]
 
   def initialize(args)
     arg = args.shift
@@ -103,7 +182,7 @@ class MotionMainCommand
     end
     command = Commands.find { |command| command.name == arg }
     usage unless command
-    exit command.run(args) ? 0 : 1
+    command.run(args)
   end
 
   def usage
