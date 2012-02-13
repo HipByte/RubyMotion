@@ -127,7 +127,7 @@ class UpdateCommand < Command
 
     need_root
     license_key = File.read(LicensePath)
-    product_version = '0.0'#Motion::Version
+    product_version = Motion::Version
 
     $stderr.puts "Connecting to the server..."
     curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data-hipbyte.heroku.com/update_software"
