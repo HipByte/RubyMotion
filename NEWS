@@ -1,5 +1,6 @@
 = RubyMotion 0.46 =
 
+  * Implemented the `motion activate' and ` motion update' commands.
   * Removed the docset from the main distribution (will be online).
   * Fixed the `rake device' task to only depend on
     `rake archive:development' (thanks Hugues).
