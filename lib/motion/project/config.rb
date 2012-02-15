@@ -69,14 +69,13 @@ module Motion; module Project
       map
     end
 
-    def load_setup(b)
-      @setups ||= []
-      @setups << b
-      b.call self
-      validate
-    end
-
     def validate
+      # Xcode version
+      ary = `/usr/bin/xcodebuild -version`.scan(/Xcode\s+([^\n]+)\n/)
+      if ary and ary[0] and xcode_version = ary[0][0]
+        App.fail "Xcode 4.x or greater is required" if xcode_version < '4.0'
+      end
+
       # sdk_version
       ['iPhoneSimulator', 'iPhoneOS'].each do |platform|
         sdk_path = File.join(platforms_dir, platform + '.platform',
