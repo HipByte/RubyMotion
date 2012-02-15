@@ -130,7 +130,7 @@ class UpdateCommand < Command
     product_version = Motion::Version
 
     $stderr.puts "Connecting to the server..."
-    curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data-hipbyte.heroku.com/update_software"
+    curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data.hipbyte.com/update_software"
     resp = `#{curl}`
     unless resp.match(/^http:/)
       die resp
