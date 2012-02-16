@@ -1,3 +1,14 @@
+= RubyMotion 0.47 =
+
+  * Added a `rake ctags' task that generates a `tags' file inside the
+    project directory, containing the symbols of all frameworks and
+    vendor projects used by the project.
+  * Fixed the build system to fail when building a vendor project that
+    does not create at least one .a library.
+  * Fixed the build system to fail with a proper error message in case
+    the current version of Xcode is below 4.x. Otherwise, the build
+    fails later during link because of a missing C++ ABI symbol.
+
 = RubyMotion 0.46 =
 
   * Implemented the `motion activate' and ` motion update' commands.
