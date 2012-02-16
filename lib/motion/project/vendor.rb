@@ -15,6 +15,9 @@ module Motion; module Project;
 
     def build(platform, archs)
       send gen_method('build'), platform, archs, @opts
+      if @libs.empty?
+        App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
+      end
     end
 
     def clean
@@ -51,16 +54,14 @@ module Motion; module Project;
           xcodeproj = opts.delete(:xcodeproj) || begin
             projs = Dir.glob('*.xcodeproj')
             if projs.size != 1
-              $stderr.puts "Can't locate Xcode project file for vendor project #{@path}"
-              exit 1
+              App.fail "Can't locate Xcode project file for vendor project #{@path}"
             end
             projs[0]
           end
           target = opts.delete(:target)
           scheme = opts.delete(:scheme)
           if target and scheme
-            $stderr.puts "Both :target and :scheme are provided"
-            exit 1
+            App.fail "Both :target and :scheme are provided"
           end
           configuration = opts.delete(:configuration) || 'Release'
  
