@@ -1,5 +1,3 @@
-require 'motion/plist'
-
 module Motion; module Project
   class Config
     VARS = []
