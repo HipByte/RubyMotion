@@ -153,11 +153,9 @@ class UpdateCommand < Command
 
     $stderr.puts "Software update installed.\n\n"
     news = File.read('/Library/Motion/NEWS')
-    section = 0
     news.lines.each do |line|
-      if line.match(/^= /)
-        break if section == 1
-        section += 1
+      if md = line.match(/^=\s+RubyMotion\s+(.+)\s+=$/)
+        break if md[1] <= product_version
       end
       $stderr.puts line
     end
