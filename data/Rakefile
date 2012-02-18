@@ -43,7 +43,9 @@ task :bridgesupport_files do
       next unless File.exist?(File.join(framework_path, framework))
       dest = "#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
       unless File.exist?(dest)
-        sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"--sysroot=#{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
+        a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
+        sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+        sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
       end
     end
   end

@@ -22,9 +22,9 @@ module Motion; module Project
       end
     end
 
-    variable :files, :platforms_dir, :sdk_version, :deployment_target,
-      :frameworks, :libs, :delegate_class, :name, :build_dir, :resources_dir,
-      :specs_dir, :identifier, :codesign_certificate, :provisioning_profile,
+    variable :files, :xcode_dir, :sdk_version, :deployment_target, :frameworks,
+      :libs, :delegate_class, :name, :build_dir, :resources_dir, :specs_dir,
+      :identifier, :codesign_certificate, :provisioning_profile,
       :device_family, :interface_orientations, :version, :icons,
       :prerendered_icon, :seed_id, :entitlements, :fonts
 
@@ -34,7 +34,6 @@ module Motion; module Project
       @project_dir = project_dir
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
       @dependencies = {}
-      @platforms_dir = File.join(`/usr/bin/xcode-select -print-path`.strip, 'Platforms')
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @libs = []
       @delegate_class = 'AppDelegate'
@@ -67,9 +66,38 @@ module Motion; module Project
       map
     end
 
+    def xcode_dir
+      @xcode_dir ||= begin
+        # First, honor /usr/bin/xcode-select
+	xcodeselect = '/usr/bin/xcode-select'
+        if File.exist?(xcodeselect)
+          path = `#{xcodeselect} -print-path`.strip
+          return path if File.exist?(path)
+        end
+
+        # Since xcode-select is borked, we assume the user installed Xcode
+        # as an app (new in Xcode 4.3).
+        path = '/Applications/Xcode.app'
+        if File.exist?(path)
+          path = File.join(path, 'Contents/Developer')
+          return path if File.exist?(path)
+        end
+
+        App.fail "Can't locate any version of Xcode on the system."
+      end
+    end
+
+    def locate_binary(name)
+      [File.join(xcode_dir, 'usr/bin'), '/usr/bin'].each do |dir|
+        path = File.join(dir, name)
+        return path if File.exist?(path)
+      end
+      App.fail "Can't locate binary `#{name}' on the system."
+    end
+
     def validate
       # Xcode version
-      ary = `/usr/bin/xcodebuild -version`.scan(/Xcode\s+([^\n]+)\n/)
+      ary = `#{locate_binary('xcodebuild')} -version`.scan(/Xcode\s+([^\n]+)\n/)
       if ary and ary[0] and xcode_version = ary[0][0]
         App.fail "Xcode 4.x or greater is required" if xcode_version < '4.0'
       end
@@ -198,7 +226,7 @@ module Motion; module Project
         frameworks.each do |framework|
           framework_path = File.join(slf, framework + '.framework', framework)
           if File.exist?(framework_path)
-            `/usr/bin/otool -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
+            `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
               # Only care about public, non-umbrella frameworks (for now).
               if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(.+)$/) and md[1] == md[2]
                 deps << md[1]
@@ -235,8 +263,12 @@ module Motion; module Project
       File.join(motiondir, 'data', target)
     end
 
+    def platforms_dir
+      File.join(xcode_dir, 'Platforms')
+    end
+
     def platform_dir(platform)
-      File.join(@platforms_dir, platform + '.platform')
+      File.join(platforms_dir, platform + '.platform')
     end
 
     def sdk_version

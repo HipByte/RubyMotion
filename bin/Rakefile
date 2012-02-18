@@ -10,15 +10,15 @@ end
 
 task :deploy do
   if !File.exist?('deploy') or File.mtime('deploy.m') > File.mtime('deploy')
-    sh "/usr/bin/gcc -I./src -std=c99 -Wall -O3 deploy.m -o deploy -framework Foundation"
-    sh "/usr/bin/strip -x deploy"
+    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 deploy.m -o deploy -framework Foundation"
+    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -x deploy"
   end
 end
 
 task :sim do
   if !File.exist?('sim') or File.mtime('sim.m') > File.mtime('sim')
-    sh "/usr/bin/gcc -I./src -std=c99 -Wall -O3 sim.m -o sim -framework Foundation"
-    sh "/usr/bin/strip -x sim"
+    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 sim.m -o sim -framework Foundation"
+    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -x sim"
   end
 end
 

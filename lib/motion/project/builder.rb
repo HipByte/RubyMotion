@@ -49,7 +49,7 @@ module Motion; module Project;
             or File.mtime(ruby) > File.mtime(obj))
  
         # Generate or retrieve init function.
-        init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `/usr/bin/nm #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
+        init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
 
         if should_rebuild
           App.info 'Compile', path
@@ -329,7 +329,7 @@ EOS
       # Strip all symbols. Only in release mode.
       if main_exec_created and config.release?
         App.info "Strip", main_exec
-        sh "/usr/bin/strip \"#{main_exec}\""
+        sh "#{config.locate_binary('strip')} \"#{main_exec}\""
       end
     end
 

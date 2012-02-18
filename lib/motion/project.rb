@@ -50,10 +50,12 @@ task :simulator => ['build:simulator'] do
     end
 
   # Launch the simulator.
+  xcode = App.config.xcode_dir
+  env = xcode.match(/^\/Applications/) ? "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\"" : ''
   sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
   App.info 'Simulate', app
-  sh "#{sim} #{debug} #{family_int} #{target} \"#{app}\""
+  sh "#{env} #{sim} #{debug} #{family_int} #{target} \"#{xcode}\" \"#{app}\""
 end
 
 desc "Create archives for everything"

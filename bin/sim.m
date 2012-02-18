@@ -116,17 +116,18 @@ main(int argc, char **argv)
 {
     [[NSAutoreleasePool alloc] init];
 
-    if (argc != 5) {
+    if (argc != 6) {
 	usage();
     }
 
     debug_mode = atoi(argv[1]) == 1 ? YES : NO;
     NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
     NSString *sdk_version = [NSString stringWithUTF8String:argv[3]];
+    NSString *xcode_path = [NSString stringWithUTF8String:argv[4]];
     NSString *app_path =
-	[NSString stringWithUTF8String:realpath(argv[4], NULL)];
+	[NSString stringWithUTF8String:realpath(argv[5], NULL)];
 
-    [[NSBundle bundleWithPath:@"/Developer/Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/iPhoneSimulatorRemoteClient.framework"] load];
+    [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/iPhoneSimulatorRemoteClient.framework"]] load];
 
     Class AppSpecifier =
 	NSClassFromString(@"DTiPhoneSimulatorApplicationSpecifier");
