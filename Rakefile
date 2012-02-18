@@ -1,5 +1,5 @@
 PLATFORMS_DIR = '/Applications/Xcode.app/Contents/Developer/Platforms'
-PROJECT_VERSION = '0.47'
+PROJECT_VERSION = '0.48'
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
@@ -68,7 +68,7 @@ desc "Install"
 task :install do
   public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/deploy', './bin/sim',
-    './bin/llc', './bin/ruby'])
+    './bin/llc', './bin/ruby', './bin/ctags'])
   data = ['./NEWS']
   data.concat(Dir.glob('./lib/motion/**/*'))
   SDK_VERSIONS.each do |sdk_version|
@@ -114,7 +114,7 @@ task :package do
     rm_rf destdir
     Rake::Task[:install].invoke
 
-    sh "/Developer/usr/bin/packagemaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{PROJECT_VERSION}.pkg\" --version #{PROJECT_VERSION}"
+    sh "/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{PROJECT_VERSION}.pkg\" --version #{PROJECT_VERSION}"
   #end
 end
 
