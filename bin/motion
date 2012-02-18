@@ -2,7 +2,8 @@
 
 require 'fileutils'
 
-$motion_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
+relative_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
+$motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_libdir : '/Library/Motion/lib'
 $:.unshift($motion_libdir)
 require 'motion/version'
 
@@ -30,7 +31,7 @@ class CreateCommand < Command
 
   def self.run(args)
     if args.size != 1
-      die "Please specify an app name (e.g. motion create Hello)"
+      die "Usage: motion create <appname>"
     end
 
     app_name = args.shift
@@ -94,7 +95,7 @@ class ActivateCommand < Command
 
   def self.run(args)
     if args.size != 1
-      die "Please specify the license key to activate (e.g. motion activate b2e662dab891b...)"
+      die "Usage: motion activate <license-key>"
     end
 
     license_key = args[0]
@@ -117,8 +118,19 @@ class UpdateCommand < Command
   self.help = 'Update the software'
 
   def self.run(args)
+    check_mode = args.delete('--check')
     unless args.empty?
-      die "Extra arguments provided."
+      die "Usage: motion update [--check]"
+    end
+
+    product_version = Motion::Version
+    if check_mode
+      curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" http://data.hipbyte.com/latest_software_version"
+      resp = `#{curl}`
+      unless resp.match(/^\d+\.\d+/)
+        die resp
+      end
+      exit resp > product_version ? 1 : 0
     end
 
     unless File.exist?(LicensePath)
@@ -127,7 +139,6 @@ class UpdateCommand < Command
 
     need_root
     license_key = File.read(LicensePath)
-    product_version = Motion::Version
 
     $stderr.puts "Connecting to the server..."
     curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data.hipbyte.com/update_software"
