@@ -117,6 +117,14 @@ class UpdateCommand < Command
   self.name = 'update'
   self.help = 'Update the software'
 
+  def self.curl(cmd)
+    resp = `/usr/bin/curl #{cmd}`
+    if $?.exitstatus != 0
+      die "Error when connecting to the server. Check your Internet connection and try again."
+    end
+    resp
+  end
+
   def self.run(args)
     check_mode = args.delete('--check')
     unless args.empty?
@@ -125,12 +133,13 @@ class UpdateCommand < Command
 
     product_version = Motion::Version
     if check_mode
-      curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" http://data.hipbyte.com/latest_software_version"
-      resp = `#{curl}`
-      unless resp.match(/^\d+\.\d+/)
-        die resp
+      update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
+      if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
+        resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" http://data.hipbyte.com/latest_software_version")
+        exit 1 unless resp.match(/^\d+\.\d+/)
+        File.open(update_check_file, 'w') { |io| io.write(resp) }
       end
-      exit resp > product_version ? 1 : 0
+      exit File.read(update_check_file) > product_version ? 2 : 0
     end
 
     unless File.exist?(LicensePath)
@@ -141,8 +150,7 @@ class UpdateCommand < Command
     license_key = File.read(LicensePath)
 
     $stderr.puts "Connecting to the server..."
-    curl = "/usr/bin/curl -s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data.hipbyte.com/update_software"
-    resp = `#{curl}`
+    resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data.hipbyte.com/update_software")
     unless resp.match(/^http:/)
       die resp
     end
@@ -150,10 +158,7 @@ class UpdateCommand < Command
     $stderr.puts "Downloading software update..."
     url = resp
     tmp_dest = '/tmp/_rubymotion_su.pkg'
-    curl = "/usr/bin/curl -# \"#{url}\" -o #{tmp_dest}"
-    unless system(curl)
-      die "An error happened when downloading the software update."
-    end
+    curl("-# \"#{url}\" -o #{tmp_dest}")
 
     $stderr.puts "Installing software update..."
     installer = "/usr/sbin/installer -pkg \"#{tmp_dest}\" -target / >& /tmp/installer.stderr"

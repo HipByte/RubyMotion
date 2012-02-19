@@ -1,13 +1,23 @@
+require 'motion/version'
 require 'motion/project/app'
 require 'motion/project/config'
 require 'motion/project/builder'
 require 'motion/project/vendor'
 require 'motion/project/plist'
 
+App = Motion::Project::App
+
+# Check for software updates.
+system('/usr/bin/motion update --check')
+if $?.exitstatus == 2
+  puts '=' * 80
+  puts " A new version of RubyMotion is available. Run `sudo motion update' to upgrade."
+  puts '=' * 80
+  puts ''
+end
+
 desc "Build the project, then run the simulator"
 task :default => :simulator
-
-App = Motion::Project::App
 
 desc "Build everything"
 task :build => ['build:simulator', 'build:device']
