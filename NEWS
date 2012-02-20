@@ -1,34 +1,37 @@
+= RubyMotion 0.50 =
+
+  * Fixed a bug when compiling calls to certain structures (such as
+    CMTimeRange) which may contain anonymous types when used from APIs defined
+    in other frameworks (such as AVFoundation).
+
 = RubyMotion 0.49 =
 
-  * The project build system will now check once a day if a new
-    version of RubyMotion is available for download, and print a
-    message accordingly on the terminal. The check only happens when
-    you're using RubyMotion.
+  * The project build system will now check once a day if a new version of
+    RubyMotion is available for download, and print a message accordingly on
+    the terminal. The check only happens when you are using RubyMotion.
 
 = RubyMotion 0.48 =
 
-  * Added support for Xcode 4.3. Previous Xcode releases in 
-    /Developer can be safely removed. There is no need to install the
-    command-line tool package. Support for iOS 4.3 is temporarily 
-    removed, it will be added back as well as support for 5.1 in an
-    upcoming build.
+  * Added support for Xcode 4.3. Previous Xcode releases in /Developer can be
+    safely removed. There is no need to install the command-line tool package.
+    Support for iOS 4.3 is temporarily removed, it will be added back as well
+    as support for 5.1 in an upcoming build.
   * Removed the `platforms_dir' project variable, added `xcode_dir'.
-  * Added a `--check' optional argument to `motion update' that will
-    check if a new version of RubyMotion is available, and exit with
-    1 if yes, 0 if no.
-  * Fixed `motion update' to show changes for all versions since the
-    previous installed version. 
+  * Added a `--check' optional argument to `motion update' that will check if
+    a new version of RubyMotion is available, and exit with 1 if yes, 0 if no.
+  * Fixed `motion update' to show changes for all versions since the previous
+    installed version. 
 
 = RubyMotion 0.47 =
 
-  * Added a `rake ctags' task that generates a `tags' file inside the
-    project directory, containing the symbols of all frameworks and
-    vendor projects used by the project.
-  * Fixed the build system to fail when building a vendor project that
-    does not create at least one .a library.
-  * Fixed the build system to fail with a proper error message in case
-    the current version of Xcode is below 4.x. Otherwise, the build
-    fails later during link because of a missing C++ ABI symbol.
+  * Added a `rake ctags' task that generates a `tags' file inside the project
+    directory, containing the symbols of all frameworks and vendor projects
+    used by the project.
+  * Fixed the build system to fail when building a vendor project that does not
+    create at least one .a library.
+  * Fixed the build system to fail with a proper error message in case the
+    current version of Xcode is below 4.x. Otherwise, the build fails later
+    during link because of a missing C++ ABI symbol.
 
 = RubyMotion 0.46 =
 
@@ -47,10 +50,10 @@
   * Updated doc/ReferenceManual.html to follow these changes.
   * Fixed a bug in the TestFlight integration where the optional
     distribution_lists key wasn't actually optional (thanks Matt).
-  * Fixed a couple bugs in the internal Array erase routine, where
-    some objects could potentially leak or be double-released.
-  * Fixed a bug where the regular expression global backref object could
-    be in some cases prematurely released.
+  * Fixed a couple bugs in the internal Array erase routine, where some objects
+    could potentially leak or be double-released.
+  * Fixed a bug where the regular expression global backref object could be in
+    some cases prematurely released.
 
 = RubyMotion 0.44 =
 
