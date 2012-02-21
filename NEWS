@@ -1,3 +1,9 @@
+= RubyMotion 0.51 =
+
+  * Forgot to bundle the ctags config file. `rake ctags' should work now.
+  * Fixed the VM build to use llvm-gcc and not clang again. This allows the
+    bundled interpreter to launch and do syntax check.
+
 = RubyMotion 0.50 =
 
   * Fixed a bug when compiling calls to certain structures (such as
