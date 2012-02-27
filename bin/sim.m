@@ -10,6 +10,7 @@ static BOOL debug_mode = NO;
 static NSTask *gdb_task = nil;
 static BOOL debugger_killed_session = NO;
 static id current_session = nil;
+static NSString *xcode_path = nil;
 
 static void
 sigterminate(int sig)
@@ -87,7 +88,7 @@ sigforwarder(int sig)
 	//}
 
 	// Run the gdb process.
-	NSString *gdb_path = @"/Developer/Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin";
+	NSString *gdb_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin"];
 	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
 	    arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"--pid",
 	    [pidNumber description], @"-x", cmds_path, nil]] retain];
@@ -123,7 +124,7 @@ main(int argc, char **argv)
     debug_mode = atoi(argv[1]) == 1 ? YES : NO;
     NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
     NSString *sdk_version = [NSString stringWithUTF8String:argv[3]];
-    NSString *xcode_path = [NSString stringWithUTF8String:argv[4]];
+    xcode_path = [[NSString stringWithUTF8String:argv[4]] retain];
     NSString *app_path =
 	[NSString stringWithUTF8String:realpath(argv[5], NULL)];
 
