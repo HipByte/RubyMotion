@@ -1,0 +1,51 @@
+h1. Getting Started
+
+Welcome to RubyMotion. This guide will help getting you started.
+
+h2. Overview
+
+RubyMotion is a toolchain that permits the development of iOS applications using the Ruby programming language.
+
+"iOS":http://www.apple.com/ios/ is Apple's mobile operating system, powering a variety of devices such as iPhone, iPod touch and iPad. Developers can write applications for iOS and submit them to the App Store, Apple's application distribution system.
+
+Conceptually, RubyMotion is a combination of three components:
+
+* *Runtime*: a new implementation of the Ruby language for iOS, tightly integrated with the native iOS runtime and customized for embedded devices constrains.
+* *Tool*: a command-line interface to create and manage RubyMotion projects.
+* *Library*: a high-level Ruby library sitting on top of the iOS SDK that facilitates the development of applications.
+
+RubyMotion installs itself into +/Library/Motion+. A symbolic link to the command-line interface is created as +/usr/bin/motion+.
+
+h2. License Activation
+
+You should have received an email after purchasing RubyMotion, which contains a license key of 40 hexadecimal characters. This key can be used to activate RubyMotion.
+
+<pre>
+$ sudo motion activate <license-key...>
+</pre>
+
+h2. Software Updates
+
+Software updates can be applied via the command-line.
+
+<pre>
+$ sudo motion update
+</pre>
+
+This command will grab the latest version of RubyMotion from the network and install it. You must be connected to the Internet to perform that command.
+
+You can always see the version number of the version of RubyMotion installed on the computer.
+
+<pre>
+$ motion -v
+1.0
+</pre>
+
+h2. More Information
+
+You will find sample code in the "/Library/Motion/sample":file:///Library/Motion/sample directory.
+Each of these samples can be run by typing the +rake+ command in their directory. 
+
+To learn more about RubyMotion, check out the "/Library/Motion/doc":file:///Library/Motion/doc directory, which contains guides about the RubyMotion runtime, project management tool, and library.
+
+More documentation, such as tutorials or screencasts, is also available online from the "Developer Center":http://www.rubymotion.com/devcenter.

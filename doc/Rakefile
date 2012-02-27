@@ -169,13 +169,14 @@ class GuideGenerator < RedCloth
     base = File.basename(src, '.textile')
     @title = base.gsub(/([a-z])([A-Z])/, '\1 \2')
     @dest = dest
-    super(fix_anchors(File.read(src)))
+    data = File.read(src)
+    super(fix_anchors(data))
   end
 
   def run
     File.open(@dest, 'w') do |io|
       io.puts html_header
-      io.puts toc
+      #io.puts toc
       io.puts '<div class="content">'
       io.puts to_html(:inline_plus_annotations, :textile)
       io.puts '</div>'
@@ -244,7 +245,7 @@ body {
 .content {
   margin-bottom: 20px;
   margin-left: 280px;
-  margin-right: 100px;
+  margin-right: 280px;
   margin-top: 0px;
   position: relative;
   text-align: left;
