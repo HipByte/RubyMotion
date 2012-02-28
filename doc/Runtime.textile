@@ -62,11 +62,62 @@ Note: The syntax used to define Objective-C selectors was added to RubyMotion an
 
 h3. Reading Objective-C Interfaces
 
-TBD
+As Objective-C is the main language used to describe the iOS SDK, it is necessary to understand how to read Objective-C interfaces and how to use them from Ruby.
+
+Objective-C interfaces can be found in Apple's iOS API reference and also in the iOS framework header (+.h+) files. 
+
+An Objective-C interface starts with either the minus or plus character, which is used to respectively declare instance or class methods. 
+
+For instance, the following interface declares the +foo+ instance method on the +Foo+ class.
+
+<pre>
+@class Foo
+- (id)foo;
+@end
+</pre>
+
+The next one declares the +foo+ class method on the same class.
+
+<pre>
+@class Foo
++ (id)foo;
+@end
+</pre>
+
+Note: +(id)+ is the type information. Types are covered in an upcoming section, so you can omit them for now.
+
+As seen in the previous section, arguments in Objective-C methods can be named with a keyword. The sum of all keywords form the message name, or selector.
+
+The following interface declares the +doSomethingWithObject:andObject:+ class method on the +Test+ class.
+
+<pre>
+@class Test
++ (id)sharedInstanceWithObject:(id)obj1 andObject:(id)obj2;
+@end
+</pre>
+
+This method can be called from Ruby like this.
+
+<pre>
+# obj1 and obj2 are variables for the arguments.
+instance = Test.sharedInstanceWithObject(obj1, andObject:obj2)
+</pre>
 
 h3. Shortcuts
 
-TBD
+The RubyMotion runtime provides convenience shortcuts for certain Objective-C selectors.
+
+|_<. Selector |_<. Shortcut |
+| +setFoo:+ | +foo=+ |
+| +isFoo+ | +foo?+ |
+| +objectForKey:+ | +[]+ |
+| +setObject:forKey:+ | +[]=+ |
+
+As an example, the +setHidden:+ and +isHidden+ methods of +UIView+ can be called by using the +hidden=+ and +hidden?+ shortcuts.
+
+<pre>
+view.hidden = true unless view.hidden?
+</pre>
 
 h2. Builtin Classes
 
@@ -294,7 +345,49 @@ Pointers to C characters, also called C strings, are automatically converted fro
 
 h3. Function Pointers and Blocks
 
-TBD
+C or Objective-C APIs accepting C function pointers or C blocks can be called by RubyMotion, by passing a +Proc+ object instead.
+
+Functions pointers are pretty rare in the iOS SDK, but C blocks are common. C blocks is an extension of the C language defined by Apple. The carrot (+^+) character is used to define C blocks.
+
+As an example, let's consider the +addObserverForName:object:queue:usingBlock:+ method of +NSNotificationCenter+, which accepts a C block as its last argument.
+
+<pre>
+- (id)addObserverForName:(NSString *)name object:(id)obj queue:(NSOperationQueue *)queue
+      usingBlock:(void (^)(NSNotification *))block;
+</pre>
+
+The block in question returns +void+ and accepts one argument, a +NSNotification+ object.
+
+This method can be called from Ruby like this.
+
+<pre>
+notification_center.addObserverForName(name, object:object, queue:queue,
+  usingBlock:lambda do |notification|
+    # Handle notification here...
+  end)
+</pre>
+
+The +enumerateObjectsWithOptions:usingBlock:+ method of +NSArray+ presents a more complicated case of a C block, which accepts 3 arguments: the enumerated object, its index position in the array, and a pointer to a boolean variable that can be set to +true+ to stop the enumeration.
+
+<pre>
+- (void)enumerateObjectsWithOptions:(NSEnumerationOptions)opts
+        usingBlock:(void (^)(id obj, NSUInteger idx, BOOL *stop))block;
+</pre>
+
+Assuming we want to stop at the 10th iteration:
+
+<pre>
+ary.enumerateObjectsWithOptions(options, usingBlock:lambda do |obj, idx, stop_ptr|
+  stop_ptr[0] = true if idx == 9
+end)
+</pre>
+
+(Obviously this example is used for educational purposes, in RubyMotion there is no need to use this method, since +NSArray+ responds to the Ruby +Array+ interface which is must more elaborated.)
+
+A few important notes:
+
+# The +Proc+ object must have the same number of arguments than the C function pointer or block, otherwise an exception will be raised at runtime.
+# In case of a C function pointer argument, you need to make sure the +Proc+ object will not be prematurely collected. If the method will call the function pointer asynchronously, a reference to the +Proc+ object must then be kept. Memory management is discussed in the following section.
 
 h2. Memory Management
 
