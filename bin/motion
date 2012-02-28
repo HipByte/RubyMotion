@@ -58,7 +58,7 @@ end
 EOS
       end
       Dir.mkdir('app')
-      File.open('app/main.rb', 'w') do |io|
+      File.open('app/app_delegate.rb', 'w') do |io|
         io.puts <<EOS
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
