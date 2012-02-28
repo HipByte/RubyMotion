@@ -1,3 +1,19 @@
+= RubyMotion 0.52 =
+
+  * Added a new sample, locations, which demonstrates CoreData.
+  * Fixed `motion update' to use SSL when transmitting the license key. The
+    server will stop honoring non-SSL requests by the next build.
+  * Fixed `motion create' to now generate app/app_delegate.rb instead of
+    app/main.rb.
+  * Cleaned up a bit the samples.
+  * Split the reference manual into 3 separate documents.
+  * Fixed a bug when the calling stub of a retyped property could not be found
+    at runtime, because the target abstract class doesn't actually define the
+    message (ex: UIBarItem's setEnabled:).
+  * Fixed a bug when the runtime could not perform the -hash selector because
+    the calling stub wasn't precompiled.
+  * Fixed `rake simulator debug=1`' to work with Xcode 4.3.
+
 = RubyMotion 0.51 =
 
   * Forgot to bundle the ctags config file. `rake ctags' should work now.
