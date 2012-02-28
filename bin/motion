@@ -128,14 +128,14 @@ class UpdateCommand < Command
   def self.run(args)
     check_mode = args.delete('--check')
     unless args.empty?
-      die "Usage: motion update [--check]"
+      die "Usage: motion update"
     end
 
     product_version = Motion::Version
     if check_mode
       update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
       if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
-        resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" http://data.hipbyte.com/latest_software_version")
+        resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" http://secure.rubymotion.com/latest_software_version")
         exit 1 unless resp.match(/^\d+\.\d+/)
         File.open(update_check_file, 'w') { |io| io.write(resp) }
       end
@@ -150,7 +150,7 @@ class UpdateCommand < Command
     license_key = File.read(LicensePath)
 
     $stderr.puts "Connecting to the server..."
-    resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" http://data.hipbyte.com/update_software")
+    resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
     unless resp.match(/^http:/)
       die resp
     end
