@@ -31,19 +31,3 @@ class HelloView < UIView
     setNeedsDisplay  
   end
 end
-
-class HelloViewController < UIViewController
-  def loadView
-    self.view = HelloView.alloc.init
-  end
-end
-
-class AppDelegate
-  def application(application, didFinishLaunchingWithOptions:launchOptions)
-    @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
-    @window.rootViewController = HelloViewController.alloc.init
-    @window.rootViewController.wantsFullScreenLayout = true
-    @window.makeKeyAndVisible
-    return true
-  end
-end

@@ -55,27 +55,3 @@ class PaintView < UIView
     setNeedsDisplay
   end
 end
-
-class PaintViewController < UIViewController
-  def loadView
-    self.view = PaintView.alloc.init
-  end
-
-  def canBecomeFirstResponder
-    true
-  end
-
-  def motionEnded(motion, withEvent:event)
-    self.view.eraseContent if motion == UIEventSubtypeMotionShake
-  end
-end
-
-class AppDelegate
-  def application(application, didFinishLaunchingWithOptions:launchOptions)
-    @window = UIWindow.alloc.initWithFrame(UIScreen.mainScreen.bounds)
-    @window.rootViewController = PaintViewController.alloc.init
-    @window.rootViewController.wantsFullScreenLayout = true
-    @window.makeKeyAndVisible
-    return true
-  end
-end
