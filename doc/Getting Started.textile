@@ -43,6 +43,16 @@ $ motion -v
 
 Once a day, the RubyMotion build system will ping the software update server in order to see if a new version of RubyMotion is available to install, and will accordingly print a message on your terminal. This only happens when you are working on a RubyMotion project.
 
+h2. Support
+
+If you are experiencing an issue or just want to ask a question, support is always available.
+
+<pre>
+$ motion support
+</pre>
+
+This command will open a new page in your default browser where you can fill out a support ticket. Some basic information such as details about your environment will be pre-filled for you.
+
 h2. Hello World
 
 We are now ready to write our first RubyMotion program: Hello World.
