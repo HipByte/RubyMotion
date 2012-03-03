@@ -1,3 +1,9 @@
+= RubyMotion 0.53 =
+
+  * Added `motion support', which allows developers to submit support tickets.
+  * Added missing sections in the Runtime guide: Reading Objective-C
+    Interfaces, Shortcuts and C function pointers and Blocks.
+
 = RubyMotion 0.52 =
 
   * Added a new sample, locations, which demonstrates CoreData.
