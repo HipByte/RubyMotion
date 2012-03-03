@@ -165,22 +165,27 @@ end
 
 require 'redcloth'
 class GuideGenerator < RedCloth
-  def initialize(src, dest)
+  def initialize(src, dest, no_header_footer)
     base = File.basename(src, '.textile')
     @title = base.gsub(/([a-z])([A-Z])/, '\1 \2')
     @dest = dest
+    @no_header_footer = no_header_footer
     data = File.read(src)
     super(fix_anchors(data))
   end
 
   def run
     File.open(@dest, 'w') do |io|
-      io.puts html_header
-      #io.puts toc
-      io.puts '<div class="content">'
+      unless @no_header_footer
+        io.puts html_header
+        #io.puts toc
+        io.puts '<div class="content">'
+      end
       io.puts to_html(:inline_plus_annotations, :textile)
-      io.puts '</div>'
-      io.puts html_footer
+      unless @no_header_footer
+        io.puts '</div>'
+        io.puts html_footer
+      end
     end
   end
 
@@ -394,10 +399,13 @@ task :default => :all
 task :all => [:guides] # no docset in the main distribution...
 
 task :guides do
+  devcenter = ENV['devcenter_destdir']
   Dir.glob('*.textile').each do |src|
-    dest = File.basename(src, '.textile') + '.html'
-    if !File.exist?(dest) or File.mtime(src) > File.mtime(dest) or File.mtime(__FILE__) > File.mtime(dest)
-      GuideGenerator.new(src, dest).run
+    dest = (File.basename(src, '.textile') + '.html')
+    dest = dest.downcase.gsub(/ /, '-') if devcenter
+    dest = File.join(devcenter, dest) if devcenter
+    if devcenter or !File.exist?(dest) or File.mtime(src) > File.mtime(dest) or File.mtime(__FILE__) > File.mtime(dest)
+      GuideGenerator.new(src, dest, devcenter != nil).run
     end 
   end
 end

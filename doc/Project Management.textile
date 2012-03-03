@@ -300,6 +300,7 @@ The +rake device+ task builds and uploads a development archive of the applicati
 There must be one iOS device connected via USB to the Mac. The deployment task will attempt to upload the application to the first discovered iOS device on the USB channel.
 
 The process will fail in the following cases:
+
 * No iOS device was found on USB.
 * The project builds on a version of iOS greater than the version of iOS running on the device.
 * The project doesn't use the appropriate certificate and provisioning profile linked to the device.
