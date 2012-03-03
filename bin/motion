@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'fileutils'
+require 'uri'
 
 relative_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
 $motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_libdir : '/Library/Motion/lib'
@@ -62,8 +63,7 @@ EOS
         io.puts <<EOS
 class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
-    puts "Hello World!"
-    return true
+    true
   end
 end
 EOS
@@ -113,6 +113,35 @@ class ActivateCommand < Command
   end
 end
 
+class SupportCommand < Command
+  self.name = 'support'
+  self.help = 'Create a support ticket'
+
+  def self.run(args)
+    unless args.empty?
+      die "Usage: motion support"
+    end
+
+    unless File.exist?(LicensePath)
+      die "License file not present. Please activate RubyMotion with `motion activate' and try again."
+    end
+    license_key = File.read(LicensePath)
+
+    # Guess the default email address from git.
+    email = URI.escape(`git config --get user.email`.strip)
+
+    # Collect details about the environment.
+    osx_vers = `sw_vers -productVersion`.strip
+    rm_vers = Motion::Version
+    xcode_vers = `xcodebuild -version`.strip.scan(/Xcode\s(.+)$/).flatten[0].to_s
+    xcode_vers = 'unknown' if xcode_vers.empty?
+
+    environment = URI.escape("OSX #{osx_vers}, RubyMotion #{rm_vers}, Xcode #{xcode_vers}")
+
+    system("open \"https://secure.rubymotion.com/new_support_ticket?license_key=#{license_key}&email=#{email}&environment=#{environment}\"")
+  end
+end
+
 class UpdateCommand < Command
   self.name = 'update'
   self.help = 'Update the software'
@@ -143,7 +172,7 @@ class UpdateCommand < Command
     end
 
     unless File.exist?(LicensePath)
-      die "The product has not been activated yet. Please purchase RubyMotion, then use the `motion activate' command."
+      die "License file not present. Please activate RubyMotion with `motion activate' and try again."
     end
 
     need_root
@@ -180,7 +209,7 @@ class UpdateCommand < Command
 end
 
 class MotionMainCommand
-  Commands = [CreateCommand, ActivateCommand, UpdateCommand]
+  Commands = [CreateCommand, ActivateCommand, UpdateCommand, SupportCommand]
 
   def initialize(args)
     arg = args.shift
