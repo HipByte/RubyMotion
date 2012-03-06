@@ -1,3 +1,8 @@
+= RubyMotion 0.54 =
+
+  * Fixed a bug in the installer where empty resources directories in some
+    samples would not be created.
+
 = RubyMotion 0.53 =
 
   * Added `motion support', which allows developers to submit support tickets.

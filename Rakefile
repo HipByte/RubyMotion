@@ -1,5 +1,5 @@
 PLATFORMS_DIR = '/Applications/Xcode.app/Contents/Developer/Platforms'
-PROJECT_VERSION = '0.53'
+PROJECT_VERSION = '0.54'
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
@@ -81,7 +81,6 @@ task :install do
   #data.concat(Dir.glob('./doc/docset/**/*'))
   data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   data.reject! { |path| /^\./.match(File.basename(path)) }
-  data.reject! { |path| File.directory?(path) }
 
   motiondir = '/Library/Motion'
   destdir = (ENV['DESTDIR'] || '/')
@@ -90,8 +89,12 @@ task :install do
     pathdir = File.join(destmotiondir, File.dirname(path))
     mkdir_p pathdir unless File.exist?(pathdir)
     destpath = File.join(destmotiondir, path)
-    cp path, destpath
-    chmod mode, destpath
+    if File.directory?(path)
+      mkdir_p destpath
+    else
+      cp path, destpath
+      chmod mode, destpath
+    end
     destpath
   end
 
