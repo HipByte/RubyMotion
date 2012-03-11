@@ -1,3 +1,12 @@
+= RubyMotion 0.55 =
+
+  * Added CocoaPods integration. It will be gemified when RubyMotion goes
+    public, currently, you can do `require 'motion/project/cocoapods' in your
+    Rakefile, then `app.pods { dependency 'JSONKit' }' in order to use the
+    JSONKit library. CocoaPods must be installed and set up before use. There
+    are still bugs when covering header files with certain pods.
+  * Added support for iOS 5.1.
+
 = RubyMotion 0.54 =
 
   * Fixed a bug in the installer where empty resources directories in some
