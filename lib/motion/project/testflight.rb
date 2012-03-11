@@ -1,22 +1,30 @@
-# TestFlight builtin support for RubyMotion projects.
-#
-# Usage:
-#
-#   1. Download the TestFlight SDK into `vendor/TestFlightSDK'.
-#
-#   2. In your project Rakefile, add the following line:
-#        require 'motion/project/testflight'
-#
-#   3. Still in the Rakefile, add the mandatory configuration settings:
-#        app.testflight.sdk = 'vendor/TestFlightSDK'
-#        app.testflight.api_token = '<insert your API token here>'
-#        app.testflight.team_token = '<insert your team token here>'
-#
-#   4. (Optional) You can set the distribution lists, if needed:
-#        app.testflight.distribution_lists = ['CoolKids']
-#
-#   5. You can now submit your project to TestFlight, using:
-#        rake testflight notes="zomg!"
+# Copyright (c) 2012, Laurent Sansonetti <lrz@hipbyte.com>
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+unless defined?(Motion::Project::Config)
+  raise "This file must be required within a RubyMotion project Rakefile."
+end
 
 class TestFlightConfig
   attr_accessor :sdk, :api_token, :team_token, :distribution_lists
@@ -72,33 +80,32 @@ module Motion; module Project; class Config
   end
 end; end; end
 
-desc "Submit a development archive to TestFlight"
-task :testflight => 'archive:development' do
-  # Retrieve configuration settings.
-  prefs = App.config.testflight
-  unless prefs.api_token
-    App.fail "A value for app.testflight.api_token is mandatory" 
+namespace 'testflight' do
+  desc "Submit a development archive to TestFlight"
+  task :submit => 'archive:development' do
+    # Retrieve configuration settings.
+    prefs = App.config.testflight
+    App.fail "A value for app.testflight.api_token is mandatory" unless prefs.api_token
+    App.fail "A value for app.testflight.team_token is mandatory" unless prefs.team_token
+    distribution_lists = (prefs.distribution_lists ? prefs.distribution_lists.join(',') : nil)
+    notes = ENV['notes']
+    App.fail "Submission notes must be provided via the `notes' environment variable. Example: rake testflight notes='w00t'" unless notes
+  
+    # An archived version of the .dSYM bundle is needed.
+    app_dsym = App.config.app_bundle('iPhoneOS').sub(/\.app$/, '.dSYM')
+    app_dsym_zip = app_dsym + '.zip'
+    if !File.exist?(app_dsym_zip) or File.mtime(app_dsym) > File.mtime(app_dsym_zip)
+      Dir.chdir(File.dirname(app_dsym)) do
+        sh "/usr/bin/zip -q -r \"#{File.basename(app_dsym)}.zip\" \"#{File.basename(app_dsym)}\""
+      end
+    end  
+  
+    curl = "/usr/bin/curl http://testflightapp.com/api/builds.json -F file=@\"#{App.config.archive}\" -F dsym=@\"#{app_dsym_zip}\" -F api_token='#{prefs.api_token}' -F team_token='#{prefs.team_token}' -F notes=\"#{notes}\" -F notify=True"
+    curl << " -F distribution_lists='#{distribution_lists}'" if distribution_lists
+    App.info 'Run', curl
+    sh curl
   end
-  unless prefs.team_token
-    App.fail "A value for app.testflight.team_token is mandatory"
-  end
-  distribution_lists = (prefs.distribution_lists ? prefs.distribution_lists.join(',') : nil)
-  notes = ENV['notes']
-  unless notes
-    App.fail "Submission notes must be provided via the `notes' environment variable. Example: rake testflight notes='w00t'"
-  end
-
-  # An archived version of the .dSYM bundle is needed.
-  app_dsym = App.config.app_bundle('iPhoneOS').sub(/\.app$/, '.dSYM')
-  app_dsym_zip = app_dsym + '.zip'
-  if !File.exist?(app_dsym_zip) or File.mtime(app_dsym) > File.mtime(app_dsym_zip)
-    Dir.chdir(File.dirname(app_dsym)) do
-      sh "/usr/bin/zip -q -r \"#{File.basename(app_dsym)}.zip\" \"#{File.basename(app_dsym)}\""
-    end
-  end  
-
-  curl = "/usr/bin/curl http://testflightapp.com/api/builds.json -F file=@\"#{App.config.archive}\" -F dsym=@\"#{app_dsym_zip}\" -F api_token='#{prefs.api_token}' -F team_token='#{prefs.team_token}' -F notes=\"#{notes}\" -F notify=True"
-  curl << " -F distribution_lists='#{distribution_lists}'" if distribution_lists
-  App.info 'Run', curl
-  sh curl
 end
+
+desc 'Same as testflight:submit'
+task 'testflight' => 'testflight:submit'

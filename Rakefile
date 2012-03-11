@@ -107,6 +107,13 @@ task :install do
     destpath = File.join(motiondir, path)
     ln_sf destpath, File.join(bindir, File.basename(path))
   end
+
+=begin
+  # Gems (only for beta).
+  gemsdir = File.join(destmotiondir, 'gems')
+  mkdir_p gemsdir
+  cp '../motion-testflight/pkg/motion-testflight-1.0.gem', gemsdir
+=end
 end
 
 desc "Generate .pkg"

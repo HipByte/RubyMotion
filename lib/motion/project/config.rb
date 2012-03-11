@@ -252,7 +252,7 @@ module Motion; module Project
     end
 
     def motiondir
-      File.expand_path(File.join(File.dirname(__FILE__), '../../..'))
+      @motiondir ||= File.expand_path(File.join(File.dirname(__FILE__), '../../..'))
     end
 
     def bindir
@@ -294,6 +294,36 @@ module Motion; module Project
     def sdk(platform)
       File.join(platform_dir(platform), 'Developer/SDKs',
         platform + sdk_version + '.sdk')
+    end
+
+    def cc(platform)
+      File.join(platform_dir(platform), 'Developer/usr/bin/gcc')
+    end
+
+    def cxx(platform)
+      File.join(platform_dir(platform), 'Developer/usr/bin/g++')
+    end
+
+    def archs(platform)
+      Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
+        path.scan(/kernel-(.+).bc$/)[0][0]
+      end      
+    end
+
+    def arch_flags(platform)
+      archs(platform).map { |x| "-arch #{x}" }.join(' ')
+    end
+
+    def common_flags(platform)
+      "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
+    end
+
+    def cflags(platform, cplusplus)
+      "#{common_flags(platform)} -fexceptions -fblocks -fobjc-legacy-dispatch -fobjc-abi-version=2" + (cplusplus ? '' : ' -std=c99')
+    end
+
+    def ldflags(platform)
+      common_flags(platform)
     end
 
     def bundle_name

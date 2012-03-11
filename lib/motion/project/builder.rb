@@ -6,9 +6,8 @@ module Motion; module Project;
 
     def build(config, platform)
       datadir = config.datadir
-      archs = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
-        path.scan(/kernel-(.+).bc$/)[0][0]
-      end
+      archs = config.archs(platform)
+
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
 
@@ -16,12 +15,10 @@ module Motion; module Project;
         App.fail "No spec files in `#{config.specs_dir}'"
       end
 
-      # Locate SDK.
+      # Locate SDK and compilers.
       sdk = config.sdk(platform)
-
-      # Locate compilers.
-      cc = File.join(config.platform_dir(platform), 'Developer/usr/bin/gcc')
-      cxx = File.join(config.platform_dir(platform), 'Developer/usr/bin/g++')
+      cc = config.cc(platform)
+      cxx = config.cxx(platform)
     
       build_dir = File.join(config.versionized_build_dir(platform))
       App.info 'Build', build_dir
@@ -32,7 +29,7 @@ module Motion; module Project;
       # Build vendor libraries.
       vendor_libs = []
       config.vendor_projects.each do |vendor_project|
-        vendor_project.build(platform, archs)
+        vendor_project.build(platform)
         vendor_libs.concat(vendor_project.libs)
         bs_files.concat(vendor_project.bs_files)
       end 
@@ -233,12 +230,11 @@ EOS
 EOS
  
       # Compile main file.
-      arch_flags = archs.map { |x| "-arch #{x}" }.join(' ')
       main = File.join(objs_build_dir, 'main.mm')
       main_o = File.join(objs_build_dir, 'main.o')
       if !(File.exist?(main) and File.exist?(main_o) and File.read(main) == main_txt)
         File.open(main, 'w') { |io| io.write(main_txt) }
-        sh "#{cxx} \"#{main}\" #{arch_flags} -fexceptions -fblocks -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.deployment_target} -fobjc-legacy-dispatch -fobjc-abi-version=2 -c -o \"#{main_o}\""
+        sh "#{cxx} \"#{main}\" #{config.cflags(platform, true)} -c -o \"#{main_o}\""
       end
 
       # Prepare bundle.
@@ -264,7 +260,7 @@ EOS
           stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
           framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
         end
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{arch_flags} #{framework_stubs_objs.join(' ')} -isysroot \"#{sdk}\" -miphoneos-version-min=#{config.deployment_target} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{framework_stubs_objs.join(' ')} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
         main_exec_created = true
       end
 

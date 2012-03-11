@@ -125,6 +125,7 @@ desc "Clear build objects"
 task :clean do
   App.info 'Delete', App.config.build_dir
   rm_rf(App.config.build_dir)
+  App.config.vendor_projects.each { |vendor| vendor.clean }
 end
 
 desc "Show project config"
@@ -144,5 +145,22 @@ task :ctags do
     ctags = File.join(config.bindir, 'ctags')
     config = File.join(config.motiondir, 'data', 'bridgesupport-ctags.cfg')
     sh "#{ctags} --options=\"#{config}\" #{bs_files.map { |x| '"' + x + '"' }.join(' ')}"
+  end
+end
+
+# Automatically load project extensions. A project extension is a gem whose
+# name starts with `motion-' and which exposes a `lib/motion/project' libdir.
+require 'rubygems'
+Gem.path.each do |gemdir|
+  Dir.glob(File.join(gemdir, 'gems', '*')).each do |gempath|
+    base = File.basename(gempath)
+    if md = base.match(/^(motion-.*)-((\d+\.)*\d+)/) and File.exist?(File.join(gempath, 'lib', 'motion', 'project'))
+      ext_name = md[1]
+      begin
+        require ext_name
+      rescue LoadError => e
+        $stderr.puts "Can't autoload extension `#{ext_name}': #{e.message}"
+      end
+    end
   end
 end
