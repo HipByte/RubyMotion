@@ -17,8 +17,8 @@ module Motion; module Project;
 
       # Locate SDK and compilers.
       sdk = config.sdk(platform)
-      cc = config.cc(platform)
-      cxx = config.cxx(platform)
+      cc = config.locate_compiler(platform, 'gcc')
+      cxx = config.locate_compiler(platform, 'g++')
     
       build_dir = File.join(config.versionized_build_dir(platform))
       App.info 'Build', build_dir

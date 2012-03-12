@@ -296,18 +296,23 @@ module Motion; module Project
         platform + sdk_version + '.sdk')
     end
 
-    def cc(platform)
-      File.join(platform_dir(platform), 'Developer/usr/bin/gcc')
-    end
+    def locate_compiler(platform, *execs)
+      paths = [File.join(platform_dir(platform), 'Developer/usr/bin')]
+      paths.unshift File.join(xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin') if platform == 'iPhoneSimulator'
 
-    def cxx(platform)
-      File.join(platform_dir(platform), 'Developer/usr/bin/g++')
+      execs.each do |exec|
+        paths.each do |path|
+          cc = File.join(path, exec)
+          return cc if File.exist?(cc)
+        end
+      end
+      App.fail "Can't locate compilers for platform `#{platform}'"
     end
 
     def archs(platform)
       Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
         path.scan(/kernel-(.+).bc$/)[0][0]
-      end      
+      end
     end
 
     def arch_flags(platform)

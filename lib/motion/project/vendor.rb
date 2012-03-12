@@ -40,10 +40,10 @@ module Motion; module Project;
           compiler =
             case File.extname(srcfile)
               when '.c', '.m'
-                @config.cc(platform)
+                @config.locate_compiler(platform, 'clang', 'gcc')
               when '.cpp', '.cxx', '.mm'
                 cplusplus = true
-                @config.cxx(platform)
+                @config.locate_compiler(platform, 'clang++', 'g++')
               else
                 # Not a valid source file, skip.
                 next
@@ -69,7 +69,7 @@ EOS
         if File.exist?(build_dir)
           libname = 'lib' + File.basename(@path) + '.a'
           Dir.chdir(build_dir) do
-            objs = Dir.glob('*.o')
+            objs = Dir.glob('*/**/*.o')
             FileUtils.rm_rf libname
             unless objs.empty?
               sh "#{@config.locate_binary('ar')} cq #{libname} #{objs.join(' ')}"
@@ -85,7 +85,7 @@ EOS
           bs_file = File.basename(@path) + '.bridgesupport'
           if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
             includes = headers.map { |p| "-I" + File.dirname(p) }.uniq.join(' ')
-            sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"#{includes}\" #{headers.join(' ')} -o \"#{bs_file}\""
+            sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-I. #{includes}\" #{headers.join(' ')} -o \"#{bs_file}\""
           end
           bs_files << bs_file
         end
