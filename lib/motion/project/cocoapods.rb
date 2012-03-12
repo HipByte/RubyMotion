@@ -54,7 +54,7 @@ class CocoaPodsConfig
       end
     end.flatten.join(' ')
     specs.each do |podspec|
-     cflags = (podspec.compiler_flags or '') + header_paths
+     cflags = (podspec.compiler_flags or '') + ' ' + header_paths
       source_files = podspec.expanded_source_files.map do |path|
         # Remove the first part of the path which is the project directory.
         path.to_s.split('/')[1..-1].join('/')
