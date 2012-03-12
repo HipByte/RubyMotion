@@ -1,3 +1,10 @@
+= RubyMotion 0.57 =
+
+  * Fixed a bug in the cocoapods integration where custom cflags would not
+    properly be taken into account (thanks Eloy).
+  * Fixed the compilation of vendored project source files to use clang/clang++
+    instead of gcc, since only the former supports ARC (thanks Eloy).
+
 = RubyMotion 0.56 =
 
   * Fixed a regression in the testflight integration.
