@@ -1,3 +1,8 @@
+= RubyMotion 0.56 =
+
+  * Fixed a regression in the testflight integration.
+  * Added support for Snow Leopard (OSX 10.6).
+
 = RubyMotion 0.55 =
 
   * Added CocoaPods integration. It will be gemified when RubyMotion goes
