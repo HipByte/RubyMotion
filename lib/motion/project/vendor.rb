@@ -66,16 +66,18 @@ EOS
           sh "#{compiler} #{cflags}  #{@config.cflags(platform, cplusplus)} -I. -include \"#{pch}\" -c \"#{srcfile}\" -o \"#{objfile}\""
         end
 
-        libname = 'lib' + File.basename(@path) + '.a'
-        Dir.chdir(build_dir) do
-          objs = Dir.glob('*.o')
-          FileUtils.rm_rf libname
-          unless objs.empty?
-            sh "#{@config.locate_binary('ar')} cq #{libname} #{objs.join(' ')}"
+        if File.exist?(build_dir)
+          libname = 'lib' + File.basename(@path) + '.a'
+          Dir.chdir(build_dir) do
+            objs = Dir.glob('*.o')
+            FileUtils.rm_rf libname
+            unless objs.empty?
+              sh "#{@config.locate_binary('ar')} cq #{libname} #{objs.join(' ')}"
+            end
           end
+          libpath = File.join(build_dir, libname)
+          libs << libpath if File.exist?(libpath)
         end
-        libpath = File.join(build_dir, libname)
-        libs << libpath if File.exist?(libpath)
 
         headers = source_files.select { |p| File.extname(p) == '.h' }
         bs_files = []
