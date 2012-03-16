@@ -1,3 +1,7 @@
+= RubyMotion 0.58 =
+
+  * This build contains changes non visible to end users.
+
 = RubyMotion 0.57 =
 
   * Fixed a bug in the cocoapods integration where custom cflags would not
