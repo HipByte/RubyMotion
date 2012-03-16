@@ -1,6 +1,6 @@
-h1. Getting Started
+h1. Welcome!
 
-Welcome to RubyMotion. This guide will help getting you started.
+Thanks for purchasing RubyMotion. This guide will help you getting started with the product.
 
 h2. Overview
 
@@ -10,15 +10,15 @@ h2. Overview
 
 Conceptually, RubyMotion is a combination of three components:
 
-* *Runtime*: a new implementation of the Ruby language for iOS, tightly integrated with the native iOS runtime and customized for embedded devices constrains.
-* *Tool*: a command-line interface to create and manage RubyMotion projects.
-* *Library*: a high-level Ruby library sitting on top of the iOS SDK that facilitates the development of applications.
+* *Runtime*: a brand-new implementation of the Ruby language, tightly integrated with the native iOS runtime and optimized for embedded iOS devices constrains.
+* *Tool*: a command-line interface to create, manage and interactively develop RubyMotion projects. It also includes a static compiler that compiles Ruby into optimized machine code, and a fully-functional debugger.
+* *Library*: a set of high-level Ruby libraries sitting on top of the iOS SDK that greatly facilitates the development of applications. Each library covers a commonly used pattern, such as UI elements building, XML/JSON parsing, data persistence, and more.
 
 RubyMotion installs itself into +/Library/Motion+. A symbolic link to the command-line interface is created as +/usr/bin/motion+.
 
 h2. License Activation
 
-You should have received an email after purchasing RubyMotion, which contains a license key of 40 hexadecimal characters. This key can be used to activate RubyMotion.
+You should have received an email with your purchase that contains a 40 hexadecimal characters license key. The key can be used to activate RubyMotion. Product activation is mandatory in order to receive software updates or file support tickets.
 
 <pre>
 $ sudo motion activate <license-key...>
@@ -41,17 +41,15 @@ $ motion -v
 1.0
 </pre>
 
-Once a day, the RubyMotion build system will ping the software update server in order to see if a new version of RubyMotion is available to install, and will accordingly print a message on your terminal. This only happens when you are working on a RubyMotion project.
+Once a day, the RubyMotion build system pings the software update server in order to see if a new version of RubyMotion is available to install, and accordingly prints a message on your terminal, suggesting you to upgrade.
 
 h2. Support
 
-If you are experiencing an issue or just want to ask a question, support is always available.
+If you are experiencing an issue, would like to request a feature, or simply have a question, you can file out a support ticket from the command-line too.
 
 <pre>
 $ motion support
 </pre>
-
-This command will open a new page in your default browser where you can fill out a support ticket. Some basic information such as details about your environment will be pre-filled for you.
 
 h2. Hello World
 
@@ -124,6 +122,6 @@ h2. And Now?
 
 The "/Library/Motion/sample":file:///Library/Motion/sample directory contains sample code. Each of these is a RubyMotion project as described above, you can type +rake+ from their directory to build and run them.
 
-The "/Library/Motion/doc":file:///Library/Motion/doc directory contains guides about the platform. You will find there essential information about the runtime and the project management tool.
+The "/Library/Motion/doc":file:///Library/Motion/doc directory contains guides about the platform. You will find there essential information about the runtime and the project management interface.
 
 Check out the "Developer Center":http://www.rubymotion.com/devcenter for more resources. You will find there tutorials and screencasts.
