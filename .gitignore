@@ -16,7 +16,7 @@ doc/docset
 
 lib/motion/version.rb
 
-pkg
+pkg/*.pkg
 
 rubymotion-head.tgz
 
