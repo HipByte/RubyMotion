@@ -8,7 +8,7 @@ class TweetsController < UITableViewController
     view.tableHeaderView = searchBar
     view.dataSource = view.delegate = self
 
-    searchBar.text = 'Hello'
+    searchBar.text = 'xcode crash'
     searchBarSearchButtonClicked(searchBar)
   end
 
