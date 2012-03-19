@@ -53,7 +53,65 @@ module Motion; module Project
         builder.codesign(config, platform)
       end
 
+      def create(app_name)
+        unless app_name.match(/^[a-zA-Z\d\s]+$/)
+          fail "Invalid app name"
+        end
+    
+        if File.exist?(app_name)
+          fail "Directory `#{app_name}' already exists"
+        end
+
+        App.log 'Create', app_name 
+        Dir.mkdir(app_name)
+        Dir.chdir(app_name) do
+          App.log 'Create', File.join(app_name, 'Rakefile')
+          File.open('Rakefile', 'w') do |io|
+            io.puts <<EOS
+$:.unshift(\"#{$motion_libdir}\")
+require 'motion/project'
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = '#{app_name}'
+end
+EOS
+          end
+          App.log 'Create', File.join(app_name, 'app')
+          Dir.mkdir('app')
+          App.log 'Create', File.join(app_name, 'app/app_delegate.rb')
+          File.open('app/app_delegate.rb', 'w') do |io|
+            io.puts <<EOS
+class AppDelegate
+  def application(application, didFinishLaunchingWithOptions:launchOptions)
+    true
+  end
+end
+EOS
+          end
+          App.log 'Create', File.join(app_name, 'resources')
+          Dir.mkdir('resources')
+          App.log 'Create', File.join(app_name, 'spec')
+          Dir.mkdir('spec')
+          App.log 'Create', File.join(app_name, 'spec/main_spec.rb')
+          File.open('spec/main_spec.rb', 'w') do |io|
+            io.puts <<EOS
+describe "Application '#{app_name}'" do
+  before do
+    @app = UIApplication.sharedApplication
+  end
+
+  it "has one window" do
+    @app.windows.size.should == 1
+  end
+end
+EOS
+          end
+        end
+      end
+
       def log(what, msg)
+        require 'thread'
         @print_mutex ||= Mutex.new
         # Because this method can be called concurrently, we don't want to mess any output.
         @print_mutex.synchronize do

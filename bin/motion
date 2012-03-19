@@ -7,6 +7,7 @@ relative_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__
 $motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_libdir : '/Library/Motion/lib'
 $:.unshift($motion_libdir)
 require 'motion/version'
+require 'motion/project/app.rb'
 
 class Command
   class << self
@@ -36,54 +37,7 @@ class CreateCommand < Command
     end
 
     app_name = args.shift
-
-    unless app_name.match(/^[a-zA-Z\d\s]+$/)
-      die "Invalid app name"
-    end
-
-    if File.exist?(app_name)
-      die "Directory `#{app_name}' already exists"
-    end
-
-    Dir.mkdir(app_name)
-    Dir.chdir(app_name) do
-      File.open('Rakefile', 'w') do |io|
-        io.puts <<EOS
-$:.unshift(\"#{$motion_libdir}\")
-require 'motion/project'
-
-Motion::Project::App.setup do |app|
-  # Use `rake config' to see complete project settings.
-  app.name = '#{app_name}'
-end
-EOS
-      end
-      Dir.mkdir('app')
-      File.open('app/app_delegate.rb', 'w') do |io|
-        io.puts <<EOS
-class AppDelegate
-  def application(application, didFinishLaunchingWithOptions:launchOptions)
-    true
-  end
-end
-EOS
-      end
-      Dir.mkdir('resources')
-      Dir.mkdir('spec')
-      File.open('spec/main_spec.rb', 'w') do |io|
-        io.puts <<EOS
-describe "Application '#{app_name}'" do
-  before do
-    @app = UIApplication.sharedApplication
-  end
-
-  it "has one window" do
-    @app.windows.size.should == 1
-  end
-end
-EOS
-      end
-    end
+    Motion::Project::App.create(app_name)
   end
 end
 
