@@ -3,6 +3,13 @@
 #import <sys/param.h>
 #import <signal.h>
 
+#import <readline/readline.h>
+#import <readline/history.h>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
 @interface Delegate : NSObject
 @end
 
@@ -11,13 +18,26 @@ static NSTask *gdb_task = nil;
 static BOOL debugger_killed_session = NO;
 static id current_session = nil;
 static NSString *xcode_path = nil;
+static NSString *replSocketPath = nil;
+
+static void
+terminate_session(void)
+{
+    static bool terminated = false;
+    if (!terminated) {
+	// requestEndWithTimeout: must be called only once.
+	assert(current_session != nil);
+	((void (*)(id, SEL, double))objc_msgSend)(current_session,
+	    @selector(requestEndWithTimeout:), 0.0);
+	terminated = true;
+    }
+}
 
 static void
 sigterminate(int sig)
 {
-    assert(current_session != nil);
-    ((void (*)(id, SEL, double))objc_msgSend)(current_session,
-	@selector(requestEndWithTimeout:), 0.0);
+    terminate_session();
+    exit(1);
 }
 
 static void
@@ -30,12 +50,109 @@ sigforwarder(int sig)
 
 @implementation Delegate
 
+- (void)readEvalPrintLoop
+{
+    [[NSAutoreleasePool alloc] init];
+
+    // Wait until the socket file is created.
+    while (true) {
+	if ([[NSFileManager defaultManager] fileExistsAtPath:replSocketPath]) {
+	    break;
+	}
+	usleep(500000);
+    }
+
+    // Create the socket.
+    const int fd = socket(PF_LOCAL, SOCK_STREAM, 0);
+    if (fd == -1) {
+	perror("socket()");
+	terminate_session();
+	return;
+    }
+    fcntl(fd, F_SETFL, O_NONBLOCK);
+
+    // Prepare the name.
+    struct sockaddr_un name;
+    name.sun_family = PF_LOCAL;
+    strncpy(name.sun_path, [replSocketPath fileSystemRepresentation],
+	    sizeof(name.sun_path));
+
+    // Connect.
+    if (connect(fd, (struct sockaddr *)&name, SUN_LEN(&name)) == -1) {
+	perror("connect()");
+	terminate_session();
+	return;
+    }
+
+    rl_readline_name = (char *)"RubyMotionRepl";
+    using_history();
+
+    while (true) {
+	// Read expression from stdin.
+	char *line = readline(">> ");
+	if (line == NULL) {
+	    terminate_session();
+	    break;
+	}
+
+	// Trim expression.
+	const char *b = line;
+	while (isspace(*b)) { b++; }
+	const char *e = line + strlen(line);
+	while (isspace(*e)) { e--; }
+	char buf[1024];
+	const size_t line_len = e - b;
+	if (line_len == 0) {
+	    continue;
+	}
+	strlcpy(buf, b, line_len + 1);
+	buf[line_len] = '\0';	
+	add_history(buf);
+	free(line);
+	line = NULL;
+
+	// Send expression to the simulator.
+	if (send(fd, buf, line_len, 0) != line_len) {
+	    terminate_session();
+	    break;
+	}
+
+	// Receive & print the result.
+	printf("=> ");
+	bool received_something = false;
+        while (true) {
+	    ssize_t len = recv(fd, buf, sizeof buf, 0);
+	    if (len == -1) {
+		if (errno == EAGAIN) {
+		    if (!received_something) {
+			continue;
+		    }
+		    break;
+		}
+		perror("error when receiving data from repl socket");
+		terminate_session();
+		break;
+	    }
+	    buf[len] = '\0';
+	    printf("%s", buf);
+	    if (len < sizeof buf) {
+		break;
+	    }
+	    received_something = true;
+	}
+	printf("\n");
+    }	
+}
+
 - (void)session:(id)session didEndWithError:(NSError *)error
 {
     if (gdb_task != nil) {
 	[gdb_task terminate];
 	[gdb_task waitUntilExit];
     }
+
+    // In case we are stuck in readline()...
+    system("/bin/stty echo");
 
     if (error == nil || debugger_killed_session) {
 	//fprintf(stderr, "*** simulator session ended without error\n");
@@ -99,6 +216,9 @@ sigforwarder(int sig)
 	((void (*)(id, SEL, NSTimeInterval))objc_msgSend)(session,
 	    @selector(requestEndWithTimeout:), 0);
     }
+    else {
+	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop) toTarget:self withObject:nil];
+    }
 
     //fprintf(stderr, "*** simulator session started\n");
 }
@@ -128,6 +248,7 @@ main(int argc, char **argv)
     NSString *app_path =
 	[NSString stringWithUTF8String:realpath(argv[5], NULL)];
 
+    // Load the framework.
     [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/iPhoneSimulatorRemoteClient.framework"]] load];
 
     Class AppSpecifier =
@@ -142,6 +263,44 @@ main(int argc, char **argv)
 
     Class Session = NSClassFromString(@"DTiPhoneSimulatorSession");
     assert(Session != nil);
+
+    // Prepare app environment.
+    NSDictionary *appEnvironment = [[NSProcessInfo processInfo] environment];
+    if (!debug_mode) {
+	// Prepare repl socket path.
+	NSString *tmpdir = NSTemporaryDirectory();
+	assert(tmpdir != nil);
+	char path[PATH_MAX];
+	snprintf(path, sizeof path, "%s/rubymotion-repl-XXXXXX",
+		[tmpdir fileSystemRepresentation]);
+	assert(mktemp(path) != NULL);
+	replSocketPath = [[[NSFileManager defaultManager]
+	    stringWithFileSystemRepresentation:path length:strlen(path)]
+	    retain];
+	NSMutableDictionary *newEnv = [appEnvironment mutableCopy];
+	[newEnv setObject:replSocketPath forKey:@"REPL_SOCKET_PATH"];
+
+	// Make sure the unix socket path does not exist.
+	[[NSFileManager defaultManager] removeItemAtPath:replSocketPath
+	    error:nil];
+
+	// Prepare repl dylib path.
+	NSString *replPath = nil;
+	replPath = [[NSFileManager defaultManager]
+	    stringWithFileSystemRepresentation:argv[0] length:strlen(argv[0])];
+	replPath = [replPath stringByDeletingLastPathComponent];
+	replPath = [replPath stringByDeletingLastPathComponent];
+	replPath = [replPath stringByAppendingPathComponent:@"data"];
+	replPath = [replPath stringByAppendingPathComponent:sdk_version];
+	replPath = [replPath stringByAppendingPathComponent:@"iPhoneSimulator"];
+	replPath = [replPath stringByAppendingPathComponent:@"libmacruby-repl.dylib"];
+	[newEnv setObject:replPath forKey:@"REPL_DYLIB_PATH"];
+
+	appEnvironment = newEnv;
+	[newEnv autorelease];
+    }
+
+    //[NSDictionary dictionaryWithObjectsAndKeys:@"/usr/lib/libgmalloc.dylib", @"DYLD_INSERT_LIBRARIES", nil]);
 
     // Create application specifier.
     id app_spec = ((id (*)(id, SEL, id))objc_msgSend)(AppSpecifier,
@@ -161,8 +320,7 @@ main(int argc, char **argv)
 	@selector(setSimulatedApplicationLaunchArgs:), [NSArray array]);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
        @selector(setSimulatedApplicationLaunchEnvironment:),
-       //[NSDictionary dictionaryWithObjectsAndKeys:@"/usr/lib/libgmalloc.dylib", @"DYLD_INSERT_LIBRARIES", nil]);
-       [[NSProcessInfo processInfo] environment]);
+       appEnvironment);
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
 	@selector(setSimulatedApplicationShouldWaitForDebugger:), debug_mode);
     ((void (*)(id, SEL, id))objc_msgSend)(config,

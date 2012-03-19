@@ -15,7 +15,7 @@ task :vm_files do
       install path, ios
     end
     install File.join(objs, 'libmacruby-static.a'), ios
-    
+
     sim = File.join(sdk_version, 'iPhoneSimulator')
     mkdir_p sim
     objs = "../vm/iPhoneSimulator#{sdk_version}.objs"
@@ -23,6 +23,8 @@ task :vm_files do
       install path, sim
     end
     install File.join(objs, 'libmacruby-static.a'), sim
+    objs = "../vm/iPhoneSimulator#{sdk_version}-repl.objs"
+    install File.join(objs, 'libmacruby-repl.dylib'), sim
   end
 end
 
