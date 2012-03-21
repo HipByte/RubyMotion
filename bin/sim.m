@@ -1,4 +1,6 @@
 #import <Foundation/Foundation.h>
+#import <ApplicationServices/ApplicationServices.h>
+
 #import <objc/message.h>
 #import <sys/param.h>
 #import <signal.h>
@@ -11,6 +13,9 @@
 #include <sys/un.h>
 
 @interface Delegate : NSObject
+- (NSString *)replEval:(NSString *)expression;
+- (BOOL)sendString:(NSString *)string;
+- (NSString *)receiveString;
 @end
 
 static BOOL debug_mode = NO;
@@ -19,6 +24,10 @@ static BOOL debugger_killed_session = NO;
 static id current_session = nil;
 static NSString *xcode_path = nil;
 static NSString *replSocketPath = nil;
+
+static NSRect simulator_app_bounds = { {0, 0}, {0, 0} };
+static int repl_fd = -1;
+static NSLock *repl_fd_lock = nil;
 
 static void
 terminate_session(void)
@@ -49,6 +58,232 @@ sigforwarder(int sig)
 }
 
 @implementation Delegate
+
+static void
+locate_simulator_app_bounds(void)
+{
+    if (!CGRectEqualToRect(simulator_app_bounds, CGRectZero)) {
+	return;
+    }	
+
+    CFArrayRef windows = CGWindowListCopyWindowInfo(kCGWindowListOptionAll,
+	    kCGNullWindowID);
+    NSRect bounds = NSZeroRect;
+    bool bounds_ok = false;
+    for (NSDictionary *dict in (NSArray *)windows) {
+#define validate(obj, klass) \
+    if (obj == nil || ![obj isKindOfClass:[klass class]]) { \
+	continue; \
+    }
+	id name = [dict objectForKey:@"kCGWindowName"];
+	validate(name, NSString);
+	if (![name hasPrefix:@"iOS Simulator"]) {
+	    continue;
+	}
+
+	id bounds_dict = [dict objectForKey:@"kCGWindowBounds"];
+	validate(bounds_dict, NSDictionary);
+
+	id x = [bounds_dict objectForKey:@"X"];
+	id y = [bounds_dict objectForKey:@"Y"];
+	id width = [bounds_dict objectForKey:@"Width"];
+	id height = [bounds_dict objectForKey:@"Height"];
+
+	validate(x, NSNumber);
+	validate(y, NSNumber);
+	validate(width, NSNumber);
+	validate(height, NSNumber);
+
+	bounds.origin.x = [x intValue];
+	bounds.origin.y = [y intValue];
+	bounds.size.width = [width intValue];
+	bounds.size.height = [height intValue];
+
+#undef validate
+	bounds_ok = true;
+	break;
+    }
+    CFRelease(windows);
+    if (!bounds_ok) {
+	fprintf(stderr,
+		"Can't locate the Simulator app, mouse over disabled\n");
+	return;
+    }
+
+    // Inset the main view frame.
+    bounds.origin.x += 30;
+    bounds.size.width -= 60;
+    bounds.origin.y += 120;
+    bounds.size.height -= 240;
+    simulator_app_bounds = bounds;
+}
+
+static NSString *
+current_repl_prompt(id delegate, NSString *top_level)
+{
+    char question = '?';
+    if (top_level == nil) {
+	top_level = [delegate replEval:@"self"];
+	question = '>';
+    }
+
+    return [NSString stringWithFormat:@"(%@)%c> ",
+	   top_level, question];
+}
+
+static void
+refresh_repl_prompt(id delegate, NSString *top_level, bool clear)
+{
+    rl_set_prompt([current_repl_prompt(delegate, top_level) UTF8String]);
+    if (clear) {
+	printf("\n\033[F\033[J"); // Clear.
+	rl_forced_update_display();
+    }
+}
+
+static CGEventRef
+event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
+    void *ctx)
+{
+    static bool previousHighlight = false;
+    Delegate *delegate = (Delegate *)ctx;
+
+    if (!(CGEventGetFlags(event) & kCGEventFlagMaskCommand)) {
+	if (previousHighlight) {
+	    [delegate replEval:[NSString stringWithFormat:
+		@"<<MotionReplCaptureView %f,%f,%d", 0, 0, 0]];
+	    previousHighlight = false;
+	}
+	refresh_repl_prompt(delegate, nil, true);
+	if (type == kCGEventLeftMouseDown) {
+	    // Reset the simulator app bounds as it may have moved.
+	    simulator_app_bounds = CGRectZero;
+	}
+	return event;
+    }
+
+    locate_simulator_app_bounds();
+    CGPoint mouseLocation = CGEventGetLocation(event);
+    const bool capture = type == kCGEventLeftMouseDown;
+    NSString *res = @"nil";
+
+    if (NSPointInRect(mouseLocation, simulator_app_bounds)) {
+	// We are over the Simulator.app main view.
+	// Inset the mouse location.
+	mouseLocation.x -= simulator_app_bounds.origin.x;
+	mouseLocation.y -= simulator_app_bounds.origin.y;
+
+	// Send coordinate to the repl.
+	previousHighlight = true;
+	res = [delegate replEval:[NSString stringWithFormat:
+	    @"<<MotionReplCaptureView %f,%f,%d", mouseLocation.x,
+	    mouseLocation.y, capture ? 2 : 1]];
+    }
+    else {
+	if (previousHighlight) {
+	    res = [delegate replEval:[NSString stringWithFormat:
+		@"<<MotionReplCaptureView %f,%f,%d", 0, 0, 0]];
+	    previousHighlight = false;
+	}
+    }
+
+    if (capture) {
+	refresh_repl_prompt(delegate, nil, true);
+	return NULL;
+    }
+    refresh_repl_prompt(delegate, res, true);
+    return event;
+}
+
+static void
+start_capture(id delegate)
+{
+    // We only want one kind of event at the moment: The mouse has moved
+    CGEventMask emask = CGEventMaskBit(kCGEventMouseMoved)
+	| CGEventMaskBit(kCGEventLeftMouseDown);
+
+    // Create the Tap
+    CFMachPortRef myEventTap = CGEventTapCreate(kCGSessionEventTap,
+	    kCGTailAppendEventTap, kCGEventTapOptionListenOnly, emask,
+	    &event_tap_cb, delegate);
+
+    // Create a RunLoop Source for it
+    CFRunLoopSourceRef eventTapRLSrc = CFMachPortCreateRunLoopSource(
+	    kCFAllocatorDefault, myEventTap, 0);
+
+    // Add the source to the current RunLoop
+    CFRunLoopAddSource(CFRunLoopGetCurrent(), eventTapRLSrc,
+	    kCFRunLoopDefaultMode);
+}
+
+- (BOOL)sendString:(NSString *)string
+{
+    const char *line = [string UTF8String];
+    const size_t line_len = strlen(line);
+
+    if (send(repl_fd, line, line_len, 0) != line_len) {
+	return NO;
+    }
+    return YES;
+}
+
+- (NSString *)receiveString
+{
+    NSMutableString *res = [NSMutableString new];
+    bool received_something = false;
+    while (true) {
+	char buf[1024];
+	ssize_t len = recv(repl_fd, buf, sizeof buf, 0);
+	if (len == -1) {
+	    if (errno == EAGAIN) {
+		if (!received_something) {
+		    continue;
+		}
+		break;
+	    }
+	    perror("error when receiving data from repl socket");
+	    [res release];
+	    res = nil;
+	    return nil;
+	}
+	buf[len] = '\0';
+	[res appendString:[NSString stringWithUTF8String:buf]];
+	if (len < sizeof buf) {
+	    break;
+	}
+	received_something = true;
+    }
+    return [res autorelease];
+}
+
+- (NSString *)replEval:(NSString *)expression
+{
+    if (repl_fd <= 0) {
+	return nil;
+    }
+
+    if (repl_fd_lock == nil) {
+	repl_fd_lock = [NSLock new];
+    }
+    [repl_fd_lock lock];
+
+    if (![self sendString:expression]) {
+	goto bail;
+    }
+
+    NSString *res = nil;
+    while (true) {
+	res = [self receiveString];
+	if (res == nil) {
+	    goto bail;
+	}
+	break;
+    }
+
+bail:
+    [repl_fd_lock unlock];
+    return res;
+}
 
 - (void)readEvalPrintLoop
 {
@@ -84,12 +319,15 @@ sigforwarder(int sig)
 	return;
     }
 
+    repl_fd = fd;
+
     rl_readline_name = (char *)"RubyMotionRepl";
     using_history();
 
+    char buf[1024];
     while (true) {
 	// Read expression from stdin.
-	char *line = readline(">> ");
+	char *line = readline([current_repl_prompt(self, nil) UTF8String]);
 	if (line == NULL) {
 	    terminate_session();
 	    break;
@@ -100,7 +338,6 @@ sigforwarder(int sig)
 	while (isspace(*b)) { b++; }
 	const char *e = line + strlen(line);
 	while (isspace(*e)) { e--; }
-	char buf[1024];
 	const size_t line_len = e - b;
 	if (line_len == 0) {
 	    continue;
@@ -111,36 +348,13 @@ sigforwarder(int sig)
 	free(line);
 	line = NULL;
 
-	// Send expression to the simulator.
-	if (send(fd, buf, line_len, 0) != line_len) {
+	NSString *res = [self replEval:[NSString stringWithUTF8String:buf]];
+	if (res == nil) {
 	    terminate_session();
 	    break;
 	}
 
-	// Receive & print the result.
-	printf("=> ");
-	bool received_something = false;
-        while (true) {
-	    ssize_t len = recv(fd, buf, sizeof buf, 0);
-	    if (len == -1) {
-		if (errno == EAGAIN) {
-		    if (!received_something) {
-			continue;
-		    }
-		    break;
-		}
-		perror("error when receiving data from repl socket");
-		terminate_session();
-		break;
-	    }
-	    buf[len] = '\0';
-	    printf("%s", buf);
-	    if (len < sizeof buf) {
-		break;
-	    }
-	    received_something = true;
-	}
-	printf("\n");
+	printf("=> %s\n", [res UTF8String]);
     }	
 }
 
@@ -218,6 +432,7 @@ sigforwarder(int sig)
     }
     else {
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop) toTarget:self withObject:nil];
+	start_capture(self);
     }
 
     //fprintf(stderr, "*** simulator session started\n");
