@@ -1,3 +1,16 @@
+= RubyMotion 0.59 =
+
+  * Changed `motion create' to now print the files it creates on screen.
+  * Changed #methods and others to now return Objective-C selectors by default.
+  * Added a REPL, which automatically starts with the simulator. The REPL
+    is implemented as a shared library and loaded at demand in the simulator,
+    to make sure a RubyMotion app built for the simulator remains identical
+    to an app built for an iOS device. The REPL is asynchronous, it does not
+    block the simulator, however, expressions are forced to be evaluated in
+    the main thread (to allow UIKit calls). The REPL can capture views if you
+    maintain the Command key then click on a view in the simulator window.
+    The REPL is a work-in-progress.
+
 = RubyMotion 0.58 =
 
   * This build contains changes non visible to end users.
