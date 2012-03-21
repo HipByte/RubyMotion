@@ -232,7 +232,7 @@ start_capture(id delegate)
     NSMutableString *res = [NSMutableString new];
     bool received_something = false;
     while (true) {
-	char buf[1024];
+	char buf[1024 + 1];
 	ssize_t len = recv(repl_fd, buf, sizeof buf, 0);
 	if (len == -1) {
 	    if (errno == EAGAIN) {
