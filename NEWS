@@ -1,3 +1,7 @@
+= RubyMotion 0.60 =
+
+  * Fixed various bugs in the REPL (also, make it work under Snow Leopard).
+
 = RubyMotion 0.59 =
 
   * Changed `motion create' to now print the files it creates on screen.
