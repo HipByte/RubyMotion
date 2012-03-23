@@ -85,10 +85,18 @@ class SupportCommand < Command
     email = URI.escape(`git config --get user.email`.strip)
 
     # Collect details about the environment.
-    osx_vers = `sw_vers -productVersion`.strip
+    osx_vers = `/usr/bin/sw_vers -productVersion`.strip
     rm_vers = Motion::Version
-    xcode_vers = `xcodebuild -version`.strip.scan(/Xcode\s(.+)$/).flatten[0].to_s
-    xcode_vers = 'unknown' if xcode_vers.empty?
+    xcode_vers = begin
+      xcodebuild = `which xcodebuild`.strip
+      xcodebuild = '/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild' if xcodebuild.empty?
+      vers = ''
+      if File.exist?(xcodebuild)
+        vers = `#{xcodebuild} -version`.strip.scan(/Xcode\s(.+)$/).flatten[0].to_s
+      end
+      vers = 'unknown' if vers.empty?
+      vers
+    end
 
     environment = URI.escape("OSX #{osx_vers}, RubyMotion #{rm_vers}, Xcode #{xcode_vers}")
 
