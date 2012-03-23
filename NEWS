@@ -1,3 +1,16 @@
+= RubyMotion 0.61 =
+
+  * Fixed a bug when doing `rake clean' on a project with vendored projects.
+  * Fixed a bug when the terminal echo could be off after an app crashes in
+    the simulator, due to the REPL's readline.
+  * Changed the compiler to not save local variables when creating blocks.
+  * The REPL now exposes special methods: #repl, #quit, #sessions and #help.
+    Use #help to know more.
+  * Fixed `motion support' to properly collect the version of Xcode for
+    installations in /Applications.
+  * Fixed the REPL to refresh the prompt in capture mode using a different
+    technique, to make it work in iTerm.
+
 = RubyMotion 0.60 =
 
   * Fixed various bugs in the REPL (also, make it work under Snow Leopard).
