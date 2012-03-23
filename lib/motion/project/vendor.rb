@@ -160,7 +160,7 @@ EOS
 
     def clean_xcode
       Dir.chdir(@path) do
-        rm_rf 'build', 'build-iPhoneOS', 'build-iPhoneSimulator'
+        ['build', 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
       end
     end
 
