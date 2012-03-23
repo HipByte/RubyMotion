@@ -165,11 +165,18 @@ rl_set_prompt(const char *prompt)
 static void
 refresh_repl_prompt(id delegate, NSString *top_level, bool clear)
 {
+    static int previous_prompt_length = 0;
     rl_set_prompt([current_repl_prompt(delegate, top_level) UTF8String]);
     if (clear) {
-	printf("\n\033[F\033[J"); // Clear.
+	putchar('\r');
+	for (int i = 0; i < previous_prompt_length; i++) {
+	    putchar(' ');
+	}
+	putchar('\r');
+	//printf("\n\033[F\033[J"); // Clear.
 	rl_forced_update_display();
     }
+    previous_prompt_length = strlen(rl_prompt);
 }
 
 static CGEventRef
