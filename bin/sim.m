@@ -296,23 +296,14 @@ start_capture(id delegate)
     if (repl_fd_lock == nil) {
 	repl_fd_lock = [NSLock new];
     }
+
     [repl_fd_lock lock];
-
-    if (![self sendString:expression]) {
-	goto bail;
-    }
-
     NSString *res = nil;
-    while (true) {
+    if ([self sendString:expression]) {
 	res = [self receiveString];
-	if (res == nil) {
-	    goto bail;
-	}
-	break;
     }
-
-bail:
     [repl_fd_lock unlock];
+
     return res;
 }
 
@@ -474,7 +465,7 @@ bail:
 static void
 usage(void)
 {
-    system("open http://www.youtube.com/watch?v=QH2-TGUlwu4");
+    system("open http://www.youtube.com/watch?v=1orMXD_Ijbs&feature=fvst");
     exit(1);
 }
 
