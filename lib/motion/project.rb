@@ -65,6 +65,7 @@ task :simulator => ['build:simulator'] do
   sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || '0') == '1' ? 1 : 0
   App.info 'Simulate', app
+  at_exit { system("stty echo") } # Just in case the simulator launcher crashes and leaves the terminal without echo.
   sh "#{env} #{sim} #{debug} #{family_int} #{target} \"#{xcode}\" \"#{app}\""
 end
 
