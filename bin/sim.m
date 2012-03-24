@@ -14,8 +14,6 @@
 
 @interface Delegate : NSObject
 - (NSString *)replEval:(NSString *)expression;
-- (BOOL)sendString:(NSString *)string;
-- (NSString *)receiveString;
 @end
 
 static int debug_mode = -1;
@@ -33,15 +31,54 @@ static NSRect simulator_app_bounds = { {0, 0}, {0, 0} };
 static int repl_fd = -1;
 static NSLock *repl_fd_lock = nil;
 
+#define HISTORY_FILE @".repl_history"
+
+static void
+save_repl_history(void)
+{
+    NSMutableArray *lines = [NSMutableArray array];
+    for (int i = 0; i < history_length; i++) {
+	HIST_ENTRY *entry = history_get(history_base + i);
+	if (entry == NULL) {
+	    break;
+	}
+	[lines addObject:[NSString stringWithUTF8String:entry->line]];
+    }
+    NSString *data = [lines componentsJoinedByString:@"\n"];
+    NSError *error = nil;
+    if (![data writeToFile:HISTORY_FILE atomically:YES
+	encoding:NSASCIIStringEncoding error:&error]) {
+	fprintf(stderr, "Cannot save REPL history file to `%s': %s\n",
+		[HISTORY_FILE UTF8String], [[error description] UTF8String]);
+    }
+}
+
+static void
+load_repl_history(void)
+{
+    NSString *data = [NSString stringWithContentsOfFile:HISTORY_FILE
+	encoding:NSASCIIStringEncoding error:nil];
+    if (data != nil) {
+	NSArray *lines = [data componentsSeparatedByString:@"\n"];
+	for (NSString *line in lines) {
+	    line = [line stringByTrimmingCharactersInSet:
+		[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	    add_history([line UTF8String]);
+	}
+    }
+}
+
 static void
 terminate_session(void)
 {
     static bool terminated = false;
     if (!terminated) {
 	// requestEndWithTimeout: must be called only once.
-	assert(current_session != nil);
-	((void (*)(id, SEL, double))objc_msgSend)(current_session,
-	    @selector(requestEndWithTimeout:), 0.0);
+	dispatch_sync(dispatch_get_main_queue(), ^{
+	    assert(current_session != nil);
+	    ((void (*)(id, SEL, double))objc_msgSend)(current_session,
+	        @selector(requestEndWithTimeout:), 0.0);
+	});
 	terminated = true;
     }
 }
@@ -50,6 +87,15 @@ static void
 sigterminate(int sig)
 {
     terminate_session();
+    exit(1);
+}
+
+static void
+sigcleanup(int sig)
+{
+    if (debug_mode == DEBUG_REPL) {
+	save_repl_history(); 
+    }
     exit(1);
 }
 
@@ -263,18 +309,26 @@ start_capture(id delegate)
 	    kCFRunLoopDefaultMode);
 }
 
-- (BOOL)sendString:(NSString *)string
+static bool
+send_string(NSString *string)
 {
     const char *line = [string UTF8String];
     const size_t line_len = strlen(line);
 
     if (send(repl_fd, line, line_len, 0) != line_len) {
-	return NO;
+	if (errno == EPIPE) {
+	    terminate_session();
+	}
+	else {
+	    perror("error when sending data to repl socket");
+	}
+	return false;
     }
-    return YES;
+    return true;
 }
 
-- (NSString *)receiveString
+static NSString *
+receive_string(void)
 {
     NSMutableString *res = [NSMutableString new];
     bool received_something = false;
@@ -288,15 +342,27 @@ start_capture(id delegate)
 		}
 		break;
 	    }
-	    perror("error when receiving data from repl socket");
+	    if (errno == EPIPE) {
+		terminate_session();
+	    }
+	    else {
+		perror("error when receiving data from repl socket");
+	    }
 	    [res release];
-	    res = nil;
 	    return nil;
 	}
-	buf[len] = '\0';
-	[res appendString:[NSString stringWithUTF8String:buf]];
-	if (len < sizeof buf) {
-	    break;
+	if (len > 0) {
+	    buf[len] = '\0';
+	    [res appendString:[NSString stringWithUTF8String:buf]];
+	    if (len < sizeof buf) {
+		break;
+	    }
+	}
+	else {
+	    if ([res length] == 0) {
+		[res release];
+		return nil;
+	    }
 	}
 	received_something = true;
     }
@@ -315,8 +381,8 @@ start_capture(id delegate)
 
     [repl_fd_lock lock];
     NSString *res = nil;
-    if ([self sendString:expression]) {
-	res = [self receiveString];
+    if (send_string(expression)) {
+	res = receive_string();
     }
     [repl_fd_lock unlock];
 
@@ -361,6 +427,7 @@ start_capture(id delegate)
 
     rl_readline_name = (char *)"RubyMotionRepl";
     using_history();
+    load_repl_history();
 
     char buf[1024];
     while (true) {
@@ -388,7 +455,6 @@ start_capture(id delegate)
 
 	NSString *res = [self replEval:[NSString stringWithUTF8String:buf]];
 	if (res == nil) {
-	    terminate_session();
 	    break;
 	}
 
@@ -403,8 +469,9 @@ start_capture(id delegate)
 	[gdb_task waitUntilExit];
     }
 
-    // In case we are stuck in readline()...
-    system("/bin/stty echo");
+    if (debug_mode == DEBUG_REPL) {
+	save_repl_history();
+    }
 
     if (error == nil || debugger_killed_session) {
 	//fprintf(stderr, "*** simulator session ended without error\n");
@@ -615,6 +682,7 @@ main(int argc, char **argv)
 	// ^C should terminate the request.
 	current_session = session;
 	signal(SIGINT, sigterminate);
+	signal(SIGPIPE, sigcleanup);
     }
 
     // Open simulator to the foreground.
