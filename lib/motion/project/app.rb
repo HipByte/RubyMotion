@@ -65,6 +65,11 @@ module Motion; module Project
         App.log 'Create', app_name 
         Dir.mkdir(app_name)
         Dir.chdir(app_name) do
+          App.log 'Create', File.join(app_name, '.gitignore')
+          File.open('.gitignore', 'w') do |io|
+            io.puts ".repl_history"
+            io.puts "build"
+          end
           App.log 'Create', File.join(app_name, 'Rakefile')
           File.open('Rakefile', 'w') do |io|
             io.puts <<EOS
