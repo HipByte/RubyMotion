@@ -18,7 +18,11 @@
 - (NSString *)receiveString;
 @end
 
-static BOOL debug_mode = NO;
+static int debug_mode = -1;
+#define DEBUG_GDB 1
+#define DEBUG_REPL 2
+#define DEBUG_NOTHING 0
+
 static NSTask *gdb_task = nil;
 static BOOL debugger_killed_session = NO;
 static id current_session = nil;
@@ -125,6 +129,11 @@ current_repl_prompt(id delegate, NSString *top_level)
     if (top_level == nil) {
 	top_level = [delegate replEval:@"self"];
 	question = '>';
+    }
+
+    if ([top_level length] > 30) {
+	top_level = [[top_level substringToIndex:30]
+	    stringByAppendingString:@"..."];
     }
 
     return [NSString stringWithFormat:@"(%@)%c> ",
@@ -416,7 +425,7 @@ start_capture(id delegate)
 	exit(1);
     }
 
-    if (debug_mode) {
+    if (debug_mode == DEBUG_GDB) {
 	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
 		@selector(simulatedApplicationPID));
 	if (pidNumber == nil || ![pidNumber isKindOfClass:[NSNumber class]]) {
@@ -459,7 +468,7 @@ start_capture(id delegate)
 	((void (*)(id, SEL, NSTimeInterval))objc_msgSend)(session,
 	    @selector(requestEndWithTimeout:), 0);
     }
-    else {
+    else if (debug_mode == DEBUG_REPL) {
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop) toTarget:self withObject:nil];
 	start_capture(self);
     }
@@ -485,7 +494,7 @@ main(int argc, char **argv)
 	usage();
     }
 
-    debug_mode = atoi(argv[1]) == 1 ? YES : NO;
+    debug_mode = atoi(argv[1]);
     NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
     NSString *sdk_version = [NSString stringWithUTF8String:argv[3]];
     xcode_path = [[NSString stringWithUTF8String:argv[4]] retain];
@@ -510,7 +519,7 @@ main(int argc, char **argv)
 
     // Prepare app environment.
     NSDictionary *appEnvironment = [[NSProcessInfo processInfo] environment];
-    if (!debug_mode) {
+    if (debug_mode == DEBUG_REPL) {
 	// Prepare repl socket path.
 	NSString *tmpdir = NSTemporaryDirectory();
 	assert(tmpdir != nil);
@@ -566,7 +575,8 @@ main(int argc, char **argv)
        @selector(setSimulatedApplicationLaunchEnvironment:),
        appEnvironment);
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
-	@selector(setSimulatedApplicationShouldWaitForDebugger:), debug_mode);
+	@selector(setSimulatedApplicationShouldWaitForDebugger:),
+	debug_mode == DEBUG_GDB);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedDeviceFamily:), device_family);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
@@ -601,7 +611,7 @@ main(int argc, char **argv)
 	exit(1);
     }
 
-    if (!debug_mode) {
+    if (debug_mode != DEBUG_GDB) {
 	// ^C should terminate the request.
 	current_session = session;
 	signal(SIGINT, sigterminate);
