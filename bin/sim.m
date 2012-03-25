@@ -21,6 +21,7 @@ static int debug_mode = -1;
 #define DEBUG_REPL 2
 #define DEBUG_NOTHING 0
 
+static Delegate *delegate = nil;
 static NSTask *gdb_task = nil;
 static BOOL debugger_killed_session = NO;
 static id current_session = nil;
@@ -169,7 +170,7 @@ locate_simulator_app_bounds(void)
 }
 
 static NSString *
-current_repl_prompt(id delegate, NSString *top_level)
+current_repl_prompt(NSString *top_level)
 {
     char question = '?';
     if (top_level == nil) {
@@ -218,10 +219,10 @@ rl_set_prompt(const char *prompt)
 #endif
 
 static void
-refresh_repl_prompt(id delegate, NSString *top_level, bool clear)
+refresh_repl_prompt(NSString *top_level, bool clear)
 {
     static int previous_prompt_length = 0;
-    rl_set_prompt([current_repl_prompt(delegate, top_level) UTF8String]);
+    rl_set_prompt([current_repl_prompt(top_level) UTF8String]);
     if (clear) {
 	putchar('\r');
 	for (int i = 0; i < previous_prompt_length; i++) {
@@ -239,7 +240,6 @@ event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
     void *ctx)
 {
     static bool previousHighlight = false;
-    Delegate *delegate = (Delegate *)ctx;
 
     if (!(CGEventGetFlags(event) & kCGEventFlagMaskCommand)) {
 	if (previousHighlight) {
@@ -247,7 +247,7 @@ event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
 		@"<<MotionReplCaptureView %f,%f,%d", 0, 0, 0]];
 	    previousHighlight = false;
 	}
-	refresh_repl_prompt(delegate, nil, true);
+	refresh_repl_prompt(nil, true);
 	if (type == kCGEventLeftMouseDown) {
 	    // Reset the simulator app bounds as it may have moved.
 	    simulator_app_bounds = CGRectZero;
@@ -281,10 +281,10 @@ event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
     }
 
     if (capture) {
-	refresh_repl_prompt(delegate, nil, true);
+	refresh_repl_prompt(nil, true);
 	return NULL;
     }
-    refresh_repl_prompt(delegate, res, true);
+    refresh_repl_prompt(res, true);
     return event;
 }
 
@@ -298,7 +298,7 @@ start_capture(id delegate)
     // Create the Tap
     CFMachPortRef myEventTap = CGEventTapCreate(kCGSessionEventTap,
 	    kCGTailAppendEventTap, kCGEventTapOptionListenOnly, emask,
-	    &event_tap_cb, delegate);
+	    &event_tap_cb, NULL);
 
     // Create a RunLoop Source for it
     CFRunLoopSourceRef eventTapRLSrc = CFMachPortCreateRunLoopSource(
@@ -389,6 +389,164 @@ receive_string(void)
     return res;
 }
 
+static NSArray *
+repl_complete_data(const char *text)
+{
+    // Determine if we want to complete a method or not.
+    char buf[1024];
+    size_t len = strlen(text);
+    if (len == 0) {
+	return NULL;
+    }
+    bool method = false;
+    int i;
+    for (i = len - 1; i >= 1; i--) {
+	if (text[i] == ' ' || text[i] == '\t') {
+	    break;
+	}
+	else if (text[i] == '.') {
+	    method = true;
+	    break;
+	}
+    }
+    if (i >= sizeof buf) {
+	return NULL;
+    }
+
+    // Prepare the REPL expression to evaluate.
+    if (method) {
+	strncpy(buf, text, i);
+	buf[i] = '\0';
+	strlcat(buf, ".methods", sizeof buf);
+    }
+    else {
+	if (isupper(text[0])) {
+	    strncpy(buf, "Object.constants", sizeof buf);
+	}
+	else if (text[0] == '@') {
+	    strncpy(buf, "instance_variables", sizeof buf);
+	}
+	else {
+	    strncpy(buf, "local_variables", sizeof buf);
+	}
+    }
+
+    // Evaluate the expression.
+    NSString *list = [delegate replEval:
+	[NSString stringWithUTF8String:buf]];
+    if ([list characterAtIndex:0] != '[') {
+	// Not an array, likely an exception.
+	return NULL;
+    }
+    // Ignore trailing '[' and ']'.
+    list = [list substringWithRange:NSMakeRange(1, [list length] - 2)];
+
+    // Split tokens.
+    NSMutableArray *data = [[NSMutableArray alloc] init];
+    NSArray *all = [list componentsSeparatedByString:@", "];
+
+    // Prepare first part of completion.
+    const char *p = &text[i];
+    if (method) {
+	p++;
+    }
+    NSString *last = [NSString stringWithUTF8String:p];
+    const size_t last_length = [last length];
+
+    // Filter all tokens based on the first part of completion.
+    for (NSString *res in all) {
+	size_t res_length = [res length];
+	int skip_beg = 1; // Results are symbols, so we skip ':'.
+	int skip_end = 0;
+	if (res_length < last_length + 1) {
+	    continue;
+	}
+	if ([res characterAtIndex:skip_beg] == '"') {
+	    skip_beg++; // Special symbol, :"foo:bar:".
+	    skip_end++;
+	}
+	if (res_length < last_length + skip_beg + skip_end) {
+	    continue;
+	}
+	if (last_length == 0) {
+	    if (method && [res characterAtIndex:skip_beg] == '_') {
+		// Skip 'private' methods if we are searching for all
+		// methods.
+		continue;
+	    }
+	}
+	else  {
+	    NSString *first = [res substringWithRange:NSMakeRange(skip_beg,
+		    last_length)];
+	    if (![first isEqualToString:last]) {
+		continue;
+	    }
+	}
+	res = [res substringWithRange:NSMakeRange(skip_beg,
+		[res length] - skip_beg - skip_end)];
+	[data addObject:res];
+    }
+
+    // Now prepare the suggested completion result.
+    int data_count = [data count];
+    if (data_count >= 1) {
+	NSString *suggested = nil;
+	if (method) {
+	    suggested = [NSString stringWithUTF8String:text];
+	}
+	else if (data_count == 1) {
+	    suggested = [data objectAtIndex:0];
+	}
+	else {
+	    int i = 0, low = 100000;
+	    while (i < data_count) {
+		int si = 0;
+		while (true) {
+		    if (i + 1 >= data_count) {
+			break;
+		    }
+		    NSString *s1 = [data objectAtIndex:i];
+		    NSString *s2 = [data objectAtIndex:i + 1];
+		    if (si >= [s1 length] || si >= [s2 length]) {
+			break;
+		    }
+		    if ([s1 characterAtIndex:si] != [s2 characterAtIndex:si]) {
+			break;
+		    }
+		    si++;
+		}
+		if (low > si) {
+		    low = si;
+		}
+		i++;
+	    }
+	    suggested = [[data objectAtIndex:0] substringToIndex:low];
+	}
+	[data insertObject:suggested atIndex:0];
+    }
+
+    return [data autorelease];
+}
+
+static char **
+repl_complete(const char *text, int start, int end)
+{
+    NSArray *data = repl_complete_data(text);
+    if (data == nil) {
+	return NULL;
+    }
+    int data_count = [data count];
+    if (data_count == 0) {
+	return NULL;
+    }
+    char **res = (char **)malloc(sizeof(char *) * (data_count + 1));
+    for (int i = 0; i < data_count; i++) {
+	res[i + 0] = strdup([[data objectAtIndex:i] UTF8String]);
+    }
+    res[[data count]] = NULL;
+    return res;
+}
+
 - (void)readEvalPrintLoop
 {
     [[NSAutoreleasePool alloc] init];
@@ -428,11 +586,13 @@ receive_string(void)
     rl_readline_name = (char *)"RubyMotionRepl";
     using_history();
     load_repl_history();
+    rl_attempted_completion_function = repl_complete;
+    rl_basic_word_break_characters = strdup(" \t\n`<;|&(");
 
     char buf[1024];
     while (true) {
 	// Read expression from stdin.
-	char *line = readline([current_repl_prompt(self, nil) UTF8String]);
+	char *line = readline([current_repl_prompt(nil) UTF8String]);
 	if (line == NULL) {
 	    terminate_session();
 	    break;
@@ -664,7 +824,7 @@ main(int argc, char **argv)
 
     // Create session.
     id session = [[Session alloc] init];
-    id delegate = [[Delegate alloc] init];
+    delegate = [[Delegate alloc] init];
     ((void (*)(id, SEL, id))objc_msgSend)(session, @selector(setDelegate:),
 	delegate);
 
