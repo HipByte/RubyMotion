@@ -1,3 +1,13 @@
+= RubyMotion 0.62 =
+
+  * Fixed a bug when `rake spec' would start the REPL.
+  * Added persistent REPL history.
+  * Changed the REPL to not exit with an error status in case of a broken pipe.
+  * Changed `motion create' to generate a .gitignore file, which currently
+    lists `build' and `.repl_history'.
+  * Added completion functionality to the REPL. Use the <tab> key to complete
+    methods, constants, instance variables and local variables.
+
 = RubyMotion 0.61 =
 
   * Fixed a bug when doing `rake clean' on a project with vendored projects.
