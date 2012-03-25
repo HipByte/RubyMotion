@@ -21,3 +21,4 @@ pkg/*.pkg
 rubymotion-head.tgz
 
 sample/*/build
+sample/*/.repl_history
