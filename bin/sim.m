@@ -393,7 +393,6 @@ static NSArray *
 repl_complete_data(const char *text)
 {
     // Determine if we want to complete a method or not.
-    char buf[1024];
     size_t len = strlen(text);
     if (len == 0) {
 	return NULL;
@@ -409,25 +408,26 @@ repl_complete_data(const char *text)
 	    break;
 	}
     }
-    if (i >= sizeof buf) {
-	return NULL;
-    }
 
     // Prepare the REPL expression to evaluate.
+    char buf[1024];
+    strlcpy(buf, "<<MotionReplPreserveLastExpr ", sizeof buf);
     if (method) {
-	strncpy(buf, text, i);
-	buf[i] = '\0';
+	if (i >= sizeof(buf) - strlen(buf)) {
+	    return NULL;
+	}
+	strncat(buf, text, i);
 	strlcat(buf, ".methods", sizeof buf);
     }
     else {
 	if (isupper(text[0])) {
-	    strncpy(buf, "Object.constants", sizeof buf);
+	    strlcat(buf, "Object.constants", sizeof buf);
 	}
 	else if (text[0] == '@') {
-	    strncpy(buf, "instance_variables", sizeof buf);
+	    strlcat(buf, "instance_variables", sizeof buf);
 	}
 	else {
-	    strncpy(buf, "local_variables", sizeof buf);
+	    strlcat(buf, "local_variables", sizeof buf);
 	}
     }
 
