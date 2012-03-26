@@ -75,11 +75,9 @@ terminate_session(void)
     static bool terminated = false;
     if (!terminated) {
 	// requestEndWithTimeout: must be called only once.
-	dispatch_sync(dispatch_get_main_queue(), ^{
-	    assert(current_session != nil);
-	    ((void (*)(id, SEL, double))objc_msgSend)(current_session,
-	        @selector(requestEndWithTimeout:), 0.0);
-	});
+	assert(current_session != nil);
+	((void (*)(id, SEL, double))objc_msgSend)(current_session,
+	    @selector(requestEndWithTimeout:), 0.0);
 	terminated = true;
     }
 }
