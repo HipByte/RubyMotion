@@ -1,3 +1,16 @@
+= RubyMotion 0.63 =
+
+  * Changed #methods and others to not return Objective-C methods whose names
+    start with an underscore ('_') character. The REPL won't list them.
+  * Fixed the REPL to support calling C functions or Objective-C methods with
+    calling stubs not already precompiled in the project.
+  * Changed the REPL to save the value of the last evaluated expression in the
+    '_' local variable.
+  * Improved the REPL to support class definitions, method definitions and
+    exception handlers.
+  * Fixed a bug in the REPL where ^C would cause a deadlock and not exit the
+    process as it used to.
+
 = RubyMotion 0.62 =
 
   * Fixed a bug when `rake spec' would start the REPL.
