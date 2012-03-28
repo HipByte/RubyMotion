@@ -104,7 +104,7 @@ class ViewController < UITableViewController
 
   def gestureRecognizer(gestureRecognizer, needsCommitRowAtIndexPath: indexPath)
     @rows[indexPath.row] = 'Added!'
-    cell = gestureRecognizer.tableView.cellForRowAtIndexPath(indexPath)
+    cell = tableView.cellForRowAtIndexPath(indexPath)
     cell.finishedHeight = NormalCellFinishingHeight
     cell.textLabel.text = 'Just Added!'
   end

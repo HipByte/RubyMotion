@@ -3,10 +3,6 @@ class GestureRecognizer
   RowAnimationDuration = 0.25
   CellSnapshotTag = 100000
 
-#  attr_accessor :delegate, :tableViewDelegate, :tableView, :addingRowHeight, :addingIndexPath,
-#    :addingCellState, :startPinchingUpperPoint, :panRecognizer,
-#    :longPressRecognizer, :state, :cellSnapshot, :scrollingRate, :movingTimer
-
   def initWithTableView(tableView, delegate:delegate)
     if init
       @tableView = tableView
@@ -20,6 +16,7 @@ class GestureRecognizer
       @longPressRecognizer = UILongPressGestureRecognizer.alloc.initWithTarget(self, action: :"longPressGestureRecognizer:")
       tableView.gestureRecognizers += [@pinchRecognizer, @panRecognizer, @longPressRecognizer]
       @pinchRecognizer.delegate = @panRecognizer.delegate = @longPressRecognizer.delegate = self
+      @addingRowHeight = 0
     end
     self
   end
@@ -60,15 +57,15 @@ class GestureRecognizer
   end
 
   def commitOrDiscardCell
-    cell = @tableView.cellForRowAtIndexPath(@addingIndexPath)
-
     @tableView.beginUpdates
 
-    commitingCellHeight = @tableView.rowHeight
-    if @delegate.respond_to? :"gestureRecognizer:heightForCommittingRowAtIndexPath:"
-      commitingCellHeight = @delegate.gestureRecognizer(self, heightForCommittingRowAtIndexPath: @addingIndexPath)
-    end
-
+    cell = @tableView.cellForRowAtIndexPath(@addingIndexPath)
+    commitingCellHeight =
+      if @delegate.respond_to? :"gestureRecognizer:heightForCommittingRowAtIndexPath:"
+        @delegate.gestureRecognizer(self, heightForCommittingRowAtIndexPath: @addingIndexPath)
+      else
+        @tableView.rowHeight
+      end
     if cell.frame.size.height >= commitingCellHeight
       @delegate.gestureRecognizer(self, needsCommitRowAtIndexPath: @addingIndexPath)
     else
@@ -135,7 +132,7 @@ class GestureRecognizer
 
       newUpperPoint = upperPoint
       diffOffsetY = @startPinchingUpperPoint.y - newUpperPoint.y
-      newOffset   = CGPointMake(@tableView.contentOffset.x, @tableView.contentOffset.y + diffOffsetY)
+      newOffset = CGPointMake(@tableView.contentOffset.x, @tableView.contentOffset.y + diffOffsetY)
       @tableView.setContentOffset(newOffset, animated: false)
     end
   end
@@ -161,10 +158,7 @@ class GestureRecognizer
         @delegate.gestureRecognizer(self, didChangeContentViewTranslation: translation, forRowAtIndexPath: indexPath)
       end
 
-      commitEditingLength = CommitEditingRowDefaultRowHeight
-      if @delegate.respond_to? :"gestureRecognizer:lengthForCommitEditingRowAtIndexPath:"
-        commitEditingLength = @delegate.gestureRecognizer(self, lengthForCommitEditingRowAtIndexPath: indexPath)
-      end
+      commitEditingLength = lengthForCommitEditingRowAtIndexPath(indexPath)
       if translation.x.abs >= commitEditingLength
         if @addingCellState == :middle
           @addingCellState = translation.x > 0 ? :right : :left
@@ -182,10 +176,7 @@ class GestureRecognizer
       cell = @tableView.cellForRowAtIndexPath(@addingIndexPath)
       translation = recognizer.translationInView(@tableView)
 
-      commitEditingLength = CommitEditingRowDefaultRowHeight
-      if @delegate.respond_to? :"gestureRecognizer:lengthForCommitEditingRowAtIndexPath:"
-        commitEditingLength = @delegate.gestureRecognizer(self, lengthForCommitEditingRowAtIndexPath: @addingIndexPath)
-      end
+      commitEditingLength = lengthForCommitEditingRowAtIndexPath(@addingIndexPath)
       if translation.x.abs >= commitEditingLength
         if @delegate.respond_to? :"gestureRecognizer:commitEditingState:forRowAtIndexPath:"
           @delegate.gestureRecognizer(self, commitEditingState: @addingCellState, forRowAtIndexPath: @addingIndexPath)
@@ -325,10 +316,12 @@ class GestureRecognizer
     if scrollView.contentOffset.y < 0
       if @addingIndexPath.nil? && @state == :none && !scrollView.isDecelerating
         @state = :dragging
-        @addingIndexPath = NSIndexPath.indexPathForRow(0, inSection: 0)
-        if @delegate.respond_to? :"gestureRecognizer:willCreateCellAtIndexPath:"
-          @addingIndexPath = @delegate.gestureRecognizer(self, willCreateCellAtIndexPath: @addingIndexPath)
-        end
+        @addingIndexPath = 
+          if @delegate.respond_to?(:"gestureRecognizer:willCreateCellAtIndexPath:")
+            @delegate.gestureRecognizer(self, willCreateCellAtIndexPath: @addingIndexPath)
+          else
+            NSIndexPath.indexPathForRow(0, inSection: 0)
+          end
 
         @tableView.beginUpdates
         @delegate.gestureRecognizer(self, needsAddRowAtIndexPath: @addingIndexPath)
@@ -352,25 +345,17 @@ class GestureRecognizer
     end
   end
 
-  def forwardInvocation(anInvocation)
-    anInvocation.invokeWithTarget(@tableViewDelegate)
-  end
-
-  def methodSignatureForSelector(aSelector)
-    @tableViewDelegate.methodSignatureForSelector(aSelector)
-  end
-
-  def respondsToSelector(aSelector)
-    if @tableViewDelegate.respondsToSelector(aSelector)
-      true
-    end
-    self.class.instancesRespondToSelector(aSelector)
-  end
-
-  private
   def indexPathFromRecognizer(recognizer)
     location = recognizer.locationInView(@tableView)
     @tableView.indexPathForRowAtPoint(location)
+  end
+
+  def lengthForCommitEditingRowAtIndexPath(indexPath)
+    if @delegate.respond_to? :"gestureRecognizer:lengthForCommitEditingRowAtIndexPath:"
+      @delegate.gestureRecognizer(self, lengthForCommitEditingRowAtIndexPath: indexPath)
+    else
+      CommitEditingRowDefaultRowHeight
+    end
   end
 end
 
