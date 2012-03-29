@@ -172,7 +172,14 @@ current_repl_prompt(NSString *top_level)
 {
     char question = '?';
     if (top_level == nil) {
-	top_level = [delegate replEval:@"self"];
+	static bool first_time = true;
+	if (first_time) {
+	    top_level = @"main";
+	    first_time = false;
+	}
+	else {
+	    top_level = [delegate replEval:@"self"];
+	}
 	question = '>';
     }
 
