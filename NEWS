@@ -1,3 +1,12 @@
+= RubyMotion 0.64 =
+
+  * Added a new sample code, gesture_table, which demonstrates a table view
+    that can be manipulated with gestures (similar to the Clear iOS app).
+    Thanks Josh Ballanco for contributing the initial version of the code.
+  * Added a new sample code, mustache, a port of the famous MacRuby sample
+    to iOS. Demonstrates CoreImage's face detection feature. Thanks to Josh
+    Ballanco for the matrix algebra.
+
 = RubyMotion 0.63 =
 
   * Changed #methods and others to not return Objective-C methods whose names
