@@ -63,7 +63,8 @@ task :simulator => ['build:simulator'] do
   xcode = App.config.xcode_dir
   env = xcode.match(/^\/Applications/) ? "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\"" : ''
   sim = File.join(App.config.bindir, 'sim')
-  debug = (ENV['debug'] || '0') == '1' ? 1 : (App.config.spec_mode ? 0 : 2)
+  debug = (ENV['debug'] || (App.config.spec_mode ? '0' : '2')).to_i
+  debug = 2 if debug < 0 or debug > 2
   App.info 'Simulate', app
   at_exit { system("stty echo") } # Just in case the simulator launcher crashes and leaves the terminal without echo.
   sh "#{env} #{sim} #{debug} #{family_int} #{target} \"#{xcode}\" \"#{app}\""
