@@ -79,7 +79,7 @@ class SupportCommand < Command
     unless File.exist?(LicensePath)
       die "License file not present. Please activate RubyMotion with `motion activate' and try again."
     end
-    license_key = File.read(LicensePath)
+    license_key = File.read(LicensePath).strip
 
     # Guess the default email address from git.
     email = URI.escape(`git config --get user.email`.strip)
@@ -138,7 +138,7 @@ class UpdateCommand < Command
     end
 
     need_root
-    license_key = File.read(LicensePath)
+    license_key = File.read(LicensePath).strip
 
     $stderr.puts "Connecting to the server..."
     resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
