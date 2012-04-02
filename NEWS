@@ -1,3 +1,7 @@
+= RubyMotion 0.65 =
+
+  * Changes for the new installer.
+
 = RubyMotion 0.64 =
 
   * Added a new sample code, gesture_table, which demonstrates a table view
