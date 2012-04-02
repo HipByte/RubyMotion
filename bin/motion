@@ -152,7 +152,7 @@ class UpdateCommand < Command
     curl("-# \"#{url}\" -o #{tmp_dest}")
 
     $stderr.puts "Installing software update..."
-    installer = "MOTION_UPDATE=1 /usr/sbin/installer -pkg \"#{tmp_dest}\" -target / >& /tmp/installer.stderr"
+    installer = "/usr/sbin/installer -pkg \"#{tmp_dest}\" -target / >& /tmp/installer.stderr"
     unless system(installer)
       die "An error happened when installing the software update: #{File.read('/tmp/installer.stderr')}"
     end
