@@ -1,0 +1,310 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		4DAE74D0152A0F5800751094 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DAE74CF152A0F5800751094 /* Cocoa.framework */; };
+		4DAE74DA152A0F5800751094 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4DAE74D8152A0F5800751094 /* InfoPlist.strings */; };
+		4DAE74DC152A0F5800751094 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DAE74DB152A0F5800751094 /* main.m */; };
+		4DAE74E3152A0F5800751094 /* RMAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DAE74E2152A0F5800751094 /* RMAppDelegate.m */; };
+		4DAE74E6152A0F5800751094 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DAE74E4152A0F5800751094 /* MainMenu.xib */; };
+		4DAE74F3152A0FFF00751094 /* eula.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 4DAE74EC152A0FFF00751094 /* eula.rtf */; };
+		4DAE74F4152A0FFF00751094 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 4DAE74ED152A0FFF00751094 /* icon.icns */; };
+		4DAE74F5152A0FFF00751094 /* logo_bottom.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DAE74EE152A0FFF00751094 /* logo_bottom.png */; };
+		4DAE74F6152A0FFF00751094 /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 4DAE74EF152A0FFF00751094 /* logo.png */; };
+		4DAE74F7152A0FFF00751094 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4DAE74F0152A0FFF00751094 /* MainWindow.xib */; };
+		4DAE74F8152A0FFF00751094 /* RMMainWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4DAE74F2152A0FFF00751094 /* RMMainWindowController.m */; };
+		4DAE74FA152A102100751094 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DAE74F9152A102100751094 /* QuartzCore.framework */; };
+		4DAE74FC152A102700751094 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DAE74FB152A102700751094 /* Security.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		4DAE74CB152A0F5800751094 /* RubyMotion Installer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "RubyMotion Installer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4DAE74CF152A0F5800751094 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		4DAE74D2152A0F5800751094 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		4DAE74D3152A0F5800751094 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		4DAE74D4152A0F5800751094 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		4DAE74D7152A0F5800751094 /* RubyMotion Installer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "RubyMotion Installer-Info.plist"; sourceTree = "<group>"; };
+		4DAE74D9152A0F5800751094 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		4DAE74DB152A0F5800751094 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		4DAE74DD152A0F5800751094 /* RubyMotion Installer-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RubyMotion Installer-Prefix.pch"; sourceTree = "<group>"; };
+		4DAE74E1152A0F5800751094 /* RMAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RMAppDelegate.h; sourceTree = "<group>"; };
+		4DAE74E2152A0F5800751094 /* RMAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RMAppDelegate.m; sourceTree = "<group>"; };
+		4DAE74E5152A0F5800751094 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		4DAE74EC152A0FFF00751094 /* eula.rtf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.rtf; path = eula.rtf; sourceTree = "<group>"; };
+		4DAE74ED152A0FFF00751094 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
+		4DAE74EE152A0FFF00751094 /* logo_bottom.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo_bottom.png; sourceTree = "<group>"; };
+		4DAE74EF152A0FFF00751094 /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
+		4DAE74F0152A0FFF00751094 /* MainWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainWindow.xib; sourceTree = "<group>"; };
+		4DAE74F1152A0FFF00751094 /* RMMainWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMMainWindowController.h; sourceTree = "<group>"; };
+		4DAE74F2152A0FFF00751094 /* RMMainWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMMainWindowController.m; sourceTree = "<group>"; };
+		4DAE74F9152A102100751094 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		4DAE74FB152A102700751094 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4DAE74C8152A0F5800751094 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DAE74FC152A102700751094 /* Security.framework in Frameworks */,
+				4DAE74FA152A102100751094 /* QuartzCore.framework in Frameworks */,
+				4DAE74D0152A0F5800751094 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4DAE74C0152A0F5800751094 = {
+			isa = PBXGroup;
+			children = (
+				4DAE74FB152A102700751094 /* Security.framework */,
+				4DAE74F9152A102100751094 /* QuartzCore.framework */,
+				4DAE74D5152A0F5800751094 /* RubyMotion Installer */,
+				4DAE74CE152A0F5800751094 /* Frameworks */,
+				4DAE74CC152A0F5800751094 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4DAE74CC152A0F5800751094 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4DAE74CB152A0F5800751094 /* RubyMotion Installer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		4DAE74CE152A0F5800751094 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4DAE74CF152A0F5800751094 /* Cocoa.framework */,
+				4DAE74D1152A0F5800751094 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4DAE74D1152A0F5800751094 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4DAE74D2152A0F5800751094 /* AppKit.framework */,
+				4DAE74D3152A0F5800751094 /* CoreData.framework */,
+				4DAE74D4152A0F5800751094 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		4DAE74D5152A0F5800751094 /* RubyMotion Installer */ = {
+			isa = PBXGroup;
+			children = (
+				4DAE74EC152A0FFF00751094 /* eula.rtf */,
+				4DAE74ED152A0FFF00751094 /* icon.icns */,
+				4DAE74EE152A0FFF00751094 /* logo_bottom.png */,
+				4DAE74EF152A0FFF00751094 /* logo.png */,
+				4DAE74F0152A0FFF00751094 /* MainWindow.xib */,
+				4DAE74F1152A0FFF00751094 /* RMMainWindowController.h */,
+				4DAE74F2152A0FFF00751094 /* RMMainWindowController.m */,
+				4DAE74E1152A0F5800751094 /* RMAppDelegate.h */,
+				4DAE74E2152A0F5800751094 /* RMAppDelegate.m */,
+				4DAE74E4152A0F5800751094 /* MainMenu.xib */,
+				4DAE74D7152A0F5800751094 /* RubyMotion Installer-Info.plist */,
+				4DAE74D8152A0F5800751094 /* InfoPlist.strings */,
+				4DAE74DB152A0F5800751094 /* main.m */,
+				4DAE74DD152A0F5800751094 /* RubyMotion Installer-Prefix.pch */,
+			);
+			path = "RubyMotion Installer";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		4DAE74CA152A0F5800751094 /* RubyMotion Installer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4DAE74E9152A0F5800751094 /* Build configuration list for PBXNativeTarget "RubyMotion Installer" */;
+			buildPhases = (
+				4DAE74C7152A0F5800751094 /* Sources */,
+				4DAE74C8152A0F5800751094 /* Frameworks */,
+				4DAE74C9152A0F5800751094 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "RubyMotion Installer";
+			productName = "RubyMotion Installer";
+			productReference = 4DAE74CB152A0F5800751094 /* RubyMotion Installer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4DAE74C2152A0F5800751094 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = RM;
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = 4DAE74C5152A0F5800751094 /* Build configuration list for PBXProject "RubyMotion Installer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 4DAE74C0152A0F5800751094;
+			productRefGroup = 4DAE74CC152A0F5800751094 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				4DAE74CA152A0F5800751094 /* RubyMotion Installer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4DAE74C9152A0F5800751094 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DAE74DA152A0F5800751094 /* InfoPlist.strings in Resources */,
+				4DAE74E6152A0F5800751094 /* MainMenu.xib in Resources */,
+				4DAE74F3152A0FFF00751094 /* eula.rtf in Resources */,
+				4DAE74F4152A0FFF00751094 /* icon.icns in Resources */,
+				4DAE74F5152A0FFF00751094 /* logo_bottom.png in Resources */,
+				4DAE74F6152A0FFF00751094 /* logo.png in Resources */,
+				4DAE74F7152A0FFF00751094 /* MainWindow.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		4DAE74C7152A0F5800751094 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DAE74DC152A0F5800751094 /* main.m in Sources */,
+				4DAE74E3152A0F5800751094 /* RMAppDelegate.m in Sources */,
+				4DAE74F8152A0FFF00751094 /* RMMainWindowController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		4DAE74D8152A0F5800751094 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4DAE74D9152A0F5800751094 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		4DAE74E4152A0F5800751094 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4DAE74E5152A0F5800751094 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4DAE74E7152A0F5800751094 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		4DAE74E8152A0F5800751094 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		4DAE74EA152A0F5800751094 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "RubyMotion Installer/RubyMotion Installer-Prefix.pch";
+				INFOPLIST_FILE = "RubyMotion Installer/RubyMotion Installer-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		4DAE74EB152A0F5800751094 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "RubyMotion Installer/RubyMotion Installer-Prefix.pch";
+				INFOPLIST_FILE = "RubyMotion Installer/RubyMotion Installer-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4DAE74C5152A0F5800751094 /* Build configuration list for PBXProject "RubyMotion Installer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DAE74E7152A0F5800751094 /* Debug */,
+				4DAE74E8152A0F5800751094 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4DAE74E9152A0F5800751094 /* Build configuration list for PBXNativeTarget "RubyMotion Installer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4DAE74EA152A0F5800751094 /* Debug */,
+				4DAE74EB152A0F5800751094 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4DAE74C2152A0F5800751094 /* Project object */;
+}
