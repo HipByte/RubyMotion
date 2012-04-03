@@ -48,6 +48,10 @@ class ActivateCommand < Command
   self.help = 'Activate the software license'
 
   def self.run(args)
+    if File.exist?(LicensePath)
+      die "Product is already activated. Delete the license file `#{LicensePath}' if you want to activate a new license."
+    end
+
     if args.size != 1
       die "Usage: motion activate <license-key>"
     end
@@ -55,10 +59,6 @@ class ActivateCommand < Command
     license_key = args[0]
     unless license_key.match(/^[a-f0-9]{40}$/)
       die "Given license key `#{license_key}' seems invalid. It should be a string of 40 hexadecimal characters. Check the mail you received after the order, or contact us if you need any help: info@hipbyte.com"
-    end
-
-    if File.exist?(LicensePath)
-      die "Product is already activated. Delete the license file `#{LicensePath}' if you want to activate a new license."
     end
 
     need_root
