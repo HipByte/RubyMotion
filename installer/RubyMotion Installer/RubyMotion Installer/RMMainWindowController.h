@@ -11,6 +11,7 @@
 @interface RMMainWindowController : NSWindowController <NSURLDownloadDelegate>
 {
     IBOutlet NSView *view1, *view2, *view3, *view4, *view5;
+    IBOutlet NSButton *seeLicenseButton;
     IBOutlet NSTextView *licenseTextView;
     IBOutlet NSTextField *licenseKeyTextField;
     IBOutlet NSTextField *licenseKeyDescriptiveLabel;
@@ -29,6 +30,7 @@
 
 + (id)open;
 
+- (IBAction)seeLicense:(id)sender;
 - (IBAction)contactSupport:(id)sender;
 - (IBAction)quitStep:(id)sender;
 - (IBAction)nextStep:(id)sender;

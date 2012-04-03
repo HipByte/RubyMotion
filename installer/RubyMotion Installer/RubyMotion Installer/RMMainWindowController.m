@@ -193,6 +193,14 @@ DoneWorking:
 
 - (void)nextStep:(id)sender
 {
+    if (currentStep == 1) {
+        if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Library/Motion"]) {
+            if ([[NSAlert alertWithMessageText:@"RubyMotion Already Installed" defaultButton:@"Quit Installer" alternateButton:@"Force a New Installation" otherButton:@"" informativeTextWithFormat:@"It looks like RubyMotion has already been installed on this system. You can force a new installation if you want."] runModal] == NSAlertDefaultReturn) {
+                [[NSApplication sharedApplication] terminate:sender];
+            }
+        }
+    }
+    
     if (currentStep == 3 && licenseKey == nil) {
         NSString *givenLicenseKey = [licenseKeyTextField stringValue];
         givenLicenseKey = [givenLicenseKey stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
@@ -321,6 +329,9 @@ DoneWorking:
             break;
         case 2:
             if (true) {
+                
+                [seeLicenseButton setAttributedTitle:[[[NSAttributedString alloc] initWithString:@"software license agreement" attributes:[NSDictionary dictionaryWithObjectsAndKeys:[NSColor blueColor], NSForegroundColorAttributeName, [NSFont fontWithName:@"Lucida Grande" size:13.0], NSFontAttributeName, [NSNumber numberWithInt:NSUnderlineStyleSingle], NSUnderlineStyleAttributeName, nil]] autorelease]];
+
                 NSString *licensePath = [[NSBundle mainBundle] pathForResource:@"eula" ofType:@"rtf"];
                 assert(licensePath != nil);
                 NSData *data = [NSData dataWithContentsOfFile:licensePath];
@@ -339,6 +350,14 @@ DoneWorking:
             break;
     }
 }
+
+- (IBAction)seeLicense:(id)sender
+{
+    NSString *licensePath = [[NSBundle mainBundle] pathForResource:@"eula" ofType:@"rtf"];
+    assert(licensePath != nil);
+    [[NSWorkspace sharedWorkspace] openFile:licensePath];
+}
+
 
 - (void)windowWillClose:(NSNotification *)notification
 {
