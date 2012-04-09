@@ -1,3 +1,10 @@
+= RubyMotion 0.66 =
+
+  * Added support for calling variadic functions or methods. Currently, the
+    number of varargs must not be higher than 15.
+  * Improved the mustache sample with swipe gestures, in order to browse the
+    builtin photos.
+
 = RubyMotion 0.65 =
 
   * Changes for the new installer.
