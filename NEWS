@@ -1,3 +1,12 @@
+= RubyMotion 0.68 =
+
+  * Added a new sample, trollify, that demonstrates gestures, image editing,
+    camera picture acquisition and interacting with the photo library roll.
+    The code was graciously contributed by Johannes Fahrenkrug.
+  * Fixed a crash that could happen in the REPL when working on an application
+    that makes use of CoreImage, because CoreImage bundles its own version of
+    the LLVM JIT with all symbols exposed.
+
 = RubyMotion 0.67 =
 
   * Fixed a regression in the compiler introduced by new changes in the
