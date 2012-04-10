@@ -1,3 +1,8 @@
+= RubyMotion 0.67 =
+
+  * Fixed a regression in the compiler introduced by new changes in the
+    previous build.
+
 = RubyMotion 0.66 =
 
   * Added support for calling variadic functions or methods. Currently, the
