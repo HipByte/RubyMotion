@@ -1,4 +1,4 @@
-$:.unshift("/Users/lrz/src/rubixir/lib")
+$:.unshift('../../lib')
 require 'motion/project'
 
 Motion::Project::App.setup do |app|
