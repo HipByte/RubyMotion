@@ -8,16 +8,16 @@ class ImageCompositionController < UIViewController
     view.addSubview(troll_image_view)
     
     rotationGesture = UIRotationGestureRecognizer.alloc.initWithTarget(self, action: 'rotate_image:')
-    @troll_image_view.addGestureRecognizer(rotationGesture)
+    troll_image_view.addGestureRecognizer(rotationGesture)
     
     panGesture = UIPanGestureRecognizer.alloc.initWithTarget(self, action: 'pan_image:')
     panGesture.maximumNumberOfTouches = 2
     panGesture.delegate = self
-    @troll_image_view.addGestureRecognizer(panGesture)
+    troll_image_view.addGestureRecognizer(panGesture)
     
     pinchGesture = UIPinchGestureRecognizer.alloc.initWithTarget(self, action:'scale_image:')
     pinchGesture.delegate = self
-    @troll_image_view.addGestureRecognizer(pinchGesture)
+    troll_image_view.addGestureRecognizer(pinchGesture)
     
     navigationItem.leftBarButtonItem = UIBarButtonItem.alloc.initWithTitle("Pick", style:UIBarButtonItemStylePlain, target:self, action:'show_source_sheet')
     navigationItem.rightBarButtonItem = UIBarButtonItem.alloc.initWithTitle("Save", style:UIBarButtonItemStylePlain, target:self, action:'save_image')
@@ -73,7 +73,7 @@ class ImageCompositionController < UIViewController
   def scale_image(gestureRecognizer)
     adjust_anchor_point_for_gesture_recognizer(gestureRecognizer)
     if gestureRecognizer.state == UIGestureRecognizerStateBegan || gestureRecognizer.state == UIGestureRecognizerStateChanged
-      gestureRecognizer.view.transform = CGAffineTransformScale(gestureRecognizer.view.transform, gestureRecognizer.scale, gestureRecognizer.scale);
+      gestureRecognizer.view.transform = CGAffineTransformScale(gestureRecognizer.view.transform, gestureRecognizer.scale, gestureRecognizer.scale)
       gestureRecognizer.scale = 1
     end
   end
@@ -137,31 +137,31 @@ class ImageCompositionController < UIViewController
   def save_image
     image = view.image
 
-    troll_image_transform = @troll_image_view.transform;
-    trollfaceRotation = Math.atan2(troll_image_transform.b, troll_image_transform.a);
-    trollfaceScaleX = Math.sqrt(troll_image_transform.a**2 + troll_image_transform.c**2);
-    trollfaceScaleY = Math.sqrt(troll_image_transform.b**2  + troll_image_transform.d**2);
+    troll_image_transform = troll_image_view.transform
+    trollfaceRotation = Math.atan2(troll_image_transform.b, troll_image_transform.a)
+    trollfaceScaleX = Math.sqrt(troll_image_transform.a**2 + troll_image_transform.c**2)
+    trollfaceScaleY = Math.sqrt(troll_image_transform.b**2  + troll_image_transform.d**2)
 
      # We are displaying the image in AspectFill mode. This will give us the scale.
     scale = [image.size.width/view.frame.size.width, image.size.height/view.frame.size.height].min
 
-    targetWidth = image.size.width;
-    targetHeight = image.size.height;
+    targetWidth = image.size.width
+    targetHeight = image.size.height
 
     # Image Rect and Image Context in the size of the image.
-    imageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+    imageRect = CGRectMake(0, 0, image.size.width, image.size.height)
 
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(targetWidth, targetHeight), true, UIScreen.mainScreen.scale);
-    c = UIGraphicsGetCurrentContext();
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(targetWidth, targetHeight), true, UIScreen.mainScreen.scale)
+    c = UIGraphicsGetCurrentContext()
     image.drawInRect(imageRect)
 
     # Potential landscape rotation.
     CGContextSaveGState(c)
      
     # Get the (possibly rotated) image.
-    trollface_image = @troll_image_view.image 
+    trollface_image = troll_image_view.image 
     if trollfaceRotation != 0
-      trollface_image = @troll_image_view.image.imageRotatedByRadians(trollfaceRotation)
+      trollface_image = troll_image_view.image.imageRotatedByRadians(trollfaceRotation)
     end
 
     # Move the context down and left (or either or) to match where the trollface view was on the screen
@@ -170,7 +170,7 @@ class ImageCompositionController < UIViewController
     CGContextScaleCTM(c, scale, scale)
 
     # Draw the trollface image, correctly scaled.
-    trollface_image.drawInRect(CGRectMake(@troll_image_view.frame.origin.x, @troll_image_view.frame.origin.y, trollface_image.size.width * trollfaceScaleX, trollface_image.size.height * trollfaceScaleY))
+    trollface_image.drawInRect(CGRectMake(troll_image_view.frame.origin.x, troll_image_view.frame.origin.y, trollface_image.size.width * trollfaceScaleX, trollface_image.size.height * trollfaceScaleY))
 
     CGContextRestoreGState(c) 
 
