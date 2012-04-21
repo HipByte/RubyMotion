@@ -403,6 +403,7 @@ PLIST
         sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
       end
 
+=begin
       # Create .xcarchive. Only in release mode.
       if config.release?
         xcarchive = File.join(File.dirname(app_bundle), config.name + '.xcarchive')
@@ -431,6 +432,7 @@ PLIST
           end 
         end
       end
+=end
     end
   end
 end; end

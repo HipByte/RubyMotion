@@ -98,7 +98,7 @@ namespace :archive do
     App.archive
   end
 
-  desc "Create an .ipa and .xcarchive for release (AppStore)"
+  desc "Create an .ipa for release (AppStore)"
   task :release do
     App.config_mode = :release
     Rake::Task["build:device"].execute
