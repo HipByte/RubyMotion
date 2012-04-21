@@ -50,7 +50,7 @@
 {
     if (currentStep == 5) {
         if ([openGettingStartedGuideButton state] == NSOnState) {
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:@"/Library/Motion/doc/Getting Started.html"]];
+            [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:@"http://www.rubymotion.com/developer-center/guides/getting-started"]];
         }
     }
     [[NSApplication sharedApplication] terminate:sender];
