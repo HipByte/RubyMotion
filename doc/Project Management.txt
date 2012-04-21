@@ -1,0 +1,355 @@
+RubyMotion Project Management Guide
+===================================
+Laurent Sansonetti <lrz@hipbyte.com>
+
+In this guide we will explain how to create new RubyMotion projects, then configure and maintain them.
+
+Creation
+--------
+
+To create a new RubyMotion project, pass the +create+ command to '/usr/bin/motion'. It will create a new project directory.
+
+----
+$ motion create Hello
+$ cd Hello
+$ ls
+Rakefile app resources spec
+----
+
+Project Anatomy
+~~~~~~~~~~~~~~~
+
+The following table illustrates the anatomy of a project directory.
+
+[options="header,autowidth"]
+|=========================
+| File/Directory | Purpose 
+| 'Rakefile' | This file contains the configuration of the project, as well as a default set of tasks. It can be edited to change the configuration or add new tasks.
+| '.gitignore' | This file contains file patterns that should be ignored by the source control management software (for instance, build files). This file is used by Git, but it can be ported to other SCMs.
+| 'app/' | This directory contains the Ruby code of the project. In a new project, a 'main.rb' file is created automatically.
+| 'resources/' | This directory contains the resources files of the project, such as images or sounds. In a new project, this directory is empty.
+|'spec/' | This directory contains the specification files of the application. In a new project, a default specification file is created automatically.
+|=========================
+
+RubyMotion projects are based on Rake. Essential rake tasks will be covered in the following sections. To see the full list of available tasks:
+
+----
+$ rake -T
+----
+
+NOTE: Rake is the de-facto build system framework for Ruby. It is similar to make and ships by default in OSX.
+
+Configuration
+-------------
+
+The +rake config+ task will dump the project configuration. Each configuration variable has a sensible default value that can be manually overriden in the 'Rakefile' file.
+
+[options="header,autowidth"]
+|====
+| Variable | Discussion
+|+name+ | Project name, as a +String+. The default value is the name passed to +motion create+.
+|+version+ | Project version, as a +String+. The default value is +"1.0"+.
+|+identifier+ | Project identifier, as a +String+, in reverse DNS format. The default value is the concatenation of +"com.yourcompany."+ and the +name+ variable.
+|+delegate_class+ | Name of the application delegate class, as a +String+. The default value is +"AppDelegate"+ and the class is defined in 'app/main.rb'.
+|+files+ | Project files, as an +Array+. The default value is the result of the following expression: +Dir.glob('./app/**/*.rb')+ (every '.rb' file in the 'app' directory).
+|+frameworks+ | The names of iOS frameworks to link against, as an +Array+. It should contain the names of public iOS frameworks, typically present in '/System/Library/Frameworks'. The build system is capable of dealing with dependencies, for instance there is no need to mention +"CoreFoundation"+ if you have +"Foundation"+. The default value is +['UIKit', 'Foundation', 'CoreGraphics']+.
+| +libs+ | Library paths to link against, as an +Array+. It should contain paths to public, system libraries, for example +"/usr/lib/libz.dylib"+. The default value is +[]+, an empty array.
+|+build_dir+ | Path to the directory for build products, as a +String+. It must be relative to the project directory. The directory will be created by the build system if it does not exist yet. If it cannot be created, a temporary directory will be used instead. The default value is +"build"+.
+|+resources_dir+ | Directory for resources files, as a +String+. It must be relative to the project directory. The default value is +"resources"+.
+|+specs_dir+ | Directory for specification files, as a +String+. It must be relative to the project directory. The default value is +"spec"+.
+|+icons+ | List of names of resource files to use for icons, as an +Array+. For example, +["Icon.png", "Icon-72.png", "Icon@2x.png"]+. The files must conform to the http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html[HIG guidelines]. The default value is +[]+, an empty array.
+|+fonts+ | List of names of font files in the resources directory, as an +Array+. For example, +["Inconsolata.otf"]+. The fonts will then be properly taken into account when generating the application. The default value is the list of all '.ttf' and '.otf' files in the resources directory. It is recommended to keep the default value.
+|+prerendered_icon+ | Whether the image files in +icons+ are already pre-rendered according to the HIG guidelines. If +false+, iOS will apply a reflective shine effect on the icons. The default value is +false+.
+|+device_family+ | Family of devices to support. Possible values can be: +iphone+, +ipad+ or +[:iphone, :ipad]+ (for a universal application). The default value is +:iphone+.
+|+interface_orientations+ | Supported interface orientations. Value must be an +Array+ of one or more of the following symbols: +:portrait+, +:landscape_left+, :+landscape_right+:, and +:portrait_upside_down+. The default value is +[:portrait, :landscape_left, :landscape_right]+.
+|+xcode_dir+ | Directory where Xcode is installed, as a +String+. The default value is determined by the returned value of '/usr/bin/xcode-select -printPath', or, if invalid, '/Applications/Xcode.app/Contents/Developer'. Giving a new value to this setting must be done first, before changing other settings.
+|+sdk_version+ | Version number of the SDK to use, as a +String+. The default value is the version number of the most recent supported SDK in +xcode_dir+. Example: +"5.0"+.
+|+deployment_target+ | Version number of the SDK to target, as a +String+. The default value is the value of +sdk_version+, but can be lowered to target older versions of iOS. Example: +"4.3"+.
+|+codesign_certificate+ | The name of the certificate to use for codesigning, as a +String+. The default value is the first iPhone Developer certificate found in keychain. Example: +"iPhone Developer: Darth Vader (A3LKZY369Q)"+.
+|+provisioning_profile+ | Path to the provisioning profile to use for deployment, as a +String+. The default value is the first '.mobileprovision' file found in '~/Library/MobileDevice/Provisioning'.
+|+seed_id+ | The application provisioning identifier, as a +String+. It is a unique (within the App Store) 10 characters identifier generated by the provisioning portal. The default value is the first application identifier found in +provisioning_profile+.
+|====
+
+Custom values for the configuration settings can be added by tweaking the +Motion::App.setup+ block in the +Rakefile+ file.
+
+As an example, let's take the configuration block of a fictional video player application for the iPad. The device family setting has to change from its default value, iPhone, to iPad. Also, the application makes use of an additional framework, AVFoundation, for audio-video functionality.
+
+----
+Motion::Project::App.setup do |app|
+  app.name = 'Awesome Video Player'
+  app.device_family = :ipad
+  app.frameworks += ['AVFoundation']
+end
+----
+
+Files Dependencies
+~~~~~~~~~~~~~~~~~~
+
+By default, RubyMotion will compile files in the regular sorting order of the filesystem. When a RubyMotion application starts, the main scope of each file will then be executed in that specific order.
+
+Sometimes, the developer will want to customize the order, if for instance one file makes use of a constant defined in another.
+
+----
+$ cat app/foo.rb
+class Foo
+end
+$ cat app/bar.rb
+class Bar < Foo
+end
+----
+
+In the example above, using the default order, 'bar.rb' will be compiled before 'foo.rb' resulting in a constant lookup error, because the +Foo+ constant has not been defined yet when we execute the code in 'bar.rb'.
+
+To fix that problem, the +files_dependencies+ method can be used in the 'Rakefile'. This method accepts a +Hash+ which should be a set of files dependencies.
+
+----
+Motion::Project::App.setup do |app|
+  # ...
+  app.files_dependencies 'app/bar.rb' => 'app/foo.rb'
+end
+----
+
+After this change, the build system will compile 'foo.rb' before 'bar.rb'.
+
+Using 3rd-Party Libraries
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The iOS SDK has a significant amount of functionality built-in that one can use from a RubyMotion project, however, sometimes a developer will need to use a 3rd-party library that provides a missing feature of iOS.
+
+To vendor a 3rd-party library in a RubyMotion project, the source code must be available somewhere on the filesystem. It is recommended to keep the 3rd-party libraries required by the project at the same place, for instance under a 'vendor' directory.
+
+The +vendor_project+ method can be called from the 'Rakefile'. Its first argument must be the path to the 3rd-party library, for example +"vendor/OAuth2Client"+. Its second argument must be a symbol representing the project type, like +:xcode+. Other arguments can be provided as a list of key/value objects.
+
+Here is a table summarizing project types and key/value objects.
+
+[cols=".^,.^,.^",options="header,autowidth"]
+|====
+| Project Type | Key | Discussion
+.6+|+:xcode+ | +:xcodeproj+ | Name of the Xcode project file to use. Optional if there is one '.xcodeproj' file in the directory.
+| +:target+ | Name of the target to build. If not provided, the default target will be used. Cannot be used at the same time than +:scheme+.
+| +:scheme+ | Name of the scheme to build. If not provided, the default scheme will be used. Cannot be used at the same time than +:target+.
+| +:configuration+ | Name of the configuration to build. If not provided, +"Release"+ will be used.
+| +:headers_dir+ | Path to the directory that contains public headers files, declaring APIs that will be used by the RubyMotion project. The path should be relative to the path provided to +vendor_project+, for example +"Sources/Headers"+. This key is optional.
+| +:products+ | An +Array+ containing the names of products to use in the RubyMotion project, for example +["libfoo.a"]+. This key can be used when the project builds more than one product and the developer wants to filter what will be used by the app. If not provided, all +.a+ libraries built will be used.
+.2+| +:static+ | +:products+ | An +Array+ containing the names of static libraries to use. The default value is the list of all '.a' files in the vendor project directory.
+| +:headers_dir+ | Path to the directory that contains public headers files, declaring APIs that will be used by the RubyMotion project. The path should be relative to the path provided to +vendor_project+, for example +"include"+. The default value is the vendor project directory.
+|====
+
+As an example, assuming our video player project wants to make use of the OAuth2Client 3rd-library library, a 'vendor' directory would be created and the OAuth2Client source code would be added there.
+
+----
+$ cd AwesomeVideoPlayer
+$ ls vendor
+OAuth2Client
+----
+
+Then, the 'Rakefile' can be modified as such. 
+
+----
+Motion::Project::App.setup do |app|
+  # ...
+  app.vendor_project('vendor/OAuth2Client', :xcode,
+      :target => 'OAuth2Client',
+      :headers_dir => 'Sources/OAuth2Client')
+  app.frameworks << 'Security' # OAuth2Client depends on Security.framework
+end
+----
+
+Entitlements
+~~~~~~~~~~~~
+
+Entitlements confer specific capabilities or security permissions to an application. You may be required by Apple to request an entitlement when trying to access a specific feature of the system.
+
+An application running on an iOS device that does not have the proper entitlement for a functionality will fail at runtime when trying to use such functionality. It will also not be accepted into the App Store.
+
+Entitlements are used during the code-signing part of the build process.
+
+The +entitlements+ method of the 'Rakefile' configuration object returns an empty +Hash+ object by default, that the developer can modify to set appropriate keys and values.
+
+For instance, our video player might require access to the keychain to store the user credentials. According to the documentation, the +keychain-access-groups+ entitlement must be requested, passing a combination of the application provisioning identifier and the application identifier, respectively exposed as +seed_id+ and +identifier+ in RubyMotion.
+
+----
+Motion::Project::App.setup do |app|
+  # ...
+  app.entitlements['keychain-access-groups'] = [
+    app.seed_id + '.' + app.identifier
+  ]
+end
+----
+
+Advanced Info.plist Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+An iOS app has its configuration described into the 'Info.plist' file, which is located inside the application bundle. This file contains a set of keys and values. It is fully documented in the http://developer.apple.com/library/ios/#documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html[Info.plist reference] guide.
+
+In a RubyMotion project, the 'Info.plist' file is derived from the configuration object exposed in the 'Rakefile' file. For example, the +CFBundleName+ variable in 'Info.plist' is derived from the +name+ variable in the 'Rakefile'. Most of the time, the configuration object will let the developer control the necessary settings of his project.
+
+However, it might happen that the developer will want to change an advanced setting of a project. The 'Rakefile' interface does not cover all the possible settings, but it exposes the internal 'Info.plist' data structure that one can modify if needed.
+
+As an example, our video player might need to register a custom URI scheme, so that it can open custom URLs from the web browser, for instance, +x-videoplayer://play+. The 'Rakefile' configuration object does not provide support for this.
+
+The reference suggests that the +CFBundleURLTypes+ key should be used. The key can be manually set by using the +info_plist+ method, which returns a mutable +Hash+ object.
+
+----
+Motion::Project::App.setup do |app|
+  # ...
+  app.info_plist['CFBundleURLTypes'] = [
+    { 'CFBundleURLName' => 'com.mycompany.x-videoplayer',
+      'CFBundleURLSchemes' => ['x-videoplayer'] }
+  ]
+end
+----
+
+Build
+-----
+
+The +rake build+ task builds the project into the temporary 'build' directory. Two different versions of the project will be built, one to run in the iOS simulator (on the Mac itself) and one to run on the iOS device.
+
+The following steps are performed during the build process:
+
+. It compiles each Ruby source code file into optimized machine code, translating the Ruby syntax tree into an intermediate representation language (using http://llvm.org[LLVM]), then assembly. The compiler will generate code for either the Intel 32-bit (+i386+) or ARM (+armv6+, +armv7+) instruction sets and ABIs depending on the target.
+. It links the machine code with the RubyMotion runtime statically to form an executable. The linker also includes metadata for the C APIs that the project uses, as well as 3rd-party libraries vendored from the configuration.
+. It creates an '.app' bundle and copies the executable there. The 'Info.plist' file is generated based on the project configuration. Each resource file in the 'resources' directory is copied in the bundle. Old resource files, that have been deleted since from the project, will not be present in the application bundle.
+. It codesigns the bundle based on the certificate, the provisioning profile and the entitlements specified in the project configuration.
+
+Normally the user does not need to explicitly build the project, as the 'build' task is a dependency of the other tasks.
+
+Parallel Compilation
+~~~~~~~~~~~~~~~~~~~~
+
+The compilation of Ruby source files into machine code takes a non-negligeable amount of time.
+
+If the machine used to build the project runs a multicore processor, which is very likely these days, the build system will try to spread the compilation tasks in parallel. This can be very useful when building a project that contains a significant number of files.
+
+The build system uses the value of the +machdep.cpu.thread_count+ sysctl kernel variable to determine  know how many compilation tasks can be executed in parallel. For example, a MacBook Pro running an Intel Core i7 processor has 4 available cores, each one being able to run 2 concurrent threads, and the build system will therefore compile 8 files at a time.
+
+It is possible to override the number of concurrent jobs the build system should use by setting the +jobs+ environment variable. It can be set to a lower number if for instance the machine is performing another CPU intensive task that should not be interrupted by the build system.
+
+----
+$ rake jobs=1        # Force compilation tasks to be sequential.
+----
+
+Cleaning
+~~~~~~~~
+
+The +rake clean+ task empties the 'build' directory and clean the build directories of the vendored projects.
+
+Simulation
+----------
+
+The +rake simulator+ task builds the project for the iOS simulator, and runs the application in the simulator.
+
+The default +rake+ task is a shortcut to +rake simulator+.
+
+----
+$ rake
+----
+
+Universal Applications
+~~~~~~~~~~~~~~~~~~~~~~
+
+A universal application targets both the iPhone and iPad device families (see the +device_family+ project configuration setting for more details).
+
+In this case, it can be convenient to specify which device family the simulator should use. By default, the simulator will use the first device family provided in the project configuration setting.
+
+The +device_family+ environment variable can be set to either +iphone+ or +ipad+ to change this default. For example, forcing a universal application to run on the iPad.
+
+----
+$ rake simulator device_family=ipad
+----
+
+Cleaning the Sandbox
+~~~~~~~~~~~~~~~~~~~~
+
+Each application lives in its own directory inside the iOS simulator sandbox. This directory contains the application bundle, but also the 'Documents' and 'Library' folders, which store its filesystem state. When running an application through the simulator, the sandbox will be created if it doesn't exist, otherwise, the application will be copied into the existing sandbox.
+
+Sometimes, the developer may want to clean the application sandbox before running the simulator, in order to start from a fresh state. For instance, if resource files are removed from the project, or if the application has state data that has to be cleaned up.
+
+To perform that, the +clean+ environment variable can be set to any value, which will trigger the removal of the application sandbox before running the simulator.
+
+----
+$ rake simulator clean=1
+----
+
+Testing
+-------
+
+RubyMotion has built-in http://en.wikipedia.org/wiki/Behavior_Driven_Development[Behavior-Driven Development] functionality that the developer can use to cover the specifications of an application. RubyMotion uses a flavor of the http://github.com/alloy/MacBacon[Bacon] framework slightly modified to integrate better with the iOS system.
+ 
+Specification files are written in the 'spec' directory.
+
+The +rake spec+ task will build a special version of the project that will execute all specification files right after the application launches. A summary will then be printed on the standard output terminal, and the application will exit.
+
+Note: +rake spec+ currently only works with the simulator.
+
+Specification files have full access to the iOS SDK as well as the application classes. Here is a spec that makes sure the application has one active window.
+
+----
+$ cat spec/main_spec.rb 
+describe "My Awesome App" do
+  it "has a window" do
+    app = UIApplication.sharedApplication
+    app.windows.size.should == 1
+  end
+end
+----
+
+Assuming the application is properly implemented to follow that specification, +rake spec+ will gracefully exit with a status error of 0.
+
+----
+$ rake spec
+...
+My Awesome App
+  - has a window
+
+1 specifications (1 requirements), 0 failures, 0 errors
+----
+
+Archiving
+---------
+
+RubyMotion projects can be archived in order to be distributed and submitted to the App Store.
+
+Development vs Release
+~~~~~~~~~~~~~~~~~~~~~~
+
+A RubyMotion project can be built for development or release. A project is built for development when you run it in the simulator, or push it to your development device. A project is built for release when you're generating an archive for an App Store submission.
+
+Currently, the only difference between a RubyMotion app built for release and one built for development is that all symbols are stripped from the main executable. This process removes about 1MB of data from the app bundle, but at the same time, makes debugging more difficult, which is why it's not applied in development. 
+
+Sometimes, the developer may want to apply different settings in the 'Rakefile' if the project builds for release. This can be done by using the +development+ and +release+ methods on the configuration object, which will yield the given block in case the project builds for the appropriate mode.
+
+----
+Motion::Project::App.setup do |app|
+  # ...
+  app.development do
+    # This entitlement is required during development but must not be used for release.
+    app.entitlements['get-task-allow'] = true
+  end
+end
+----
+
+Install on Device
+~~~~~~~~~~~~~~~~~
+
+The +rake device+ task builds and uploads a development archive of the application to an iOS device.
+
+There must be one iOS device connected via USB to the Mac. The deployment task will attempt to upload the application to the first discovered iOS device on the USB channel.
+
+The process will fail in the following cases:
+
+* No iOS device was found on USB.
+* The project builds on a version of iOS greater than the version of iOS running on the device.
+* The project doesn't use the appropriate certificate and provisioning profile linked to the device.
+* There is a USB connection issue when talking to the device.
+
+Otherwise, the process returns successfully and the application is then available on the device springboard.
+
+Distribution
+~~~~~~~~~~~~
+
+The +rake archive+ task can be used to generate '.ipa' archives for both development and release modes. An '.ipa' archive is suitable for ad-hoc distribution. 
+
+The task requires a valid certificate and provisioning profile in order to codesign the app bundle.
+
+In release mode, an '.xcarchive' archive is also created. This file opens with the Xcode 4 organizer and allows the developer to perform an App Store submission.

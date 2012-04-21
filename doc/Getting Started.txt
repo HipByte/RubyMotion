@@ -1,0 +1,126 @@
+Welcome to RubyMotion
+=====================
+Laurent Sansonetti <lrz@hipbyte.com>
+
+
+Thank you for purchasing RubyMotion. This guide will help you getting started with the product.
+
+Overview
+--------
+
+http://www.rubymotion.com[RubyMotion] is a toolchain that permits the development of iOS applications using the Ruby programming language.
+
+http://www.apple.com/ios[iOS] is Apple's mobile operating system, powering a variety of devices such as iPhone, iPod touch and iPad. Developers can write applications for iOS and submit them to the App Store, Apple's application distribution system.
+
+Conceptually, RubyMotion is a combination of two major components:
+
+* *Runtime*: a brand-new implementation of the Ruby language, tightly integrated with the native iOS runtime and optimized for embedded iOS devices constrains.
+* *Project Management*: a command-line interface to create, manage and interactively develop RubyMotion projects. It also includes a static compiler that compiles Ruby into optimized machine code and an interactive console where you can evaluate expressions on the fly and change the way your app behaves in real-time.
+
+RubyMotion installs itself into '/Library/Motion'. A symbolic link to the command-line interface is created as '/usr/bin/motion'.
+
+Software Updates
+----------------
+
+Software updates can be applied via the command-line.
+
+The following command will grab the latest version of RubyMotion from the network and install it. You must be connected to the Internet to perform that command.
+
+----
+$ sudo motion update
+----
+
+You can always see the version number of the version of RubyMotion installed on the computer.
+
+----
+$ motion -v
+1.0
+----
+
+Once a day, the RubyMotion build system pings the software update server in order to see if a new version of RubyMotion is available to install, and accordingly prints a message on your terminal, suggesting you to upgrade.
+
+Support
+-------
+
+If you are experiencing an issue, would like to request a feature, or simply have a question, you can file out a support ticket from the command-line.
+
+----
+$ motion support
+----
+
+This will open a new window in your browser where you can fill up a support ticket. Your license key and some useful information regarding your environment will be added automatically.
+
+Hello World
+-----------
+
+We are now ready to write our first RubyMotion program: Hello World.
+
+Open your terminal and go to a place where you would like this first project to be created, then type the following command.
+
+----
+$ motion create Hello
+----
+
+This command will create a RubyMotion project in a new directory, called Hello. If this directory already exists or cannot be created, the command will fail.
+
+Let's have a look inside.
+
+----  
+$ cd Hello
+$ ls
+Rakefile app resources spec
+----
+
+A RubyMotion project is +Rakefile+-based. +rake+ is the de-facto Ruby build program. It is similar to +make+ and it ships with Mac OS X by default.
+
+The 'app' directory contains the application code. The 'resources' directory will eventually contain the resource files of your project, such as icon, image or sound files. The 'spec' directory contains specification/test files.
+
+Let's run the default task.
+
+----
+$ rake
+----
+
+This should build our project then start the simulator, and you should see... an empty, black window. It's actually normal, we haven't written any code yet!
+
+If you look inside the 'app' directory you will see an 'app_delegate.rb' file, which is created by default. This file implements the +AppDelegate+ class, which is responsible to control your application object.
+
+----
+class AppDelegate
+  def application(application, didFinishLaunchingWithOptions:launchOptions)
+    true
+  end
+end
+----
+
+Open the 'app/app_delegate.rb' file with your favorite editor. We will change the code to do something more interesting, such as triggering an alert.
+
+----
+class AppDelegate
+  def application(application, didFinishLaunchingWithOptions:launchOptions)
+    alert = UIAlertView.new
+    alert.message = "Hello World!"
+    alert.show
+    true
+  end
+end
+----
+
+If you run the +rake+ command again from the terminal, you should be able to see the alert in the simulator.
+
+Now, let's try this outside the simulator. Make sure you have an iOS device properly configured for development connected over USB, and type the following.
+
+----
+$ rake device
+----
+
+This should install the Hello app on your device. You can now pick it up and run the app, and you should be able to see the alert message.
+
+Congratulations, you successfully created your first RubyMotion program. That wasn't too hard, wasn't it?
+
+And Now?
+--------
+
+You will find sample code in the '/Library/Motion/sample' folder. Each of the sub-folders is a RubyMotion project as introduced above. You can type +rake+ from their directory to build and run them and check their source code by reading the files in the 'app' directory.
+
+Make sure to check the http://www.rubymotion.com/developer-center[Developer Center] for more resources, such as guides and tutorials.
