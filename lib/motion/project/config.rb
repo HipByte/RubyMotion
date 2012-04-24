@@ -1,3 +1,8 @@
+# Copyright (C) 2012, HipByte SPRL. All Rights Reserved.
+#
+# This file is subject to the terms and conditions of the End User License
+# Agreement accompanying the package this file is a part of.
+
 module Motion; module Project
   class Config
     VARS = []

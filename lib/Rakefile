@@ -8,6 +8,11 @@ task :all => [:version_file]
 task :version_file do
   File.open('motion/version.rb', 'w') do |io|
     io.puts <<EOS
+# Copyright (C) 2012, HipByte SPRL. All Rights Reserved.
+#
+# This file is subject to the terms and conditions of the End User License
+# Agreement accompanying the package this file is a part of.
+
 module Motion
   Version = \"#{PROJECT_VERSION}\"
 end
