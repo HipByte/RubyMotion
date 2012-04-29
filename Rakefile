@@ -1,5 +1,5 @@
 PLATFORMS_DIR = '/Applications/Xcode.app/Contents/Developer/Platforms'
-PROJECT_VERSION = '0.68'
+PROJECT_VERSION = '0.70'
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
@@ -78,12 +78,12 @@ task :install do
     data.concat(Dir.glob("./data/#{sdk_version}/iPhoneSimulator/*"))
   end
   data.concat(Dir.glob('./data/*-ctags.cfg'))
-  data.concat(Dir.glob('./doc/*.html'))
+  #data.concat(Dir.glob('./doc/*.html'))
   #data.concat(Dir.glob('./doc/docset/**/*'))
-  data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
+  #data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   data.reject! { |path| /^\./.match(File.basename(path)) }
 
-  motiondir = '/Library/Motion'
+  motiondir = '/Library/RubyMotion'
   destdir = (ENV['DESTDIR'] || '/')
   destmotiondir = File.join(destdir, motiondir)
   install = proc do |path, mode|

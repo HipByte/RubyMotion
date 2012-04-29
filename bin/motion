@@ -8,7 +8,7 @@ require 'fileutils'
 require 'uri'
 
 relative_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
-$motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_libdir : '/Library/Motion/lib'
+$motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_libdir : '/Library/RubyMotion/lib'
 $:.unshift($motion_libdir)
 require 'motion/version'
 require 'motion/project/app.rb'
@@ -45,7 +45,7 @@ class CreateCommand < Command
   end
 end
 
-LicensePath = '/Library/Motion/license.key'
+LicensePath = '/Library/RubyMotion/license.key'
 
 class ActivateCommand < Command
   self.name = 'activate'
@@ -163,14 +163,14 @@ class UpdateCommand < Command
     FileUtils.rm_f tmp_dest
 
     $stderr.puts "Software update installed.\n\n"
-    news = File.read('/Library/Motion/NEWS')
+    news = File.read('/Library/RubyMotion/NEWS')
     news.lines.each do |line|
       if md = line.match(/^=\s+RubyMotion\s+(.+)\s+=$/)
         break if md[1] <= product_version
       end
       $stderr.puts line
     end
-    $stderr.puts "(See the `/Library/Motion/NEWS' file for all changes.)"
+    $stderr.puts "(See the `/Library/RubyMotion/NEWS' file for all changes.)"
   end
 end
 
