@@ -1,3 +1,13 @@
+= RubyMotion 0.69 =
+
+  * Removed the samples from the distribution. They will be online on GitHub.
+  * Removed the documentation from the distribution. It will be online in the
+    website's developer center.
+  * Removed the testflight/cocoapods files. They will be online as gems.
+  * RubyMotion is now installed into /Library/RubyMotion.
+  * This is very likely the last release before RubyMotion launches. Thanks to
+    everyone who beta-tested it :-)
+
 = RubyMotion 0.68 =
 
   * Added a new sample, trollify, that demonstrates gestures, image editing,
