@@ -50,7 +50,7 @@
 {
     if (currentStep == 5) {
         if ([openGettingStartedGuideButton state] == NSOnState) {
-            [[NSWorkspace sharedWorkspace] openURL:[NSURL fileURLWithPath:@"http://www.rubymotion.com/developer-center/guides/getting-started"]];
+            [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"http://www.rubymotion.com/developer-center/guides/getting-started"]];
         }
     }
     [[NSApplication sharedApplication] terminate:sender];
@@ -154,7 +154,7 @@ DoneWorking:
     
     NSString *installerExecPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"installer.sh"];
     
-    [@"#!/bin/sh\n\n/usr/sbin/installer -pkg $1 -target / \n/bin/echo $2 > /Library/Motion/license.key \n" writeToFile:installerExecPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
+    [@"#!/bin/sh\n\n/usr/sbin/installer -pkg $1 -target / \n/bin/echo $2 > /Library/RubyMotion/license.key \n" writeToFile:installerExecPath atomically:YES encoding:NSUTF8StringEncoding error:nil];
     chmod([installerExecPath fileSystemRepresentation], S_IXUSR | S_IXGRP | S_IXOTH);
     
     char *install_args[] = { (char *)[installerPath fileSystemRepresentation], (char *)[licenseKey UTF8String], NULL };
@@ -194,7 +194,7 @@ DoneWorking:
 - (void)nextStep:(id)sender
 {
     if (currentStep == 1) {
-        if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Library/Motion"]) {
+        if ([[NSFileManager defaultManager] fileExistsAtPath:@"/Library/RubyMotion"]) {
             if ([[NSAlert alertWithMessageText:@"RubyMotion Already Installed" defaultButton:@"Quit Installer" alternateButton:@"Force a New Installation" otherButton:@"" informativeTextWithFormat:@"It looks like RubyMotion has already been installed on this system. You can force a new installation if you want."] runModal] == NSAlertDefaultReturn) {
                 [[NSApplication sharedApplication] terminate:sender];
             }
