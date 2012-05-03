@@ -1,5 +1,5 @@
 PLATFORMS_DIR = '/Applications/Xcode.app/Contents/Developer/Platforms'
-PROJECT_VERSION = '0.70'
+PROJECT_VERSION = '1.0'
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
@@ -145,12 +145,12 @@ task :upload do
   # Will raise an error if bucket doesn't exist
   AWS::S3::Bucket.find WEBSITE_BUCKET_NAME
 
-  puts "Uploading Latest.."
-  AWS::S3::S3Object.store('rubymotion/releases/Latest', PROJECT_VERSION, WEBSITE_BUCKET_NAME)
-  puts "Done!"
-
   file = "pkg/RubyMotion #{PROJECT_VERSION}.pkg"
   puts "Uploading #{file}.."
   AWS::S3::S3Object.store("rubymotion/releases/#{PROJECT_VERSION}.pkg", File.read(file), WEBSITE_BUCKET_NAME)
+  puts "Done!"
+
+  puts "Uploading Latest.."
+  AWS::S3::S3Object.store('rubymotion/releases/Latest', PROJECT_VERSION, WEBSITE_BUCKET_NAME)
   puts "Done!"
 end
