@@ -26,6 +26,7 @@ static NSTask *gdb_task = nil;
 static BOOL debugger_killed_session = NO;
 static id current_session = nil;
 static NSString *xcode_path = nil;
+static NSString *sdk_version = nil;
 static NSString *replSocketPath = nil;
 
 static NSRect simulator_app_bounds = { {0, 0}, {0, 0} };
@@ -126,7 +127,8 @@ locate_simulator_app_bounds(void)
     }
 	id name = [dict objectForKey:@"kCGWindowName"];
 	validate(name, NSString);
-	if (![name hasPrefix:@"iOS Simulator"]) {
+	if (![name rangeOfString:[NSString stringWithFormat:@"iPhone - %@",
+		sdk_version]].location == NSNotFound) {
 	    continue;
 	}
 
@@ -154,8 +156,12 @@ locate_simulator_app_bounds(void)
     }
     CFRelease(windows);
     if (!bounds_ok) {
-	fprintf(stderr,
-		"Can't locate the Simulator app, mouse over disabled\n");
+	static bool error_printed = false;
+	if (!error_printed) {
+	    fprintf(stderr,
+		    "Cannot locate the Simulator app, mouse over disabled\n");
+	    error_printed = true;
+	}
 	return;
     }
 
@@ -728,7 +734,7 @@ main(int argc, char **argv)
 
     debug_mode = atoi(argv[1]);
     NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
-    NSString *sdk_version = [NSString stringWithUTF8String:argv[3]];
+    sdk_version = [[NSString stringWithUTF8String:argv[3]] retain];
     xcode_path = [[NSString stringWithUTF8String:argv[4]] retain];
     NSString *app_path =
 	[NSString stringWithUTF8String:realpath(argv[5], NULL)];
