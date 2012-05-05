@@ -1,3 +1,10 @@
+= RubyMotion 1.1 =
+
+  * Fixed a bug in `rake simulator' where view detection would not work on
+    non-English desktops (error "Cannot locate the Simulator app").
+  * Fixed `rake device' to print a human-readable error message in case the
+    deployment might fail because another process is connected to the device.
+
 = RubyMotion 1.0 =
 
   * First release.
