@@ -99,7 +99,8 @@ static bool discovery_mode = false;
 	LOG(what); \
 	int code = call; \
 	if (code != 0) { \
-	    fprintf(stderr, "error when %s: code %d\n", what, code); \
+	    fprintf(stderr, "Error when %s: code %d\n", what, code); \
+	    fprintf(stderr, "Make sure RubyMotion is using a valid (non-expired) provisioning profile\nand that no other process (iTunes, Xcode) is connected to your iOS device\nat the same time.\n"); \
 	    exit(1); \
 	} \
     } \
