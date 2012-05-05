@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface RMMainWindowController : NSWindowController <NSURLDownloadDelegate>
+@interface RMMainWindowController : NSWindowController
 {
     IBOutlet NSView *view1, *view2, *view3, *view4, *view5;
     IBOutlet NSButton *seeLicenseButton;

@@ -239,7 +239,10 @@ DoneWorking:
         [sender setEnabled:NO];
         [licenseKeyTextField setEnabled:NO];
         
-        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse *resp, NSData *data, NSError *error) {
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSError *error = nil;
+            NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error];
 
             [sender setEnabled:YES];
             [licenseKeyTextField setEnabled:YES];
@@ -274,7 +277,7 @@ DoneWorking:
                 [[NSAlert alertWithMessageText:@"License Key Validation Error" defaultButton:@"Okay" alternateButton:@"" otherButton:@"" informativeTextWithFormat:error_msg] runModal];
                 [self licenseKeyInvalid];
             }
-        }];
+        });
         return;
     }
     
