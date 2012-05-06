@@ -412,7 +412,16 @@ module Motion; module Project
         },
         'UIAppFonts' => fonts,
         'UIDeviceFamily' => device_family_ints.map { |x| x.to_s },
-        'UISupportedInterfaceOrientations' => interface_orientations_consts
+        'UISupportedInterfaceOrientations' => interface_orientations_consts,
+        'UIStatusBarStyle' => 'UIStatusBarStyleDefault',
+        'DTXcode' => '0431',
+        'DTSDKName' => 'iphoneos5.0',
+        'DTSDKBuild' => '9A334',
+        'DTPlatformName' => 'iphoneos',
+        'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
+        'DTPlatformVersion' => '5.1',
+        'DTXcodeBuild' => '4E1019',
+        'DTPlatformBuild' => '9B176'
       }
     end
 
@@ -426,7 +435,8 @@ module Motion; module Project
 
     def codesign_certificate
       @codesign_certificate ||= begin
-        certs = `/usr/bin/security -q find-certificate -a`.scan(/"iPhone Developer: [^"]+"/).uniq
+        cert_type = (development? ? 'Developer' : 'Distribution')
+        certs = `/usr/bin/security -q find-certificate -a`.scan(/"iPhone #{cert_type}: [^"]+"/).uniq
         if certs.size == 0
           App.fail "Can't find an iPhone Developer certificate in the keychain"
         elsif certs.size > 1
@@ -487,7 +497,11 @@ module Motion; module Project
     end
 
     def entitlements_data
-      Motion::PropertyList.to_s(entitlements)
+      dict = entitlements
+      if release?
+        dict['application-identifier'] ||= seed_id + '.' + identifier
+      end
+      Motion::PropertyList.to_s(dict)
     end
 
     def fonts
