@@ -8,7 +8,7 @@ module Motion; module Project;
     include Rake::DSL if Rake.const_defined?(:DSL)
 
     def initialize(path, type, config, opts)
-      @path = path
+      @path = path.to_s
       @type = type
       @config = config
       @opts = opts
@@ -74,7 +74,7 @@ EOS
         if File.exist?(build_dir)
           libname = 'lib' + File.basename(@path) + '.a'
           Dir.chdir(build_dir) do
-            objs = Dir.glob('*/**/*.o')
+            objs = Dir.glob('**/*.o')
             FileUtils.rm_rf libname
             unless objs.empty?
               sh "#{@config.locate_binary('ar')} cq #{libname} #{objs.join(' ')}"
