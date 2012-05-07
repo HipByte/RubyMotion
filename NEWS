@@ -1,12 +1,13 @@
 = RubyMotion 1.2 =
 
-  * Fixed codesign bugs in `rake archive:release' (for App Store submissions).
   * Fixed a couple bugs in the project vendoring code that would be triggered
     when using the motion-cocoapods gem. The fixes were merged from the
     https://github.com/HipByte/motion-cocoapods/issues/1 discussion.
+  * Fixed codesign bugs in `rake archive:release'.
   * Improved the Xcode detection code by printing a warning message in case
     the user installed a recent Xcode in /Applications that has not been
     set as the default Xcode in the system yet.
+  * Fixed a typo in the REPL help message (thanks Mike Clark).
 
 = RubyMotion 1.1 =
 
