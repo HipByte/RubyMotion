@@ -155,6 +155,7 @@ task :ctags do
   end
 end
 
+=begin
 # Automatically load project extensions. A project extension is a gem whose
 # name starts with `motion-' and which exposes a `lib/motion/project' libdir.
 require 'rubygems'
@@ -171,3 +172,4 @@ Gem.path.each do |gemdir|
     end
   end
 end
+=end
