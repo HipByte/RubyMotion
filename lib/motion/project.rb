@@ -133,6 +133,10 @@ task :clean do
   App.info 'Delete', App.config.build_dir
   rm_rf(App.config.build_dir)
   App.config.vendor_projects.each { |vendor| vendor.clean }
+  Dir.glob(App.config.resources_dir + '/*.nib').each do |p|
+    App.info 'Delete', p
+    rm_rf p
+  end
 end
 
 desc "Show project config"

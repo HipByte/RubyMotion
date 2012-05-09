@@ -284,6 +284,17 @@ EOS
         File.open(bundle_pkginfo, 'w') { |io| io.write(config.pkginfo_data) }
       end
 
+      # Compile IB resources.
+      if File.exist?(config.resources_dir)
+        Dir.glob(File.join(config.resources_dir, '*.xib')).each do |xib|
+          nib = xib.sub(/\.xib$/, '.nib')
+          if !File.exist?(nib) or File.mtime(xib) > File.mtime(nib)
+            App.info 'Compile', xib
+            sh "/usr/bin/ibtool --compile \"#{nib}\" \"#{xib}\""
+          end
+        end
+      end
+
       # Copy resources, handle subdirectories.
       reserved_app_bundle_files = [
         '_CodeSignature/CodeResources', 'CodeResources', 'embedded.mobileprovision',
@@ -293,7 +304,7 @@ EOS
       resources_files = []
       if File.exist?(config.resources_dir)
         resources_files = Dir.chdir(config.resources_dir) do
-          Dir.glob('**/*').reject { |x| File.directory?(x) }
+          Dir.glob('**/*').reject { |x| File.directory?(x) or ['.xib'].include?(File.extname(x)) }
         end
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)

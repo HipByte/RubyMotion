@@ -74,6 +74,7 @@ module Motion; module Project
           File.open('.gitignore', 'w') do |io|
             io.puts ".repl_history"
             io.puts "build"
+            io.puts "resources/*.nib"
           end
           App.log 'Create', File.join(app_name, 'Rakefile')
           File.open('Rakefile', 'w') do |io|
