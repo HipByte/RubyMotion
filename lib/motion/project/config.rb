@@ -518,8 +518,12 @@ EOS
 
     def fonts
       @fonts ||= begin
-        Dir.chdir(resources_dir) do
-          Dir.glob('*.{otf,ttf}')
+        if File.exist?(resources_dir)
+          Dir.chdir(resources_dir) do
+            Dir.glob('*.{otf,ttf}')
+          end
+        else
+          []
         end
       end
     end
