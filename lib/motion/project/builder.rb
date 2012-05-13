@@ -286,11 +286,24 @@ EOS
 
       # Compile IB resources.
       if File.exist?(config.resources_dir)
-        Dir.glob(File.join(config.resources_dir, '*.xib')).each do |xib|
-          nib = xib.sub(/\.xib$/, '.nib')
-          if !File.exist?(nib) or File.mtime(xib) > File.mtime(nib)
-            App.info 'Compile', xib
-            sh "/usr/bin/ibtool --compile \"#{nib}\" \"#{xib}\""
+        ib_resources = []
+        ib_resources.concat(Dir.glob(File.join(config.resources_dir, '*.xib')).map { |xib| [xib, xib.sub(/\.xib$/, '.nib')] })
+        ib_resources.concat(Dir.glob(File.join(config.resources_dir, '*.storyboard')).map { |storyboard| [storyboard, storyboard.sub(/\.storyboard$/, '.storyboardc')] })
+        ib_resources.each do |src, dest|
+          if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
+            App.info 'Compile', src
+            sh "/usr/bin/ibtool --compile \"#{dest}\" \"#{src}\""
+          end
+        end
+      end
+
+      # Compile CoreData Model resources.
+      if File.exist?(config.resources_dir)
+        Dir.glob(File.join(config.resources_dir, '*.xcdatamodeld')).each do |model|
+          momd = model.sub(/\.xcdatamodeld$/, '.momd')
+          if !File.exist?(momd) or File.mtime(model) > File.mtime(momd)
+            App.info 'Compile', model
+            sh "\"#{App.config.xcode_dir}/usr/bin/momc\" \"#{model}\" \"#{momd}\""
           end
         end
       end
@@ -304,7 +317,7 @@ EOS
       resources_files = []
       if File.exist?(config.resources_dir)
         resources_files = Dir.chdir(config.resources_dir) do
-          Dir.glob('**/*').reject { |x| File.directory?(x) or ['.xib'].include?(File.extname(x)) }
+          Dir.glob('**/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld'].include?(File.extname(x)) }
         end
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)
@@ -315,7 +328,7 @@ EOS
           if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
             FileUtils.mkdir_p(File.dirname(dest_path))
             App.info 'Copy', res_path
-            FileUtils.cp(res_path, File.dirname(dest_path))
+            FileUtils.cp_r(res_path, File.dirname(dest_path))
           end
         end
       end

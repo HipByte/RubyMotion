@@ -75,6 +75,8 @@ module Motion; module Project
             io.puts ".repl_history"
             io.puts "build"
             io.puts "resources/*.nib"
+            io.puts "resources/*.momd"
+            io.puts "resources/*.storyboardc"
           end
           App.log 'Create', File.join(app_name, 'Rakefile')
           File.open('Rakefile', 'w') do |io|
