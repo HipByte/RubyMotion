@@ -381,6 +381,16 @@ EOS
       end
     end
 
+    def device_family_string(family, retina)
+      device = case family
+        when :iphone, 1
+          "iPhone"
+        when :ipad, 2
+          "iPad"
+      end
+      retina ? device + " (Retina)" : device
+    end
+
     def device_family_ints
       ary = @device_family.is_a?(Array) ? @device_family : [@device_family]
       ary.map { |family| device_family_int(family) }
