@@ -57,14 +57,13 @@ task :simulator => ['build:simulator'] do
   end
 
   # Prepare the device family.
-  family_int, retina =
+  family_int =
     if family = ENV['device_family']
-      str = family.downcase
-      retina = str.sub!(/\:retina$/, '') ? true : false
-      [App.config.device_family_int(str.intern), retina]
+      App.config.device_family_int(str.intern)
     else
-      [App.config.device_family_ints[0], false]
+      App.config.device_family_ints[0]
     end
+  retina = ENV['retina'] == 'true'
 
   # Configure the SimulateDevice variable (the only way to specify if we want to run in retina mode or not).
   sh "/usr/bin/defaults write com.apple.iphonesimulator \"SimulateDevice\" \"'#{App.config.device_family_string(family_int, retina)}'\""
