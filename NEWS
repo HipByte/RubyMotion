@@ -1,3 +1,20 @@
+= RubyMotion 1.4 =
+
+  * Added support for the compilation of .xcdatamodeld and .storyboard resource
+    files. Thanks Ian Phillips, Andrew Vega and Michail Pishchagin.
+  * Fixed a bug when the build system would fail in case the resources dir does
+    not exist. Thanks Watson.
+  * Fixed a bug in the Xcode project vendoring code when header files at
+    different directory levels would not be properly handled. This also fixes
+    the motion-cocoapods gem. Thanks Eloy Duran.
+  * Added a way to start the simulator in retina mode by setting the `retina'
+    environment variable to `true' (other values will be considered false).
+    For example: `rake retina=true'. Thanks Marcin Maciukiewicz for the idea.
+  * Fixed an ABI bug in the way we compile Ruby methods overloading Objective-C
+    methods returning small C structures that can fit in a 64-bit integer.
+    Thanks Kristoph Cichocki-Romanov for the report.
+  * Added support for the iOS 4.3 SDK.
+
 = RubyMotion 1.3 =
 
   * Fixed a bug in format strings with width / precision modifiers.
