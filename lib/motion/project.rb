@@ -59,7 +59,7 @@ task :simulator => ['build:simulator'] do
   # Prepare the device family.
   family_int =
     if family = ENV['device_family']
-      App.config.device_family_int(str.intern)
+      App.config.device_family_int(family.downcase.intern)
     else
       App.config.device_family_ints[0]
     end
