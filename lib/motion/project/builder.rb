@@ -303,6 +303,8 @@ EOS
           momd = model.sub(/\.xcdatamodeld$/, '.momd')
           if !File.exist?(momd) or File.mtime(model) > File.mtime(momd)
             App.info 'Compile', model
+            model = File.expand_path(model) # momc wants absolute paths.
+            momd = File.expand_path(momd)
             sh "\"#{App.config.xcode_dir}/usr/bin/momc\" \"#{model}\" \"#{momd}\""
           end
         end
