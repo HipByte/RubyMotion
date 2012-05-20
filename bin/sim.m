@@ -127,8 +127,25 @@ locate_simulator_app_bounds(void)
     }
 	id name = [dict objectForKey:@"kCGWindowName"];
 	validate(name, NSString);
-	if (![name rangeOfString:[NSString stringWithFormat:@"iPhone - %@",
-		sdk_version]].location == NSNotFound) {
+
+	static NSArray *patterns = nil;
+	if (patterns == nil) {
+	    patterns = [[NSArray alloc] initWithObjects:
+		[NSString stringWithFormat:@"iPhone - iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPad - iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPhone / iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPad / iOS %@", sdk_version],
+		nil];
+	}
+
+	bool found = false;
+	for (NSString *pattern in patterns) {
+	    if ([name rangeOfString:pattern].location != NSNotFound) {
+		found = true;
+		break;
+	    }
+	}
+	if (!found) {
 	    continue;
 	}
 
@@ -173,6 +190,8 @@ locate_simulator_app_bounds(void)
     simulator_app_bounds = bounds;
 }
 
+static int expr_level = 0;
+
 static NSString *
 current_repl_prompt(NSString *top_level)
 {
@@ -194,8 +213,13 @@ current_repl_prompt(NSString *top_level)
 	    stringByAppendingString:@"..."];
     }
 
-    return [NSString stringWithFormat:@"(%@)%c> ",
-	   top_level, question];
+    NSString *prompt = [NSString stringWithFormat:@"(%@)%c ",
+	top_level, question];
+
+    for (int i = 0; i < expr_level; i++) {
+	prompt = [prompt stringByAppendingString:@"  "];
+    }
+    return prompt;
 }
 
 #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
@@ -601,13 +625,9 @@ repl_complete(const char *text, int start, int end)
     rl_basic_word_break_characters = strdup(" \t\n`<;|&(");
 
     NSString *expr = nil;
-    int expr_level = 0;
     while (true) {
 	// Read expression from stdin.
 	NSString *prompt = current_repl_prompt(nil);
-	for (int i = 0; i < expr_level; i++) {
-	    prompt = [prompt stringByAppendingString:@"  "];
-	}
 	char *line_cstr = readline([prompt UTF8String]);
 	if (line_cstr == NULL) {
 	    terminate_session();
