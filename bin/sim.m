@@ -600,36 +600,111 @@ repl_complete(const char *text, int start, int end)
     rl_attempted_completion_function = repl_complete;
     rl_basic_word_break_characters = strdup(" \t\n`<;|&(");
 
-    char buf[1024];
+    NSString *expr = nil;
+    int expr_level = 0;
     while (true) {
 	// Read expression from stdin.
-	char *line = readline([current_repl_prompt(nil) UTF8String]);
-	if (line == NULL) {
+	NSString *prompt = current_repl_prompt(nil);
+	for (int i = 0; i < expr_level; i++) {
+	    prompt = [prompt stringByAppendingString:@"  "];
+	}
+	char *line_cstr = readline([prompt UTF8String]);
+	if (line_cstr == NULL) {
 	    terminate_session();
 	    break;
 	}
+        NSString *line = [NSString stringWithUTF8String:line_cstr];
+	free(line_cstr);
+	line_cstr = NULL;
 
-	// Trim expression.
-	const char *b = line;
-	while (isspace(*b)) { b++; }
-	const char *e = line + strlen(line);
-	while (isspace(*e)) { e--; }
-	const size_t line_len = e - b;
-	if (line_len == 0) {
+	// Parse the expression to see if it's complete.
+	static NSDictionary *begin_tokens = nil;
+	if (begin_tokens == nil) {
+	    begin_tokens = [[NSDictionary alloc] initWithObjectsAndKeys:
+		@"1", @"class",
+		@"1", @"module",
+		@"1", @"def",
+		@"1", @"begin",
+		@"1", @"if",
+		@"1", @"unless",
+		@"1", @"case",
+		@"1", @"while",
+		@"1", @"for",
+		@"1", @"do",
+		nil];
+	}
+	NSMutableString *parse_data = [line mutableCopy];
+	while (true) {
+	    NSUInteger i, count;
+again:
+	    i = 0;
+	    count = [parse_data length];
+	    for (i = 0; i < count; i++) {
+		UniChar c = [parse_data characterAtIndex:i];
+		switch (c) {
+		    case '\'':
+		    case '"':
+		    case '/':
+		    case '`':
+			for (NSUInteger k = i + 1; k < count; k++) {
+			    UniChar c2 = [parse_data characterAtIndex:k];
+			    if (c2 == '\\') {
+				k++;
+			    }
+			    else if (c2 == c) {
+				NSRange range = { i, k - i };
+				[parse_data deleteCharactersInRange:range];
+				goto again;
+			    }
+			}
+			break;
+		}
+	    }
+	    break;
+	}
+        NSArray *tokens = [parse_data componentsSeparatedByCharactersInSet:
+	    [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	[parse_data release];
+	int old_expr_level = expr_level;
+	for (NSString *token in tokens) {
+	    if ([begin_tokens objectForKey:token] != nil) {
+		expr_level++;
+	    }
+	    else if ([token isEqualToString:@"end"]) {
+		expr_level--;
+	    }
+	}
+
+        if (expr == nil) {
+	    expr = line;
+	}
+	else {
+	    expr = [expr stringByAppendingString:@"\n"];
+	    expr = [expr stringByAppendingString:line];
+	}
+
+	if (old_expr_level - 1 == expr_level) {
+	    printf("\e[1A\r\e[0K%s%s\n",
+		    [[prompt substringToIndex:[prompt length] - 2] UTF8String],
+		    [line UTF8String]);
+	}
+
+        // The expression is not complete yet.
+	if (expr_level > 0) {
 	    continue;
 	}
-	strlcpy(buf, b, line_len + 1);
-	buf[line_len] = '\0';	
-	add_history(buf);
-	free(line);
-	line = NULL;
 
-	NSString *res = [self replEval:[NSString stringWithUTF8String:buf]];
+	// The expression is complete, add to history, eval it and print
+	// the result.
+	add_history([expr UTF8String]);
+	NSString *res = [self replEval:expr];
 	if (res == nil) {
 	    break;
 	}
-
 	printf("=> %s\n", [res UTF8String]);
+
+	expr = nil;
+	expr_level = 0;
     }	
 }
 
