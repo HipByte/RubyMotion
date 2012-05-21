@@ -287,7 +287,7 @@ EOS
       # Compile IB resources.
       if File.exist?(config.resources_dir)
         ib_resources = []
-        ib_resources.concat(Dir.glob(File.join(config.resources_dir, '*.xib')).map { |xib| [xib, xib.sub(/\.xib$/, '.nib')] })
+        ib_resources.concat(Dir.glob(File.join(config.resources_dir, '*.xib')) + Dir.glob(File.join(config.resources_dir, '*.lproj', '*.xib')).map { |xib| [xib, xib.sub(/\.xib$/, '.nib')] })
         ib_resources.concat(Dir.glob(File.join(config.resources_dir, '*.storyboard')).map { |storyboard| [storyboard, storyboard.sub(/\.storyboard$/, '.storyboardc')] })
         ib_resources.each do |src, dest|
           if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
@@ -319,7 +319,7 @@ EOS
       resources_files = []
       if File.exist?(config.resources_dir)
         resources_files = Dir.chdir(config.resources_dir) do
-          Dir.glob('**/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld'].include?(File.extname(x)) }
+          Dir.glob('**/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }
         end
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)
