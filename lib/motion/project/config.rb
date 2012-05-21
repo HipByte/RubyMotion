@@ -235,10 +235,10 @@ EOS
       end
     end
 
-    def bridgesupport_files
-      @bridgesupport_files ||= begin
+    def frameworks_dependencies
+      @frameworks_dependencies ||= begin
         # Compute the list of frameworks, including dependencies, that the project uses.
-        deps = ['RubyMotion']
+        deps = []
         slf = File.join(sdk('iPhoneSimulator'), 'System', 'Library', 'Frameworks')
         frameworks.each do |framework|
           framework_path = File.join(slf, framework + '.framework', framework)
@@ -252,9 +252,15 @@ EOS
           end
           deps << framework
         end
+        deps.uniq
+      end
+    end
 
+    def bridgesupport_files
+      @bridgesupport_files ||= begin
         bs_files = []
-        deps.uniq.each do |framework|
+        deps = ['RubyMotion'] + frameworks_dependencies
+        deps.each do |framework|
           bs_path = File.join(datadir, 'BridgeSupport', framework + '.bridgesupport')
           if File.exist?(bs_path)
             bs_files << bs_path

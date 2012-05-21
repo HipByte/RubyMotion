@@ -259,9 +259,9 @@ EOS
           or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
-        frameworks = config.frameworks.map { |x| "-framework #{x}" }.join(' ')
+        frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
         framework_stubs_objs = []
-        config.frameworks.each do |framework|
+        config.frameworks_dependencies.each do |framework|
           stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
           framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
         end
