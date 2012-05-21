@@ -1,3 +1,20 @@
+= RubyMotion 1.5 =
+
+  * Improved the REPL to support multi-line expressions.
+  * Fixed a bug when compiling Core Data model files where the `momc' utility
+    was not given absolute paths.
+  * Removed legacy MacRuby code that was using the private `isaForAutonotifying'
+    selector and causing a warning during an App Store submission.
+  * Fixed a bug in Enumerable#sort_by that would lead to a crash.
+  * Fixed a bug in the REPL where it would not detect the iOS Simulator window
+    if certain windows were in front or created later.
+  * Fixed a bug in the build system where framework dependencies would not be
+    properly handled.
+  * Added support for .lproj directories (i18n). Thanks Aaron Hurley.
+  * Fixed a bug where objects from pure Ruby classes sent to KVO would not be
+    properly handled later (because KVO inserts a new singleton class).
+  * Fixed attr_writer to emit KVO notifications (will/didChangeValueForKey).
+
 = RubyMotion 1.4 =
 
   * Added support for the compilation of .xcdatamodeld and .storyboard resource
