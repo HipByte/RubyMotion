@@ -1,3 +1,11 @@
+= RubyMotion 1.6 =
+
+  * Fixed a regression in the build system introduced by the previous update
+    (when compiling .xib files).
+  * Fixed the vendoring system to include all source code files. Merged patch
+    from https://groups.google.com/d/msg/rubymotion/tPCxSMCA2f4/w2DIHFo2AVAJ
+  * Fixed the REPL to not crash if you give it an empty expression.
+
 = RubyMotion 1.5 =
 
   * Improved the REPL to support multi-line expressions.
