@@ -636,6 +636,9 @@ repl_complete(const char *text, int start, int end)
         NSString *line = [NSString stringWithUTF8String:line_cstr];
 	free(line_cstr);
 	line_cstr = NULL;
+	if ([line length] == 0) {
+	    continue;
+	}
 
 	// Parse the expression to see if it's complete.
 	static NSDictionary *begin_tokens = nil;
