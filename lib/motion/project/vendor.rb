@@ -89,8 +89,7 @@ EOS
         unless headers.empty?
           bs_file = File.basename(@path) + '.bridgesupport'
           if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
-            includes = headers.map { |p| "-I" + File.dirname(p) }.uniq.join(' ')
-            sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-I. #{includes}\" #{headers.join(' ')} -o \"#{bs_file}\""
+            @config.gen_bridge_metadata(headers, bs_file)
           end
           bs_files << bs_file
         end
@@ -155,7 +154,7 @@ EOS
         if !File.exist?(bs_file) and headers_dir
           project_dir = File.expand_path(@config.project_dir)
           headers = Dir.glob(File.join(project_dir, headers_dir, '**/*.h'))
-          BridgeSupport.new(headers).save_as(bs_file)
+          @config.gen_bridge_metadata(headers, bs_file)
         end
 
         @bs_files = Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) }
@@ -176,24 +175,5 @@ EOS
       raise "Invalid vendor project type: #{@type}" unless respond_to?(method)
       method
     end
-
-    class BridgeSupport
-      include Rake::DSL if Rake.const_defined?(:DSL)
-
-      attr_reader :headers
-
-      def initialize(headers)
-        @headers = headers
-      end
-
-      def search_paths
-        @headers.map { |header| "-I '#{File.dirname(header)}'" }.uniq
-      end
-
-      def save_as(path)
-        sh %{/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags "#{search_paths.join(' ')}" -o '#{path}' '#{headers.join("' '")}'}
-      end
-    end
-
   end
 end; end

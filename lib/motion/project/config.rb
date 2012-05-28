@@ -543,5 +543,17 @@ EOS
         end
       end
     end
+
+    def gen_bridge_metadata(headers, bs_file)
+      sdk_path = self.sdk('iPhoneSimulator')
+      includes = headers.map { |header| "-I '#{File.dirname(header)}'" }.uniq
+      a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
+      sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+
+      line = "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes}\" #{headers.join(' ')} -o \"#{bs_file}\""
+      unless system(line)
+        App.fail "Error when generating bridge metadata: #{line}"
+      end
+    end
   end
 end; end
