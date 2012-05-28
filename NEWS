@@ -1,3 +1,20 @@
+= RubyMotion 1.7 =
+
+  * Fixed a bug in the compiler where the proper signature would not be used
+    when defining informal protocol methods with CF types as arguments.
+  * Fixed iOS constants to be looked up at demand (when being used) and not
+    when the app starts, because certain constants are not set until a certain
+    API is called (ex: the kAB... constants of the AddressBook framework).
+    This change should also speed up a little bit the app starting time.
+  * Fixed a bug in the compiler where very long selectors would be truncated
+    and causing exceptions later at runtime.
+  * Fixed a bug in the compiler where memory-related selectors (alloc, dealloc,
+    retain, release, etc.) could not be defined in Ruby.
+  * Fixed a bug in the compiler where NSObject instance methods could not be
+    called on classes (ex. MyClass.performSelector(...)).
+  * Fixed a bug in the build system where vendored 3rd-party APIs dealing with
+    types defined in iOS headers could not be used (ex: enums or structs).
+
 = RubyMotion 1.6 =
 
   * Fixed a regression in the build system introduced by the previous update
