@@ -252,7 +252,7 @@ EOS
           end
           deps << framework
         end
-        deps.uniq
+        deps.uniq.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
       end
     end
 
