@@ -265,7 +265,7 @@ EOS
           stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
           framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
         end
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{framework_stubs_objs.join(' ')} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load ' + x }.join(' ')}"
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{framework_stubs_objs.join(' ')} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
         main_exec_created = true
       end
 
