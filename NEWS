@@ -1,3 +1,11 @@
+= RubyMotion 1.8 =
+
+  * Fixed a bug in the generation of BridgeSupport files for multiple headers
+    directories.
+  * When building vendored projects, unset environment variables that could
+    potentially make the build to fail.
+    https://github.com/HipByte/motion-cocoapods/issues/12
+
 = RubyMotion 1.7 =
 
   * Fixed a bug in the compiler where the proper signature would not be used
