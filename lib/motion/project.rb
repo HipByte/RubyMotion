@@ -71,6 +71,7 @@ task :simulator => ['build:simulator'] do
   # Launch the simulator.
   xcode = App.config.xcode_dir
   env = xcode.match(/^\/Applications/) ? "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\"" : ''
+  env << ' NO_FOREGROUND_SIM=1' if App.config.spec_mode
   sim = File.join(App.config.bindir, 'sim')
   debug = (ENV['debug'] || (App.config.spec_mode ? '0' : '2')).to_i
   debug = 2 if debug < 0 or debug > 2

@@ -955,7 +955,9 @@ main(int argc, char **argv)
     }
 
     // Open simulator to the foreground.
-    system("/usr/bin/open -a \"iPhone Simulator\"");
+    if (getenv("NO_FOREGROUND_SIM") == NULL) {
+	system("/usr/bin/open -a \"iPhone Simulator\"");
+    }
 
     [[NSRunLoop mainRunLoop] run];
     return 0;
