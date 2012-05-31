@@ -28,7 +28,7 @@ task :vm_files do
   end
 end
 
-EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'CoreAudio', 'IOKit']
+EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit']
 task :bridgesupport_files do
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
   SDK_VERSIONS.each do |sdk_version|
