@@ -254,6 +254,11 @@ EOS
     end
 
     def frameworks_dependencies
+      if @frameworks_dependencies_frozen && @frameworks_dependencies_frozen != frameworks.to_s
+        @frameworks_dependencies = nil
+      end      
+      @frameworks_dependencies_frozen = frameworks.to_s
+      
       @frameworks_dependencies ||= begin
         # Compute the list of frameworks, including dependencies, that the project uses.
         deps = []
