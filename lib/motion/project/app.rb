@@ -88,6 +88,10 @@ module Motion; module Project
         App.log 'Create', app_name 
         Dir.mkdir(app_name)
         Dir.chdir(app_name) do
+          App.log 'Create', File.join(app_name, 'Gemfile')
+          File.open('Gemfile', 'w') do |io|
+            io.puts ''
+          end
           App.log 'Create', File.join(app_name, '.gitignore')
           File.open('.gitignore', 'w') do |io|
             io.puts ".repl_history"
