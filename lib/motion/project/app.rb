@@ -99,6 +99,7 @@ module Motion; module Project
           App.log 'Create', File.join(app_name, 'Rakefile')
           File.open('Rakefile', 'w') do |io|
             io.puts <<EOS
+# -*- coding: utf-8 -*-
 $:.unshift(\"#{$motion_libdir}\")
 require 'motion/project'
 
