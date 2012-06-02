@@ -353,21 +353,13 @@ EOS
       ]
       resources_files = []
       if File.exist?(config.resources_dir)
-        resources_files = Dir.chdir(config.resources_dir) do
-          Dir.glob('**/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }
-        end
-        resources_files.each do |res|
-          res_path = File.join(config.resources_dir, res)
-          if reserved_app_bundle_files.include?(res)
-            App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
-          end
-          dest_path = File.join(bundle_path, res)
-          if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
-            FileUtils.mkdir_p(File.dirname(dest_path))
-            App.info 'Copy', res_path
-            FileUtils.cp_r(res_path, File.dirname(dest_path))
-          end
-        end
+        resources_files += copy_resources(reserved_app_bundle_files, bundle_path, config.resources_dir)
+      end
+      
+      # Copy resources of gems
+      # TODO: compile compilable resources
+      Motion::Gem::Manager.instance.specs.each do |name, spec|
+        resources_files += copy_resources(reserved_app_bundle_files, bundle_path, spec.resources_dir) if spec.resources_dir
       end
 
       # Delete old resource files.
@@ -393,6 +385,25 @@ EOS
         App.info "Strip", main_exec
         sh "#{config.locate_binary('strip')} \"#{main_exec}\""
       end
+    end
+    
+    def copy_resources(reserved_app_bundle_files, bundle_path, resources_dir)
+      resources_files = Dir.chdir(resources_dir) do
+        Dir.glob('**/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }
+      end
+      resources_files.each do |res|
+        res_path = File.join(resources_dir, res)
+        if reserved_app_bundle_files.include?(res)
+          App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
+        end
+        dest_path = File.join(bundle_path, res)
+        if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+          FileUtils.mkdir_p(File.dirname(dest_path))
+          App.info 'Copy', res_path
+          FileUtils.cp_r(res_path, File.dirname(dest_path))
+        end
+      end
+      resources_files
     end
 
     def codesign(config, platform)
