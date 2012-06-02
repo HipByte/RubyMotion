@@ -287,9 +287,11 @@ EOS
         bs_files
       end
     end
-
+    
+    attr_writer :spec_files
+    
     def spec_files
-      Dir.glob(File.join(specs_dir, '**', '*.rb'))
+      @spec_files ||= Dir.glob(File.join(specs_dir, '**', '*.rb'))
     end
 
     def motiondir

@@ -48,6 +48,23 @@ module Motion; module Project;
  
       # Prepare the list of BridgeSupport files needed. 
       bs_files = config.bridgesupport_files
+      
+      # Infect config with motionspecs
+      Motion::Gem::Manager.instance.specs.each do |name, spec|
+        # pre-build early as it might modify the spec
+        spec.hooks[:pre_build].call(config) if spec.hooks[:pre_build]
+        
+        # files, spec_files
+        config.files = spec.files + config.files
+        config.spec_files = spec.spec_files + config.spec_files
+        
+        # add missing frameworks and libs
+        config.frameworks |= spec.frameworks
+        config.libs |= spec.libs
+        
+        # add vendor projects
+        spec.vendor_projects.each { |args| config.vendor_project(*args) }
+      end
 
       # Build vendor libraries.
       vendor_libs = []
