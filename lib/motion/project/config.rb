@@ -153,6 +153,11 @@ EOS
       unless File.exist?(datadir)
         App.fail "iOS deployment target #{deployment_target} is not supported by this version of RubyMotion"
       end
+
+      # icons
+      if !(icons.is_a?(Array) and icons.all? { |x| x.is_a?(String) })
+        App.fail "app.icons should be an array of strings."
+      end
     end
 
     def build_dir
