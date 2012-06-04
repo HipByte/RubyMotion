@@ -77,7 +77,7 @@ module Motion; module Project
       end
 
       def create(app_name)
-        unless app_name.match(/^[a-zA-Z\d\s]+$/)
+        unless app_name.match(/^[\w\s-]+$/)
           fail "Invalid app name"
         end
     
