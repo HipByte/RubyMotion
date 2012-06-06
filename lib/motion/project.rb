@@ -61,7 +61,7 @@ end
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
   app = App.config.app_bundle('iPhoneSimulator')
-  target = App.config.deployment_target
+  target = App.config.sdk_version
 
   # Cleanup the simulator application sandbox, to avoid having old resource files there.
   if ENV['clean']
