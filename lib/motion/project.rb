@@ -39,8 +39,11 @@ if $?.exitstatus == 2
   puts ''
 end
 
-require 'bundler/setup'
-Bundler.require
+begin
+  require 'bundler/setup'
+  Bundler.require
+rescue LoadError
+end
 
 desc "Build the project, then run the simulator"
 task :default => :simulator
