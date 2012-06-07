@@ -573,7 +573,7 @@ EOS
 
     def gen_bridge_metadata(headers, bs_file)
       sdk_path = self.sdk('iPhoneSimulator')
-      includes = headers.map { |header| "-I\"#{File.dirname(header)}\"" }.uniq
+      includes = headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
       a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
       sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
       extra_flags = OSX_VERSION >= 10.7 ? '--no-64-bit' : ''
