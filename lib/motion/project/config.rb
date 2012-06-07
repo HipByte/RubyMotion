@@ -23,6 +23,8 @@
 
 module Motion; module Project
   class Config
+    include Rake::DSL if Rake.const_defined?(:DSL)
+
     VARS = []
 
     def self.variable(*syms)
@@ -75,6 +77,8 @@ module Motion; module Project
       @spec_mode = false
       @build_mode = build_mode
     end
+
+    OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
 
     def variables
       map = {}
@@ -569,14 +573,12 @@ EOS
 
     def gen_bridge_metadata(headers, bs_file)
       sdk_path = self.sdk('iPhoneSimulator')
-      includes = headers.map { |header| "-I\"#{File.dirname(header)}\"" }.uniq
+      includes = headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
       a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
       sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+      extra_flags = OSX_VERSION >= 10.7 ? '--no-64-bit' : ''
 
-      line = "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.join(' ')} -o \"#{bs_file}\""
-      unless system(line)
-        App.fail "Error when generating bridge metadata: #{line}"
-      end
+      sh "/usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.join(' ')} -o \"#{bs_file}\""
     end
   end
 end; end
