@@ -58,6 +58,18 @@ namespace :build do
   end
 end
 
+desc "Simulate on iPad"
+task :ipad do
+  ENV['device_family'] = "ipad"
+  Rake::Task["default"].invoke
+end
+
+desc "Simulate on iPhone"
+task :iphone do
+  ENV['device_family'] = "iphone"
+  Rake::Task["default"].invoke
+end
+
 desc "Run the simulator"
 task :simulator => ['build:simulator'] do
   app = App.config.app_bundle('iPhoneSimulator')
