@@ -743,8 +743,21 @@ again:
     }
 
     if (error == nil || debugger_killed_session) {
-	//fprintf(stderr, "*** simulator session ended without error\n");
-	exit(0);
+	int status = 0;
+	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
+		@selector(simulatedApplicationPID));
+	if (pidNumber != nil && [pidNumber isKindOfClass:[NSNumber class]]) {
+	    NSString *path = [NSString stringWithFormat:
+		@"/tmp/.rubymotion_process_exited.%@",
+		     [pidNumber description]];
+	    NSString *res = [NSString stringWithContentsOfFile:path
+		encoding:NSASCIIStringEncoding error:nil];
+	    if (res != nil) {
+		status = [res intValue];
+	    }
+	    [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
+	}
+	exit(status);
     }
     else {
 	fprintf(stderr, "*** simulator session ended with error: %s\n",
