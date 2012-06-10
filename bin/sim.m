@@ -270,6 +270,9 @@ refresh_repl_prompt(NSString *top_level, bool clear)
     previous_prompt_length = strlen(rl_prompt);
 }
 
+#define CONCURRENT_BEGIN dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+#define CONCURRENT_END });
+
 static CGEventRef
 event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
     void *ctx)
@@ -277,12 +280,14 @@ event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
     static bool previousHighlight = false;
 
     if (!(CGEventGetFlags(event) & kCGEventFlagMaskCommand)) {
+CONCURRENT_BEGIN
 	if (previousHighlight) {
 	    [delegate replEval:[NSString stringWithFormat:
 		@"<<MotionReplCaptureView %f,%f,%d", 0, 0, 0]];
 	    previousHighlight = false;
 	}
 	refresh_repl_prompt(nil, true);
+CONCURRENT_END
 	if (type == kCGEventLeftMouseDown) {
 	    // Reset the simulator app bounds as it may have moved.
 	    simulator_app_bounds = CGRectZero;
@@ -290,11 +295,12 @@ event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
 	return event;
     }
 
-    locate_simulator_app_bounds();
-    CGPoint mouseLocation = CGEventGetLocation(event);
+    __block CGPoint mouseLocation = CGEventGetLocation(event);
     const bool capture = type == kCGEventLeftMouseDown;
-    NSString *res = @"nil";
 
+CONCURRENT_BEGIN
+    locate_simulator_app_bounds();
+    NSString *res = @"nil";
     if (NSPointInRect(mouseLocation, simulator_app_bounds)) {
 	// We are over the Simulator.app main view.
 	// Inset the mouse location.
@@ -317,9 +323,12 @@ event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
 
     if (capture) {
 	refresh_repl_prompt(nil, true);
-	return NULL;
     }
-    refresh_repl_prompt(res, true);
+    else {
+	refresh_repl_prompt(res, true);
+    }
+CONCURRENT_END
+
     return event;
 }
 
