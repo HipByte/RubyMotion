@@ -1,3 +1,40 @@
+= RubyMotion 1.10 =
+
+  * Fixed the build system to validate the content of the `app.icons' variable,
+    since a wrong value may trigger an "unrecognized selector" exception in
+    Application Loader when trying to submit the app to the App Store.
+  * Fixed the Rakefile created by `motion create' to include the magic utf8
+    comment, as the file may contain multibyte characters and be parsed by
+    Ruby 1.9. Patch by @pchw.
+  * Fixed a memory bug when using symbols as Hash keys.
+  * Exposed iOS 4.3 (or greater) libdispatch APIs.
+  * The following NSString methods that used to raise a "does not work on
+    NSStrings" exception are no longer defined: byte_size, get_byte, set_byte,
+    force_encoding, valid_encoding?, ascii_only?, bytes, each_byte, to_data,
+    pointer. This allows the developer to use respond_to?. These methods
+    however are available on strings created in Ruby.
+  * Fixed a bug in `rake simulator' where the value of `deployment_target'
+    would be used as the SDK version, causing a `system_root != nil' assertion
+    in some cases.
+  * Fixed the compilation of empty symbols (:'').
+  * Fixed the generation of .bridgesupport files on Snow Leopard by not
+    passing the '--no-64-bit' flag (which was added in Lion).
+  * Fixed `motion create' to accept dash or underscore characters in the app
+    name. Patch by Mark Villacampa.
+  * Added a workaround for an iOS 5.1 bug that causes write(2) to return EBADF 
+    when writing to stdout. The bug seems to happen on devices not configured
+    for development. Writing to stdout (using p/puts) in this scenario becomes
+    a no-op.
+  * Fixed the simulator launcher to properly propagate exit(2) status codes
+    from the simulated app. This fixes `rake spec' to properly exit with 1 in
+    case one or more specs failed to run.
+  * Fixed the RUBY_ENGINE constant to be 'rubymotion' (was 'macruby' before).
+  * Objective-C objects conforming to the NSFastEnumeration protocol can now be
+    iterated using the #each method. The method is created on demand on these
+    objects.
+  * Fixed a bug in the simulator REPL where hitting the Home button would
+    trigger an insane CPU usage.
+
 = RubyMotion 1.9 =
 
   * Fixed a bug in the build system where the paths of vendored libraries
