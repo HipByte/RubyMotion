@@ -263,6 +263,11 @@ EOS
     end
 
     def frameworks_dependencies
+      if @frameworks_dependencies_frozen && @frameworks_dependencies_frozen != frameworks.to_s
+        @frameworks_dependencies = nil
+      end      
+      @frameworks_dependencies_frozen = frameworks.to_s
+      
       @frameworks_dependencies ||= begin
         # Compute the list of frameworks, including dependencies, that the project uses.
         deps = []
@@ -296,9 +301,11 @@ EOS
         bs_files
       end
     end
-
+    
+    attr_writer :spec_files
+    
     def spec_files
-      Dir.glob(File.join(specs_dir, '**', '*.rb'))
+      @spec_files ||= Dir.glob(File.join(specs_dir, '**', '*.rb'))
     end
 
     def motiondir
