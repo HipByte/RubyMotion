@@ -1,5 +1,5 @@
 PLATFORMS_DIR = '/Applications/Xcode.app/Contents/Developer/Platforms'
-PROJECT_VERSION = '1.10'
+PROJECT_VERSION = '1.11'
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
@@ -77,6 +77,14 @@ task :install do
     data.concat(Dir.glob("./data/#{sdk_version}/iPhoneOS/*"))
     data.concat(Dir.glob("./data/#{sdk_version}/iPhoneSimulator/*"))
   end
+
+  # === 6.0 support (beta) ===
+  data.concat(Dir.glob("./data/6.0/Rakefile"))
+  data.concat(Dir.glob("./data/6.0/BridgeSupport/RubyMotion.bridgesupport"))
+  data.concat(Dir.glob("./data/6.0/iPhoneOS/*"))
+  data.concat(Dir.glob("./data/6.0/iPhoneSimulator/*"))
+  # ==========================
+
   data.concat(Dir.glob('./data/*-ctags.cfg'))
   #data.concat(Dir.glob('./doc/*.html'))
   #data.concat(Dir.glob('./doc/docset/**/*'))

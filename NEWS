@@ -1,3 +1,16 @@
+= RubyMotion 1.11 =
+
+  * Fixed a bug where the runtime would not allow `nil' to be passed as a
+    C-level block argument.
+  * Fixed a bug where methods defined by attr_* would abort the program when
+    called by Objective-C.
+  * Improved `rake spec' to honor the `output' environment variable, which can
+    be used to select a different output format. Available formats: spec_dox,
+    test_unit, tap and knock (ex. rake spec output=test_unit).
+  * Support for the iOS 6.0 Beta 1 SDK can be generated after having installed
+    Xcode 4.5 by typing the following command:
+    $ cd /Library/RubyMotion/data/6.0; rake update
+
 = RubyMotion 1.10 =
 
   * Fixed the build system to validate the content of the `app.icons' variable,
