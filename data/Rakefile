@@ -43,6 +43,7 @@ task :bridgesupport_files do
       framework = File.basename(framework_path, '.framework')
       next if EXCLUDED_FRAMEWORKS.include?(framework)
       next unless File.exist?(File.join(framework_path, framework))
+      next unless File.exist?(File.join(framework_path, 'Headers'))
       dest = "#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
       unless File.exist?(dest)
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
