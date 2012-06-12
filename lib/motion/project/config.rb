@@ -101,7 +101,7 @@ module Motion; module Project
 	xcodeselect = '/usr/bin/xcode-select'
         if File.exist?(xcodeselect)
           path = `#{xcodeselect} -print-path`.strip
-          if path != xcode_dot_app_path and File.exist?(xcode_dot_app_path)
+          if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
             @xcode_error_printed ||= false
             $stderr.puts(<<EOS) unless @xcode_error_printed
 ===============================================================================
