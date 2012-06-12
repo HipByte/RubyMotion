@@ -116,7 +116,16 @@ module Bacon
     def handle_summary;  end
   end
 
-  extend SpecDoxOutput          # default
+  extend case ENV['output']
+    when nil, 'spec_dox'
+      SpecDoxOutput # default
+    when 'test_unit'
+      TestUnitOutput
+    when 'tap'
+      TapOutput
+    when 'knock'
+      KnockOutput
+  end 
 
   class Error < RuntimeError
     attr_accessor :count_as
