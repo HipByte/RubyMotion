@@ -24,6 +24,7 @@ task :apply_exceptions do
     h_orig = h + '.orig'
     next if File.exist?(h_orig)
     txt = File.read(h)
+    txt.force_encoding(Encoding::ASCII_8BIT) if txt.respond_to?(:force_encoding)
     # workaround for new objc enum parsing bug
     changed = true if txt.gsub!(/NS_(ENUM|OPTIONS)\(([^\s,]+)\s*,\s*([^)]+)\)/, '\2 \3; enum')
     case File.basename(h) 
