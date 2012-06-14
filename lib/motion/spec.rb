@@ -71,20 +71,39 @@ module Bacon
     end
   end
 
+  module FastOutput
+    def handle_specification_begin(name); end
+    def handle_specification_end; end
+
+    def handle_requirement_begin(description); end
+    def handle_requirement_end(error)
+      return if error.empty?
+      print error[0..0]
+    end
+
+    def handle_summary
+      puts "", "Finished in #{Time.now - @timer} seconds."
+      puts ErrorLog  if Backtraces
+      puts "%d tests, %d assertions, %d failures, %d errors" %
+        Counter.values_at(:specifications, :requirements, :failed, :errors)
+    end
+  end
+
   module TapOutput
     def handle_specification_begin(name); end
     def handle_specification_end        ; end
 
     def handle_requirement_begin(description)
+      @description = description
       ErrorLog.replace ""
     end
 
     def handle_requirement_end(error)
       if error.empty?
-        puts "ok %-3d - %s" % [Counter[:specifications], description]
+        puts "ok %-3d - %s" % [Counter[:specifications], @description]
       else
         puts "not ok %d - %s: %s" %
-          [Counter[:specifications], description, error]
+          [Counter[:specifications], @description, error]
         puts ErrorLog.strip.gsub(/^/, '# ')  if Backtraces
       end
     end
@@ -101,14 +120,15 @@ module Bacon
     def handle_specification_end        ; end
 
     def handle_requirement_begin(description)
+      @description = description
       ErrorLog.replace ""
     end
 
     def handle_requirement_end(error)
       if error.empty?
-        puts "ok - %s" % [description]
+        puts "ok - %s" % [@description]
       else
-        puts "not ok - %s: %s" % [description, error]
+        puts "not ok - %s: %s" % [@description, error]
         puts ErrorLog.strip.gsub(/^/, '# ')  if Backtraces
       end
     end
@@ -119,6 +139,8 @@ module Bacon
   extend case ENV['output']
     when nil, 'spec_dox'
       SpecDoxOutput # default
+    when 'fast'
+      FastOutput
     when 'test_unit'
       TestUnitOutput
     when 'tap'
