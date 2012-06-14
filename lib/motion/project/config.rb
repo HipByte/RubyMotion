@@ -361,10 +361,11 @@ EOS
     end
 
     def archs(platform)
+      @cpu_types << :i386
       sdk_archs = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
         path.scan(/kernel-(.+).bc$/)[0][0]
       end
-      sdk_archs & @cpu_types.map{ |cpu| cpu.to_s }
+      sdk_archs & @cpu_types.uniq.map{ |cpu| cpu.to_s }
     end
 
     def arch_flags(platform)
