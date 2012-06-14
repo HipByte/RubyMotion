@@ -361,13 +361,11 @@ EOS
     end
 
     def archs(platform)
-      if @deployment_target == "4.3"
-        return @cpu_types.map{|x| x.to_s }
-      end
-
+      sdk_archs = []
       Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
-        path.scan(/kernel-(.+).bc$/)[0][0]
+        sdk_archs << path.scan(/kernel-(.+).bc$/)[0][0]
       end
+      sdk_archs & @cpu_types.map{ |cpu| cpu.to_s }
     end
 
     def arch_flags(platform)
