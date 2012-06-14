@@ -361,9 +361,8 @@ EOS
     end
 
     def archs(platform)
-      sdk_archs = []
-      Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
-        sdk_archs << path.scan(/kernel-(.+).bc$/)[0][0]
+      sdk_archs = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
+        path.scan(/kernel-(.+).bc$/)[0][0]
       end
       sdk_archs & @cpu_types.map{ |cpu| cpu.to_s }
     end
