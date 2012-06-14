@@ -51,7 +51,7 @@ module Motion; module Project
       :libs, :delegate_class, :name, :build_dir, :resources_dir, :specs_dir,
       :identifier, :codesign_certificate, :provisioning_profile,
       :device_family, :interface_orientations, :version, :icons,
-      :prerendered_icon, :seed_id, :entitlements, :fonts
+      :prerendered_icon, :seed_id, :entitlements, :fonts, :cpu_types
 
     attr_accessor :spec_mode
 
@@ -76,6 +76,7 @@ module Motion; module Project
       @entitlements = {}
       @spec_mode = false
       @build_mode = build_mode
+      @cpu_types = [:armv6, :armv7]
     end
 
     OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
@@ -360,9 +361,11 @@ EOS
     end
 
     def archs(platform)
-      Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
+      @cpu_types << :i386
+      sdk_archs = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
         path.scan(/kernel-(.+).bc$/)[0][0]
       end
+      sdk_archs & @cpu_types.uniq.map{ |cpu| cpu.to_s }
     end
 
     def arch_flags(platform)
