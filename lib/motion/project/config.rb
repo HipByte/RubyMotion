@@ -348,7 +348,7 @@ EOS
 
     def locate_compiler(platform, *execs)
       paths = [File.join(platform_dir(platform), 'Developer/usr/bin')]
-      paths.unshift File.join(xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin') if platform == 'iPhoneSimulator'
+      paths.unshift File.join(xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin')
 
       execs.each do |exec|
         paths.each do |path|
