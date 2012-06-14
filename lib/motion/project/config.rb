@@ -359,14 +359,20 @@ EOS
       App.fail "Can't locate compilers for platform `#{platform}'"
     end
 
-    def archs(platform)
-      Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
-        path.scan(/kernel-(.+).bc$/)[0][0]
+    def archs
+      @archs ||= begin
+        h = {}
+        %w{iPhoneSimulator iPhoneOS}.each do |platform|
+          h[platform] = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
+            path.scan(/kernel-(.+).bc$/)[0][0]
+          end
+        end
+        h
       end
     end
 
     def arch_flags(platform)
-      archs(platform).map { |x| "-arch #{x}" }.join(' ')
+      archs[platform].map { |x| "-arch #{x}" }.join(' ')
     end
 
     def common_flags(platform)

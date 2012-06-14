@@ -29,7 +29,7 @@ module Motion; module Project;
 
     def build(config, platform)
       datadir = config.datadir
-      archs = config.archs(platform)
+      archs = config.archs[platform]
 
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
