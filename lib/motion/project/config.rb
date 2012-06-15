@@ -164,6 +164,12 @@ EOS
       end
     end
 
+    def supported_versions
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data/*')).select{|path| File.directory?(path)}.map do |path|
+        File.basename path
+      end
+    end
+
     def build_dir
       unless File.directory?(@build_dir)
         tried = false
@@ -288,9 +294,12 @@ EOS
         bs_files = []
         deps = ['RubyMotion'] + frameworks_dependencies
         deps.each do |framework|
-          bs_path = File.join(datadir, 'BridgeSupport', framework + '.bridgesupport')
-          if File.exist?(bs_path)
-            bs_files << bs_path
+          supported_versions.each do |ver|
+            next if ver < deployment_target || sdk_version < ver
+            bs_path = File.join(datadir(ver), 'BridgeSupport', framework + '.bridgesupport')
+            if File.exist?(bs_path)
+              bs_files << bs_path
+            end
           end
         end
         bs_files
