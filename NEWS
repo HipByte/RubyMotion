@@ -25,7 +25,7 @@
     64 bits would not be following the ABI and causing unexpected behavior in
     certain cases (ex. cocos2d). Thanks to Aaron Hurley for the detective work.
   * Removed Kernel#select as it clashes with a private `select' method defined
-    by iOS and triggered when hittin the select button in a paste action.
+    by iOS and triggered when hitting the select button in a paste action.
     Thanks to Francis Chong for the detective work.
 
 = RubyMotion 1.11 =
