@@ -39,6 +39,8 @@ task :bridgesupport_files do
     rm_bs = "#{sdk_version}/BridgeSupport/RubyMotion.bridgesupport"
     cp 'RubyMotion.bridgesupport', rm_bs
 
+    next if ENV['SDK_BETA']
+
     Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
       framework = File.basename(framework_path, '.framework')
       next if EXCLUDED_FRAMEWORKS.include?(framework)
