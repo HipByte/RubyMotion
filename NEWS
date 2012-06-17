@@ -1,3 +1,33 @@
+= RubyMotion 1.12 =
+
+  * Fixed a bug where sending an `init' message alone (without using `alloc'
+    before) would lead to a memory crash. This was possible when overloading
+    an initWith* method and doing `self.init' inside.
+  * Fixed a bug where performing Objective-C methods that accept CFType objects
+    would crash the program (ex. [ABPersonViewController setDisplayedPerson:]).
+  * Switched to clang++ to link the executable bits. This fixes linker crashes
+    on iOS 6.0.
+  * Added `fast' output for `rake spec'. Fixed a bug in the other outputs.
+    Patch by Marin Usalj.
+  * Improved the build system to let the user specify CPU archs that should be
+    used for a certain platform. The `app.archs' method returns a Hash that one
+    can tweak. This is so far only useful when you target 4.3 (which is armv6
+    and armv7) and want to link with a 3rd-party library that only supports
+    armv7 (ex. app.archs['iPhoneOS'] = ['armv7']).
+  * Improved `rake simulator' to honor the `deployment_target' environment
+    variable (ex. rake deployment_target=4.3). Patch by Satoshi Ebisawa.
+  * Fixed a bug in the build system where the compiler would not use the right
+    BridgeSupport files when using a lower deployment_target.
+    Patch by Satoshi Ebisawa.
+  * Fixed the build system to re-link the .app executable in case one of the
+    vendored libraries changed.
+  * Fixed bugs in both ARM/simulator compilers where structures smaller than
+    64-bit would not be following the ABI and causing unexpected behavior in
+    certain cases (ex. cocos2d). Thanks to Aaron Hurley for the detective work.
+  * Removed Kernel#select as it clashes with a private `select' method defined
+    by iOS and triggered when hittin the select button in a paste action.
+    Thanks to Francis Chong for the detective work.
+
 = RubyMotion 1.11 =
 
   * Fixed a bug where the runtime would not allow `nil' to be passed as a
