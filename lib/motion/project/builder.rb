@@ -157,6 +157,8 @@ module Motion; module Project;
         builder_i = 0 if builder_i == builders_count
       end
 
+      FileUtils.touch(objs_build_dir) if project_file_changed
+
       app_objs = objs
       if config.spec_mode
         # Build spec files too, but sequentially.
