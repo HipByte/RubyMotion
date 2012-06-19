@@ -1,3 +1,15 @@
+= RubyMotion 1.13 =
+
+  * Fixed a regression in `rake simulator' introduced by the last update.
+    Also, the environment variable used to set the SDK target is renamed to
+    `target' (ex. rake target=4.3).
+  * Fixed a bug in the build system where certain .rb files would be rebuilt
+    every time `rake build' was executed, because the object directory was not
+    touched.
+  * Fixed a bug in the build system where the RUBYOPT variable would not be
+    cleared when calling the gen_bridge_metadata tool, which would cause some
+    issues later on. Patch by Satoshi Ebisawa.
+
 = RubyMotion 1.12 =
 
   * Fixed a bug where sending an `init' message alone (without using `alloc'
