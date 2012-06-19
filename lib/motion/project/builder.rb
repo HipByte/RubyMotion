@@ -281,12 +281,13 @@ EOS
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
         frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
+        weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         framework_stubs_objs = []
-        config.frameworks_dependencies.each do |framework|
+        (config.frameworks_dependencies+config.weak_frameworks).each do |framework|
           stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
           framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
         end
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{framework_stubs_objs.join(' ')} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{framework_stubs_objs.join(' ')} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
         main_exec_created = true
       end
 

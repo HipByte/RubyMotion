@@ -51,7 +51,7 @@ module Motion; module Project
       :libs, :delegate_class, :name, :build_dir, :resources_dir, :specs_dir,
       :identifier, :codesign_certificate, :provisioning_profile,
       :device_family, :interface_orientations, :version, :icons,
-      :prerendered_icon, :seed_id, :entitlements, :fonts
+      :prerendered_icon, :seed_id, :entitlements, :fonts, :weak_frameworks
 
     attr_accessor :spec_mode
 
@@ -60,6 +60,7 @@ module Motion; module Project
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
       @dependencies = {}
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
+      @weak_frameworks = []
       @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
@@ -292,7 +293,7 @@ EOS
     def bridgesupport_files
       @bridgesupport_files ||= begin
         bs_files = []
-        deps = ['RubyMotion'] + frameworks_dependencies
+        deps = ['RubyMotion'] + frameworks_dependencies + weak_frameworks
         deps.each do |framework|
           supported_versions.each do |ver|
             next if ver < deployment_target || sdk_version < ver
