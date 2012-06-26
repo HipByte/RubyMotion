@@ -52,7 +52,7 @@ module Motion; module Project
       :identifier, :codesign_certificate, :provisioning_profile,
       :device_family, :interface_orientations, :version, :short_version, :icons,
       :prerendered_icon, :background_modes, :seed_id, :entitlements, :fonts, 
-      :status_bar_style, :url_types
+      :status_bar_style
 
     attr_accessor :spec_mode
 
@@ -72,8 +72,7 @@ module Motion; module Project
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @version = '1.0'
       @short_version = '1'
-      @status_bar_style = 'UIStatusBarStyleDefault'
-      @url_types = []
+      @status_bar_style = :default
       @background_modes = []
       @icons = []
       @prerendered_icon = false
@@ -462,6 +461,31 @@ EOS
       end
     end
 
+    def background_modes_consts
+      @background_modes.map do |mode|
+        case mode
+          when :audio then 'audio'
+          when :location then 'location'
+          when :voip then 'voip'
+          when :newsstand_content then 'newsstand-content'
+          when :external_accessory then 'external-accessory'
+          when :bluetooth_central then 'bluetooth-central'
+          else
+            App.fail "Unknown background_modes value: `#{mode}'"
+        end
+      end
+    end
+
+    def status_bar_style_const
+      case @status_bar_style
+        when :default then 'UIStatusBarStyleDefault'
+        when :black_translucent then 'UIStatusBarStyleBlackTranslucent'
+        when :black_opaque then 'UIStatusBarStyleBlackOpaque'
+        else
+          App.fail "Unknown status_bar_style value: `#{@status_bar_style}'"
+      end
+    end
+
     def info_plist
       @info_plist ||= {
         'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
@@ -485,12 +509,11 @@ EOS
             'UIPrerenderedIcon' => prerendered_icon,
           }
         },
-        'CFBundleURLTypes' => url_types,
         'UIAppFonts' => fonts,
         'UIDeviceFamily' => device_family_ints.map { |x| x.to_s },
         'UISupportedInterfaceOrientations' => interface_orientations_consts,
-        'UIStatusBarStyle' => @status_bar_style,
-        'UIBackgroundModes' => @background_modes,
+        'UIStatusBarStyle' => status_bar_style_const,
+        'UIBackgroundModes' => background_modes_consts,
         'DTXcode' => '0431',
         'DTSDKName' => 'iphoneos5.0',
         'DTSDKBuild' => '9A334',
