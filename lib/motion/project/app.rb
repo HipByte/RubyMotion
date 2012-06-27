@@ -103,8 +103,8 @@ module Motion; module Project
             File.open(rakefileTemplate, 'r') do |src|
               File.open('Rakefile', 'w') do |dest|
                 source = src.read
-                source = source.gsub(/\#{\$motion_libdir}/){"#{$motion_libdir}"}
-                source = source.gsub(/\#{app_name}/){"#{app_name}"}
+                source = source.gsub(/\#\{\$motion_libdir\}/){"#{$motion_libdir}"}
+                source = source.gsub(/\#\{app_name\}/){"#{app_name}"}
                 dest.write(source)
               end
             end
