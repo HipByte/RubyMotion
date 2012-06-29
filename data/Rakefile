@@ -36,8 +36,7 @@ task :bridgesupport_files do
     sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
     mkdir_p "#{sdk_version}/BridgeSupport"
 
-    rm_bs = "#{sdk_version}/BridgeSupport/RubyMotion.bridgesupport"
-    cp 'RubyMotion.bridgesupport', rm_bs
+    Dir.glob('*.bridgesupport').each { |bs| cp bs, "#{sdk_version}/BridgeSupport" }
 
     next if ENV['SDK_BETA']
 

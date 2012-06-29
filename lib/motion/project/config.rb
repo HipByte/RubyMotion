@@ -289,7 +289,9 @@ EOS
           end
           deps << framework
         end
-        deps.uniq.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+        deps = deps.uniq.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+        deps << 'UIAutomation' if spec_mode
+        deps
       end
     end
 
@@ -311,7 +313,10 @@ EOS
     end
 
     def spec_files
-      Dir.glob(File.join(specs_dir, '**', '*.rb'))
+      @spec_files ||= begin
+        # core library + core helpers + project helpers + project specs
+        Dir.chdir(File.join(File.dirname(__FILE__), '..')) { (['spec.rb'] + Dir.glob('spec/helpers/*.rb')).map { |x| File.expand_path(x) } } + Dir.glob(File.join(specs_dir, 'helpers', '*.rb')) + Dir.glob(File.join(specs_dir, '*.rb'))
+      end
     end
 
     def motiondir
@@ -389,7 +394,9 @@ EOS
     end
 
     def common_flags(platform)
-      "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
+      cflags = "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
+      cflags << " -F#{sdk(platform)}/Developer/Library/PrivateFrameworks" if spec_mode # For UIAutomation
+      cflags
     end
 
     def cflags(platform, cplusplus)

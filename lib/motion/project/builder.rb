@@ -162,7 +162,6 @@ module Motion; module Project;
       app_objs = objs
       if config.spec_mode
         # Build spec files too, but sequentially.
-        objs << build_file.call(File.expand_path(File.join(File.dirname(__FILE__), '../spec.rb')))
         spec_objs = config.spec_files.map { |path| build_file.call(path) }
         objs += spec_objs
       end
@@ -196,11 +195,31 @@ EOS
 @interface SpecLauncher : NSObject
 @end
 
+#include <dlfcn.h>
+
 @implementation SpecLauncher
 
 + (id)launcher
 {
     [UIApplication sharedApplication];
+
+    // Enable simulator accessibility.
+    // Thanks http://www.stewgleadow.com/blog/2011/10/14/enabling-accessibility-for-ios-applications/
+    NSString *simulatorRoot = [[[NSProcessInfo processInfo] environment] objectForKey:@"IPHONE_SIMULATOR_ROOT"];
+    if (simulatorRoot != nil) {
+        void *appSupportLibrary = dlopen([[simulatorRoot stringByAppendingPathComponent:@"/System/Library/PrivateFrameworks/AppSupport.framework/AppSupport"] fileSystemRepresentation], RTLD_LAZY);
+        CFStringRef (*copySharedResourcesPreferencesDomainForDomain)(CFStringRef domain) = (CFStringRef (*)(CFStringRef)) dlsym(appSupportLibrary, "CPCopySharedResourcesPreferencesDomainForDomain");
+
+        if (copySharedResourcesPreferencesDomainForDomain != NULL) {
+            CFStringRef accessibilityDomain = copySharedResourcesPreferencesDomainForDomain(CFSTR("com.apple.Accessibility"));
+
+            if (accessibilityDomain != NULL) {
+                CFPreferencesSetValue(CFSTR("ApplicationAccessibilityEnabled"), kCFBooleanTrue, accessibilityDomain, kCFPreferencesAnyUser, kCFPreferencesAnyHost);
+                CFRelease(accessibilityDomain);
+            }
+        }
+    }
+
     SpecLauncher *launcher = [[self alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
     return launcher; 
