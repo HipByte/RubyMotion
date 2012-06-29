@@ -180,6 +180,7 @@ extern "C" {
     void rb_vm_init_jit(void);
     void rb_vm_aot_feature_provide(const char *, void *);
     void *rb_vm_top_self(void);
+    void rb_define_const(void *, const char *, void *);
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
 EOS
@@ -261,6 +262,13 @@ EOS
       app_objs.each do |_, init_func|
         main_txt << "#{init_func}(self, 0);\n"
       end
+      rubymotion_env =
+        if config.spec_mode
+          'test'
+        else
+          config.development? ? 'development' : 'release'
+        end
+      main_txt << "rb_define_const([NSObject class], \"RUBYMOTION_ENV\", @\"#{rubymotion_env}\");\n"
       main_txt << <<EOS
         retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
         rb_exit(retval);
