@@ -27,9 +27,11 @@ module Motion; module Project;
   class Builder
     include Rake::DSL if Rake.const_defined?(:DSL)
 
-    def build(config, platform)
+    def build(config, platform, opts)
       datadir = config.datadir
       archs = config.archs[platform]
+
+      static_library = opts.delete(:static)
 
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
@@ -166,8 +168,8 @@ module Motion; module Project;
         objs += spec_objs
       end
 
-      # Generate main file.
-      main_txt = <<EOS
+      # Generate init file.
+      init_txt = <<EOS
 #import <UIKit/UIKit.h>
 
 extern "C" {
@@ -180,14 +182,70 @@ extern "C" {
     void rb_vm_init_jit(void);
     void rb_vm_aot_feature_provide(const char *, void *);
     void *rb_vm_top_self(void);
-    void rb_define_const(void *, const char *, void *);
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
 EOS
       objs.each do |_, init_func|
-        main_txt << "void #{init_func}(void *, void *);\n"
+        init_txt << "void #{init_func}(void *, void *);\n"
       end
-      main_txt << <<EOS
+      init_txt << <<EOS
+}
+
+extern "C"
+void
+RubyMotionInit(int argc, char **argv)
+{
+    static bool initialized = false;
+    if (!initialized) {
+	ruby_init();
+	ruby_init_loadpath();
+        if (argc > 0) {
+	    const char *progname = argv[0];
+	    ruby_script(progname);
+	}
+	try {
+	    void *self = rb_vm_top_self();
+EOS
+      app_objs.each do |_, init_func|
+        init_txt << "#{init_func}(self, 0);\n"
+      end
+      init_txt << <<EOS
+	}
+	catch (...) {
+	    rb_rb2oc_exc_handler();
+	}
+	initialized = true;
+    }
+}
+EOS
+
+      # Compile init file.
+      init = File.join(objs_build_dir, 'init.mm')
+      init_o = File.join(objs_build_dir, 'init.o')
+      if !(File.exist?(init) and File.exist?(init_o) and File.read(init) == init_txt)
+        File.open(init, 'w') { |io| io.write(init_txt) }
+        sh "#{cxx} \"#{init}\" #{config.cflags(platform, true)} -c -o \"#{init_o}\""
+      end
+
+      if static_library
+        # Create a static archive with all object files + the runtime.
+        lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
+        App.info 'Create', lib
+        cp File.join(datadir, platform, 'libmacruby-static.a'), lib
+        objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
+        sh "/usr/bin/ar -cr \"#{lib}\" #{objs_list}"
+        return lib
+      end
+
+      # Generate main file.
+      main_txt = <<EOS
+#import <UIKit/UIKit.h>
+
+extern "C" {
+    void rb_define_const(void *, const char *, void *);
+    void rb_rb2oc_exc_handler(void);
+    void rb_exit(int);
+    void RubyMotionInit(int argc, char **argv);
 }
 EOS
 
@@ -250,18 +308,13 @@ int
 main(int argc, char **argv)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    const char *progname = argv[0];
-    ruby_init();
-    ruby_init_loadpath();
-    ruby_script(progname);
     int retval = 0;
     try {
-        void *self = rb_vm_top_self();
 EOS
       main_txt << "[SpecLauncher launcher];\n" if config.spec_mode
-      app_objs.each do |_, init_func|
-        main_txt << "#{init_func}(self, 0);\n"
-      end
+      main_txt << <<EOS
+        RubyMotionInit(argc, argv);
+EOS
       rubymotion_env =
         if config.spec_mode
           'test'
@@ -306,14 +359,9 @@ EOS
           or vendor_libs.any? { |lib| File.mtime(lib) > File.mtime(main_exec) } \
           or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
         App.info 'Link', main_exec
-        objs_list = objs.map { |path, _| path }.unshift(main_o).map { |x| "\"#{x}\"" }.join(' ')
+        objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
         frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
-        framework_stubs_objs = []
-        config.frameworks_dependencies.each do |framework|
-          stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
-          framework_stubs_objs << "\"#{stubs_obj}\"" if File.exist?(stubs_obj)
-        end
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{framework_stubs_objs.join(' ')} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
         main_exec_created = true
       end
 

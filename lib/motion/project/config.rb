@@ -295,6 +295,15 @@ EOS
       end
     end
 
+    def frameworks_stubs_objects(platform)
+      stubs = []
+      frameworks_dependencies.each do |framework|
+        stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
+        stubs << stubs_obj if File.exist?(stubs_obj)
+      end
+      stubs
+    end
+
     def bridgesupport_files
       @bridgesupport_files ||= begin
         bs_files = []
