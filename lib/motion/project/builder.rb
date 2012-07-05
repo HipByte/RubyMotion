@@ -369,7 +369,8 @@ EOS
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
         frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
+        weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
         main_exec_created = true
       end
 
