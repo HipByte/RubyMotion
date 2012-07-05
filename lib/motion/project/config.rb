@@ -48,11 +48,11 @@ module Motion; module Project
     end
 
     variable :files, :xcode_dir, :sdk_version, :deployment_target, :frameworks,
-      :libs, :delegate_class, :name, :build_dir, :resources_dir, :specs_dir,
-      :identifier, :codesign_certificate, :provisioning_profile,
-      :device_family, :interface_orientations, :version, :short_version, :icons,
-      :prerendered_icon, :background_modes, :seed_id, :entitlements, :fonts, 
-      :status_bar_style
+      :weak_frameworks, :libs, :delegate_class, :name, :build_dir,
+      :resources_dir, :specs_dir, :identifier, :codesign_certificate,
+      :provisioning_profile, :device_family, :interface_orientations, :version,
+      :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
+      :entitlements, :fonts, :status_bar_style
 
     attr_accessor :spec_mode
 
@@ -61,6 +61,7 @@ module Motion; module Project
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
       @dependencies = {}
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
+      @weak_frameworks = []
       @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
@@ -297,7 +298,7 @@ EOS
 
     def frameworks_stubs_objects(platform)
       stubs = []
-      frameworks_dependencies.each do |framework|
+      (frameworks_dependencies + weak_frameworks).uniq.each do |framework|
         stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
         stubs << stubs_obj if File.exist?(stubs_obj)
       end
@@ -307,7 +308,7 @@ EOS
     def bridgesupport_files
       @bridgesupport_files ||= begin
         bs_files = []
-        deps = ['RubyMotion'] + frameworks_dependencies
+        deps = ['RubyMotion'] + (frameworks_dependencies + weak_frameworks).uniq
         deps.each do |framework|
           supported_versions.each do |ver|
             next if ver < deployment_target || sdk_version < ver
