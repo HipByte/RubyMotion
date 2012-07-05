@@ -16,8 +16,7 @@
     the following string values: 'test', 'development' and 'release'.
   * Introduced the `rake static' task which creates a universal static library
     containing the project's object files and the RubyMotion runtime, which is
-    suitable for inclusion in Objective-C/Xcode projects. Check out the
-    Project Management guide in the developer center for more information.
+    suitable for inclusion in Objective-C/Xcode projects. 
   * Introduced weak frameworks support. The `app.weak_frameworks' setting can
     be set to an array of framework names, similar to how `app.frameworks'
     works (ex. app.weak_frameworks += ['Twitter']). Patch by Satoshi Ebisawa.
