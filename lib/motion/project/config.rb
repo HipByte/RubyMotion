@@ -289,8 +289,19 @@ EOS
           end
           deps << framework
         end
-        deps.uniq.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+        deps = deps.uniq.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+        deps << 'UIAutomation' if spec_mode
+        deps
       end
+    end
+
+    def frameworks_stubs_objects(platform)
+      stubs = []
+      frameworks_dependencies.each do |framework|
+        stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
+        stubs << stubs_obj if File.exist?(stubs_obj)
+      end
+      stubs
     end
 
     def bridgesupport_files
@@ -311,7 +322,21 @@ EOS
     end
 
     def spec_files
-      Dir.glob(File.join(specs_dir, '**', '*.rb'))
+      @spec_files ||= begin
+        # Core library + core helpers.
+        files = Dir.chdir(File.join(File.dirname(__FILE__), '..')) { (['spec.rb'] + Dir.glob('spec/helpers/*.rb')).map { |x| File.expand_path(x) } }
+        # Project helpers.
+        files += Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
+        # Project specs.
+        specs = Dir.glob(File.join(specs_dir, '*.rb'))
+        if files_filter = ENV['files']
+          # Filter specs we want to run. A filter can be either the basename of a spec file or its path.
+          files_filter = files_filter.split(',')
+          files_filter.map! { |x| File.exist?(x) ? File.expand_path(x) : x }
+          specs.delete_if { |x| !files_filter.include?(File.expand_path(x)) and !files_filter.include?(File.basename(x, '.rb')) } 
+        end
+        files + specs
+      end
     end
 
     def motiondir
@@ -389,7 +414,9 @@ EOS
     end
 
     def common_flags(platform)
-      "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
+      cflags = "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
+      cflags << " -F#{sdk(platform)}/Developer/Library/PrivateFrameworks" if spec_mode # For UIAutomation
+      cflags
     end
 
     def cflags(platform, cplusplus)

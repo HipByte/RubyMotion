@@ -64,8 +64,8 @@ module Motion; module Project
         config.validate
       end
 
-      def build(platform)
-        builder.build(config, platform)
+      def build(platform, opts={})
+        builder.build(config, platform, opts)
       end
 
       def archive

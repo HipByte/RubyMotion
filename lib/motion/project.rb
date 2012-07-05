@@ -134,7 +134,7 @@ namespace :archive do
   end
 end
 
-desc "Run specs"
+desc "Run the test/spec suite"
 task :spec do
   App.config.spec_mode = true
   Rake::Task["simulator"].invoke
@@ -180,6 +180,16 @@ task :ctags do
     config = File.join(config.motiondir, 'data', 'bridgesupport-ctags.cfg')
     sh "#{ctags} --options=\"#{config}\" #{bs_files.map { |x| '"' + x + '"' }.join(' ')}"
   end
+end
+
+desc "Create a .a static library"
+task :static do
+  libs = %w{iPhoneSimulator iPhoneOS}.map do |platform|
+    '"' + App.build(platform, :static => true) + '"'
+  end
+  fat_lib = File.join(App.config.build_dir, App.config.name + '-universal.a')
+  App.info 'Create', fat_lib
+  sh "/usr/bin/lipo -create #{libs.join(' ')} -output \"#{fat_lib}\""
 end
 
 =begin
