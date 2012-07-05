@@ -424,7 +424,7 @@ EOS
       resources_files = []
       if File.exist?(config.resources_dir)
         resources_files = Dir.chdir(config.resources_dir) do
-          Dir.glob('**/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }
+          Dir.glob('**{,/*/**}/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }
         end
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)
