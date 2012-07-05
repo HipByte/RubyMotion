@@ -1,3 +1,29 @@
+= RubyMotion 1.15 =
+
+  * Improved the spec framework to leverage UIAutomation's functionality. This
+    lets you write functional tests on views and controllers by using the same
+    event generators, but in pure Ruby (and not Javascript).
+    Check http://www.rubymotion.com/developer-center/articles/testing for more
+    information about the new API. Feature contributed by Eloy Duran.
+  * Introduced spec helpers. `rake spec' will now honor the files inside the
+    `spec/helpers' directory (if it exists) and compile them before the spec
+    files.
+  * Introduced the `files' option to `rake spec', which can be used to filter
+    the spec files that should be run. Filters can be either the basename of
+    a spec file or its full path, and are separated by a comma.
+    Example: rake spec files=main_spec,kvo_spec,spec/foo_spec.rb 
+  * Introduced the RUBYMOTION_ENV constant in the runtime which can have one of
+    the following string values: 'test', 'development' and 'release'.
+  * Introduced the `rake static' task which creates a universal static library
+    containing the project's object files and the RubyMotion runtime, which is
+    suitable for inclusion in Objective-C/Xcode projects. Check out the
+    Project Management guide in the developer center for more information.
+  * Introduced weak frameworks support. The `app.weak_frameworks' setting can
+    be set to an array of framework names, similar to how `app.frameworks'
+    works (ex. app.weak_frameworks += ['Twitter']). Patch by Satoshi Ebisawa.
+  * Fixed a bug in the build system where  files within symlinks inside of the
+    resources directory would not be copied. Patch by Nick Quaranto.
+
 = RubyMotion 1.14 =
 
   * Fixed a bug in the Struct class where certain instances would be released
