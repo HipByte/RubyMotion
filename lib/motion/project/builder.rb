@@ -162,6 +162,7 @@ module Motion; module Project;
       FileUtils.touch(objs_build_dir) if project_file_changed
 
       app_objs = objs
+      spec_objs = []
       if config.spec_mode
         # Build spec files too, but sequentially.
         spec_objs = config.spec_files.map { |path| build_file.call(path) }
@@ -185,7 +186,7 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
 EOS
-      objs.each do |_, init_func|
+      app_objs.each do |_, init_func|
         init_txt << "void #{init_func}(void *, void *);\n"
       end
       init_txt << <<EOS
@@ -246,6 +247,13 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
+EOS
+      if config.spec_mode
+        spec_objs.each do |_, init_func|
+          main_txt << "void #{init_func}(void *, void *);\n"
+        end
+      end
+      main_txt << <<EOS
 }
 EOS
 
