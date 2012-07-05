@@ -89,13 +89,20 @@ module RunLoopHelpers
 
   MIN_INTERVAL = 0.01
 
-  # TODO this is already in the master branch, merge it!
+  # This will halt the current call stack while still process runloop sources.
+  #
+  # The edge version of MacBacon uses this pattern for all the `wait` methods,
+  # which is why this undocumented version is called `proper_wait`.
+  #
+  # You are free to use this, but be aware that it will be deprecated in the
+  # future when a new version of MacBacon is released and merged into
+  # RubyMotion.
   def proper_wait(sec)
     CFRunLoopRunInMode(KCFRunLoopDefaultMode, sec, false)
   end
 
-  # Keeps trying the block until it returns a truthy value. Has a default
-  # `timeout` of 3 seconds.
+  # Keeps trying the block until it returns a truthy value or the `timeout`
+  # passes. The default `timeout` is 3 seconds.
   #
   # Returns the return value of the block.
   def wait_till(timeout = Bacon::Functional.default_timeout)
