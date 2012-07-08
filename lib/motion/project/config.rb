@@ -325,18 +325,18 @@ EOS
     def spec_files
       @spec_files ||= begin
         # Core library + core helpers.
-        files = Dir.chdir(File.join(File.dirname(__FILE__), '..')) { (['spec.rb'] + Dir.glob(File.join('spec', 'helpers', '*.rb'))).map { |x| File.expand_path(x) } }
+        core = Dir.chdir(File.join(File.dirname(__FILE__), '..')) { (['spec.rb'] + Dir.glob(File.join('spec', 'helpers', '*.rb'))).map { |x| File.expand_path(x) } }
         # Project helpers.
-        files += Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
+        helpers = Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
         # Project specs.
-        specs = Dir.glob(File.join(specs_dir, '**', '*.rb'))
+        specs = Dir.glob(File.join(specs_dir, '**', '*.rb')) - helpers
         if files_filter = ENV['files']
           # Filter specs we want to run. A filter can be either the basename of a spec file or its path.
           files_filter = files_filter.split(',')
           files_filter.map! { |x| File.exist?(x) ? File.expand_path(x) : x }
           specs.delete_if { |x| !files_filter.include?(File.expand_path(x)) and !files_filter.include?(File.basename(x, '.rb')) }
         end
-        files + specs
+        core + helpers + specs
       end
     end
 
