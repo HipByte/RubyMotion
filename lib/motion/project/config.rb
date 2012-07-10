@@ -52,7 +52,7 @@ module Motion; module Project
       :resources_dir, :specs_dir, :identifier, :codesign_certificate,
       :provisioning_profile, :device_family, :interface_orientations, :version,
       :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
-      :entitlements, :fonts, :status_bar_style
+      :entitlements, :fonts, :status_bar_style, :motiondir
 
     attr_accessor :spec_mode
 
