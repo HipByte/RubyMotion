@@ -576,3 +576,6 @@ class Should
     raise Bacon::Error.new(:failed, reason)
   end
 end
+
+# Do not log all exceptions when running the specs.
+Exception.log_exceptions = false
