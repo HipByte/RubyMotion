@@ -43,6 +43,7 @@ begin
   require 'bundler/setup'
   Bundler.require
 rescue LoadError
+rescue NoMethodError
 end
 
 desc "Build the project, then run the simulator"
