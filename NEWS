@@ -1,3 +1,8 @@
+= RubyMotion 1.17 =
+
+  * Removed the Bundler support as it's apparently causing issues on certain
+    environments. It will be added back once we figure out the edge cases.
+
 = RubyMotion 1.16 =
 
   * Fixed a compiler bug in the way certain opaque types in the CoreMIDI
