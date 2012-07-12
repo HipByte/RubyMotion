@@ -1,3 +1,25 @@
+= RubyMotion 1.16 =
+
+  * Fixed a compiler bug in the way certain opaque types in the CoreMIDI
+    framework would not properly be handled, causing crashes at runtime.
+  * Fixed a regression in the build system where spec files in nested
+    directories would not be taken into account. Patch by Marc Schwieterman.
+  * Bundler is now optionally required by the build system. If you use bundler,
+    you do not need to require it in the project's Rakefile anymore. Patch by
+    Vladimir Pouzanov.
+  * Disabled exception logging when running in spec mode.
+  * Fixed a bunch of memory leaks due to a bug in the compiler that was not
+    properly autoreleasing objects returned from overloaded initializers.
+    Thanks to Satoshi Ebisawa for the detective work.
+  * Fixed a memory bug in Array that was happening when re-allocating the
+    storage after a #shift call.
+  * Fixed a compiler bug where C or Objective-C APIs returning 32-bit integers
+    whose values cannot fix in 30-bits would not be properly converted into
+    Bignum types.
+  * Fixed a bug in the simulator launcher where iPad projects could be started
+    in the iPad simulator but using an iPhone simulator frame.
+  * The iOS 6.0 version of the runtime has been recompiled for iOS 6.0 Beta 2.
+
 = RubyMotion 1.15 =
 
   * Improved the spec framework to leverage UIAutomation's functionality. This
