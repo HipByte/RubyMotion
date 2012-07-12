@@ -90,7 +90,11 @@ task :simulator => ['build:simulator'] do
   retina = ENV['retina'] == 'true'
 
   # Configure the SimulateDevice variable (the only way to specify if we want to run in retina mode or not).
-  sh "/usr/bin/defaults write com.apple.iphonesimulator \"SimulateDevice\" \"'#{App.config.device_family_string(family_int, retina)}'\""
+  simulate_device = App.config.device_family_string(family_int, retina)
+  if `/usr/bin/defaults read com.apple.iphonesimulator "SimulateDevice"`.strip != simulate_device
+    system("/usr/bin/killall \"iPhone Simulator\"")
+    system("/usr/bin/defaults write com.apple.iphonesimulator \"SimulateDevice\" \"'#{App.config.device_family_string(family_int, retina)}'\"")
+  end
 
   # Launch the simulator.
   xcode = App.config.xcode_dir
