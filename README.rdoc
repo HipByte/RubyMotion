@@ -16,7 +16,15 @@ These files are installed as +/Library/RubyMotion/lib+.
 In order to use the GitHub version of these files in your RubyMotion project,
 you can modify the project Rakefile like this.
 
-  $:.unshift(ENV['RUBYMOTION_LIB'] || "/Library/RubyMotion/lib")
+  $:.unshift(ENV['RUBYMOTION_LIB'] || '/Library/RubyMotion/lib')
+
+You must also set +motiondir+, so the +data+ and +bin+ directories can be found.
+
+  Motion::Project::App.setup do |app|
+    app.name = '...'
+    app.motiondir = '/Library/RubyMotion'
+    # ...
+  end
 
 Then, simply set the RUBYMOTION_LIB environment variable when using +rake+.
 
