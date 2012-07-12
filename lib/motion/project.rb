@@ -39,14 +39,6 @@ if $?.exitstatus == 2
   puts ''
 end
 
-if File.exist?('Gemfile')
-  begin
-    require 'bundler/setup'
-    Bundler.require
-  rescue LoadError
-  end
-end
-
 desc "Build the project, then run the simulator"
 task :default => :simulator
 
