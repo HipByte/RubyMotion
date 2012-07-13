@@ -168,13 +168,7 @@ module Bacon
     # * :navigation => true
     # * :tab => true
     def tests(controller_class, options = {})
-      @controller_class = controller_class
-      @options = {
-        # name of storyboard file in resources directory
-        :storyboard_name => 'MainStoryboard',
-        # id of controller as assigned in Xcode
-        :id => nil
-      }.merge(options)
+      @controller_class, @options = controller_class, options
       extend Bacon::Functional::API
       extend Bacon::Functional::ContextExt
     end
@@ -227,7 +221,7 @@ module Bacon
       end
 
       def storyboard
-        @storyboard ||= UIStoryboard.storyboardWithName(@options[:storyboard_name], bundle:nil)
+        @storyboard ||= UIStoryboard.storyboardWithName(@options[:storyboard] || 'MainStoryboard', bundle:nil)
       end
     end
 

@@ -1,3 +1,5 @@
 *.swp
 *.orig
 .DS_Store
+*.storyboardc
+build
