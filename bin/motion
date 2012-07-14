@@ -121,9 +121,17 @@ class UpdateCommand < Command
   end
 
   def self.run(args)
-    check_mode = args.delete('--check')
-    unless args.empty?
-      die "Usage: motion update"
+    check_mode = false
+    wanted_software_version = ''
+    args.each do |a|
+      case a
+        when '--check'
+          check_mode = true
+        when /--force-version=(.+)/
+          wanted_software_version = $1.to_s
+        else
+          die "Usage: motion update [--force-version=X]"
+      end
     end
 
     product_version = Motion::Version
@@ -145,7 +153,7 @@ class UpdateCommand < Command
     license_key = File.read(LicensePath).strip
 
     $stderr.puts "Connecting to the server..."
-    resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
+    resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"wanted_software_version=#{wanted_software_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
     unless resp.match(/^http:/)
       die resp
     end
