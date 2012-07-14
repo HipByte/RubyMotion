@@ -168,7 +168,7 @@ module Bacon
     # * :navigation => true
     # * :tab => true
     def tests(controller_class, options = {})
-      @controller_class = controller_class
+      @controller_class, @options = controller_class, options
       extend Bacon::Functional::API
       extend Bacon::Functional::ContextExt
     end
@@ -213,7 +213,15 @@ module Bacon
       attr_accessor :controller
 
       def controller
-        @controller ||= @controller_class.alloc.init
+        @controller ||= if @options[:id]
+          storyboard.instantiateViewControllerWithIdentifier(@options[:id])
+        else
+          @controller_class.alloc.init
+        end
+      end
+
+      def storyboard
+        @storyboard ||= UIStoryboard.storyboardWithName(@options[:storyboard] || 'MainStoryboard', bundle:nil)
       end
     end
 
