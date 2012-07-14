@@ -7,7 +7,7 @@ def die(*msg)
   exit 1
 end
 
-xcode = '/Applications/Xcode45-DP1.app'
+xcode = '/Applications/Xcode45-DP2.app'
 sdk_version = '6.0'
 die "Xcode 4.5 must be installed as '#{xcode}'" unless File.exist?(xcode)
 
