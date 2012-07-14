@@ -1,3 +1,17 @@
+= RubyMotion 1.18 =
+
+  * Fixed a problem introduced in 1.16 that was causing objects returned from
+    certain initializers to be autoreleased twice.
+  * Added the `motiondir' project variable that can be used to specify the path
+    of the RubyMotion distribution (defaults to /Library/RubyMotion/lib).
+    Patch by Marc Schwieterman.
+  * Added support to test Storyboards in the testing layer. Patch by Marc
+    Schwieterman.
+  * Added the `--force-version=X' argument to `motion update' which can be used
+    to downgrade to a specific version of RubyMotion. This can be useful to
+    reduce bugs. Ex: motion update --force-version=1.15
+  * Fixed the iOS 6.0 Rakefile to use Xcode 4.5 DP2 by default.
+
 = RubyMotion 1.17 =
 
   * Removed the Bundler support as it's apparently causing issues on certain
