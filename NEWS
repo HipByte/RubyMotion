@@ -1,3 +1,8 @@
+= RubyMotion 1.19 =
+
+  * Fixed a compiler bug (segfault) that could happen when compiling files
+    using C opaque types.
+
 = RubyMotion 1.18 =
 
   * Fixed a problem introduced in 1.16 that was causing objects returned from
