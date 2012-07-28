@@ -283,7 +283,7 @@ event_tap_cb(CGEventTapProxy proxy, CGEventType type, CGEventRef event,
 CONCURRENT_BEGIN
 	if (previousHighlight) {
 	    [delegate replEval:[NSString stringWithFormat:
-		@"<<MotionReplCaptureView %f,%f,%d", 0, 0, 0]];
+		@"<<MotionReplCaptureView %f,%f,%d", 0.0, 0.0, 0]];
 	    previousHighlight = false;
 	}
 	refresh_repl_prompt(nil, true);
@@ -316,7 +316,7 @@ CONCURRENT_BEGIN
     else {
 	if (previousHighlight) {
 	    res = [delegate replEval:[NSString stringWithFormat:
-		@"<<MotionReplCaptureView %f,%f,%d", 0, 0, 0]];
+		@"<<MotionReplCaptureView %f,%f,%d", 0.0, 0.0, 0]];
 	    previousHighlight = false;
 	}
     }
@@ -876,7 +876,7 @@ main(int argc, char **argv)
     assert(Session != nil);
 
     // Prepare app environment.
-    NSDictionary *appEnvironment = [[NSProcessInfo processInfo] environment];
+    NSMutableDictionary *appEnvironment = [[[NSProcessInfo processInfo] environment] mutableCopy];
     if (debug_mode == DEBUG_REPL) {
 	// Prepare repl socket path.
 	NSString *tmpdir = NSTemporaryDirectory();
@@ -888,8 +888,7 @@ main(int argc, char **argv)
 	replSocketPath = [[[NSFileManager defaultManager]
 	    stringWithFileSystemRepresentation:path length:strlen(path)]
 	    retain];
-	NSMutableDictionary *newEnv = [appEnvironment mutableCopy];
-	[newEnv setObject:replSocketPath forKey:@"REPL_SOCKET_PATH"];
+	[appEnvironment setObject:replSocketPath forKey:@"REPL_SOCKET_PATH"];
 
 	// Make sure the unix socket path does not exist.
 	[[NSFileManager defaultManager] removeItemAtPath:replSocketPath
@@ -905,10 +904,7 @@ main(int argc, char **argv)
 	replPath = [replPath stringByAppendingPathComponent:sdk_version];
 	replPath = [replPath stringByAppendingPathComponent:@"iPhoneSimulator"];
 	replPath = [replPath stringByAppendingPathComponent:@"libmacruby-repl.dylib"];
-	[newEnv setObject:replPath forKey:@"REPL_DYLIB_PATH"];
-
-	appEnvironment = newEnv;
-	[newEnv autorelease];
+	[appEnvironment setObject:replPath forKey:@"REPL_DYLIB_PATH"];
     }
 
     //[NSDictionary dictionaryWithObjectsAndKeys:@"/usr/lib/libgmalloc.dylib", @"DYLD_INSERT_LIBRARIES", nil]);
