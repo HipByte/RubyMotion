@@ -1,3 +1,27 @@
+= RubyMotion 1.20 =
+
+  * Fixed a bug in the runtime where apps compiled for iOS5 calling into APIs
+    using certain C typedefs would raise an exception in iOS6 because of an
+    ABI incompatibility (introduced by clang's new enumerator_attributes
+    extension).
+  * Fixed a bug in the runtime where an exception would occur when Objective-C
+    code would try to allocate a new instance of a class defined in Ruby using
+    the +new method (ex. RestKit). 
+  * Fixed a memory bug in Hash.[] when a Hash was passed (ex. Hash[a:'a']).
+  * Fixed a bug in certain Dispatch APIs when the main Dispatch::Queue object
+    was passed causing an ArgumentError exception.
+  * Fixed a bug in #public_send where an exception would not be raised if the
+    method is marked private.
+  * Fixed a bug when preparing blocks for libdispatch where dynamic variables
+    could be prematurely collected.
+  * Fixed a bug when certain methods implemented using message forwarding
+    would not be properly precompiled and would be raising an exception at
+    runtime (ex. UITextInputTraits enablesReturnKeyAutomatically).
+  * Removed a dyld warning that was printed on stderr when generating the
+    backtrace of an exception (dyld: DYLD_ environment variables being ignored
+    because...). Mountain Lion only.
+  * The iOS 6.0 version of the runtime has been recompiled for iOS 6.0 Beta 3.
+
 = RubyMotion 1.19 =
 
   * Fixed a compiler bug (segfault) that could happen when compiling files
