@@ -20,6 +20,10 @@
   * Removed a dyld warning that was printed on stderr when generating the
     backtrace of an exception (dyld: DYLD_ environment variables being ignored
     because...). Mountain Lion only.
+  * Fixed the runtime to be able to use Objective-C classes whose names start
+    with a lower-case character by capitalizing the name, similar to how C
+    constants and enumerations are mapped. (Ex. ICarrousel.new for the
+    iCarrousel class).
   * The iOS 6.0 version of the runtime has been recompiled for iOS 6.0 Beta 3.
 
 = RubyMotion 1.19 =
