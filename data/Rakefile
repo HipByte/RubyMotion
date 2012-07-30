@@ -29,10 +29,16 @@ task :vm_files do
 end
 
 def apply_bridgesupport_fixes(bs)
-  if File.basename(bs) == 'CoreMIDI.bridgesupport'
-    txt = File.read(bs).gsub(/cftype/, 'opaque')
-    File.open(bs, 'w') { |io| io.write(txt) }
+  rules = []
+  case File.basename(bs, '.bridgesupport')
+    when 'CoreMIDI', 'AudioToolBox'
+      rules << [/cftype/, 'opaque']
+    else
+      rules << [/opaque/, 'cftype']
   end
+  txt = File.read(bs)
+  rules.each { |a| txt.gsub!(a[0], a[1]) }
+  File.open(bs, 'w') { |io| io.write(txt) }
 end
 
 EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit']
