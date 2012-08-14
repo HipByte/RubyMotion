@@ -1,15 +1,15 @@
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -151,7 +151,7 @@ EOS
         sdk_path = File.join(platforms_dir, platform + '.platform',
             "Developer/SDKs/#{platform}#{sdk_version}.sdk")
         unless File.exist?(sdk_path)
-          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
+          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'"
         end
       end
 
@@ -226,7 +226,7 @@ EOS
 
     def files_dependencies(deps_hash)
       res_path = lambda do |x|
-        path = /^\./.match(x) ? x : File.join('.', x)
+        path = /^\.$/.match(x) ? x : File.join('.', x)
         unless @files.include?(path)
           App.fail "Can't resolve dependency `#{x}'"
         end
@@ -253,10 +253,10 @@ EOS
       if deps
         deps = deps.map { |x| file_dependencies(x) }
       else
-        deps = [] 
+        deps = []
       end
       deps << file
-      deps 
+      deps
     end
 
     def ordered_build_files
@@ -521,7 +521,7 @@ EOS
         'CFBundleDevelopmentRegion' => 'en',
         'CFBundleName' => @name,
         'CFBundleDisplayName' => @name,
-        'CFBundleExecutable' => @name, 
+        'CFBundleExecutable' => @name,
         'CFBundleIdentifier' => identifier,
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
@@ -571,7 +571,7 @@ EOS
           App.warn "Found #{certs.size} iPhone Developer certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
         end
         certs[0][1..-2] # trim trailing `"` characters
-      end 
+      end
     end
 
     def device_id
