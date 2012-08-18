@@ -1,3 +1,8 @@
+= RubyMotion 1.22 =
+
+  * This release adds support for iOS 4.3 and 5.0 back which wasn't present in
+    1.21 due to a bug in the build system. Sorry folks!
+
 = RubyMotion 1.21 =
 
   * Fixed a regression in the BridgeSupport generator in Mountain Lion where
