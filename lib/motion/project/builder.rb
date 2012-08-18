@@ -234,7 +234,7 @@ EOS
         App.info 'Create', lib
         cp File.join(datadir, platform, 'libmacruby-static.a'), lib
         objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        sh "/usr/bin/ar -cr \"#{lib}\" #{objs_list}"
+        sh "/usr/bin/ar -rcs \"#{lib}\" #{objs_list}"
         return lib
       end
 
