@@ -1,3 +1,18 @@
+= RubyMotion 1.21 =
+
+  * Fixed a regression in the BridgeSupport generator in Mountain Lion where
+    APIs dealing with CFTypeRef would accept or return Pointer objects instead
+    of genuine objects.
+  * Fixed a bug where C structures starting with a lower-case character could
+    potentially be registered more than once in the runtime, leading to weird
+    memory issues (ex. many cocos2d structures).
+  * Fixed a bug where certain bignums (ex. ALAssetsGroupAll) could not be
+    passed as `unsigned int' arguments.
+  * Fixed a bug in `rake static' where the static archives would not be created
+    with an object-file index, which is now mandatory in Mountain Lion.
+  * Fixed a bug in the runtime where Objective-C properties implemented using
+    message forwarding could not be called (ex. GKPlayer's alias or playerID).
+
 = RubyMotion 1.20 =
 
   * Fixed a bug in the runtime where apps compiled for iOS5 calling into APIs
