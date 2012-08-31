@@ -70,10 +70,12 @@ class SmallControlsViewController < UIViewController
 
   attr_reader :tapRecognizer
   attr_reader :tappedLocationInWindow
+  attr_reader :tappedLocationInTappableView
   def handleTap(recognizer)
     @tappableView.text = "Taps: #{recognizer.numberOfTapsRequired}"
     @tapRecognizer = recognizer
     @tappedLocationInWindow = recognizer.locationInView(nil)
+    @tappedLocationInTappableView = recognizer.locationInView(@tappableView)
   end
 end
 
@@ -91,6 +93,58 @@ describe "Bacon::Functional::API, concerning one-shot gestures" do
     highlight_touches!
     view = tap("Tappable view")
     controller.tappedLocationInWindow.should == view.superview.convertPoint(view.center, toView:nil)
+  end
+
+  it "taps at the :top_left of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :top_left)
+    controller.tappedLocationInTappableView.x.should < view.frame.size.width / 2
+    controller.tappedLocationInTappableView.y.should < view.frame.size.height / 2
+  end
+
+  it "taps at the :top of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :top)
+    controller.tappedLocationInTappableView.y.should < view.frame.size.height / 2
+  end
+
+  it "taps at the :top_right of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :top_right)
+    controller.tappedLocationInTappableView.x.should > view.frame.size.width / 2
+    controller.tappedLocationInTappableView.y.should < view.frame.size.height / 2
+  end
+
+  it "taps at the :right of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :right)
+    controller.tappedLocationInTappableView.x.should > view.frame.size.width / 2
+  end
+
+  it "taps at the :bottom_right of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :bottom_right)
+    controller.tappedLocationInTappableView.x.should > view.frame.size.width / 2
+    controller.tappedLocationInTappableView.y.should > view.frame.size.height / 2
+  end
+
+  it "taps at the :bottom of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :bottom)
+    controller.tappedLocationInTappableView.y.should > view.frame.size.height / 2
+  end
+
+  it "taps at the :bottom_left of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :bottom_left)
+    controller.tappedLocationInTappableView.x.should < view.frame.size.width / 2
+    controller.tappedLocationInTappableView.y.should > view.frame.size.height / 2
+  end
+
+  it "taps at the :left of a view" do
+    highlight_touches!
+    view = tap("Tappable view", :at => :left)
+    controller.tappedLocationInTappableView.x.should < view.frame.size.width / 2
   end
 
   #it "taps at a specific point in window coordinates" do
