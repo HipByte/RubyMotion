@@ -323,8 +323,6 @@ module Bacon
         touches  = options[:touches] || 1
         location = _coerce_location_to_point(view, options[:at], false) || view.superview.convertPoint(view.center, toView:nil)
 
-        location = view.superview.convertPoint(view.center, toView:window)
-
         _event_generator.sendTaps(taps,
                          location:location,
               withNumberOfTouches:touches,
