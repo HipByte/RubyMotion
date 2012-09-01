@@ -95,7 +95,7 @@ EOS
             objs = Dir.glob('**/*.o')
             FileUtils.rm_rf libname
             unless objs.empty?
-              sh "#{@config.locate_binary('ar')} cq #{libname} #{objs.join(' ')}"
+              sh "#{@config.locate_binary('ar')} -rcs #{libname} #{objs.join(' ')}"
             end
           end
           libpath = File.join(build_dir, libname)
