@@ -147,12 +147,13 @@ end
 desc "Deploy on the device"
 task :device => 'archive:development' do
   App.info 'Deploy', App.config.archive
-  unless App.config.provisioned_devices.include?(App.config.device_id)
-    App.fail "Connected device ID `#{App.config.device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
+  device_id = (ENV['id'] or App.config.device_id)
+  unless App.config.provisioned_devices.include?(device_id)
+    App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
   deploy = File.join(App.config.bindir, 'deploy')
   flags = Rake.application.options.trace ? '-d' : ''
-  sh "#{deploy} #{flags} \"#{App.config.device_id}\" \"#{App.config.archive}\""
+  sh "#{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
 end
 
 desc "Clear build objects"
