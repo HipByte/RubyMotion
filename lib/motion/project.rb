@@ -138,10 +138,26 @@ namespace :archive do
   end
 end
 
-desc "Run the test/spec suite"
-task :spec do
-  App.config.spec_mode = true
-  Rake::Task["simulator"].invoke
+desc "Run entire test/spec suite"
+task :spec => ['spec:all']
+
+namespace :spec do
+  task :all do
+    App.config.spec_mode = true
+    Rake::Task["simulator"].invoke
+  end
+
+  desc "Run unit test/spec suite"
+  task :units do
+    App.config.spec_mode = :units
+    Rake::Task["simulator"].invoke
+  end
+
+  desc "Run functional test/spec suite"
+  task :functionals do
+    App.config.spec_mode = :functionals
+    Rake::Task["simulator"].invoke
+  end
 end
 
 desc "Deploy on the device"

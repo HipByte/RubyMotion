@@ -49,10 +49,10 @@ module Motion; module Project
 
     variable :files, :xcode_dir, :sdk_version, :deployment_target, :frameworks,
       :weak_frameworks, :libs, :delegate_class, :name, :build_dir,
-      :resources_dir, :specs_dir, :identifier, :codesign_certificate,
-      :provisioning_profile, :device_family, :interface_orientations, :version,
-      :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
-      :entitlements, :fonts, :status_bar_style, :motiondir
+      :resources_dir, :specs_dir, :unit_specs_dir, :functional_specs_dir,
+      :identifier, :codesign_certificate, :provisioning_profile, :device_family,
+      :interface_orientations, :version, :short_version, :icons, :prerendered_icon,
+      :background_modes, :seed_id, :entitlements, :fonts, :status_bar_style, :motiondir
 
     attr_accessor :spec_mode
 
@@ -67,7 +67,7 @@ module Motion; module Project
       @name = 'Untitled'
       @resources_dir = File.join(project_dir, 'resources')
       @build_dir = File.join(project_dir, 'build')
-      @specs_dir = File.join(project_dir, 'spec')
+      self.specs_dir = File.join(project_dir, 'spec')
       @device_family = :iphone
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
@@ -322,6 +322,24 @@ EOS
       end
     end
 
+    def specs_dir=(_specs_dir)
+      @specs_dir = _specs_dir
+      @unit_specs_dir = File.join(@specs_dir, 'unit')
+      @functional_specs_dir = File.join(@specs_dir, 'functional')
+      @specs_dir
+    end
+
+    def current_specs_dir
+      case spec_mode
+      when :units
+        @unit_specs_dir
+      when :functionals
+        @functional_specs_dir
+      else
+        @specs_dir
+      end
+    end
+
     def spec_files
       @spec_files ||= begin
         # Core library + core helpers.
@@ -329,7 +347,7 @@ EOS
         # Project helpers.
         helpers = Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
         # Project specs.
-        specs = Dir.glob(File.join(specs_dir, '**', '*.rb')) - helpers
+        specs = Dir.glob(File.join(current_specs_dir, '**', '*.rb')) - helpers
         if files_filter = ENV['files']
           # Filter specs we want to run. A filter can be either the basename of a spec file or its path.
           files_filter = files_filter.split(',')
