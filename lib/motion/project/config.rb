@@ -425,7 +425,9 @@ EOS
     end
 
     def ldflags(platform)
-      common_flags(platform)
+      ldflags = common_flags(platform)
+      ldflags << " -fobjc-arc" if deployment_target < '5.0'
+      ldflags
     end
 
     def bundle_name
