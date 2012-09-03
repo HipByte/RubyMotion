@@ -1,3 +1,39 @@
+= RubyMotion 1.23 =
+
+  * Fixed a bug where conformsToProtocol: would not return true on objects
+    implemented in Ruby for protocols using required/optional sections (ex.
+    AQGridView).
+  * Fixed a bug in the compiler metadata file for the CMSampleBufferRef type
+    which would prevent methods accepting this type to be called.
+  * Fixed a bug in the runtime where certain classes (ex. Random) would create
+    instances released twice, triggering malloc errors later on. Thanks to
+    Hugues Lismonde for the detective work.
+  * Changed `rake device' to honor the `id' environment variable that can be
+    used to specify the ID of the device where the app should be installed.
+    This is useful when you have several iOS devices connected on your machine
+    and don't want `rake device' to deploy to the first one.
+  * Fixed a bug in String#strip where certain multibyte characters would be
+    considered as whitespace. Thanks to Watson for the patch.
+  * Fixed vendor_project (:static) to create static libraries with an object-
+    file index, which is mandatory as of Mountain Lion.
+  * Fixed the build system to support nested directories containing xib and
+    storyboard files. Patch by Mike Kelley.
+  * Fixed a bug in the `tap' method of the `spec/ui' library to properly handle
+    the `at' option. Patch by Clay Allsopp and Marc Schwieterman.
+  * Added the RuntimeError#nsexception method which, in case the exception
+    comes from an Objective-C method, contains the original NSException object.
+    This can be useful when you need to access specific NSException-level
+    information (such as the `userInfo' dictionary).
+  * Fixed a bug where the REPL methods (ex. `sessions') were added on the
+    Kernel module, making them available to all objects. This was causing
+    collisions (ex. when creating a CoreData `Session' entity).
+  * Fixed the build system to pass -fobjc-arc to the linker in case the app
+    is built for the 4.3 deployment target. This is necessary so that the ARC
+    runtime is properly linked into the app, when vendoring 3rd-party projects
+    that are ARC-only (ex. SVPullToRefresh). Patch by Satoshi Ebisawa.
+  * Fixed the build system to no longer re-build all .rb files in case the
+    project's Rakefile changed.
+
 = RubyMotion 1.22 =
 
   * This release adds support for iOS 4.3 and 5.0 back which wasn't present in
