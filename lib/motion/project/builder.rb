@@ -62,11 +62,10 @@ module Motion; module Project;
       # Build object files.
       objs_build_dir = File.join(build_dir, 'objs')
       FileUtils.mkdir_p(objs_build_dir)
-      project_file_changed = File.mtime(config.project_file) > File.mtime(objs_build_dir)
+      any_obj_file_built = false
       build_file = Proc.new do |path|
         obj ||= File.join(objs_build_dir, "#{path}.o")
-        should_rebuild = (project_file_changed \
-            or !File.exist?(obj) \
+        should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
  
@@ -110,6 +109,7 @@ module Motion; module Project;
           sh "/usr/bin/lipo -create #{arch_objs_list} -output \"#{obj}\""
         end
 
+        any_obj_file_built = true
         [obj, init_func]
       end
 
@@ -159,7 +159,7 @@ module Motion; module Project;
         builder_i = 0 if builder_i == builders_count
       end
 
-      FileUtils.touch(objs_build_dir) if project_file_changed
+      FileUtils.touch(objs_build_dir) if any_obj_file_built
 
       app_objs = objs
       spec_objs = []
