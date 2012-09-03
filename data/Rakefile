@@ -32,9 +32,9 @@ def apply_bridgesupport_fixes(bs)
   rules = []
   case File.basename(bs, '.bridgesupport')
     when 'CoreMIDI', 'AudioToolBox'
-      rules << [/cftype/, 'opaque']
+      rules << [/<cftype /, '<opaque ']
     else
-      rules << [/opaque/, 'cftype']
+      rules << [/<opaque /, '<cftype ']
   end
   txt = File.read(bs)
   rules.each { |a| txt.gsub!(a[0], a[1]) }
