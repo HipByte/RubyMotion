@@ -452,6 +452,7 @@ EOS
 
     def identifier
       @identifier ||= "com.yourcompany.#{@name.gsub(/\s/, '')}"
+      spec_mode ? @identifier + '_spec' : @identifier
     end
 
     def device_family_int(family)
