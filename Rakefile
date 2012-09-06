@@ -143,10 +143,13 @@ desc "Push on Amazon S3"
 task :upload do
   require 'rubygems'
   require 'aws/s3'
+  require 'yaml'
+
+  s3config = YAML.load(File.read('s3config.yaml'))
 
   AWS::S3::Base.establish_connection!(
-    :access_key_id => 'AKIAI37ZXXJWNQQ5M45Q',
-    :secret_access_key => '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'
+    :access_key_id => s3config[:access_key_id],
+    :secret_access_key => s3config[:secret_access_key]
   )
 
   WEBSITE_BUCKET_NAME = 'data.hipbyte.com'
