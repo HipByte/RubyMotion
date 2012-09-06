@@ -9,6 +9,7 @@ bin/sim
 data/4.3
 data/5.0
 data/5.1
+data/6.0
 
 doc/.yardoc
 doc/*.html
