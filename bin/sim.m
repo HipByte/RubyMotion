@@ -938,16 +938,21 @@ main(int argc, char **argv)
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setLocalizedClientName:), @"NYANCAT");
 
-    char path[MAXPATHLEN];
-    fcntl(STDOUT_FILENO, F_GETPATH, &path);
-    ((void (*)(id, SEL, id))objc_msgSend)(config,
-	@selector(setSimulatedApplicationStdOutPath:),
-	[NSString stringWithUTF8String:path]);
+    char path[MAXPATHLEN] = {'\0'};
+    if (fcntl(STDOUT_FILENO, F_GETPATH, &path) == -1
+	    && fcntl(STDERR_FILENO, F_GETPATH, &path) == -1) {
+	fprintf(stderr,
+		"*** stdout/stderr unavailable, process output is disabled\n");
+    }
+    else {
+	((void (*)(id, SEL, id))objc_msgSend)(config,
+	    @selector(setSimulatedApplicationStdOutPath:),
+	    [NSString stringWithUTF8String:path]);
 
-    fcntl(STDERR_FILENO, F_GETPATH, &path);
-    ((void (*)(id, SEL, id))objc_msgSend)(config,
-	@selector(setSimulatedApplicationStdErrPath:),
-	[NSString stringWithUTF8String:path]);
+	((void (*)(id, SEL, id))objc_msgSend)(config,
+	    @selector(setSimulatedApplicationStdErrPath:),
+	    [NSString stringWithUTF8String:path]);
+    }
 
     // Create session.
     id session = [[Session alloc] init];
