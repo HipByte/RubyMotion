@@ -3,6 +3,19 @@
   * Fixed `rake spec' to produce an .app bundle that uses a different bundle
     identifier than the regular app. This is necessary since Xcode 4.5 DP4
     to avoid simulator installation issues.
+  * Fixed a bug where String#% does not accept a format argument which has
+    multiple named arguments.
+  * Fixed a bug where String#% accepts a format argument which specifies width
+    after precision. If passed its format argument, String#% will raise a
+    exception as invalid argument.
+  * Fixed a bug where String#% cannot omitting width at part of precision in
+    format argument.
+  * Improved String#[]= performance. String#[]= will be 50x times faster.
+  * Improved String#length performance with multibyte characters. If String
+    includes multibyte characters, its length will be cached and reused.
+    String#length with multibyte characters will be 500x times faster.
+  * Improved String#reverse performance with ascii compatible string.
+    String#reverse with ascii compatible string will be 30x times faster.
 
 = RubyMotion 1.23 =
 
