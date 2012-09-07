@@ -3,6 +3,9 @@
   * Fixed `rake spec' to produce an .app bundle that uses a different bundle
     identifier than the regular app. This is necessary since Xcode 4.5 DP4
     to avoid simulator installation issues.
+  * Fixed a bug in the simulator launcher when output to stdout would not be
+    displayed in case the rake process was piped to another process
+    (ex. `rake spec | ...').
   * Fixed a bug where String#% does not accept a format argument which has
     multiple named arguments.
   * Fixed a bug where String#% accepts a format argument which specifies width
