@@ -16,6 +16,7 @@
     String#length with multibyte characters will be 500x times faster.
   * Improved String#reverse performance with ascii compatible string.
     String#reverse with ascii compatible string will be 30x times faster.
+  * Fixed a memory leaks in String#{reverse, reverse!}
 
 = RubyMotion 1.23 =
 
