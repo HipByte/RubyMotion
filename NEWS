@@ -20,6 +20,17 @@
   * Improved String#reverse performance with ascii compatible string.
     String#reverse with ascii compatible string will be 30x times faster.
   * Fixed a memory leaks in String#{reverse, reverse!}
+  * Fixed a crash bug if call the method as receiver which is uninitialized
+    Regexp object (ex. Regexp.allocate.to_s)
+  * Fixed a crash bug in NSArray#flatten(level) if passed 0 as level.
+  * Fixed a bug in NSArray#rindex which raise an uncatchable Objective-C
+    exception.
+  * Fixed a bug in NSArray#values_at. If passed a Fixnum value and specified
+    the value out of range, NSArray#values_at raise an uncatchable Objective-C
+    exception.
+  * Fixed a bug in NSDictionary#values_at. If passed the key which does not
+    contain in receiver, NSDictionary#values_at raise an uncatchable
+    Objective-C exception.
 
 = RubyMotion 1.23 =
 
