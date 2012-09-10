@@ -6,6 +6,8 @@
   * Fixed a bug in the simulator launcher when output to stdout would not be
     displayed in case the rake process was piped to another process
     (ex. `rake spec | ...').
+  * Added the Dispatch.once method, which wraps the dispatch_once() function,
+    that can be useful to implement singletons. Usage: Dispatch.once { ... }.
   * Fixed a bug where String#% does not accept a format argument which has
     multiple named arguments.
   * Fixed a bug where String#% accepts a format argument which specifies width
