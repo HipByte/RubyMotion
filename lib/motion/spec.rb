@@ -511,7 +511,8 @@ end
 class Should
   # Kills ==, ===, =~, eql?, equal?, frozen?, instance_of?, is_a?,
   # kind_of?, nil?, respond_to?, tainted?
-  instance_methods.each { |name| undef_method name  if name =~ /\?|^\W+$/ }
+  # Special exception for _? to support the 'coalesce' gem
+  instance_methods.each { |name| undef_method name  if name =~ /(?<!^_)\?|^\W+$/ }
 
   def initialize(object)
     @object = object
