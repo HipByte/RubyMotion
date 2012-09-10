@@ -19,6 +19,8 @@
     String#length with multibyte characters will be 500x times faster.
   * Improved String#reverse performance with ascii compatible string.
     String#reverse with ascii compatible string will be 30x times faster.
+  * Improved Fixnum/Float modulo performances. The modulo between the
+    Fixnum/Float (ex. (42 % 42) or (42.0 % 42.0)) will be 2x times faster.
   * Fixed a memory leaks in String#{reverse, reverse!}
   * Fixed a crash bug if call the method as receiver which is uninitialized
     Regexp object (ex. Regexp.allocate.to_s)
@@ -31,6 +33,10 @@
   * Fixed a bug in NSDictionary#values_at. If passed the key which does not
     contain in receiver, NSDictionary#values_at raise an uncatchable
     Objective-C exception.
+  * Fixed a bug in Kernel.#sprintf which will raise an uncatchable Objective-C
+    exception if passed object which has #to_str method as format argument.
+  * FIxed a bug in Dispatch::Source.timer which can't defer the timer if passed
+    Dispatch::TIME_FOREVER as interval.
 
 = RubyMotion 1.23 =
 
