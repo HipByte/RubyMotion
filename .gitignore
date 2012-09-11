@@ -23,3 +23,6 @@ rubymotion-head.tgz
 
 sample/*/build
 sample/*/.repl_history
+
+test/vendor/code/build-iPhoneSimulator/
+test/vendor/code/code.bridgesupport
