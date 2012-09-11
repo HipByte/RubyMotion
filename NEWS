@@ -29,15 +29,15 @@
   * Fixed a crash bug in NSArray#flatten(level) if passed 0 as level.
   * Fixed a bug in NSArray#rindex which raise an uncatchable Objective-C
     exception.
-  * Fixed a bug in NSArray#values_at. If passed a Fixnum value and specified
-    the value out of range, NSArray#values_at raise an uncatchable Objective-C
-    exception.
-  * Fixed a bug in NSDictionary#values_at. If passed the key which does not
-    contain in receiver, NSDictionary#values_at raise an uncatchable
+  * Fixed a bug in NSArray#values_at which if passed a Fixnum value and
+    specified the value out of range, NSArray#values_at raise an uncatchable
     Objective-C exception.
+  * Fixed a bug in NSDictionary#values_at which if passed the key which does not
+    contain in receiver, NSDictionary#values_at raise an uncatchable Objective-C
+    exception.
   * Fixed a bug in Kernel.#sprintf which will raise an uncatchable Objective-C
     exception if passed object which has #to_str method as format argument.
-  * FIxed a bug in Dispatch::Source.timer which can't defer the timer if passed
+  * Fixed a bug in Dispatch::Source.timer which can't defer the timer if passed
     Dispatch::TIME_FOREVER as interval.
   * Fixed a bug in NSArray#delete_if which returns a nil if NSArray object does
     not change.
