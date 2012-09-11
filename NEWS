@@ -39,6 +39,14 @@
     exception if passed object which has #to_str method as format argument.
   * FIxed a bug in Dispatch::Source.timer which can't defer the timer if passed
     Dispatch::TIME_FOREVER as interval.
+  * Fixed a bug in NSArray#delete_if which returns a nil if NSArray object does
+    not change.
+  * Added the NSArray#rotate and NSMutableArray#rotate! methods.
+  * Added the NSMutableArray#sort_by! methods.
+  * Added the NSMutableArray#select! methods.
+  * Added the NSMutableArray#keep_if methods.
+  * Added the NSMutableDictionary#select! methods.
+  * Added the NSMutableDictionary#keep_if methods.
 
 = RubyMotion 1.23 =
 
