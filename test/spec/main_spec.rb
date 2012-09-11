@@ -213,3 +213,20 @@ describe "Properties implemented using forwarders" do
     player.alias.should == 'lol'
   end
 end
+
+class TestDefineMethod
+  define_method :test1 { 42 }
+  define_method :test2 { |x| x + 100 }
+  define_method :test3 { |x, y| x + y }
+  define_method :test4 { |*ary| ary.inject(0) { |m, x| m + x } }     
+end
+
+describe "define_method" do
+  it "can be used to define pure-Ruby methods" do
+    obj = TestDefineMethod.new
+    obj.test1.should == 42
+    obj.test2(42).should == 142
+    obj.test3(40, 2).should == 42
+    obj.test4(10, 10, 10, 10, 1, 1).should == 42
+  end
+end
