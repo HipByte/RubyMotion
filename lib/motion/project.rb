@@ -98,7 +98,7 @@ task :simulator => ['build:simulator'] do
   debug = (ENV['debug'] || (App.config.spec_mode ? '0' : '2')).to_i
   debug = 2 if debug < 0 or debug > 2
   App.info 'Simulate', app
-  at_exit { system("stty echo") } # Just in case the simulator launcher crashes and leaves the terminal without echo.
+  at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
   sh "#{env} #{sim} #{debug} #{family_int} #{target} \"#{xcode}\" \"#{app}\""
 end
 
