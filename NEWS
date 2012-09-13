@@ -10,6 +10,8 @@
     that can be useful to implement singletons. Usage: Dispatch.once { ... }.
   * Added support for `define_method'. Note that it cannot be used to overwrite
     existing Objective-C methods, because of the static compiler.
+  * Fixed a bug where Bignum objects could not be properly converted into
+    NSNumber objects because they weren't converted into 'long long' types.
   * Fixed a bug where String#% does not accept a format argument which has
     multiple named arguments.
   * Fixed a bug where String#% accepts a format argument which specifies width
