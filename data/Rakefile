@@ -121,7 +121,16 @@ task :bridgesupport_static_stubs do
         File.open(code, 'w') { |io| io.write(text) }
       end
 
-      [%w{iPhoneOS armv6 armv7}, %w{iPhoneSimulator i386}].each do |platform, *archs|
+      device_archs =
+        if sdk_version < '5.0'
+          ['armv6', 'armv7']
+        elsif sdk_version >= '6.0'
+          ['armv7', 'armv7s']
+        else
+          ['armv7']
+        end
+
+      [['iPhoneOS', *device_archs], %w{iPhoneSimulator i386}].each do |platform, *archs|
         obj = "#{sdk_version}/#{platform}/#{framework}_stubs.o"
         next if File.exist?(obj)
         platform_dev = "#{PLATFORMS_DIR}/#{platform}.platform/Developer"
