@@ -464,14 +464,23 @@ EOS
       end
     end
 
-    def device_family_string(family, retina)
+    def device_family_string(family, target, retina)
       device = case family
         when :iphone, 1
           "iPhone"
         when :ipad, 2
           "iPad"
       end
-      retina ? device + " (Retina)" : device
+      case retina
+        when 'true'
+          device + (family == 1 and target >= '6.0' ? ' (Retina 4-inch)' : ' (Retina)')
+        when '3.5'
+          device + ' (Retina 3.5-inch)'
+        when '4'
+          device + ' (Retina 4-inch)'
+        else
+          device
+      end
     end
 
     def device_family_ints
