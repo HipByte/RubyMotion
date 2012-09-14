@@ -2,6 +2,9 @@
 
   * Added support for the iOS 6 SDK.
   * Added support for the iPhone5 architecture (armv7s).
+  * Added new values for the `retina' option of `rake simulator': `3.5' (for
+    iPhone4) and `4' (for iPhone5). A `true' value will default to `3.5' in
+    case the simulator target is lesser than 6.0, otherwise, `4' wil be used.
   * Fixed `rake spec' to produce an .app bundle that uses a different bundle
     identifier than the regular app. This is necessary since Xcode 4.5 DP4
     to avoid simulator installation issues.
