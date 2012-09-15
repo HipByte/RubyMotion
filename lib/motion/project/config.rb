@@ -640,6 +640,9 @@ EOS
       dict = entitlements
       if release?
         dict['application-identifier'] ||= seed_id + '.' + identifier
+      else
+        # Required for gdb.
+        dict['get-task-allow'] ||= true
       end
       Motion::PropertyList.to_s(dict)
     end
