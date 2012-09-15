@@ -817,8 +817,8 @@ again:
 	// Run the gdb process.
 	NSString *gdb_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin"];
 	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
-	    arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"--pid",
-	    [pidNumber description], @"-x", cmds_path, nil]] retain];
+	    arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"-q",
+	    @"--pid", [pidNumber description], @"-x", cmds_path, nil]] retain];
 	[gdb_task waitUntilExit];
 	gdb_task = nil;
 
