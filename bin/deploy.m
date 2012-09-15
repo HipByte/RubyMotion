@@ -463,7 +463,6 @@ start_debugger(am_device_t dev)
 	"set inferior-auto-start-dyld 0\n"\
 	"set remote executable-directory %@\n"\
 	"set remote noack-mode 1\n"\
-	"set sharedlibrary check-uuids off\n"\
 	"set sharedlibrary load-rules \\\".*\\\" \\\".*\\\" container\n"\
 	"set minimal-signal-handling 1\n"\
 	"set mi-show-protections off\n"\
@@ -473,11 +472,12 @@ start_debugger(am_device_t dev)
 	"run\n"\
 	"set minimal-signal-handling 0\n"\
 	"set inferior-auto-start-dyld 1\n"\
+	"break rb_exc_raise\n"\
 	"continue\n",
 	device_support_path, device_support_path, device_support_path,
 	[[app_remote_path stringByDeletingLastPathComponent]
 	    stringByReplacingOccurrencesOfString:@"/private/var"
-	    withString:@"/var"], @"build/iPhoneOS-6.0-Development",
+	    withString:@"/var"], [app_path stringByDeletingLastPathComponent],
 	app_remote_path, gdb_unix_socket_path, app_path, dsym_path];
     assert([cmds writeToFile:cmds_path atomically:YES
 	    encoding:NSASCIIStringEncoding error:nil]);
@@ -504,7 +504,9 @@ static void
 device_go(am_device_t dev)
 {
     install_application(dev);
-    start_debugger(dev);
+    if (getenv("debug") != NULL) {
+	start_debugger(dev);
+    }
 }
 
 static void
