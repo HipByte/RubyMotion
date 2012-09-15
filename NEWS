@@ -2,6 +2,7 @@
 
   * Added support for the iOS 6 SDK.
   * Added support for the iPhone5 architecture (armv7s).
+  * Added debugging support (gdb), for both simulator and device.
   * Added new values for the `retina' option of `rake simulator': `3.5' (for
     iPhone4) and `4' (for iPhone5). A `true' value will default to `3.5' in
     case the simulator target is lesser than 6.0, otherwise, `4' wil be used.
@@ -17,6 +18,8 @@
     existing Objective-C methods, because of the static compiler.
   * Fixed a bug where Bignum objects could not be properly converted into
     NSNumber objects because they weren't converted into 'long long' types.
+  * Fixed the build system to set the `get-task-allow' entitlement to true by
+    default in development mode (needed to attach the debugger).
   * Fixed a bug where String#% does not accept a format argument which has
     multiple named arguments.
   * Fixed a bug where String#% accepts a format argument which specifies width
