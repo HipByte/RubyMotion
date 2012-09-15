@@ -467,11 +467,14 @@ start_debugger(am_device_t dev)
 	"set minimal-signal-handling 1\n"\
 	"set mi-show-protections off\n"\
 	"target remote-mobile %s\n"\
-	"file %@\n"\
+	"file \"%@\"\n"\
 	"add-dsym %@\n"\
 	"run\n"\
 	"set minimal-signal-handling 0\n"\
 	"set inferior-auto-start-dyld 1\n"\
+	"set inferior-auto-start-cfm off\n"\
+	"set sharedLibrary load-rules dyld \".*libobjc.*\" all dyld \".*CoreFoundation.*\" all dyld \".*Foundation.*\" all dyld \".*libSystem.*\" all dyld \".*AppKit.*\" all dyld \".*PBGDBIntrospectionSupport.*\" all dyld \".*/usr/lib/dyld.*\" all dyld \".*CarbonDataFormatters.*\" all dyld \".*libauto.*\" all dyld \".*CFDataFormatters.*\" all dyld \"/System/Library/Frameworks\\\\\\\\|/System/Library/PrivateFrameworks\\\\\\\\|/usr/lib\" extern dyld \".*\" all exec \".*\" all\n"\
+	"sharedlibrary apply-load-rules all\n"\
 	"break rb_exc_raise\n"\
 	"continue\n",
 	device_support_path, device_support_path, device_support_path,
