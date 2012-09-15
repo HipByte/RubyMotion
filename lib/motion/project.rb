@@ -151,9 +151,10 @@ task :device => 'archive:development' do
   unless App.config.provisioned_devices.include?(device_id)
     App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
+  env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
   deploy = File.join(App.config.bindir, 'deploy')
   flags = Rake.application.options.trace ? '-d' : ''
-  sh "#{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
+  sh "#{env} #{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
 end
 
 desc "Clear build objects"

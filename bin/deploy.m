@@ -34,6 +34,17 @@ SET_FUNC(AMDeviceNotificationSubscribe);
 typedef CFStringRef (*fptr_AMDeviceGetName)(am_device_t);
 SET_FUNC(AMDeviceGetName);
 
+typedef int (*fptr_AMDeviceLookupApplications)(am_device_t, int, void **);
+SET_FUNC(AMDeviceLookupApplications);
+
+typedef CFStringRef (*fptr_AMDeviceCopyValue)(am_device_t, unsigned int,
+	CFStringRef);
+SET_FUNC(AMDeviceCopyValue);
+
+typedef int (*fptr_AMDeviceMountImage)(am_device_t, CFStringRef,
+	CFDictionaryRef, void *, int);
+SET_FUNC(AMDeviceMountImage);
+
 typedef int (*fptr_AMDeviceConnect)(am_device_t);
 SET_FUNC(AMDeviceConnect);
 
@@ -70,6 +81,9 @@ init_private_funcs(void)
     void *handler = dlopen("/System/Library/PrivateFrameworks/MobileDevice.framework/MobileDevice", 0);
     LOOKUP_FUNC(handler, AMDeviceNotificationSubscribe);
     LOOKUP_FUNC(handler, AMDeviceGetName);
+    LOOKUP_FUNC(handler, AMDeviceLookupApplications);
+    LOOKUP_FUNC(handler, AMDeviceCopyValue);
+    LOOKUP_FUNC(handler, AMDeviceMountImage);
     LOOKUP_FUNC(handler, AMDeviceConnect);
     LOOKUP_FUNC(handler, AMDeviceValidatePairing);
     LOOKUP_FUNC(handler, AMDeviceStartSession);
@@ -166,7 +180,7 @@ static NSString *app_package_path = nil;
 static NSData *app_package_data = nil;
 
 static void
-device_go(am_device_t dev)
+install_application(am_device_t dev)
 {
     PERFORM("connecting to device", _AMDeviceConnect(dev));
     PERFORM("pairing device", _AMDeviceValidatePairing(dev));
@@ -238,6 +252,259 @@ device_go(am_device_t dev)
 
     LOG("package has been successfully installed on device");
     [handle release];
+}
+
+static void
+mount_cb(id dict, int arg)
+{
+    if (dict != nil && [dict isKindOfClass:[NSDictionary class]]) {
+	id status = [dict objectForKey:@"Status"];
+	if (status != nil && [status isKindOfClass:[NSString class]]) {
+	    LOG("mounting status: %s", [status UTF8String]);
+	}
+    }
+}
+
+static int gdb_fd = 0;
+
+#include <sys/socket.h>
+#include <sys/un.h>
+
+static void
+fdvendor_callback(CFSocketRef s, CFSocketCallBackType callbackType,
+	CFDataRef address, const void *data, void *info)
+{
+    CFSocketNativeHandle socket = (CFSocketNativeHandle)
+	(*((CFSocketNativeHandle *)data));
+
+    struct msghdr message;
+    struct iovec iov[1];
+    struct cmsghdr *control_message = NULL;
+    char ctrl_buf[CMSG_SPACE(sizeof(int))];
+    char dummy_data[1];
+
+    memset(&message, 0, sizeof(struct msghdr));
+    memset(ctrl_buf, 0, CMSG_SPACE(sizeof(int)));
+
+    dummy_data[0] = ' ';
+    iov[0].iov_base = dummy_data;
+    iov[0].iov_len = sizeof(dummy_data);
+
+    message.msg_name = NULL;
+    message.msg_namelen = 0;
+    message.msg_iov = iov;
+    message.msg_iovlen = 1;
+    message.msg_controllen = CMSG_SPACE(sizeof(int));
+    message.msg_control = ctrl_buf;
+
+    control_message = CMSG_FIRSTHDR(&message);
+    control_message->cmsg_level = SOL_SOCKET;
+    control_message->cmsg_type = SCM_RIGHTS;
+    control_message->cmsg_len = CMSG_LEN(sizeof(int));
+
+    *((int *) CMSG_DATA(control_message)) = gdb_fd;
+
+    sendmsg(socket, &message, 0);
+    CFSocketInvalidate(s);
+    CFRelease(s);
+}
+
+static NSTask *gdb_task = nil;
+
+static void
+sigforwarder(int sig)
+{
+    if (gdb_task != nil) {
+	kill([gdb_task processIdentifier], sig);
+    }
+}
+
+static void
+start_debugger(am_device_t dev)
+{
+    // We need .app and .dSYM bundles nearby.
+
+    NSString *app_path = [[app_package_path stringByDeletingPathExtension]
+	stringByAppendingString:@".app"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:app_path]) {
+	fprintf(stderr, "%s does not exist\n",
+		[app_path fileSystemRepresentation]);
+	return;
+    }
+	
+    NSString *dsym_path = [[app_package_path stringByDeletingPathExtension]
+	stringByAppendingString:@".dSYM"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:dsym_path]) {
+	fprintf(stderr, "%s does not exist\n",
+		[dsym_path fileSystemRepresentation]);
+	return;
+    }
+
+    // Locate DeveloperDiskImage.dmg on the filesystem.
+
+    char *xcode_dir = getenv("XCODE_DIR");
+    assert(xcode_dir != NULL);
+    NSString *device_supports_path = [[NSString stringWithUTF8String:xcode_dir]
+	stringByAppendingPathComponent:
+	@"Platforms/iPhoneOS.platform/DeviceSupport"];
+
+    NSString *product_version = (NSString *)_AMDeviceCopyValue(dev, 0,
+	    CFSTR("ProductVersion"));
+    assert(product_version != nil);
+
+    NSString *device_support_path = nil;
+    for (NSString *path in [[NSFileManager defaultManager]
+	    contentsOfDirectoryAtPath:device_supports_path error:nil]) {
+	if ([path hasPrefix:product_version]) {
+	    device_support_path =
+		[device_supports_path stringByAppendingPathComponent:path];
+	    break;
+	}
+    }
+
+    if (device_support_path == nil) {
+	fprintf(stderr,
+		"cannot find developer disk image in `%s' for version `%s'\n",
+		[device_support_path fileSystemRepresentation],
+		[product_version UTF8String]);
+	return;
+    }
+
+    NSString *image_path = [device_support_path stringByAppendingPathComponent:
+	@"DeveloperDiskImage.dmg"];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:image_path]) {
+	fprintf(stderr, "%s does not exist\n",
+		[image_path fileSystemRepresentation]);
+	return;
+    }
+
+    // Mount the .dmg remotely on the device.
+
+    NSString *image_sig_path = [image_path stringByAppendingString:
+	@".signature"]; 
+    if (![[NSFileManager defaultManager] fileExistsAtPath:image_sig_path]) {
+	fprintf(stderr, "%s does not exist\n",
+		[image_sig_path fileSystemRepresentation]);
+	return;
+    }
+
+    NSData *image_sig_data = [NSData dataWithContentsOfFile:image_sig_path];
+
+    NSDictionary *options = [NSDictionary dictionaryWithObjectsAndKeys:
+	image_sig_data, @"ImageSignature",
+	@"Developer", @"ImageType",
+	nil];
+
+    LOG("mounting developer disk image: %s",
+	    [image_path fileSystemRepresentation]);
+
+    /*int result =*/ _AMDeviceMountImage(dev, (CFStringRef)image_path,
+	    (CFDictionaryRef)options, mount_cb, 0);
+
+    // Start debug server and connect it to a UNIX socket file.
+
+    NSString *tmpdir = NSTemporaryDirectory();
+    assert(tmpdir != nil);
+    char gdb_unix_socket_path[PATH_MAX];
+    snprintf(gdb_unix_socket_path, sizeof gdb_unix_socket_path,
+	    "%s/rubymotion-remote-gdb-XXXXXX",
+	    [tmpdir fileSystemRepresentation]);
+    assert(mktemp(gdb_unix_socket_path) != NULL);
+
+    gdb_fd = 0;
+    PERFORM("starting installer proxy service", _AMDeviceStartService(dev,
+		CFSTR("com.apple.debugserver"), &gdb_fd, NULL));
+    assert(gdb_fd > 0);
+
+    CFSocketRef fdvendor = CFSocketCreate(NULL, AF_UNIX, 0, 0,
+	    kCFSocketAcceptCallBack, &fdvendor_callback, NULL);
+
+    int yes = 1;
+    setsockopt(CFSocketGetNative(fdvendor), SOL_SOCKET, SO_REUSEADDR, &yes,
+	    sizeof(yes));
+
+    struct sockaddr_un address;
+    memset(&address, 0, sizeof(address));
+    address.sun_family = AF_UNIX;
+    strcpy(address.sun_path, gdb_unix_socket_path);
+    address.sun_len = SUN_LEN(&address);
+    CFDataRef address_data = CFDataCreate(NULL, (const UInt8 *)&address,
+	    sizeof(address));
+
+    unlink(gdb_unix_socket_path);
+
+    CFSocketSetAddress(fdvendor, address_data);
+    CFRelease(address_data);
+    CFRunLoopAddSource(CFRunLoopGetMain(),
+	    CFSocketCreateRunLoopSource(NULL, fdvendor, 0),
+	    kCFRunLoopCommonModes);
+
+    // Prepare gdb commands file.
+
+    NSDictionary *info_plist = [NSDictionary dictionaryWithContentsOfFile:
+	[app_path stringByAppendingPathComponent:@"Info.plist"]];
+    assert(info_plist != nil);
+    NSString *app_identifier = [info_plist objectForKey:@"CFBundleIdentifier"];
+    assert(app_identifier);
+
+    NSDictionary *apps = nil;
+    const int res = _AMDeviceLookupApplications(dev, 0, (void **)&apps);
+    assert(res == 0);
+    NSDictionary *app = [apps objectForKey:app_identifier];
+    assert(app != nil);
+    NSString *app_remote_path = [app objectForKey:@"Path"];
+
+    NSString *cmds_path = [NSString pathWithComponents:
+	[NSArray arrayWithObjects:NSTemporaryDirectory(), @"_deploygdbcmds",
+	nil]];
+    NSString *cmds = [NSString stringWithFormat:@""\
+        "set shlib-path-substitutions /usr \"%@/Symbols/usr\" /System \"%@/Symbols/System\" /Developer \"%@/Symbols/Developer\" \"%@\" \"%@\"\n"\
+	"set remote max-packet-size 1024\n"\
+	"set inferior-auto-start-dyld 0\n"\
+	"set remote executable-directory %@\n"\
+	"set remote noack-mode 1\n"\
+	"set sharedlibrary check-uuids off\n"\
+	"set sharedlibrary load-rules \\\".*\\\" \\\".*\\\" container\n"\
+	"set minimal-signal-handling 1\n"\
+	"set mi-show-protections off\n"\
+	"target remote-mobile %s\n"\
+	"file %@\n"\
+	"add-dsym %@\n"\
+	"run\n"\
+	"set minimal-signal-handling 0\n"\
+	"set inferior-auto-start-dyld 1\n"\
+	"continue\n",
+	device_support_path, device_support_path, device_support_path,
+	[[app_remote_path stringByDeletingLastPathComponent]
+	    stringByReplacingOccurrencesOfString:@"/private/var"
+	    withString:@"/var"], @"build/iPhoneOS-6.0-Development",
+	app_remote_path, gdb_unix_socket_path, app_path, dsym_path];
+    assert([cmds writeToFile:cmds_path atomically:YES
+	    encoding:NSASCIIStringEncoding error:nil]);
+
+    // Start gdb.
+
+    NSString *gdb_path = [[NSString stringWithUTF8String:xcode_dir]
+	stringByAppendingPathComponent:
+	@"Platforms/iPhoneOS.platform/Developer/usr/libexec/gdb/gdb-arm-apple-darwin"];
+
+    float product_version_f = [product_version floatValue];
+    NSString *remote_arch = product_version_f < 5.0 ? @"armv6" : @"armv7";
+
+    // Forward ^C to gdb.
+    signal(SIGINT, sigforwarder);
+
+    gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
+	arguments:[NSArray arrayWithObjects:@"--arch", remote_arch, @"-q",
+	@"-x", cmds_path, nil]] retain];
+    [gdb_task waitUntilExit];
+}
+
+static void
+device_go(am_device_t dev)
+{
+    install_application(dev);
+    start_debugger(dev);
 }
 
 static void
