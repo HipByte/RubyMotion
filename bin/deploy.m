@@ -355,7 +355,10 @@ start_debugger(am_device_t dev)
     NSString *device_support_path = nil;
     for (NSString *path in [[NSFileManager defaultManager]
 	    contentsOfDirectoryAtPath:device_supports_path error:nil]) {
-	if ([path hasPrefix:product_version]) {
+	NSRange r = [path rangeOfString:@" "];
+	NSString *path_version = r.location == NSNotFound
+	    ? path : [path substringToIndex:r.location];
+	if ([product_version hasPrefix:path_version]) {
 	    device_support_path =
 		[device_supports_path stringByAppendingPathComponent:path];
 	    break;
@@ -365,7 +368,7 @@ start_debugger(am_device_t dev)
     if (device_support_path == nil) {
 	fprintf(stderr,
 		"cannot find developer disk image in `%s' for version `%s'\n",
-		[device_support_path fileSystemRepresentation],
+		[device_supports_path fileSystemRepresentation],
 		[product_version UTF8String]);
 	return;
     }
