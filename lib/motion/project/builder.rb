@@ -64,7 +64,9 @@ module Motion; module Project;
       FileUtils.mkdir_p(objs_build_dir)
       any_obj_file_built = false
       build_file = Proc.new do |path|
-        obj ||= File.join(objs_build_dir, "#{path}.o")
+        rpath = path
+        path = File.expand_path(path)
+        obj = File.join(objs_build_dir, "#{path}.o")
         should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
@@ -73,7 +75,7 @@ module Motion; module Project;
         init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
 
         if should_rebuild
-          App.info 'Compile', path
+          App.info 'Compile', rpath
           FileUtils.mkdir_p(File.dirname(obj))
           arch_objs = []
           archs.each do |arch|
