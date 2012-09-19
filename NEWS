@@ -11,6 +11,7 @@
     The Ruby code compiles with relevant DWARF metadata and the debugger
     used is gdb. Note that the debugger experience is a work in progress and
     will be significantly improved in future releases.
+    Check out http://www.rubymotion.com/developer-center/articles/debugging
   * Fixed the `development' mode to not compile with LLVM optimizations. This
     results in faster compilation times and also better debugging support,
     but the code might run a bit slower. The `release' mode builds with the
