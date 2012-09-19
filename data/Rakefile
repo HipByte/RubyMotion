@@ -25,6 +25,10 @@ task :vm_files do
     install File.join(objs, 'libmacruby-static.a'), sim
     objs = "../vm/iPhoneSimulator#{sdk_version}-repl.objs"
     install File.join(objs, 'libmacruby-repl.dylib'), sim
+
+    # remove debug symbols
+    strip = File.join(PLATFORMS_DIR, '../usr/bin/strip')
+    [ios, sim].map { |x| Dir.glob(x + '/*.{a,dylib}') }.flatten.each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
   end
 end
 
