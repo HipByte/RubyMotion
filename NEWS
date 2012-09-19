@@ -1,69 +1,66 @@
 = RubyMotion 1.24 =
 
-  * Added support for the iOS 6 SDK.
+  * Added support for the GM version of the iOS 6 SDK.
   * Added support for the iPhone5 architecture (armv7s).
   * Added new values for the `retina' option of `rake simulator': `3.5' (for
     iPhone4) and `4' (for iPhone5). A `true' value will default to `3.5' in
-    case the simulator target is lesser than 6.0, otherwise, `4' wil be used.
-  * Added debugging support (experimental), for both simulator and device.
+    case the simulator target is lesser than 6.0, otherwise, `4' will be used.
+  * Added debugging support (experimental) for both simulator and device.
     Simply set the `debug' parameter to any value to attach the debugger
     (ex. `rake debug=1' for simulator and `rake device debug=1' for device).
+    The Ruby code compiles with relevant DWARF metadata and the debugger
+    used is gdb. Note that the debugger experience is a work in progress and
+    will be significantly improved in future releases.
+  * Fixed the `development' mode to not compile with LLVM optimizations. This
+    results in faster compilation times and also better debugging support,
+    but the code might run a bit slower. The `release' mode builds with the
+    entire optimization passes.
+  * Added to the build system the `mode' option which can be used to specify
+    the build mode, either `development' (default) or `release'. You can now
+    test your app in release mode by using `rake mode=release' for simulator
+    and `rake device mode=release' for device.
+  * Fixed the build system not to execute the user-defined application setup
+    block twice, which is no longer necessary with the new `mode' option.
+  * Removed the `archive:development' and `archive:release' tasks which are
+    no longer necessary with the new `mode' option.
+  * Added the `archive:distribution' task which builds an .ipa with distribution
+    settings (certificate, default entitlements, symbols stripped).
   * Fixed `rake spec' to produce an .app bundle that uses a different bundle
-    identifier than the regular app. This is necessary since Xcode 4.5 DP4
-    to avoid simulator installation issues.
+    identifier than the regular app. This is necessary in Xcode 4.5 to avoid
+    simulator installation issues.
   * Fixed a bug in the simulator launcher when output to stdout would not be
     displayed in case the rake process was piped to another process
     (ex. `rake spec | ...').
   * Added the Dispatch.once method, which wraps the dispatch_once() function,
     that can be useful to implement singletons. Usage: Dispatch.once { ... }.
-  * Added support for `define_method'. Note that it cannot be used to overwrite
-    existing Objective-C methods, because of the static compiler.
-  * Fixed a bug where Bignum objects could not be properly converted into
-    NSNumber objects because they weren't converted into 'long long' types.
-  * Fixed the build system to set the `get-task-allow' entitlement to true by
-    default in development mode (needed to attach the debugger).
+  * Added support for `define_method'. Like `attr_*', it cannot be used to 
+    overwrite existing Objective-C methods due to limitations of the compiler.
+  * Fixed a bug when converting Bignum objects into 'long long' types.
   * Fixed a bug in the build system where relative source paths pointing to the
-    parent directory would not properly be expanded and would create build
+    parent directory would not properly be expanded and would trigger build
     failures.
-  * Fixed a bug where String#% does not accept a format argument which has
-    multiple named arguments.
-  * Fixed a bug where String#% accepts a format argument which specifies width
-    after precision. If passed its format argument, String#% will raise a
-    exception as invalid argument.
-  * Fixed a bug where String#% cannot omitting width at part of precision in
-    format argument.
-  * Improved String#[]= performance. String#[]= will be 50x times faster.
+  * Fixed several bugs in String#% related to arguments and precision format.
+  * Improved String#[]= performance. 50 times faster.
   * Improved String#length performance with multibyte characters. If String
     includes multibyte characters, its length will be cached and reused.
-    String#length with multibyte characters will be 500x times faster.
-  * Improved String#reverse performance with ascii compatible string.
-    String#reverse with ascii compatible string will be 30x times faster.
-  * Improved Fixnum/Float modulo performances. The modulo between the
-    Fixnum/Float (ex. (42 % 42) or (42.0 % 42.0)) will be 2x times faster.
-  * Fixed a memory leaks in String#{reverse, reverse!}
-  * Fixed a crash bug if call the method as receiver which is uninitialized
-    Regexp object (ex. Regexp.allocate.to_s)
-  * Fixed a crash bug in NSArray#flatten(level) if passed 0 as level.
-  * Fixed a bug in NSArray#rindex which raise an uncatchable Objective-C
-    exception.
-  * Fixed a bug in NSArray#values_at which if passed a Fixnum value and
-    specified the value out of range, NSArray#values_at raise an uncatchable
-    Objective-C exception.
-  * Fixed a bug in NSDictionary#values_at which if passed the key which does not
-    contain in receiver, NSDictionary#values_at raise an uncatchable Objective-C
-    exception.
-  * Fixed a bug in Kernel.#sprintf which will raise an uncatchable Objective-C
-    exception if passed object which has #to_str method as format argument.
-  * Fixed a bug in Dispatch::Source.timer which can't defer the timer if passed
-    Dispatch::TIME_FOREVER as interval.
-  * Fixed a bug in NSArray#delete_if which returns a nil if NSArray object does
-    not change.
-  * Added the NSArray#rotate and NSMutableArray#rotate! methods.
-  * Added the NSMutableArray#sort_by! methods.
-  * Added the NSMutableArray#select! methods.
-  * Added the NSMutableArray#keep_if methods.
-  * Added the NSMutableDictionary#select! methods.
-  * Added the NSMutableDictionary#keep_if methods.
+    500 times faster.
+  * Improved String#reverse performance with ASCII-compatible string. 30 times
+    faster.
+  * Improved Fixnum/Float modulo performance. 2 times faster.
+  * Fixed memory leaks in String#{reverse, reverse!}
+  * Fixed a bug when calling a method on an uninitialized Regexp object.
+    (ex. Regexp.allocate.to_s).
+  * Fixed a bug when calling NSArray#flatten(level) with 0.
+  * Fixed bugs in NSArray#rindex, NSArray#values_at, NSArray#values_at,
+    NSDictionary#values_at and Kernel.#sprintf which could raise uncatchable
+    exceptions.
+  * Fixed a bug in Dispatch::Source.timer which couldn't handle the
+    Dispatch::TIME_FOREVER constant for interval.
+  * Fixed a bug in NSArray#delete_if where nil could not be returned if the
+    receiver did not change.
+  * Added the following methods: NSArray#rotate, NSMutableArray#rotate!,
+    NSMutableArray#sort_by!, NSMutableArray#select!, NSMutableArray#keep_if,
+    NSMutableDictionary#select!, NSMutableDictionary#keep_if.
 
 = RubyMotion 1.23 =
 
