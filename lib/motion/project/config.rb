@@ -54,7 +54,8 @@ module Motion; module Project
       :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
       :entitlements, :fonts, :status_bar_style, :motiondir
 
-    attr_accessor :spec_mode
+    # Internal only.
+    attr_accessor :build_mode, :spec_mode, :distribution_mode
 
     def initialize(project_dir, build_mode)
       @project_dir = project_dir
@@ -96,6 +97,19 @@ module Motion; module Project
           end
       end
       map
+    end
+
+    def setup_blocks
+      @setup_blocks ||= []
+    end
+
+    def setup
+      if @setup_blocks
+        @setup_blocks.each { |b| b.call(self) }
+        @setup_blocks = nil
+        validate
+      end
+      self
     end
 
     def xcode_dir
@@ -212,6 +226,14 @@ EOS
 
     def release
       yield if release?
+    end
+
+    def opt_level
+      @opt_level ||= case @build_mode
+        when :development; 0
+        when :release; 3
+        else; 0
+      end
     end
 
     def versionized_build_dir(platform)
@@ -575,7 +597,7 @@ EOS
 
     def codesign_certificate
       @codesign_certificate ||= begin
-        cert_type = (development? ? 'Developer' : 'Distribution')
+        cert_type = (distribution_mode ? 'Distribution' : 'Developer')
         certs = `/usr/bin/security -q find-certificate -a`.scan(/"iPhone #{cert_type}: [^"]+"/).uniq
         if certs.size == 0
           App.fail "Can't find an iPhone Developer certificate in the keychain"
@@ -638,7 +660,7 @@ EOS
 
     def entitlements_data
       dict = entitlements
-      if release?
+      if distribution_mode
         dict['application-identifier'] ||= seed_id + '.' + identifier
       else
         # Required for gdb.

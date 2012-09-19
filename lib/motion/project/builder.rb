@@ -86,7 +86,7 @@ module Motion; module Project;
             # LLVM bitcode.
             bc = File.join(objs_build_dir, "#{path}.#{arch}.bc")
             bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
-            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
    
             # Assembly.
             asm = File.join(objs_build_dir, "#{path}.#{arch}.s")

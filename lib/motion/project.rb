@@ -101,38 +101,17 @@ task :simulator => ['build:simulator'] do
   sh "#{env} #{sim} #{debug} #{family_int} #{target} \"#{xcode}\" \"#{app}\""
 end
 
-desc "Create archives for everything"
-task :archive => ['archive:development', 'archive:release']
-
-def create_ipa
-  app_bundle = App.config.app_bundle('iPhoneOS')
-  archive = App.config.archive
-  if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
-    App.info 'Create', archive
-    tmp = "/tmp/ipa_root"
-    sh "/bin/rm -rf #{tmp}"
-    sh "/bin/mkdir -p #{tmp}/Payload"
-    sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
-    Dir.chdir(tmp) do
-      sh "/bin/chmod -R 755 Payload"
-      sh "/usr/bin/zip -q -r archive.zip Payload"
-    end
-    sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
-  end
+desc "Create an .ipa archive"
+task :archive => ['build:device'] do
+  App.archive
 end
 
 namespace :archive do
-  desc "Create an .ipa archive for development"
-  task :development do
-    App.config_mode = :development
-    Rake::Task["build:device"].execute
-    App.archive
-  end
-
-  desc "Create an .ipa for release (AppStore)"
-  task :release do
-    App.config_mode = :release
-    Rake::Task["build:device"].execute
+  desc "Create an .ipa archive for distribution (AppStore)"
+  task :distribution do
+    App.config_without_setup.build_mode = :release
+    App.config.distribution_mode = true
+    Rake::Task["build:device"].invoke
     App.archive
   end
 end
@@ -144,7 +123,7 @@ task :spec do
 end
 
 desc "Deploy on the device"
-task :device => 'archive:development' do
+task :device => :archive do
   App.info 'Deploy', App.config.archive
   device_id = (ENV['id'] or App.config.device_id)
   unless App.config.provisioned_devices.include?(device_id)
