@@ -12,6 +12,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include "builtin_debugger_cmds.h"
+
 @interface Delegate : NSObject
 - (NSString *)replEval:(NSString *)expression;
 @end
@@ -799,7 +801,18 @@ again:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(), @"_simgdbcmds",
 	    nil]];
 	//if (![[NSFileManager defaultManager] fileExistsAtPath:cmds_path]) {
-	    NSString *cmds = @"set breakpoint pending on\nbreak rb_exc_raise\nbreak malloc_error_break\n";
+	    NSString *cmds = @""\
+		"set breakpoint pending on\n"\
+		"break rb_exc_raise\n"\
+		"break malloc_error_break\n";
+	    cmds = [cmds stringByAppendingFormat:@"%s\n",
+		 BUILTIN_DEBUGGER_CMDS];
+	    NSString *user_cmds = [NSString stringWithContentsOfFile:
+		@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
+	    if (user_cmds != nil) {
+		cmds = [cmds stringByAppendingString:user_cmds];
+		cmds = [cmds stringByAppendingString:@"\n"];
+	    }
 	    if (getenv("no_continue") == NULL) {
 		cmds = [cmds stringByAppendingString:@"continue\n"];
 	    }

@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
+#include "builtin_debugger_cmds.h"
 
 typedef void *am_device_t;
 typedef void *afc_conn_t;
@@ -477,14 +478,22 @@ start_debugger(am_device_t dev)
 	"set inferior-auto-start-dyld 1\n"\
 	"set inferior-auto-start-cfm off\n"\
 	"set sharedLibrary load-rules dyld \".*libobjc.*\" all dyld \".*CoreFoundation.*\" all dyld \".*Foundation.*\" all dyld \".*libSystem.*\" all dyld \".*AppKit.*\" all dyld \".*PBGDBIntrospectionSupport.*\" all dyld \".*/usr/lib/dyld.*\" all dyld \".*CarbonDataFormatters.*\" all dyld \".*libauto.*\" all dyld \".*CFDataFormatters.*\" all dyld \"/System/Library/Frameworks\\\\\\\\|/System/Library/PrivateFrameworks\\\\\\\\|/usr/lib\" extern dyld \".*\" all exec \".*\" all\n"\
-	"sharedlibrary apply-load-rules all\n"\
-	"break rb_exc_raise\n"\
-	"continue\n",
+	"sharedlibrary apply-load-rules all\n",
 	device_support_path, device_support_path, device_support_path,
 	[[app_remote_path stringByDeletingLastPathComponent]
 	    stringByReplacingOccurrencesOfString:@"/private/var"
 	    withString:@"/var"], [app_path stringByDeletingLastPathComponent],
 	app_remote_path, gdb_unix_socket_path, app_path, dsym_path];
+    cmds = [cmds stringByAppendingFormat:@"%s\n", BUILTIN_DEBUGGER_CMDS];
+    NSString *user_cmds = [NSString stringWithContentsOfFile:
+	@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
+    if (user_cmds != nil) {
+	cmds = [cmds stringByAppendingString:user_cmds];
+	cmds = [cmds stringByAppendingString:@"\n"];
+    }
+    if (getenv("no_continue") == NULL) {
+	cmds = [cmds stringByAppendingString:@"continue\n"];
+    }
     assert([cmds writeToFile:cmds_path atomically:YES
 	    encoding:NSASCIIStringEncoding error:nil]);
 
