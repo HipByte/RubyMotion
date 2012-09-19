@@ -460,8 +460,8 @@ EOS
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
       end
 
-      # Strip all symbols. Only in release mode.
-      if main_exec_created and config.release?
+      # Strip all symbols. Only in distribution mode.
+      if main_exec_created and config.distribution_mode
         App.info "Strip", main_exec
         sh "#{config.locate_binary('strip')} \"#{main_exec}\""
       end
