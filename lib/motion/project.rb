@@ -1,15 +1,15 @@
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -70,7 +70,7 @@ task :simulator => ['build:simulator'] do
       if File.basename(app_bundle) == File.basename(app)
         rm_rf File.dirname(app_bundle)
         break
-      end  
+      end
     end
   end
 
@@ -165,6 +165,11 @@ task :clean do
     App.info 'Delete', p
     rm_rf p
   end
+end
+
+desc "Clear vendor build objects"
+task :clean_vendor do
+  App.config.vendor_projects.each { |vendor| vendor.clean }
 end
 
 desc "Show project config"
