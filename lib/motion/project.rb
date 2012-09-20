@@ -157,19 +157,24 @@ task :device => 'archive:development' do
 end
 
 desc "Clear build objects"
-task :clean do
-  App.info 'Delete', App.config.build_dir
-  rm_rf(App.config.build_dir)
-  App.config.vendor_projects.each { |vendor| vendor.clean }
-  Dir.glob(App.config.resources_dir + '/**/*.{nib,storyboardc,momd}').each do |p|
-    App.info 'Delete', p
-    rm_rf p
-  end
-end
+task :clean => ['clean:everything']
 
-desc "Clear vendor build objects"
-task :clean_vendor do
-  App.config.vendor_projects.each { |vendor| vendor.clean }
+namespace :clean do
+  desc "Clear build objects"
+  task :everything do
+    App.info 'Delete', App.config.build_dir
+    rm_rf(App.config.build_dir)
+    App.config.vendor_projects.each { |vendor| vendor.clean }
+    Dir.glob(App.config.resources_dir + '/**/*.{nib,storyboardc,momd}').each do |p|
+      App.info 'Delete', p
+      rm_rf p
+    end
+  end
+
+  desc "Clear vendor build objects"
+  task :vendor do
+    App.config.vendor_projects.each { |vendor| vendor.clean }
+  end
 end
 
 desc "Show project config"
