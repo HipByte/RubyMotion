@@ -37,31 +37,35 @@ module Motion; module Project
 
     class << self
       def config_mode
-        @config_mode or :development
+        @config_mode ||= begin
+          if mode = ENV['mode']
+            case mode = mode.intern
+              when :development, :release
+                mode
+              else
+                fail "Invalid value for build mode `#{mode}' (must be :development or :release)"
+            end
+          else
+            :development
+          end
+        end
       end
 
-      def config_mode=(mode)
-        @config_mode = mode
-      end
-
-      def configs
-        @configs ||= {
-          :development => Motion::Project::Config.new('.', :development),
-          :release => Motion::Project::Config.new('.', :release)
-        }
+      def config_without_setup
+        @configs ||= {}
+        @configs[config_mode] ||= Motion::Project::Config.new('.', config_mode)
       end
 
       def config
-        configs[config_mode]
+        config_without_setup.setup
       end
 
       def builder
         @builder ||= Motion::Project::Builder.new
       end
 
-      def setup
-        configs.each_value { |x| yield x }
-        config.validate
+      def setup(&block)
+        config.setup_blocks << block
       end
 
       def build(platform, opts={})

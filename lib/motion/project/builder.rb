@@ -64,7 +64,9 @@ module Motion; module Project;
       FileUtils.mkdir_p(objs_build_dir)
       any_obj_file_built = false
       build_file = Proc.new do |path|
-        obj ||= File.join(objs_build_dir, "#{path}.o")
+        rpath = path
+        path = File.expand_path(path)
+        obj = File.join(objs_build_dir, "#{path}.o")
         should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
@@ -73,7 +75,7 @@ module Motion; module Project;
         init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
 
         if should_rebuild
-          App.info 'Compile', path
+          App.info 'Compile', rpath
           FileUtils.mkdir_p(File.dirname(obj))
           arch_objs = []
           archs.each do |arch|
@@ -84,7 +86,7 @@ module Motion; module Project;
             # LLVM bitcode.
             bc = File.join(objs_build_dir, "#{path}.#{arch}.bc")
             bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
-            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
    
             # Assembly.
             asm = File.join(objs_build_dir, "#{path}.#{arch}.s")
@@ -458,8 +460,8 @@ EOS
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
       end
 
-      # Strip all symbols. Only in release mode.
-      if main_exec_created and config.release?
+      # Strip all symbols. Only in distribution mode.
+      if main_exec_created and config.distribution_mode
         App.info "Strip", main_exec
         sh "#{config.locate_binary('strip')} \"#{main_exec}\""
       end
