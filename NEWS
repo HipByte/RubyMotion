@@ -1,3 +1,8 @@
+= RubyMotion 1.25 =
+
+  * Fixed a bug when using Objective-C properties implemented using message
+    forwarding (ex. GKMatchRequest's maxPlayers).
+
 = RubyMotion 1.24 =
 
   * Added support for the GM version of the iOS 6 SDK.
