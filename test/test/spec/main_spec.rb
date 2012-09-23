@@ -206,11 +206,18 @@ describe "Large unsigned ints (Bignum)" do
 end
 
 describe "Properties implemented using forwarders" do
-  it "can be called" do
+  it "can be called (1)" do
     player = GKLocalPlayer.localPlayer
     player.alias.should == nil
     player.alias = 'lol'
     player.alias.should == 'lol'
+  end
+
+  it "can be called (2)" do
+    mr = GKMatchRequest.alloc.init
+    mr.maxPlayers.should >= 0
+    mr.maxPlayers = 42
+    mr.maxPlayers.should == 42
   end
 end
 
