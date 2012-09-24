@@ -176,6 +176,19 @@ task :static do
   sh "/usr/bin/lipo -create #{libs.join(' ')} -output \"#{fat_lib}\""
 end
 
+desc "Creating generator for quickly create files in your application"
+task  :generate  do
+if ENV['scaffold']
+    App.generate_controller(ENV['scaffold'])
+    App.generate_model(ENV['scaffold'])
+elsif ENV['controller']
+  App.generate_controller(ENV['controller'])
+elsif ENV['model']
+  App.generate_model(ENV['model'])
+else
+  puts "command not matched"
+  end
+end
 =begin
 # Automatically load project extensions. A project extension is a gem whose
 # name starts with `motion-' and which exposes a `lib/motion/project' libdir.
