@@ -24,11 +24,11 @@ class TestRange < Test::Unit::TestCase
     assert_equal([:a, :b], (:a .. :b).to_a)
   end
 
-  # def test_evaluation_order
-  #   arr = [1,2]
-  #   r = (arr.shift)..(arr.shift)
-  #   assert_equal(1..2, r, "[ruby-dev:26383]")
-  # end
+  def test_evaluation_order
+    arr = [1,2]
+    r = (arr.shift)..(arr.shift)
+    assert_equal(1..2, r, "[ruby-dev:26383]")
+  end
 
   class DuckRange
     def initialize(b,e,excl=false)
