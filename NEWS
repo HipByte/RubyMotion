@@ -4,6 +4,8 @@
     forwarding (ex. GKMatchRequest's maxPlayers).
   * Fixed a bug in Range evaluation order. Make sure evaluating a Range's begin
     at first. (ex. (x = 0)..(x + 1) )
+  * Fixed a bug in Regexp which does not consider the octal literals.
+  * Fixed a bug in Regexp which does not support '\h' and '\H' matchers.
 
 = RubyMotion 1.24 =
 
