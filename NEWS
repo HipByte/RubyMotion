@@ -2,6 +2,8 @@
 
   * Fixed a bug when using Objective-C properties implemented using message
     forwarding (ex. GKMatchRequest's maxPlayers).
+  * Fixed a bug in Range evaluation order. Make sure evaluating a Range's begin
+    at first. (ex. (x = 0)..(x + 1) )
 
 = RubyMotion 1.24 =
 
