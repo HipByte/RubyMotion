@@ -2,8 +2,13 @@
 
   * Fixed a bug when using Objective-C properties implemented using message
     forwarding (ex. GKMatchRequest's maxPlayers).
-  * Fixed a bug in build system. If info_plist is customized at except the
+  * Fixed a bug in build system where the app.info_plist dictionary would not
+    be re-generated if app.info_plist is called before changing other settings
+    (ex. app.name).
     setup block end, it might cause build error.
+  * Fixed a bug in the build system where vendored Xcode projects (including
+    projects via CocoaPods) would not be built honoring the Rakefile
+    app.deployment_target variable.
   * Fixed a bug in Range evaluation order. Make sure evaluating a Range's begin
     at first. (ex. (x = 0)..(x + 1) )
   * Fixed a bug in Regexp which does not consider the octal literals.
