@@ -472,7 +472,7 @@ start_debugger(am_device_t dev)
 	"set mi-show-protections off\n"\
 	"target remote-mobile %s\n"\
 	"file \"%@\"\n"\
-	"add-dsym %@\n"\
+	"add-dsym \"%@\"\n"\
 	"run\n"\
 	"set minimal-signal-handling 0\n"\
 	"set inferior-auto-start-dyld 1\n"\
