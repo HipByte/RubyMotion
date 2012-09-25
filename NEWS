@@ -9,6 +9,8 @@
   * Fixed a bug in the build system where vendored Xcode projects (including
     projects via CocoaPods) would not be built honoring the Rakefile
     app.deployment_target variable.
+  * Fixed a bug in the `rake device' debugger task where the debugger would
+    fail to attach if the application name includes a space character.
   * Fixed a bug in Range evaluation order. Make sure evaluating a Range's begin
     at first. (ex. (x = 0)..(x + 1) )
   * Fixed a bug in Regexp which does not consider the octal literals.
