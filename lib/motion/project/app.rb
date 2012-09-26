@@ -145,6 +145,50 @@ EOS
           end
         end
       end
+ def generate_controller(controller_name)
+      fail "Invalid controller name"  unless controller_name.match(/^[\w\s-]+$/)
+      controller_file_path =  'app/'+ controller_name+'_controller.rb'
+      fail "File `#{controller_file_path}' already exists"  if File.exist?(controller_file_path)
+      App.log 'Creating controller', camel_case(controller_name)+"Controller"
+      File.open(controller_file_path, 'w') do |io|
+        io.puts <<EOS
+class #{camel_case(controller_name)}Controller < UIViewController
+  def viewDidLoad
+  # Called when you create the class and load it. Great for initial setup and one-time-only work
+  end
+  def ViewWillAppear
+  #Called right before your view appears, good for hiding/showing fields or any operations that you want to happen every time before the view is visible
+  end
+  def ViewDidAppear
+  #Called after the view appears - great place to start an animations or the loading of external data
+  end
+end
+EOS
+      end
+  App.log 'Created controller', camel_case(controller_name)+"Controller Done!!"
+  end
+
+    def generate_model(model_name)
+        fail "Invalid model name"  unless model_name.match(/^[\w\s-]+$/)
+        model_file_path =  'app/'+ model_name+'.rb'
+        fail "File `#{model_file_path}' already exists"  if File.exist?(model_file_path)
+        App.log 'Creating model', camel_case(model_name)
+        File.open(model_file_path, 'w') do |io|
+          io.puts <<EOS
+class #{camel_case(model_name)}
+
+end
+EOS
+        end
+        App.log 'Created model', camel_case(model_name)+" Done!!"
+      end
+
+
+      def camel_case(some_string)
+        return some_string if some_string !~ /_/ && some_string =~ /[A-Z]+.*/
+        some_string.split('_').map{|e| e.capitalize}.join
+      end
+
 
       def log(what, msg)
         require 'thread'
