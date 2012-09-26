@@ -18,6 +18,7 @@
   * Fixed a bug in Range's evaluation order, where the beginning part would not
     be evaluated at first (ex. (x = 0)..(x + 1)).
   * Improved the Regexp class to support octal literals and '\[hH]' matchers.
+  * Fixed Math.atan2 to follow the Ruby 1.9.3 specs when both arguments are 0.0.
 
 = RubyMotion 1.24 =
 
