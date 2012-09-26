@@ -12,7 +12,7 @@
     fail to attach if the application name includes a space character.
   * Fixed a bug in the build system where a project whose path includes a space
     character would fail to build the second time.
-  * Fixed a bug in the runtime where methods define with `define_method' that
+  * Fixed a bug in the runtime where methods defined with `define_method' that
     are either aliased or created via a module inclusion would crash when
     called at runtime.
   * Fixed a bug in Range's evaluation order, where the beginning part would not
