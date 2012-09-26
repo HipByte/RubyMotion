@@ -15,6 +15,12 @@
   * Fixed a bug in the runtime where methods defined with `define_method' that
     are either aliased or created via a module inclusion would crash when
     called at runtime.
+  * Fixed a bug in the build system where the `get-task-allow' entitlement
+    which is set to true by default could not be set to false. Thanks to
+    @andreas for the patch.
+  * Fixed a bug in `rake simulator' where a stty-related warning would be
+    printed in case the task is launched from a process where stdout is not a
+    tty. Thanks to Dennis Ushakov for the patch.
   * Fixed a bug in Range's evaluation order, where the beginning part would not
     be evaluated at first (ex. (x = 0)..(x + 1)).
   * Improved the Regexp class to support octal literals and '\[hH]' matchers.
