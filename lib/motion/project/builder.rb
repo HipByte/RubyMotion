@@ -72,7 +72,7 @@ module Motion; module Project;
             or File.mtime(ruby) > File.mtime(obj))
  
         # Generate or retrieve init function.
-        init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} #{obj}`.scan(/T\s+_(MREP_.*)/)[0][0]
+        init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} \"#{obj}\"`.scan(/T\s+_(MREP_.*)/)[0][0]
 
         if should_rebuild
           App.info 'Compile', rpath
