@@ -60,6 +60,7 @@ module Motion; module Project
     def initialize(project_dir, build_mode)
       @project_dir = project_dir
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
+      @info_plist = {}
       @dependencies = {}
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @weak_frameworks = []
@@ -549,7 +550,11 @@ EOS
     end
 
     def info_plist
-      @info_plist ||= {
+      @info_plist
+    end
+
+    def info_plist_data
+      info_plist.merge!({
         'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
         'MinimumOSVersion' => deployment_target,
         'CFBundleDevelopmentRegion' => 'en',
@@ -584,10 +589,7 @@ EOS
         'DTPlatformVersion' => '5.1',
         'DTXcodeBuild' => '4E1019',
         'DTPlatformBuild' => '9B176'
-      }
-    end
-
-    def info_plist_data
+      })
       Motion::PropertyList.to_s(info_plist)
     end
 
