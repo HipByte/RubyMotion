@@ -664,7 +664,7 @@ EOS
         dict['application-identifier'] ||= seed_id + '.' + identifier
       else
         # Required for gdb.
-        dict['get-task-allow'] ||= true
+        dict['get-task-allow'] = true if dict['get-task-allow'].nil?
       end
       Motion::PropertyList.to_s(dict)
     end
