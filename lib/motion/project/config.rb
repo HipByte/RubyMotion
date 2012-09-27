@@ -689,7 +689,7 @@ EOS
       a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
       sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
       extra_flags = OSX_VERSION >= 10.7 ? '--no-64-bit' : ''
-      sh "RUBYOPT='' /usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.join(' ')} -o \"#{bs_file}\""
+      sh "RUBYOPT='' /usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\""
     end
   end
 end; end
