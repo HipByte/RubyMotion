@@ -1,3 +1,8 @@
+= RubyMotion 1.26 =
+
+  * Fixed a bug in the build system when building .bridgesupport files where
+    it would fail to process header paths including space characters.
+
 = RubyMotion 1.25 =
 
   * Fixed a bug when using Objective-C properties implemented using message
