@@ -496,7 +496,7 @@ EOS
       end
       case retina
         when 'true'
-          device + (family == 1 and target >= '6.0' ? ' (Retina 4-inch)' : ' (Retina)')
+          device + ((family == 1 and target >= '6.0') ? ' (Retina 4-inch)' : ' (Retina)')
         when '3.5'
           device + ' (Retina 3.5-inch)'
         when '4'
