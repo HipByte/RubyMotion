@@ -130,8 +130,8 @@ EOS
     def build_xcode(platform, opts)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
-        if !File.exist?(build_dir)
-          FileUtils.mkdir build_dir
+        if !File.exist?(build_dir) or Dir["#{build_dir}/*"].empty?
+          FileUtils.mkdir_p build_dir
 
           # Prepare Xcode project settings.
           xcodeproj = opts.delete(:xcodeproj) || begin
@@ -163,7 +163,7 @@ EOS
   
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
-          Dir.glob('build/*.a').each do |lib|
+          Dir.glob("#{configuration_build_dir}/*.a").each do |lib|
             next if prods and !prods.include?(File.basename(lib))
             lib = File.readlink(lib) if File.symlink?(lib)
             sh "/bin/cp \"#{lib}\" \"#{build_dir}\""
@@ -185,7 +185,7 @@ EOS
     end
 
     def configuration_build_dir
-      @opts[:configuration_build_dir] || 'build'
+      File.absolute_path(@opts[:configuration_build_dir] || 'build')
     end
 
     def clean_xcode
