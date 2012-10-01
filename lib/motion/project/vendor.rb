@@ -159,7 +159,7 @@ EOS
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
-          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=build IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=#{configuration_build_dir} IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
   
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
@@ -175,7 +175,7 @@ EOS
         headers_dir = opts.delete(:headers_dir)
         if !File.exist?(bs_file) and headers_dir
           project_dir = File.expand_path(@config.project_dir)
-          headers = Dir.glob(File.join(project_dir, headers_dir, '**/*.h'))
+          headers = [headers_dir].flatten.collect{|dir| Dir.glob(File.join(project_dir, dir, '**/*.h'))}.flatten
           @config.gen_bridge_metadata(headers, bs_file)
         end
 
@@ -184,9 +184,13 @@ EOS
       end
     end
 
+    def configuration_build_dir
+      @opts[:configuration_build_dir] || 'build'
+    end
+
     def clean_xcode
       Dir.chdir(@path) do
-        ['build', 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
+        [configuration_build_dir, 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
       end
     end
 
