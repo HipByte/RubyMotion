@@ -2,6 +2,8 @@
 
   * Fixed a bug in the build system when building .bridgesupport files where
     it would fail to process header paths including space characters.
+  * Fixed a bug in Pointer#cast! which does not accept symbol argument as
+    pointer type like Pointer#new.
 
 = RubyMotion 1.25 =
 
