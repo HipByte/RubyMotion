@@ -155,7 +155,7 @@ EOS
           # Build project into `build' directory. We delete the build directory
           # each time because Xcode is too stupid to be trusted to use the
           # same build directory for different platform builds.
-          rm_rf 'build'
+          rm_rf configuration_build_dir
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
