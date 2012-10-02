@@ -154,12 +154,18 @@ EOS
       App.fail "Can't locate binary `#{name}' on the system."
     end
 
+    def xcode_version
+      @xcode_version ||= begin
+        txt = `#{locate_binary('xcodebuild')} -version`
+        vers = txt.scan(/Xcode\s(.+)/)[0][0]
+        build = txt.scan(/Build version\s(.+)/)[0][0]
+        [vers, build]
+      end
+    end
+
     def validate
       # Xcode version
-      ary = `#{locate_binary('xcodebuild')} -version`.scan(/Xcode\s+([^\n]+)\n/)
-      if ary and ary[0] and xcode_version = ary[0][0]
-        App.fail "Xcode 4.x or greater is required" if xcode_version < '4.0'
-      end
+      App.fail "Xcode 4.x or greater is required" if xcode_version[0] < '4.0'
 
       # sdk_version
       ['iPhoneSimulator', 'iPhoneOS'].each do |platform|
@@ -553,8 +559,22 @@ EOS
       @info_plist
     end
 
+    def dt_info_plist
+{
+}
+    end
+
     def info_plist_data
-      info_plist.merge!({
+      ios_version_to_build = lambda do |vers|
+        # XXX we should retrieve these values programmatically.
+        case vers
+          when '4.3'; '8F191m'
+          when '5.0'; '9A334'
+          when '5.1'; '9B176'
+          else; '10A403' # 6.0 or later
+        end
+      end
+      Motion::PropertyList.to_s({
         'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
         'MinimumOSVersion' => deployment_target,
         'CFBundleDevelopmentRegion' => 'en',
@@ -581,16 +601,22 @@ EOS
         'UISupportedInterfaceOrientations' => interface_orientations_consts,
         'UIStatusBarStyle' => status_bar_style_const,
         'UIBackgroundModes' => background_modes_consts,
-        'DTXcode' => '0431',
-        'DTSDKName' => 'iphoneos5.0',
-        'DTSDKBuild' => '9A334',
+        'DTXcode' => begin
+          vers = xcode_version[0].sub(/\./, '')
+          if vers.length == 2
+            '0' + vers + '0'
+          else
+            '0' + vers
+          end
+        end,
+        'DTXcodeBuild' => xcode_version[1],
+        'DTSDKName' => "iphoneos#{sdk_version}",
+        'DTSDKBuild' => ios_version_to_build.call(sdk_version),
         'DTPlatformName' => 'iphoneos',
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
-        'DTPlatformVersion' => '5.1',
-        'DTXcodeBuild' => '4E1019',
-        'DTPlatformBuild' => '9B176'
-      })
-      Motion::PropertyList.to_s(info_plist)
+        'DTPlatformVersion' => sdk_version,
+        'DTPlatformBuild' => ios_version_to_build.call(sdk_version)
+      }.merge(dt_info_plist).merge(info_plist))
     end
 
     def pkginfo_data
