@@ -5,6 +5,8 @@
   * Fixed a bug in Pointer#cast! which does not accept symbol argument as
     pointer type like Pointer#new.
   * Added the Pointer#value which is alias of Pointer#[0].
+  * Fixed a bug where methods that take variable arguments does not call 
+    appropriate function if raise an Argument Error exception.
 
 = RubyMotion 1.25 =
 
