@@ -2,6 +2,11 @@
 
   * Fixed a bug in the build system when building .bridgesupport files where
     it would fail to process header paths including space characters.
+  * Fixed a bug in the build system where the Info.plist file would not be
+    generated with the right DT* values when targetting iOS 6.0.
+  * Fixed a compiler bug when using the
+    `TWTweetComposeViewController#setInitialText' method on iOS 5.1 or below
+    would trigger a crash at runtime.
   * Fixed a bug in Pointer#cast! which does not accept symbol argument as
     pointer type like Pointer#new.
   * Added the Pointer#value which is alias of Pointer#[0].
