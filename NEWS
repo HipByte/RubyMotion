@@ -17,6 +17,8 @@
     define_method.
   * Added `app.framework_search_paths' to configure your app in Rakefile.
     This property is used to search the custom framework paths.
+  * Added the `spec:device' Rake task which will run the spec/test suite on the
+    device via the debugger.
 
 = RubyMotion 1.25 =
 
