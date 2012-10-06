@@ -606,7 +606,7 @@ EOS
         'UIStatusBarStyle' => status_bar_style_const,
         'UIBackgroundModes' => background_modes_consts,
         'DTXcode' => begin
-          vers = xcode_version[0].sub(/\./, '')
+          vers = xcode_version[0].gsub(/\./, '')
           if vers.length == 2
             '0' + vers + '0'
           else
