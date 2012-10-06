@@ -13,6 +13,10 @@
   * Added the Pointer#value which is alias of Pointer#[0].
   * Fixed a bug where methods that take variable arguments does not call 
     appropriate function if raise an Argument Error exception.
+  * Fixed a bug which fails looking up method when call super from block in 
+    define_method.
+  * Added `app.framework_search_paths' to configure your app in Rakefile.
+    This property is used to search the custom framework paths.
 
 = RubyMotion 1.25 =
 

@@ -48,7 +48,7 @@ module Motion; module Project
     end
 
     variable :files, :xcode_dir, :sdk_version, :deployment_target, :frameworks,
-      :weak_frameworks, :libs, :delegate_class, :name, :build_dir,
+      :weak_frameworks, :framework_search_paths, :libs, :delegate_class, :name, :build_dir,
       :resources_dir, :specs_dir, :identifier, :codesign_certificate,
       :provisioning_profile, :device_family, :interface_orientations, :version,
       :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
@@ -64,6 +64,7 @@ module Motion; module Project
       @dependencies = {}
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @weak_frameworks = []
+      @framework_search_paths = []
       @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
@@ -319,7 +320,10 @@ EOS
           end
           deps << framework
         end
-        deps = deps.uniq.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+        deps.uniq!
+        if @framework_search_paths.empty?
+          deps.select! { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+        end
         deps << 'UIAutomation' if spec_mode
         deps
       end
@@ -602,7 +606,7 @@ EOS
         'UIStatusBarStyle' => status_bar_style_const,
         'UIBackgroundModes' => background_modes_consts,
         'DTXcode' => begin
-          vers = xcode_version[0].sub(/\./, '')
+          vers = xcode_version[0].gsub(/\./, '')
           if vers.length == 2
             '0' + vers + '0'
           else
