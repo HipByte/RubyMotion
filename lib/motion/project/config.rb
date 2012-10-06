@@ -322,9 +322,8 @@ EOS
         end
         deps.uniq!
         if @framework_search_paths.empty?
-          deps.select! { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+          deps = deps.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
         end
-        deps << 'UIAutomation' if spec_mode
         deps
       end
     end
@@ -351,6 +350,7 @@ EOS
             end
           end
         end
+        deps << 'UIAutomation' if spec_mode
         bs_files
       end
     end
@@ -448,9 +448,7 @@ EOS
     end
 
     def common_flags(platform)
-      cflags = "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
-      cflags << " -F#{sdk(platform)}/Developer/Library/PrivateFrameworks" if spec_mode # For UIAutomation
-      cflags
+      "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
     end
 
     def cflags(platform, cplusplus)

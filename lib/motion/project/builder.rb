@@ -289,6 +289,9 @@ EOS
         }
     }
 
+    // Load the UIAutomation framework.
+    dlopen("/Developer/Library/PrivateFrameworks/UIAutomation.framework/UIAutomation", RTLD_LOCAL);
+
     SpecLauncher *launcher = [[self alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
     return launcher; 
@@ -370,10 +373,9 @@ EOS
           or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        framework_search_paths = config.framework_search_paths.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
         frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
         main_exec_created = true
       end
 
