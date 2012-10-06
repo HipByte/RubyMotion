@@ -8,15 +8,15 @@
   * Fixed a compiler bug when using the
     `TWTweetComposeViewController#setInitialText' method on iOS 5.1 or below
     would trigger a crash at runtime.
-  * Fixed a bug in Pointer#cast! which does not accept symbol argument as
-    pointer type like Pointer#new.
-  * Added the Pointer#value which is alias of Pointer#[0].
-  * Fixed a bug where methods that take variable arguments does not call 
-    appropriate function if raise an Argument Error exception.
-  * Fixed a bug which fails looking up method when call super from block in 
-    define_method.
-  * Added `app.framework_search_paths' to configure your app in Rakefile.
-    This property is used to search the custom framework paths.
+  * Fixed a bug in Pointer#cast! where symbol arguments could not be given to.
+  * Fixed a bug where methods that take variable arguments do not call 
+    the appropriate function if an ArgumentError exception if raised.
+  * Fixed a bug where calling super from a #define_method block would fail.
+  * Fixed a bug in the compiler when compiling references to C constants which
+    might already exist in the kernel module (ex. kCFBooleanTrue).
+  * Added the Pointer#value method which is alias for Pointer#[0].
+  * Added the `app.framework_search_paths' variable that lets you configure
+    the custom framework paths for the project build.
   * Added the `spec:device' Rake task which will run the spec/test suite on the
     device via the debugger.
 
