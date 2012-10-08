@@ -127,6 +127,7 @@ EOS
       end
     end
 
+    XcodeBuildDir = '.build'
     def build_xcode(platform, opts)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
@@ -152,14 +153,14 @@ EOS
           # to fail.
           %w{CC CXX CFLAGS CXXFLAGS LDFLAGS}.each { |f| ENV[f] &&= nil }
  
-          # Build project into `build' directory. We delete the build directory
+          # Build project into a build directory. We delete the build directory
           # each time because Xcode is too stupid to be trusted to use the
           # same build directory for different platform builds.
-          rm_rf 'build'
+          rm_rf XcodeBuildDir
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
-          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=build IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=#{XcodeBuildDir} IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
   
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
@@ -186,7 +187,7 @@ EOS
 
     def clean_xcode
       Dir.chdir(@path) do
-        ['build', 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
+        [XcodeBuildDir, 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
       end
     end
 
