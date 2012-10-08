@@ -1,9 +1,10 @@
 = RubyMotion 1.26 =
 
+  * Fixed a bug in the build system where the Info.plist file would not be
+    generated with the right DT* values when targetting iOS 6.0. This fixes
+    AppStore submissions for apps made for the iPhone 5 new retina format.
   * Fixed a bug in the build system when building .bridgesupport files where
     it would fail to process header paths including space characters.
-  * Fixed a bug in the build system where the Info.plist file would not be
-    generated with the right DT* values when targetting iOS 6.0.
   * Fixed a bug where the `rake static' task would not work with iOS 6.0.
   * Fixed a compiler bug when using the
     `TWTweetComposeViewController#setInitialText' method on iOS 5.1 or below
@@ -14,6 +15,8 @@
   * Fixed a bug where calling super from a #define_method block would fail.
   * Fixed a bug in the compiler when compiling references to C constants which
     might already exist in the kernel module (ex. kCFBooleanTrue).
+  * Fixed a bug when starting the simulator with the 'retina=true' option.
+    Thanks to Scott Pierce for the patch.
   * Added the Pointer#value method which is alias for Pointer#[0].
   * Added the `app.framework_search_paths' variable that lets you configure
     the custom framework paths for the project build.
