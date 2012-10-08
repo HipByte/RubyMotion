@@ -130,8 +130,8 @@ EOS
     def build_xcode(platform, opts)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
-        if !File.exist?(build_dir)
-          FileUtils.mkdir build_dir
+        if !File.exist?(build_dir) or Dir["#{build_dir}/*"].empty?
+          FileUtils.mkdir_p build_dir
 
           # Prepare Xcode project settings.
           xcodeproj = opts.delete(:xcodeproj) || begin
@@ -155,15 +155,15 @@ EOS
           # Build project into `build' directory. We delete the build directory
           # each time because Xcode is too stupid to be trusted to use the
           # same build directory for different platform builds.
-          rm_rf 'build'
+          rm_rf configuration_build_dir
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
-          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=build IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=#{configuration_build_dir} IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
   
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
-          Dir.glob('build/*.a').each do |lib|
+          Dir.glob("#{configuration_build_dir}/*.a").each do |lib|
             next if prods and !prods.include?(File.basename(lib))
             lib = File.readlink(lib) if File.symlink?(lib)
             sh "/bin/cp \"#{lib}\" \"#{build_dir}\""
@@ -175,7 +175,7 @@ EOS
         headers_dir = opts.delete(:headers_dir)
         if !File.exist?(bs_file) and headers_dir
           project_dir = File.expand_path(@config.project_dir)
-          headers = Dir.glob(File.join(project_dir, headers_dir, '**/*.h'))
+          headers = [headers_dir].flatten.collect{|dir| Dir.glob(File.join(project_dir, dir, '**/*.h'))}.flatten
           @config.gen_bridge_metadata(headers, bs_file)
         end
 
@@ -184,9 +184,13 @@ EOS
       end
     end
 
+    def configuration_build_dir
+      File.absolute_path(@opts[:configuration_build_dir] || 'build')
+    end
+
     def clean_xcode
       Dir.chdir(@path) do
-        ['build', 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
+        [configuration_build_dir, 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
       end
     end
 

@@ -433,6 +433,9 @@ EOS
         end
         resources_files.each do |res|
           res_path = File.join(config.resources_dir, res)
+
+          next if File.directory?(res_path)  # skips hidden directories, cp_r will catch everything else
+
           if reserved_app_bundle_files.include?(res)
             App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
           end

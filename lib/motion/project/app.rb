@@ -35,15 +35,17 @@ module Motion; module Project
         true
       end
 
+    MODES = [:development, :release]
+
     class << self
       def config_mode
         @config_mode ||= begin
           if mode = ENV['mode']
             case mode = mode.intern
-              when :development, :release
+              when *MODES
                 mode
               else
-                fail "Invalid value for build mode `#{mode}' (must be :development or :release)"
+                fail "Invalid value for build mode `#{mode}' (must be one of #{MODES.inspect})"
             end
           else
             :development
@@ -54,6 +56,14 @@ module Motion; module Project
       def config_without_setup
         @configs ||= {}
         @configs[config_mode] ||= Motion::Project::Config.new('.', config_mode)
+      end
+
+      def configs
+        @configs ||= {}
+        MODES.each do |mode|
+          @configs[mode] ||= Motion::Project::Config.new('.', mode)
+        end
+        @configs
       end
 
       def config
