@@ -116,10 +116,22 @@ namespace :archive do
   end
 end
 
-desc "Run the test/spec suite"
-task :spec do
-  App.config.spec_mode = true
-  Rake::Task["simulator"].invoke
+desc "Same as 'spec:simulator'"
+task :spec => ['spec:simulator']
+
+namespace :spec do
+  desc "Run the test/spec suite on the simulator"
+  task :simulator do
+    App.config.spec_mode = true
+    Rake::Task["simulator"].invoke
+  end
+
+  desc "Run the test/spec suite on the device"
+  task :device do
+    App.config.spec_mode = true
+    ENV['debug'] ||= '1'
+    Rake::Task["device"].invoke
+  end
 end
 
 desc "Deploy on the device"

@@ -48,7 +48,7 @@ module Motion; module Project
     end
 
     variable :files, :xcode_dir, :sdk_version, :deployment_target, :frameworks,
-      :weak_frameworks, :libs, :delegate_class, :name, :build_dir,
+      :weak_frameworks, :framework_search_paths, :libs, :delegate_class, :name, :build_dir,
       :resources_dir, :specs_dir, :identifier, :codesign_certificate,
       :provisioning_profile, :device_family, :interface_orientations, :version,
       :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
@@ -64,6 +64,7 @@ module Motion; module Project
       @dependencies = {}
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @weak_frameworks = []
+      @framework_search_paths = []
       @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
@@ -319,8 +320,10 @@ EOS
           end
           deps << framework
         end
-        deps = deps.uniq.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
-        deps << 'UIAutomation' if spec_mode
+        deps.uniq!
+        if @framework_search_paths.empty?
+          deps = deps.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+        end
         deps
       end
     end
@@ -347,6 +350,7 @@ EOS
             end
           end
         end
+        deps << 'UIAutomation' if spec_mode
         bs_files
       end
     end
@@ -444,9 +448,7 @@ EOS
     end
 
     def common_flags(platform)
-      cflags = "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
-      cflags << " -F#{sdk(platform)}/Developer/Library/PrivateFrameworks" if spec_mode # For UIAutomation
-      cflags
+      "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
     end
 
     def cflags(platform, cplusplus)
@@ -602,7 +604,7 @@ EOS
         'UIStatusBarStyle' => status_bar_style_const,
         'UIBackgroundModes' => background_modes_consts,
         'DTXcode' => begin
-          vers = xcode_version[0].sub(/\./, '')
+          vers = xcode_version[0].gsub(/\./, '')
           if vers.length == 2
             '0' + vers + '0'
           else

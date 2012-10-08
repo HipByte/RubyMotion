@@ -234,9 +234,9 @@ EOS
         # Create a static archive with all object files + the runtime.
         lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
         App.info 'Create', lib
-        cp File.join(datadir, platform, 'libmacruby-static.a'), lib
+        libmacruby = File.join(datadir, platform, 'libmacruby-static.a')
         objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        sh "/usr/bin/ar -rcs \"#{lib}\" #{objs_list}"
+        sh "/usr/bin/libtool -static \"#{libmacruby}\" #{objs_list} -o \"#{lib}\""
         return lib
       end
 
@@ -288,6 +288,9 @@ EOS
             }
         }
     }
+
+    // Load the UIAutomation framework.
+    dlopen("/Developer/Library/PrivateFrameworks/UIAutomation.framework/UIAutomation", RTLD_LOCAL);
 
     SpecLauncher *launcher = [[self alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
