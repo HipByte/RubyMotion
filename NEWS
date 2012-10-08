@@ -17,6 +17,8 @@
     might already exist in the kernel module (ex. kCFBooleanTrue).
   * Fixed a bug when starting the simulator with the 'retina=true' option.
     Thanks to Scott Pierce for the patch.
+  * Fixed the build system to build vendored Xcode projects into the `.build'
+    directory instead of `build', as some projects come with such a directory.
   * Added the Pointer#value method which is alias for Pointer#[0].
   * Added the `app.framework_search_paths' variable that lets you configure
     the custom framework paths for the project build.
