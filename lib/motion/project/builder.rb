@@ -245,7 +245,7 @@ EOS
 #import <UIKit/UIKit.h>
 
 extern "C" {
-    void rb_define_const(void *, const char *, void *);
+    void rb_define_global_const(const char *, void *);
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
@@ -334,7 +334,8 @@ EOS
         else
           config.development? ? 'development' : 'release'
         end
-      main_txt << "rb_define_const([NSObject class], \"RUBYMOTION_ENV\", @\"#{rubymotion_env}\");\n"
+      main_txt << "rb_define_global_const(\"RUBYMOTION_ENV\", @\"#{rubymotion_env}\");\n"
+      main_txt << "rb_define_global_const(\"RUBYMOTION_VERSION\", @\"#{Motion::Version}\");\n"
       main_txt << <<EOS
         retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
         rb_exit(retval);
