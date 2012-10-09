@@ -20,6 +20,9 @@
   * Fixed the build system to build vendored Xcode projects into the `.build'
     directory instead of `build', as some projects come with such a directory.
   * Fixed a memory bug when calling `File.open' with a splat Array argument.
+  * Fixed a regression introduced in 1.21 which prevented the OCMock framework
+    to work, because the dispatcher was performing one additional selector on
+    NSProxy-based receivers and OCMock counts the number of messages.
   * Added the Pointer#value method which is alias for Pointer#[0].
   * Added the `app.framework_search_paths' variable that lets you configure
     the custom framework paths for the project build.
