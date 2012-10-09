@@ -30,6 +30,8 @@
     version of RubyMotion, as a String. Cleaned up other RUBY_ constants.
   * Added the `spec:device' Rake task which will run the spec/test suite on the
     device via the debugger.
+  * Improved Hash#[]= performance with array as hash key. If use the same
+    length array as hash key, it make 400 times faster.
 
 = RubyMotion 1.25 =
 
