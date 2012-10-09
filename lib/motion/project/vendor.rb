@@ -164,7 +164,7 @@ EOS
   
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
-          Dir.glob('build/*.a').each do |lib|
+          Dir.glob(File.join(XcodeBuildDir, '*.a')).each do |lib|
             next if prods and !prods.include?(File.basename(lib))
             lib = File.readlink(lib) if File.symlink?(lib)
             sh "/bin/cp \"#{lib}\" \"#{build_dir}\""
