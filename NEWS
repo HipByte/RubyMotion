@@ -26,6 +26,8 @@
   * Added the Pointer#value method which is alias for Pointer#[0].
   * Added the `app.framework_search_paths' variable that lets you configure
     the custom framework paths for the project build.
+  * Added the `RUBYMOTION_VERSION' Ruby constant at runtime which points to the 
+    version of RubyMotion, as a String. Cleaned up other RUBY_ constants.
   * Added the `spec:device' Rake task which will run the spec/test suite on the
     device via the debugger.
 
