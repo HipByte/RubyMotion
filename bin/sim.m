@@ -18,6 +18,7 @@
 - (NSString *)replEval:(NSString *)expression;
 @end
 
+static bool spec_mode = false;
 static int debug_mode = -1;
 #define DEBUG_GDB 1
 #define DEBUG_REPL 2
@@ -753,7 +754,7 @@ again:
 	save_repl_history();
     }
 
-    if (error == nil || debugger_killed_session) {
+    if (spec_mode || error == nil || debugger_killed_session) {
 	int status = 0;
 	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
 		@selector(simulatedApplicationPID));
@@ -865,6 +866,7 @@ main(int argc, char **argv)
 	usage();
     }
 
+    spec_mode = getenv("SIM_SPEC_MODE") != NULL;
     debug_mode = atoi(argv[1]);
     NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
     sdk_version = [[NSString stringWithUTF8String:argv[3]] retain];
@@ -889,7 +891,8 @@ main(int argc, char **argv)
     assert(Session != nil);
 
     // Prepare app environment.
-    NSMutableDictionary *appEnvironment = [[[NSProcessInfo processInfo] environment] mutableCopy];
+    NSMutableDictionary *appEnvironment = [[[NSProcessInfo processInfo]
+	environment] mutableCopy];
     if (debug_mode == DEBUG_REPL) {
 	// Prepare repl socket path.
 	NSString *tmpdir = NSTemporaryDirectory();
@@ -991,7 +994,7 @@ main(int argc, char **argv)
     }
 
     // Open simulator to the foreground.
-    if (getenv("NO_FOREGROUND_SIM") == NULL) {
+    if (!spec_mode) {
 	system("/usr/bin/open -a \"iPhone Simulator\"");
     }
 
