@@ -99,6 +99,7 @@ module Motion; module Project
             io.puts "resources/*.nib"
             io.puts "resources/*.momd"
             io.puts "resources/*.storyboardc"
+            io.puts ".DS_Store"
           end
           App.log 'Create', File.join(app_name, 'Rakefile')
           File.open('Rakefile', 'w') do |io|
