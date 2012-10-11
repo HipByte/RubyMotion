@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/Library/RubyMotion/bin/ruby -r require_relative.rb -Ilib $@ --seed 0

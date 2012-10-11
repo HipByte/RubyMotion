@@ -882,7 +882,7 @@ class TestNSArray < Test::Unit::TestCase
     a2 = @cls[ 'cat', 'dog' ]
     a3 = @cls[ 'dog', 'cat' ]
     assert(a1.hash == a2.hash)
-    # assert(a1.hash != a3.hash)
+    assert(a1.hash != a3.hash)
   end
 
   def test_include?
@@ -1905,7 +1905,7 @@ class TestNSArray < Test::Unit::TestCase
     a = @cls[]
     a << a
     assert_equal([[a]].hash, a.hash)
-    assert_not_equal([a, a].hash, a.hash) # Implementation dependent
+    # assert_not_equal([a, a].hash, a.hash) # Implementation dependent
   end
 
   def test_flatten_error

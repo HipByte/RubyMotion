@@ -10,8 +10,8 @@ class TestInteger < Test::Unit::TestCase
   end
 
   def test_aref
-    # assert_equal(1, (1 << 0x40000000)[0x40000000], "[ruby-dev:31271]")
-    # assert_equal(0, (-1 << 0x40000001)[0x40000000], "[ruby-dev:31271]")
+    assert_equal(1, (1 << 0x40000000)[0x40000000], "[ruby-dev:31271]")
+    assert_equal(0, (-1 << 0x40000001)[0x40000000], "[ruby-dev:31271]")
     big_zero = 0x40000000.coerce(0)[0]
     assert_equal(0, (-0x40000002)[big_zero], "[ruby-dev:31271]")
     assert_equal(1, 0x400000001[big_zero], "[ruby-dev:31271]")
@@ -30,16 +30,16 @@ class TestInteger < Test::Unit::TestCase
     assert_equal(0, 1 << -0x40000001)
     assert_equal(0, 1 << -0x80000000)
     assert_equal(0, 1 << -0x80000001)
-    # assert_equal(bdsize(0x80000000), (1 << 0x80000000).size)
+    assert_equal(bdsize(0x80000000), (1 << 0x80000000).size)
   end
 
   def test_rshift
-    # assert_equal(bdsize(0x40000001), (1 >> -0x40000001).size)
+    assert_equal(bdsize(0x40000001), (1 >> -0x40000001).size)
     assert((1 >> 0x80000000).zero?)
     assert((1 >> 0xffffffff).zero?)
     assert((1 >> 0x100000000).zero?)
-    # assert_equal((1 << 0x40000000), (1 >> -0x40000000))
-    # assert_equal((1 << 0x40000001), (1 >> -0x40000001))
+    assert_equal((1 << 0x40000000), (1 >> -0x40000000))
+    assert_equal((1 << 0x40000001), (1 >> -0x40000001))
   end
 
   def test_Integer

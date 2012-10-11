@@ -115,23 +115,23 @@ assert_equal 'Class',   proc{ class C; end;  C.dup.class }
 assert_equal 'Module',  proc{ module M; end;  M.dup.class }
 
 
-# assert_equal "ok", proc{
-#   module Foo
-#   end
+assert_equal "ok", proc{
+  module Foo
+  end
 
-#   begin
-#     def foo(&b)
-#       Foo.module_eval &b
-#     end
-#     foo{
-#       def bar
-#       end
-#     }
-#     bar()
-#   rescue NameError
-#     :ok
-#   end
-# }, '[ruby-core:14378]'
+  begin
+    def foo(&b)
+      Foo.module_eval &b
+    end
+    foo{
+      def bar
+      end
+    }
+    bar()
+  rescue NameError
+    :ok
+  end
+}, '[ruby-core:14378]'
 
 # assert_equal '3', proc{
 #   $i = 0
