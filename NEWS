@@ -1,3 +1,8 @@
+= RubyMotion 1.27 =
+
+  * Fixed the bug in Object#{dup, clone} which does not call #{initialize_dup,
+    initialize_clone}.
+
 = RubyMotion 1.26 =
 
   * Fixed a bug in the build system where the Info.plist file would not be
