@@ -4,6 +4,8 @@
     initialize_clone}.
   * Fixed a bug in Object#instance_eval which does not yield receiver object
     into the block.
+  * Fixed a bug in Array#== and Marshal.dump which lookup unnecessary private
+    methods.
 
 = RubyMotion 1.26 =
 
