@@ -6,6 +6,10 @@
     into the block.
   * Fixed a bug in Array#== and Marshal.dump which lookup unnecessary private
     methods.
+  * Fixed a bug in Array#{rotate, rotate!}. if passed nil into these methods,
+    they will raise a TypeError exception like CRuby.
+  * Fixed the Array#{uniq, uniq!} and NSArray#{uniq, uniq!} which does not
+    support block.
 
 = RubyMotion 1.26 =
 
