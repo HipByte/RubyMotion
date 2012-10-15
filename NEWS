@@ -10,6 +10,7 @@
     they will raise a TypeError exception like CRuby.
   * Fixed the Array#{uniq, uniq!} and NSArray#{uniq, uniq!} which does not
     support block.
+  * Fixed a bug in Range#dup which does not copy Range's begin/end value.
 
 = RubyMotion 1.26 =
 
