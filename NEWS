@@ -1,17 +1,21 @@
 = RubyMotion 1.27 =
 
-  * Fixed a bug which NSDecimalNumber.decimalNumberWithDecimal does not work.
-  * Fixed the bug in Object#{dup, clone} which does not call #{initialize_dup,
-    initialize_clone}.
-  * Fixed a bug in Object#instance_eval which does not yield receiver object
-    into the block.
-  * Fixed a bug in Array#== and Marshal.dump which lookup unnecessary private
-    methods.
-  * Fixed a bug in Array#{rotate, rotate!}. if passed nil into these methods,
-    they will raise a TypeError exception like CRuby.
-  * Fixed the Array#{uniq, uniq!} and NSArray#{uniq, uniq!} which does not
-    support block.
-  * Fixed a bug in Range#dup which does not copy Range's begin/end value.
+  * Fixed a bug where NSDecimalNumber.decimalNumberWithDecimal would not work
+    since 1.24 in development mode, because of a regression introduced after
+    changing the default set of optimization passes.
+  * Fixed a bug where the `dispatch_object' method would not return a proper
+    value on iOS 6.0, because it wasn't conforming to the new os/object.h
+    structure.
+  * Fixed a bug in Object#{dup,clone} where #{initialize_dup,initialize_clone}
+    would not be called.
+  * Fixed a bug in Object#instance_eval where the receiver object was not
+    properly yield to the block.
+  * Fixed a bug in Array#== and Marshal.dump where unnecessary private methods
+    were being looked up.
+  * Fixed a bug in Array#{rotate,rotate!} where it would not raise a TypeError
+    exception if nil was given.
+  * Fixed Array#{uniq, uniq!} and NSArray#{uniq, uniq!} to support blocks.
+  * Fixed a bug in Range#dup where the begin/end values were not copied.
 
 = RubyMotion 1.26 =
 
