@@ -18,6 +18,8 @@
   * Fixed a bug in Range#dup where the begin/end values were not copied.
   * Fixed a bug in Range#step which returns different from Numeric#step if 
     passed float value as step.
+  * Fixed a bug in String#<< with a codepoint argument where an exception would
+    be raised when called on US-ASCII/BINARY strings.
 
 = RubyMotion 1.26 =
 
