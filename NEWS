@@ -6,6 +6,8 @@
   * Fixed a bug where the `dispatch_object' method would not return a proper
     value on iOS 6.0, because it wasn't conforming to the new os/object.h
     structure.
+  * Fixed a bug in `rake spec' where certain UIAutomation-based methods would
+    not be callable because of a regression introduced in the previous update.
   * Fixed a bug in Object#{dup,clone} where #{initialize_dup,initialize_clone}
     would not be called.
   * Fixed a bug in Object#instance_eval where the receiver object was not
