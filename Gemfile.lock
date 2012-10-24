@@ -1,0 +1,18 @@
+GIT
+  remote: git://github.com/Watson1978/rdoc.git
+  revision: 872efa77c63aaafe56755c0d2de3f60286cddf12
+  branch: macruby
+  specs:
+    rdoc (3.12.20121024213649)
+      json (~> 1.4)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    json (1.7.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  rdoc!
