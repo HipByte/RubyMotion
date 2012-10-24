@@ -13,6 +13,9 @@
     the function will not be defined and respond_to? will return false.
     This fixes applications linking against AddressBook.framework on 6.0 and
     making conditional use of the new ABAddressBookCreateWithOptions().
+  * Fixed a bug in the runtime where calling `super' in certain methods
+    (ex. UISlider's thumbRectForBounds:trackRect:value:) would crash the
+    program due to an assertion.
   * Fixed a bug in Object#{dup,clone} where #{initialize_dup,initialize_clone}
     would not be called.
   * Fixed a bug in Object#instance_eval where the receiver object was not
