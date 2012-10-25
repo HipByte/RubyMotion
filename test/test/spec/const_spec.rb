@@ -4,3 +4,9 @@ describe "iOS constants" do
     KABPersonFirstNameProperty.should != KABPersonLastNameProperty
   end
 end
+
+describe "kCFBooleanTrue" do
+  it "can be retrieved" do
+    KCFBooleanTrue.should == true
+  end
+end
