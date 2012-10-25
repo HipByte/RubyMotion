@@ -2,3 +2,5 @@ task :default do
   ruby = ENV['ruby'] || "/Library/RubyMotion/bin/ruby"
   system "#{ruby} -Ilib -r require_relative.rb runner.rb"
 end
+
+task :spec => :default
