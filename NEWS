@@ -16,6 +16,9 @@
   * Fixed a bug in the runtime where calling `super' in certain methods
     (ex. UISlider's thumbRectForBounds:trackRect:value:) would crash the
     program due to an assertion.
+  * Fixed a bug in the compiler where certain structures could be returned as
+    an object of the wrong class (ex. MKCoordinateRegion.region returning
+    AudioValueRange instead of CLLocationCoordinate2D).
   * Fixed a bug in Object#{dup,clone} where #{initialize_dup,initialize_clone}
     would not be called.
   * Fixed a bug in Object#instance_eval where the receiver object was not
