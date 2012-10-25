@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/Watson1978/rdoc.git
-  revision: 872efa77c63aaafe56755c0d2de3f60286cddf12
+  revision: ac0bbcf2d52567c1b4d1828f99712c2b12ae88e5
   branch: macruby
   specs:
     rdoc (3.12.20121024213649)
