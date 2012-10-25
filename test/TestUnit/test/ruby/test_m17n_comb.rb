@@ -334,22 +334,22 @@ class TestM17NComb < Test::Unit::TestCase
     }
   end
 
-  # def test_str_concat
-  #   combination(STRINGS, STRINGS) {|s1, s2|
-  #     s = s1.dup
-  #     if s1.ascii_only? || s2.ascii_only? || s1.encoding == s2.encoding
-  #       s << s2
-  #       assert(s.valid_encoding?) if s1.valid_encoding? && s2.valid_encoding?
-  #       assert_equal(a(s), a(s1) + a(s2))
-  #       assert_str_enc_propagation(s, s1, s2)
-  #     else
-  #       assert_raise(Encoding::CompatibilityError) { s << s2 }
-  #     end
-  #   }
+  def test_str_concat
+    combination(STRINGS, STRINGS) {|s1, s2|
+      s = s1.dup
+      if s1.ascii_only? || s2.ascii_only? || s1.encoding == s2.encoding
+        s << s2
+        assert(s.valid_encoding?) if s1.valid_encoding? && s2.valid_encoding?
+        assert_equal(a(s), a(s1) + a(s2))
+        assert_str_enc_propagation(s, s1, s2)
+      else
+        assert_raise(Encoding::CompatibilityError) { s << s2 }
+      end
+    }
 
-  #   assert_equal("A\x84\x31\xA4\x39".force_encoding("GB18030"),
-  #                "A".force_encoding("GB18030") << 0x8431A439)
-  # end
+    # assert_equal("A\x84\x31\xA4\x39".force_encoding("GB18030"),
+    #              "A".force_encoding("GB18030") << 0x8431A439)
+  end
 
   # def test_str_aref
   #   STRINGS.each {|s|

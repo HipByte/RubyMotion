@@ -243,7 +243,7 @@ class TestModule < Test::Unit::TestCase
     end
     assert_equal("foo", Other.class_eval_test)
 
-    # assert_equal([Other], Other.class_eval { |*args| args })
+    assert_equal([Other], Other.class_eval { |*args| args })
   end
 
   def test_const_defined?

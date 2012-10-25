@@ -1356,8 +1356,8 @@ class TestM17N < Test::Unit::TestCase
   def test_force_encoding
     assert(("".center(1, "\x80".force_encoding("utf-8")); true),
            "moved from btest/knownbug, [ruby-dev:33807]")
-    # a = "".force_encoding("ascii-8bit") << 0xC3 << 0xB6
-    # assert_equal(1, a.force_encoding("utf-8").size, '[ruby-core:22437]')
+    a = "".force_encoding("ascii-8bit") << 0xC3 << 0xB6
+    assert_equal(1, a.force_encoding("utf-8").size, '[ruby-core:22437]')
     b = "".force_encoding("ascii-8bit") << 0xC3.chr << 0xB6.chr
     assert_equal(1, b.force_encoding("utf-8").size, '[ruby-core:22437]')
   end
