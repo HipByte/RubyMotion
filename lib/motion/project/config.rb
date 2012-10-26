@@ -341,6 +341,7 @@ EOS
       @bridgesupport_files ||= begin
         bs_files = []
         deps = ['RubyMotion'] + (frameworks_dependencies + weak_frameworks).uniq
+        deps << 'UIAutomation' if spec_mode
         deps.each do |framework|
           supported_versions.each do |ver|
             next if ver < deployment_target || sdk_version < ver
@@ -350,7 +351,6 @@ EOS
             end
           end
         end
-        deps << 'UIAutomation' if spec_mode
         bs_files
       end
     end
