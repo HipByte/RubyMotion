@@ -33,8 +33,8 @@
     a Float argument.
   * Fixed a bug in String#<< with a codepoint argument where an exception would
     be raised when called on US-ASCII/BINARY strings.
-  * Added .DS_Store, temporary files and project files into .gitignore which
-    created by `motion create'. (Thanks to Mark Rickert and Eric Summers)
+  * Added .DS_Store, temporary files and project files into the default
+    .gitignore file. Thanks to Mark Rickert and Eric Summers for the patch.
 
 = RubyMotion 1.26 =
 
