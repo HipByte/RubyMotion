@@ -178,7 +178,7 @@ task :rdoc do
     pack.c proc.c process.c random.c range.c rational.c re.c 
     signal.c sprintf.c string.c struct.c symbol.c thread.c time.c 
     transcode.c ucnv.c util.c variable.c vm_eval.c vm_method.c
-    NSArray.m NSDictionary.m NSString.m bridgesupport.cpp gcd.c objc.m
+    NSArray.m NSDictionary.m NSString.m bridgesupport.cpp gcd.c objc.m sandbox.c
   }
   files = TARGETS.map{ |x| "vm/#{x}" }.join(" ")
 
