@@ -15,7 +15,7 @@ doc/.yardoc
 doc/*.html
 doc/docset
 
-rdoc/
+api
 
 lib/motion/version.rb
 

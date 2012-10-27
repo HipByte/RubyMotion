@@ -1,18 +1,16 @@
 GIT
-  remote: git://github.com/Watson1978/rdoc.git
-  revision: ac0bbcf2d52567c1b4d1828f99712c2b12ae88e5
+  remote: git://github.com/Watson1978/yard.git
+  revision: 87d2127d2e390495184f47b9936c0e4c34d2499b
   branch: macruby
   specs:
-    rdoc (3.12.20121024213649)
-      json (~> 1.4)
+    yard (0.8.3)
 
 GEM
   remote: http://rubygems.org/
   specs:
-    json (1.7.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  rdoc!
+  yard!

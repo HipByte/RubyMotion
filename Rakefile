@@ -167,21 +167,23 @@ task :upload do
   puts "Done!"
 end
 
-desc "Generate Documents with rdoc"
-task :rdoc do
-  require 'fileutils'
-  OUTPUT_DIR = "rdoc"
-  TARGETS = %w{
-    array.c bignum.c class.c compar.c complex.c dir.c encoding.c enum.c
-    enumerator.c env.c error.c eval.c eval_error.c eval_jump.c eval_safe.c
-    file.c hash.c io.c kernel.c load.c marshal.c math.c numeric.c object.c
-    pack.c proc.c process.c random.c range.c rational.c re.c 
-    signal.c sprintf.c string.c struct.c symbol.c thread.c time.c 
-    transcode.c ucnv.c util.c variable.c vm_eval.c vm_method.c
-    NSArray.m NSDictionary.m NSString.m bridgesupport.cpp gcd.c objc.m sandbox.c
-  }
-  files = TARGETS.map{ |x| "vm/#{x}" }.join(" ")
+namespace :doc do
+  desc "Generate API Documents"
+  task :api do
+    require 'fileutils'
+    OUTPUT_DIR = "api"
+    TARGETS = %w{
+      array.c bignum.c class.c compar.c complex.c dir.c encoding.c enum.c
+      enumerator.c env.c error.c eval.c eval_error.c eval_jump.c eval_safe.c
+      file.c hash.c io.c kernel.c load.c marshal.c math.c numeric.c object.c
+      pack.c proc.c process.c random.c range.c rational.c re.c
+      signal.c sprintf.c string.c struct.c symbol.c thread.c time.c
+      transcode.c ucnv.c util.c variable.c vm_eval.c vm_method.c
+      NSArray.m NSDictionary.m NSString.m bridgesupport.cpp gcd.c objc.m sandbox.c
+    }
+    files = TARGETS.map{ |x| "#{x}" }.join(" ")
 
-  FileUtils.rm_rf OUTPUT_DIR
-  sh "bundle exec rdoc #{files} --op #{OUTPUT_DIR}"
+    FileUtils.rm_rf OUTPUT_DIR
+    sh "cd vm; bundle exec yardoc -o ../#{OUTPUT_DIR} #{files}"
+  end
 end
