@@ -178,7 +178,7 @@ namespace :doc do
       file.c hash.c io.c kernel.c load.c marshal.c math.c numeric.c object.c
       pack.c proc.c process.c random.c range.c rational.c re.c
       signal.c sprintf.c string.c struct.c symbol.c thread.c time.c
-      transcode.c ucnv.c util.c variable.c vm_eval.c vm_method.c
+      transcode.c ucnv.c util.c variable.c vm.cpp vm_eval.c vm_method.c
       NSArray.m NSDictionary.m NSString.m bridgesupport.cpp gcd.c objc.m sandbox.c
     }
     files = TARGETS.map{ |x| "#{x}" }.join(" ")
