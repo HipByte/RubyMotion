@@ -8,9 +8,11 @@ GIT
 GEM
   remote: http://rubygems.org/
   specs:
+    nokogiri (1.5.5)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  nokogiri
   yard!

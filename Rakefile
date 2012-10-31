@@ -170,6 +170,7 @@ end
 namespace :doc do
   desc "Generate API Documents"
   task :api do
+    require 'doc/docset'
     require 'fileutils'
     OUTPUT_DIR = "api"
     TARGETS = %w{
@@ -181,9 +182,20 @@ namespace :doc do
       transcode.c ucnv.c util.c variable.c vm.cpp vm_eval.c vm_method.c
       NSArray.m NSDictionary.m NSString.m bridgesupport.cpp gcd.c objc.m sandbox.c
     }
-    files = TARGETS.map{ |x| "#{x}" }.join(" ")
+    rubymotion_files = TARGETS.join(" ")
+
+    DOCSET_PATHS = %w{
+      ~/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset/Contents/Resources/Documents/documentation/UIKit/Reference
+      ~/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset/Contents/Resources/Documents/documentation/Cocoa/Reference
+    }
+    DOCSET_RUBY_FILES_DIR = '/tmp/rb_docset'
+
+    # generate Ruby code from iOS SDK docset
+    DocsetGenerator.new('docset', DOCSET_PATHS).generate_ruby_code
+
+    docset_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb')).join(" ")
 
     FileUtils.rm_rf OUTPUT_DIR
-    sh "cd vm; yardoc -o ../#{OUTPUT_DIR} #{files}"
+    sh "cd vm; yardoc -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files}"
   end
 end
