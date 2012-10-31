@@ -1,3 +1,8 @@
+= RubyMotion 1.28 =
+
+  * Fixed the build system to set a 5 seconds timeout when accessing the
+    software updates server. Thanks Nick Quaranto for the patch.
+
 = RubyMotion 1.27 =
 
   * Fixed a bug where NSDecimalNumber.decimalNumberWithDecimal would not work
