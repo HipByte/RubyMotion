@@ -136,6 +136,7 @@ class DocsetGenerator
   def initialize(outpath, paths)
     @input_paths = []
     paths.each do |path|
+      path = File.expand_path(path)
       if File.directory?(path)
         @input_paths.concat(Dir.glob(path + '/**/*.html'))
       else
@@ -143,20 +144,27 @@ class DocsetGenerator
       end
     end
     @outpath = outpath
+    @rb_files_dir = '/tmp/rb_docset'
   end
 
-  def run 
-    rb_files_dir = '/tmp/rb_docset'
-    FileUtils.rm_rf(rb_files_dir)
-    FileUtils.mkdir_p(rb_files_dir)
+  def generate_ruby_code
+    FileUtils.rm_rf(@rb_files_dir)
+    FileUtils.mkdir_p(@rb_files_dir)
  
     @input_paths.map { |path| parse_html_data(File.read(path)) }.compact.each_with_index do |code, n|
-      File.open(File.join(rb_files_dir, "t#{n}.rb"), 'w') do |io|
+      File.open(File.join(@rb_files_dir, "t#{n}.rb"), 'w') do |io|
         io.write(code)
       end
     end
+  end
 
-    sh "yard doc #{rb_files_dir}"
+  def generate_html
+    sh "yard doc #{@rb_files_dir}"
     sh "mv doc \"#{@outpath}\""
+  end
+
+  def run 
+    generate_ruby_code()
+    generate_html()
   end
 end
