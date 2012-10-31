@@ -196,6 +196,6 @@ namespace :doc do
     docset_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb')).join(" ")
 
     FileUtils.rm_rf OUTPUT_DIR
-    sh "cd vm; yardoc -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files}"
+    sh "cd vm; bundle exec yardoc -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files}"
   end
 end
