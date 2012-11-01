@@ -109,6 +109,10 @@ class DocsetGenerator
       is_class_method = decl.match(/^\s*\+/) != nil
       decl.sub!(/^\s*[\+\-]/, '') # Remove method qualifier.
       decl.sub!(/;\s*$/, '')
+
+      no_break_space = [0x00A0].pack("U*")
+      decl.gsub!(no_break_space, '')
+
       sel_parts = decl.gsub(/\([^)]+\)+/, '').split.map { |x| x.split(':') }
       head = sel_parts.shift
       code << "  def #{is_class_method ? 'self.' : ''}#{head[0]}("
