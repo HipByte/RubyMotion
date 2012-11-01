@@ -125,7 +125,13 @@ class DocsetGenerator
       code << "#{head[1]}" if head.size > 1
       unless sel_parts.empty?
         code << ', '
-        code << sel_parts.map { |part| "#{part[0]}:#{part[1]}" }.join(', ')
+        code << sel_parts.map { |part| 
+          if part[1]
+            "#{part[0]}:#{part[1]}"
+          else
+            part[0]
+          end
+        }.join(', ')
       end
       code << "); end\n\n"
     end
