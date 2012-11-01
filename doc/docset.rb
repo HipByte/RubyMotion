@@ -59,8 +59,12 @@ class DocsetGenerator
   
     code = doc.xpath(".//p[@class='abstract']")[0].text
     code.gsub!(/^/m, '# ')
-    code << "\nclass #{name} < #{sclass}\n\n"
-  
+    if sclass == "none"
+      code << "\nclass #{name}\n\n"
+    else
+      code << "\nclass #{name} < #{sclass}\n\n"
+    end
+
     # Properties.
     doc.xpath("//div[@class='api propertyObjC']").each do |node|
       decl = node.xpath(".//div[@class='declaration']/div[@class='declaration']").text
