@@ -40,7 +40,7 @@ class DocsetGenerator
         'Boolean'
       when 'float', 'double', 'CGFloat'
         'Float'
-      when /(?:const\s+)?u?int(?:\d+_t)?/, 'short', 'long', 'long long', 'NSInteger', 'NSUInteger'
+      when /(?:const\s+)?u?int(?:\d+_t)?/, 'char', 'unichar', 'short', 'long', 'long long', 'unsigned char', 'unsigned short', 'unsigned long', 'unsigned long long', 'NSInteger', 'NSUInteger'
         'Integer'
       when 'NSString', 'NSMutableString'
         'String'
