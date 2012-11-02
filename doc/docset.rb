@@ -7,8 +7,12 @@ class DocsetGenerator
     code = ''
     code << node.xpath(".//p[@class='abstract']").text
     code << "\n"
-    code << node.xpath(".//div[@class='api discussion']").text.sub(/^Discussion/, '')
-  
+
+    node_discussion = node.xpath(".//div[@class='api discussion']")
+    node_cdesample  = node_discussion.xpath(".//div[@class='codesample clear']")
+    node_cdesample.unlink
+
+    code << node_discussion.text.sub(/^Discussion/, '')
     code.strip!
     code.gsub!(/^/m, '  # ')
     code << "\n"
