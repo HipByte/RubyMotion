@@ -30,7 +30,7 @@ class DocsetGenerator
       when /\*$/
         # A double pointer, in MacRuby this becomes a Pointer.
         'Pointer'
-      when 'id'
+      when /id(?:\s*<\w+>)?/
         'Object'
       when 'void'
         'nil'
