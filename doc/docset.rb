@@ -16,6 +16,9 @@ class DocsetGenerator
   end
   
   def parse_type(type)
+    if type.kind_of?(Array)
+      type = type.first
+    end
     type = type.to_s
     type.strip!
     star = type.sub!(/\s*\*$/, '') # Remove pointer star.
