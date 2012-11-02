@@ -173,6 +173,7 @@ class DocsetGenerator
  
     @input_paths.map { |path| parse_html_data(File.read(path)) }.compact.each_with_index do |code, n|
       File.open(File.join(@rb_files_dir, "t#{n}.rb"), 'w') do |io|
+        io.puts "# -*- coding: utf-8 -*-"
         io.write(code)
       end
     end
