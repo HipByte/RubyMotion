@@ -170,7 +170,7 @@ end
 namespace :doc do
   desc "Generate API Documents"
   task :api do
-    require 'doc/docset'
+    require './doc/docset'
     require 'fileutils'
     OUTPUT_DIR = "api"
     TARGETS = %w{
