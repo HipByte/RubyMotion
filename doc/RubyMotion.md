@@ -117,6 +117,4 @@
 - [TypeError](TypeError.html)
 - [UnboundMethod](UnboundMethod.html)
 - [ZeroDivisionError](ZeroDivisionError.html)
-- [_RegexpMatcher](_RegexpMatcher.html)
-- [__SClassFinalizer](__SClassFinalizer.html)
 - [fatal](fatal.html)
