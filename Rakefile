@@ -200,7 +200,7 @@ namespace :doc do
     docset_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb')).join(" ")
     frameworks   = Dir.glob(File.join(OUTPUT_DIR, '*.md')).map{ |x| "../#{x}" }.join(" ")
 
-    sh "#{YARDOC} -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files} - ../doc/RubyMotion.md #{frameworks}"
+    sh "#{YARDOC} --title 'RubyMotion API Reference' -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files} - ../doc/RubyMotion.md #{frameworks}"
   end
 
   namespace :list do
