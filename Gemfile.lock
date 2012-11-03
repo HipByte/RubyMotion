@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/Watson1978/yard.git
-  revision: 7159ffdc910472fc358b605f612afd45709eb30a
+  revision: 3829f70a1d54859b398086a6245c096d83d93cd8
   branch: macruby
   specs:
     yard (0.8.3)
