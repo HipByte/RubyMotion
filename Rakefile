@@ -201,6 +201,7 @@ namespace :doc do
     frameworks   = Dir.glob(File.join(OUTPUT_DIR, '*.md')).map{ |x| "../#{x}" }.join(" ")
 
     sh "#{YARDOC} --title 'RubyMotion API Reference' -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files} - ../doc/RubyMotion.md #{frameworks}"
+    FileUtils.ln "#{OUTPUT_DIR}/_index.html", "#{OUTPUT_DIR}/index.html"
   end
 
   namespace :list do
