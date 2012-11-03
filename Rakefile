@@ -186,6 +186,19 @@ namespace :doc do
     DOCSET_PATH + '/UIKit/Reference',
     DOCSET_PATH + '/Foundation/Reference',
     DOCSET_PATH + '/CoreData/Reference',
+    DOCSET_PATH + '/CoreImage/Reference',
+    DOCSET_PATH + '/CoreLocation/Reference',
+    DOCSET_PATH + '/CoreMotion/Reference',
+    DOCSET_PATH + '/AVFoundation/Reference',
+    DOCSET_PATH + '/EventKit/Reference',
+    DOCSET_PATH + '/EventKitUI/Reference',
+    DOCSET_PATH + '/GameKit/Reference',
+    DOCSET_PATH + '/GraphicsImaging/Reference',
+    DOCSET_PATH + '/MapKit/Reference',
+    DOCSET_PATH + '/PassKit/Reference',
+    DOCSET_PATH + '/Social/Reference',
+    DOCSET_PATH + '/StoreKit/Reference',
+    DOCSET_PATH + '/iAd/Reference',
     DOCSET_PATH + '/Cocoa/Reference' # xxx we may need to filter here
   ] 
   OUTPUT_DIR = "api"
