@@ -9,10 +9,12 @@ GEM
   remote: http://rubygems.org/
   specs:
     nokogiri (1.5.5)
+    redcarpet (2.2.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   nokogiri
+  redcarpet
   yard!
