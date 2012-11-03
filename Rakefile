@@ -181,27 +181,51 @@ namespace :doc do
     transcode.c ucnv.c util.c variable.c vm.cpp vm_eval.c vm_method.c
     NSArray.m NSDictionary.m NSString.m bridgesupport.cpp gcd.c objc.m sandbox.c
   }
-  DOCSET = {
-    "UIKit" => "~/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset/Contents/Resources/Documents/documentation/UIKit/Reference",
-    "Foundation" => "~/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset/Contents/Resources/Documents/documentation/Cocoa/Reference"
-  }
+  DOCSET_PATH = '~/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset/Contents/Resources/Documents/documentation'
+  DOCSET = [
+    DOCSET_PATH + '/UIKit/Reference',
+    DOCSET_PATH + '/Foundation/Reference',
+    DOCSET_PATH + '/CoreData/Reference',
+    DOCSET_PATH + '/Cocoa/Reference' # xxx we may need to filter here
+  ] 
   OUTPUT_DIR = "api"
   DOCSET_RUBY_FILES_DIR = '/tmp/rb_docset'
 
   desc "Generate API Documents"
-  task :api => [:"list:framework"] do
-    rubymotion_files = RUBY_SOURCES.join(" ")
-
+  task :api do
     # generate Ruby code from iOS SDK docset
-    docset_paths = []
-    DOCSET.each_value{ |x| docset_paths << x }
-    DocsetGenerator.new('docset', docset_paths).generate_ruby_code
+    DocsetGenerator.new('docset', DOCSET).generate_ruby_code
 
-    docset_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb')).join(" ")
-    frameworks   = Dir.glob(File.join(OUTPUT_DIR, '*.md')).map{ |x| "../#{x}" }.join(" ")
+    # generate .md files for frameworks
+    frameworks_hash = {}
+    ruby_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb'))
+    ruby_files.each do |x|
+      data = File.read(x)
+      md1 = data.match(/#\s+\-\*\-\s+framework:\s+\/System\/Library\/Frameworks\/(.+)\.framework\s+\-\*\-/)
+      md2 = data.match(/^class\s+([^\s\n]+)/)
+      if md1 and md2
+        (frameworks_hash[md1[1]] ||= []) << md2[1]
+      end
+    end
+    frameworks_hash.each do |name, classes|
+      next if name == 'AppKit'
+      File.open("#{OUTPUT_DIR}/#{name}.md", 'w') do |io|
+        io.puts "# @markup markdown"
+        io.puts "# @title #{name}"
+        io.puts "# #{name}"
+        classes.sort.each do |klass|
+          io.puts "- [#{klass}](#{klass}.html)"
+        end
+      end
+    end
+
+    # generate yard documentation
+    rubymotion_files = RUBY_SOURCES.join(" ")
+    docset_files = ruby_files.join(" ")
+    frameworks = Dir.glob(File.join(OUTPUT_DIR, '*.md')).map{ |x| "../#{x}" }.join(" ")
 
     sh "#{YARDOC} --title 'RubyMotion API Reference' -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files} - ../doc/RubyMotion.md #{frameworks}"
-    FileUtils.ln "#{OUTPUT_DIR}/_index.html", "#{OUTPUT_DIR}/index.html"
+    FileUtils.ln "#{OUTPUT_DIR}/_index.html", "#{OUTPUT_DIR}/index.html" unless File.exist?("#{OUTPUT_DIR}/index.html")
   end
 
   namespace :list do
@@ -225,18 +249,6 @@ namespace :doc do
       }
     end
 
-    def save_framework_class_list(name, path)
-      # generate Ruby code from iOS SDK docset
-      FileUtils.rm_rf OUTPUT_FRAMEWORK_DOC_DIR
-      FileUtils.rm_rf DOCSET_RUBY_FILES_DIR
-      DocsetGenerator.new('docset', [path]).generate_ruby_code
-
-      docset_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb')).join(" ")
-      sh "#{YARDOC} -o #{OUTPUT_FRAMEWORK_DOC_DIR} #{docset_files}"
-
-      save_class_list("#{name}", OUTPUT_FRAMEWORK_DOC_DIR, "#{OUTPUT_DIR}/#{name}.md")
-    end
-
     desc "Generate RubyMotion Classes List"
     task :rubymotion do
       OUTPUT_RUBY_DOC_DIR = '/tmp/rubymotion_doc'
@@ -246,17 +258,6 @@ namespace :doc do
       FileUtils.rm_rf OUTPUT_RUBY_DOC_DIR
       sh "#{YARDOC} -o #{OUTPUT_RUBY_DOC_DIR} #{rubymotion_files}"
       save_class_list("RubyMotion", OUTPUT_RUBY_DOC_DIR, "doc/RubyMotion.md")
-    end
-
-    desc "Generate iOS SDK Framework Classes List"
-    task :framework do
-      OUTPUT_FRAMEWORK_DOC_DIR = '/tmp/rb_framework_doc'
-
-      FileUtils.rm_rf OUTPUT_DIR
-      FileUtils.mkdir_p OUTPUT_DIR
-
-      save_framework_class_list('UIKit', DOCSET['UIKit'])
-      save_framework_class_list('Foundation', DOCSET['Foundation'])
     end
   end
 end

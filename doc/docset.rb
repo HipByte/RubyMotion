@@ -63,9 +63,21 @@ class DocsetGenerator
       end
     end
     return nil unless sclass
-  
-    code = doc.xpath(".//p[@class='abstract']")[0].text
-    code.gsub!(/^/m, '# ')
+
+    code = ''
+
+    # Determine where the class is defined (optional).
+    elem = doc.xpath(".//span[@class='FrameworkPath']")
+    if elem.size > 0
+      framework_path = elem[0].parent.parent.parent.children[1].text
+      code << "# -*- framework: #{framework_path} -*-\n\n"    
+    else
+      $stderr.puts "Can't determine framework path for: #{name}"
+      code << "\n\n"
+    end
+
+    # Class abstract.
+    code << doc.xpath(".//p[@class='abstract']")[0].text.gsub(/^/m, '# ')
     if sclass == "none"
       code << "\nclass #{name}\n\n"
     else
