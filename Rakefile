@@ -233,7 +233,7 @@ namespace :doc do
       docset_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb')).join(" ")
       sh "#{YARDOC} -o #{OUTPUT_FRAMEWORK_DOC_DIR} #{docset_files}"
 
-      save_class_list("#{name} Framework Classes", OUTPUT_FRAMEWORK_DOC_DIR, "#{OUTPUT_DIR}/#{name}.md")
+      save_class_list("#{name}", OUTPUT_FRAMEWORK_DOC_DIR, "#{OUTPUT_DIR}/#{name}.md")
     end
 
     desc "Generate RubyMotion Classes List"
@@ -244,7 +244,7 @@ namespace :doc do
 
       FileUtils.rm_rf OUTPUT_RUBY_DOC_DIR
       sh "#{YARDOC} -o #{OUTPUT_RUBY_DOC_DIR} #{rubymotion_files}"
-      save_class_list("RubyMotion Classes", OUTPUT_RUBY_DOC_DIR, "doc/RubyMotion.md")
+      save_class_list("RubyMotion", OUTPUT_RUBY_DOC_DIR, "doc/RubyMotion.md")
     end
 
     desc "Generate iOS SDK Framework Classes List"

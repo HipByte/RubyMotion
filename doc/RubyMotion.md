@@ -1,6 +1,6 @@
 # @markup markdown
-# @title RubyMotion Classes
-# RubyMotion Classes
+# @title RubyMotion
+# RubyMotion
 - [ARGF](ARGF.html)
 - [ArgumentError](ArgumentError.html)
 - [Array](Array.html)
