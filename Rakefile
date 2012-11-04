@@ -183,17 +183,19 @@ namespace :doc do
   }
   DOCSET_PATH = '~/Library/Developer/Shared/Documentation/DocSets/com.apple.adc.documentation.AppleiOS6.0.iOSLibrary.docset/Contents/Resources/Documents/documentation'
   DOCSET = [
-    DOCSET_PATH + '/UIKit/Reference',
-    DOCSET_PATH + '/Foundation/Reference',
+    DOCSET_PATH + '/AVFoundation/Reference',
+    DOCSET_PATH + '/Cocoa/Reference', # xxx we may need to filter here
     DOCSET_PATH + '/CoreData/Reference',
     DOCSET_PATH + '/CoreImage/Reference',
     DOCSET_PATH + '/CoreLocation/Reference',
     DOCSET_PATH + '/CoreMotion/Reference',
-    DOCSET_PATH + '/AVFoundation/Reference',
+    DOCSET_PATH + '/DataManagement/Reference',
     DOCSET_PATH + '/EventKit/Reference',
     DOCSET_PATH + '/EventKitUI/Reference',
+    DOCSET_PATH + '/Foundation/Reference',
     DOCSET_PATH + '/GameKit/Reference',
     DOCSET_PATH + '/GraphicsImaging/Reference',
+    DOCSET_PATH + '/iAd/Reference',
     DOCSET_PATH + '/MapKit/Reference',
     DOCSET_PATH + '/MediaPlayer/Reference',
     DOCSET_PATH + '/MessageUI/Reference',
@@ -202,8 +204,7 @@ namespace :doc do
     DOCSET_PATH + '/QuartzCore/Reference',
     DOCSET_PATH + '/Social/Reference',
     DOCSET_PATH + '/StoreKit/Reference',
-    DOCSET_PATH + '/iAd/Reference',
-    DOCSET_PATH + '/Cocoa/Reference' # xxx we may need to filter here
+    DOCSET_PATH + '/UIKit/Reference'
   ] 
   OUTPUT_DIR = "api"
   DOCSET_RUBY_FILES_DIR = '/tmp/rb_docset'
