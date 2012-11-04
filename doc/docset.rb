@@ -2,7 +2,7 @@ class DocsetGenerator
   require 'rubygems'
   require 'nokogiri'
   require 'fileutils'
-  
+
   def parse_html_docref(node)
     code = ''
     code << node.xpath(".//p[@class='abstract']").text
@@ -16,9 +16,9 @@ class DocsetGenerator
     code.strip!
     code.gsub!(/^/m, '  # ')
     code << "\n"
-    return code 
+    return code
   end
-  
+
   def parse_type(type)
     if type.kind_of?(Array)
       type = type.first
@@ -52,7 +52,7 @@ class DocsetGenerator
         type
     end
   end
-  
+
   def parse_html_class(name, doc)
     # Find superclass (mandatory).
     sclass = nil
@@ -70,7 +70,7 @@ class DocsetGenerator
     elem = doc.xpath(".//span[@class='FrameworkPath']")
     if elem.size > 0
       framework_path = elem[0].parent.parent.parent.children[1].text
-      code << "# -*- framework: #{framework_path} -*-\n\n"    
+      code << "# -*- framework: #{framework_path} -*-\n\n"
     else
       $stderr.puts "Can't determine framework path for: #{name}"
       code << "\n\n"
@@ -93,12 +93,12 @@ class DocsetGenerator
       next unless md
       title = md[1]
       type = md.pre_match
-  
+
       code << parse_html_docref(node)
       code << "  # @return [#{parse_type(type)}]\n"
       code << '  ' << (readonly ? "attr_reader" : "attr_accessor") << " :#{title}\n\n"
     end
-  
+
     # Methods.
     methods = []
     methods.concat(doc.xpath("//div[@class='api classMethod']"))
@@ -106,11 +106,11 @@ class DocsetGenerator
     methods.each do |node|
       decl = node.xpath(".//div[@class='declaration']").text
       types = decl.scan(/\(([^)]+)\)/)
-      ret_type = types.shift 
-  
+      ret_type = types.shift
+
       # Docref.
       code << parse_html_docref(node)
-  
+
       # Parameters and return value.
       arg_names = node.xpath(".//div[@class='api parameters']//dt")
       arg_docs = node.xpath(".//div[@class='api parameters']//dd")
@@ -144,7 +144,7 @@ class DocsetGenerator
       code << "#{head[1]}" if head.size > 1
       unless sel_parts.empty?
         code << ', '
-        code << sel_parts.map { |part| 
+        code << sel_parts.map { |part|
           if part[1]
             "#{part[0]}:#{part[1]}"
           else
@@ -154,7 +154,7 @@ class DocsetGenerator
       end
       code << "); end\n\n"
     end
-  
+
     code << "end"
     return code
   end
@@ -227,7 +227,7 @@ class DocsetGenerator
   def generate_ruby_code
     FileUtils.rm_rf(@rb_files_dir)
     FileUtils.mkdir_p(@rb_files_dir)
- 
+
     @input_paths.map { |path| parse_html_data(File.read(path)) }.compact.each_with_index do |code, n|
       File.open(File.join(@rb_files_dir, "t#{n}.rb"), 'w') do |io|
         io.puts "# -*- coding: utf-8 -*-"
@@ -241,7 +241,7 @@ class DocsetGenerator
     sh "mv doc \"#{@outpath}\""
   end
 
-  def run 
+  def run
     generate_ruby_code()
     generate_html()
   end
