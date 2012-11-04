@@ -53,52 +53,7 @@ class DocsetGenerator
     end
   end
 
-  def parse_html_class(name, doc)
-    # Find superclass (mandatory).
-    sclass = nil
-    doc.xpath("//table[@class='specbox']/tr").each do |node|
-      if md = node.text.match(/Inherits from([^ ]+)/)
-        sclass = md[1]
-        break
-      end
-    end
-    return nil unless sclass
-
-    code = ''
-
-    # Determine where the class is defined (optional).
-    elem = doc.xpath(".//span[@class='FrameworkPath']")
-    if elem.size > 0
-      framework_path = elem[0].parent.parent.parent.children[1].text
-      code << "# -*- framework: #{framework_path} -*-\n\n"
-    else
-      $stderr.puts "Can't determine framework path for: #{name}"
-      code << "\n\n"
-    end
-
-    # Class abstract.
-    code << doc.xpath(".//p[@class='abstract']")[0].text.gsub(/^/m, '# ')
-    if sclass == "none"
-      code << "\nclass #{name}\n\n"
-    else
-      code << "\nclass #{name} < #{sclass}\n\n"
-    end
-
-    # Properties.
-    doc.xpath("//div[@class='api propertyObjC']").each do |node|
-      decl = node.xpath(".//div[@class='declaration']/div[@class='declaration']").text
-      readonly = decl.include?('readonly')
-      decl.sub!(/@property\s*(\([^\)]+\))?/, '')
-      md = decl.match(/(\w+)$/)
-      next unless md
-      title = md[1]
-      type = md.pre_match
-
-      code << parse_html_docref(node)
-      code << "  # @return [#{parse_type(type)}]\n"
-      code << '  ' << (readonly ? "attr_reader" : "attr_accessor") << " :#{title}\n\n"
-    end
-
+  def parse_html_method(doc, code = "")
     # Methods.
     methods = []
     methods.concat(doc.xpath("//div[@class='api classMethod']"))
@@ -154,6 +109,57 @@ class DocsetGenerator
       end
       code << "); end\n\n"
     end
+
+    return code
+  end
+
+  def parse_html_class(name, doc)
+    # Find superclass (mandatory).
+    sclass = nil
+    doc.xpath("//table[@class='specbox']/tr").each do |node|
+      if md = node.text.match(/Inherits from([^ ]+)/)
+        sclass = md[1]
+        break
+      end
+    end
+    return nil unless sclass
+
+    code = ''
+
+    # Determine where the class is defined (optional).
+    elem = doc.xpath(".//span[@class='FrameworkPath']")
+    if elem.size > 0
+      framework_path = elem[0].parent.parent.parent.children[1].text
+      code << "# -*- framework: #{framework_path} -*-\n\n"
+    else
+      $stderr.puts "Can't determine framework path for: #{name}"
+      code << "\n\n"
+    end
+
+    # Class abstract.
+    code << doc.xpath(".//p[@class='abstract']")[0].text.gsub(/^/m, '# ')
+    if sclass == "none"
+      code << "\nclass #{name}\n\n"
+    else
+      code << "\nclass #{name} < #{sclass}\n\n"
+    end
+
+    # Properties.
+    doc.xpath("//div[@class='api propertyObjC']").each do |node|
+      decl = node.xpath(".//div[@class='declaration']/div[@class='declaration']").text
+      readonly = decl.include?('readonly')
+      decl.sub!(/@property\s*(\([^\)]+\))?/, '')
+      md = decl.match(/(\w+)$/)
+      next unless md
+      title = md[1]
+      type = md.pre_match
+
+      code << parse_html_docref(node)
+      code << "  # @return [#{parse_type(type)}]\n"
+      code << '  ' << (readonly ? "attr_reader" : "attr_accessor") << " :#{title}\n\n"
+    end
+
+    parse_html_method(doc, code)
 
     code << "end"
     return code
