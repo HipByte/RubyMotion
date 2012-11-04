@@ -158,15 +158,56 @@ class DocsetGenerator
     code << "end"
     return code
   end
-  
+
+  def parse_html_struct(doc, code = "")
+    node_name        = doc.xpath("../h3[@class='tight jump struct']")
+    node_abstract    = doc.xpath("../p[@class='abstract']")
+    node_declaration = doc.xpath("../pre[@class='declaration']")
+    node_termdef     = doc.xpath("../dl[@class='termdef']")
+
+    node_name.size.times do |i|
+      name        = node_name[i].text
+      abstract    = node_abstract[i].text
+      declaration = node_declaration[i].text.strip
+      members     = declaration.lines.to_a[1..-1] # cut 'struct CGPoint {' line
+      unless members.empty?
+        code << "# #{abstract}\n"
+        code << "class #{name} < Boxed\n"
+
+        node_field_description = node_termdef.xpath("dd")
+        members.each_with_index do |item, index|
+          break if item =~ /\}/
+          item =~ /(.+)\s+(.+);/
+          type   = $1
+          member = $2
+          code << "  # @return [#{parse_type(type)}] #{node_field_description[index].text}\n"
+          code << "  attr_accessor :#{member}\n"
+        end
+        code << "end\n\n"
+      end
+    end
+
+    code
+  end
+
+  def parse_html_reference(name, doc)
+    if node = doc.xpath("//section/a[@title='Data Types']")
+      parse_html_struct(node)
+    end
+  end
+
   def parse_html_data(data)
     doc = Nokogiri::HTML(data)
     title = doc.xpath('/html/head/title')
-    if title and md = title.text.match(/^(.+)Class Reference$/)
-      parse_html_class(md[1].strip, doc)
+    if title
+      if md = title.text.match(/^(.+)Class Reference$/)
+        parse_html_class(md[1].strip, doc)
+      elsif md = title.text.match(/^(.+) Reference$/)
+        parse_html_reference(md[1].strip, doc)
+      end
     else
       nil
-    end      
+    end
   end
 
   def initialize(outpath, paths)
