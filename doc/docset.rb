@@ -165,6 +165,22 @@ class DocsetGenerator
     return code
   end
 
+  def parse_html_protocol(name, doc)
+    code = ''
+
+    # Class abstract.
+    node = doc.xpath(".//p[@class='abstract']")
+    return nil if node.empty?
+
+    code << node.text.gsub(/^/m, '# ')
+    code << "\nclass #{name}\n\n"
+
+    parse_html_method(doc, code)
+
+    code << "end"
+    return code
+  end
+
   def parse_html_struct(doc, code = "")
     node_name        = doc.xpath("../h3[@class='tight jump struct']")
     node_abstract    = doc.xpath("../p[@class='abstract']")
@@ -193,7 +209,7 @@ class DocsetGenerator
       end
     end
 
-    code
+    return code
   end
 
   def parse_html_reference(name, doc)
@@ -208,6 +224,8 @@ class DocsetGenerator
     if title
       if md = title.text.match(/^(.+)Class Reference$/)
         parse_html_class(md[1].strip, doc)
+      elsif md = title.text.match(/^(.+)Protocol Reference$/)
+        parse_html_protocol(md[1].strip, doc)
       elsif md = title.text.match(/^(.+) Reference$/)
         parse_html_reference(md[1].strip, doc)
       end
