@@ -244,6 +244,13 @@ namespace :doc do
 
     sh "#{YARDOC} --title 'RubyMotion API Reference' -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files} - ../doc/RubyMotion.md #{frameworks}"
     FileUtils.ln "#{OUTPUT_DIR}/_index.html", "#{OUTPUT_DIR}/index.html" unless File.exist?("#{OUTPUT_DIR}/index.html")
+
+    # update Protocol documents
+    protocol_name_list = File.read("#{DOCSET_RUBY_FILES_DIR}/protocol_list")
+    protocol_name_list.lines.each do |protocol|
+      protocol.strip!
+      DocsetGenerator.modify_protocol_document("#{OUTPUT_DIR}/#{protocol}.html")
+    end
   end
 
   namespace :list do

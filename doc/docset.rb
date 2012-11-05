@@ -178,6 +178,12 @@ class DocsetGenerator
     parse_html_method(doc, code)
 
     code << "end"
+
+    # save protocol name into list
+    File.open(File.join(@rb_files_dir, "protocol_list"), 'a') do |io|
+      io.puts name
+    end
+
     return code
   end
 
@@ -232,6 +238,31 @@ class DocsetGenerator
     else
       nil
     end
+  end
+
+  def self.modify_protocol_document(path)
+    unless File.exists?(path)
+      warn "File not exists : #{path}"
+      return nil
+    end
+    data = File.read(path)
+    data.gsub!(/\s*Class:/, 'Protocol:')
+
+    doc = Nokogiri::HTML(data)
+    # remove 'Inherits' box
+    doc.xpath("//dl[@class='box']").remove
+
+    # remove 'Methods inherited from NSObject'
+    doc.xpath("//h3[@class='inherited']").remove
+    doc.xpath("//p[@class='inherited']").remove
+
+    # remove 'Constructor Details'
+    doc.xpath("//div[@id='constructor_details']").remove
+
+    # remove 'Dynamic Method Handling'
+    doc.xpath("//div[@id='method_missing_details']").remove
+
+    File.open(path, "w") { |io| io.print doc.to_html }
   end
 
   def initialize(outpath, paths)
