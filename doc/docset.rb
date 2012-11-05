@@ -215,6 +215,7 @@ class DocsetGenerator
       node_param_description = node_termdef.xpath("dd")
       params = []
       args.each_with_index do |arg, index|
+        arg.strip!
         arg =~ /(.+)\s+([^\s]+),?$/
         type  = $1
         param = $2
