@@ -122,7 +122,7 @@ class DocsetGenerator
     end
   end
 
-  def parse_html_class(name, doc)
+  def parse_html_class(name, doc, code)
     # Find superclass (mandatory).
     sclass = nil
     doc.xpath("//table[@class='specbox']/tr").each do |node|
@@ -132,14 +132,6 @@ class DocsetGenerator
       end
     end
     return nil unless sclass
-
-    code = ''
-    if framework_path = find_framework_path(doc)
-      code << "# -*- framework: #{framework_path} -*-\n\n"
-    else
-      $stderr.puts "Can't determine framework path for: #{name}"
-      code << "\n\n"
-    end
 
     # Class abstract.
     code << doc.xpath(".//p[@class='abstract']")[0].text.gsub(/^/m, '# ')
@@ -170,24 +162,17 @@ class DocsetGenerator
     return code
   end
 
-  def parse_html_protocol(name, doc)
-    code = ''
-
+  def parse_html_protocol(name, doc, code)
     # Class abstract.
     node = doc.xpath(".//p[@class='abstract']")
     return nil if node.empty?
 
     code << node.text.gsub(/^/m, '# ')
-    code << "\nclass #{name}\n\n"
+    code << "\nmodule #{name}\n\n"
 
     parse_html_method(doc, code)
 
     code << "end"
-
-    # save protocol name into list
-    File.open(File.join(@rb_files_dir, "protocol_list"), 'a') do |io|
-      io.puts name
-    end
 
     return code
   end
@@ -288,15 +273,7 @@ class DocsetGenerator
     return code
   end
 
-  def parse_html_reference(name, doc)
-    code = ''
-    if framework_path = find_framework_path(doc)
-      code << "# -*- framework: #{framework_path} -*-\n\n"
-    else
-      #$stderr.puts "Can't determine framework path for: #{name}"
-      code << "\n\n"
-    end
-
+  def parse_html_reference(name, doc, code)
     if node = doc.xpath("//section/a[@title='Functions']")
       parse_html_function(node, code)
     end
@@ -311,12 +288,20 @@ class DocsetGenerator
     doc = Nokogiri::HTML(data)
     title = doc.xpath('/html/head/title')
     if title
+      code = ''
+      if framework_path = find_framework_path(doc)
+        code << "# -*- framework: #{framework_path} -*-\n\n"
+      else
+        #$stderr.puts "Can't determine framework path for: #{name}"
+        code << "\n\n"
+      end
+
       if md = title.text.match(/^(.+)Class Reference$/)
-        parse_html_class(md[1].strip, doc)
+        parse_html_class(md[1].strip, doc, code)
       elsif md = title.text.match(/^(.+)Protocol Reference$/)
-        parse_html_protocol(md[1].strip, doc)
+        parse_html_protocol(md[1].strip, doc, code)
       elsif md = title.text.match(/^(.+) Reference$/)
-        parse_html_reference(md[1].strip, doc)
+        parse_html_reference(md[1].strip, doc, code)
       end
     else
       nil
@@ -329,23 +314,9 @@ class DocsetGenerator
       return nil
     end
     data = File.read(path)
-    data.gsub!(/\s*Class:/, 'Protocol:')
+    data.gsub!(/\s*Module:/, 'Protocol:')
 
-    doc = Nokogiri::HTML(data)
-    # remove 'Inherits' box
-    doc.xpath("//dl[@class='box']").remove
-
-    # remove 'Methods inherited from NSObject'
-    doc.xpath("//h3[@class='inherited']").remove
-    doc.xpath("//p[@class='inherited']").remove
-
-    # remove 'Constructor Details'
-    doc.xpath("//div[@id='constructor_details']").remove
-
-    # remove 'Dynamic Method Handling'
-    doc.xpath("//div[@id='method_missing_details']").remove
-
-    File.open(path, "w") { |io| io.print doc.to_html }
+    File.open(path, "w") { |io| io.print data }
   end
 
   def initialize(outpath, paths)

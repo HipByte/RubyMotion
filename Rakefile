@@ -218,6 +218,7 @@ namespace :doc do
 
     # generate .md files for frameworks
     frameworks_hash = {}
+    all_protocols = []
     ruby_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb'))
     ruby_files.each do |x|
       data = File.read(x)
@@ -240,16 +241,20 @@ namespace :doc do
       next unless framework
       # get the list of classes
       classes = data.scan(/^class\s+([^\s\n]+)/).flatten
+      # get the list of protocols
+      protocols = data.scan(/^module\s+([^\s\n]+)/).flatten
       # get the list of functions
       functions = data.scan(/^def\s+([^\s\n\(]+)/).flatten
-      if !classes.empty? or !functions.empty?
-        ary = (frameworks_hash[framework] ||= [[], []])
+      if !classes.empty? or !protocols.empty? or !functions.empty?
+        ary = (frameworks_hash[framework] ||= [[], [], []])
         ary[0].concat(classes)
-        ary[1].concat(functions)
+        ary[1].concat(protocols)
+        ary[2].concat(functions)
       end
+      all_protocols.concat(protocols)
     end
     frameworks_hash.each do |name, ary|
-      classes, functions = ary
+      classes, protocols, functions = ary
       next if name == 'AppKit'
       File.open("#{OUTPUT_DIR}/#{name}.md", 'w') do |io|
         io.puts "# @markup markdown"
@@ -259,6 +264,12 @@ namespace :doc do
           io.puts "\n## Classes"
           classes.sort.each do |klass|
             io.puts "- [#{klass}](#{klass}.html)"
+          end
+        end
+        unless protocols.empty?
+          io.puts "\n## Protocols"
+          protocols.sort.each do |prot|
+            io.puts "- [#{prot}](#{prot}.html)"
           end
         end
         unless functions.empty?
@@ -279,8 +290,7 @@ namespace :doc do
     FileUtils.ln "#{OUTPUT_DIR}/_index.html", "#{OUTPUT_DIR}/index.html" unless File.exist?("#{OUTPUT_DIR}/index.html")
 
     # update Protocol documents
-    protocol_name_list = File.read("#{DOCSET_RUBY_FILES_DIR}/protocol_list")
-    protocol_name_list.lines.each do |protocol|
+    all_protocols.each do |protocol|
       protocol.strip!
       DocsetGenerator.modify_protocol_document("#{OUTPUT_DIR}/#{protocol}.html")
     end
