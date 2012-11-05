@@ -187,6 +187,65 @@ class DocsetGenerator
     return code
   end
 
+  def parse_html_function(doc, code = "")
+    node_name        = doc.xpath("../h3[@class='tight jump function']")
+    node_abstract    = doc.xpath("../p[@class='abstract']")
+    node_declaration = doc.xpath("../pre[@class='declaration']")
+    node_termdef     = doc.xpath("../div[@class='api parameters']/dl[@class='termdef']")
+    node_return_val  = doc.xpath("../div[@class='return_value']/p")
+
+    node_name.size.times do |i|
+      name        = node_name[i].text
+      abstract    = node_abstract[i].text
+      declaration = node_declaration[i].text.strip
+
+
+      declaration =~ /([^\s]+)\s+.+/
+      return_type = $1
+
+      declaration =~ /\((.+)\);/mx
+      args = $1
+      next unless args
+      args = args.split(",")
+      next unless args.size > 0
+
+      code << "# #{abstract}\n"
+
+      node_param_description = node_termdef.xpath("dd")
+      params = []
+      args.each_with_index do |arg, index|
+        arg =~ /(.+)\s+([^\s]+),?$/
+        type  = $1
+        param = $2
+        next unless param
+
+        param.sub!(/\*+/, '')
+        type << Regexp.last_match.to_s
+        params << param
+
+        description = node_param_description[index].text if node_param_description[index]
+        code << "# @param [#{parse_type(type)}] #{param} #{description}\n"
+      end
+
+      if node_return_val[i]
+        code << "# @return [#{parse_type(return_type)}] #{node_return_val[i].text}\n"
+      else
+        code << "# @return [nil]\n"
+      end
+      code << "def #{name}("
+      if params.size > 0
+        params.each do |param|
+          code << "#{param}, "
+        end
+        code.slice!(-2, 2) # remove last ", "
+      end
+      code << "); end\n\n"
+
+    end
+
+    return code
+  end
+
   def parse_html_struct(doc, code = "")
     node_name        = doc.xpath("../h3[@class='tight jump struct']")
     node_abstract    = doc.xpath("../p[@class='abstract']")
@@ -219,9 +278,16 @@ class DocsetGenerator
   end
 
   def parse_html_reference(name, doc)
-    if node = doc.xpath("//section/a[@title='Data Types']")
-      parse_html_struct(node)
+    code = ''
+
+    if node = doc.xpath("//section/a[@title='Functions']")
+      parse_html_function(node, code)
     end
+    if node = doc.xpath("//section/a[@title='Data Types']")
+      parse_html_struct(node, code)
+    end
+
+    return code
   end
 
   def parse_html_data(data)
