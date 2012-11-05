@@ -209,6 +209,7 @@ class DocsetGenerator
       args = args.split(",")
       next unless args.size > 0
 
+      return_type.strip!
       code << "# #{abstract}\n"
 
       node_param_description = node_termdef.xpath("dd")
@@ -229,6 +230,8 @@ class DocsetGenerator
 
       if node_return_val[i]
         code << "# @return [#{parse_type(return_type)}] #{node_return_val[i].text}\n"
+      elsif return_type != "void"
+        code << "# @return [#{parse_type(return_type)}]\n"
       else
         code << "# @return [nil]\n"
       end
