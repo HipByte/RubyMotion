@@ -186,6 +186,7 @@ namespace :doc do
     DOCSET_PATH + '/AVFoundation/Reference',
     DOCSET_PATH + '/Cocoa/Reference', # xxx we may need to filter here
     DOCSET_PATH + '/CoreData/Reference',
+    DOCSET_PATH + '/CoreFoundation/Reference',
     DOCSET_PATH + '/CoreImage/Reference',
     DOCSET_PATH + '/CoreLocation/Reference',
     DOCSET_PATH + '/CoreMotion/Reference',
@@ -229,7 +230,11 @@ namespace :doc do
           when '.framework'
             framework = base.sub(/\.framework/, '')
           when '.h'
-            framework = File.split(path)[-2]
+            components = path.split(/\//)
+            framework = components[-2]
+            framework = components[-3] if framework == 'Headers'
+          else
+            framework = base unless base.include?('/')
         end
       end
       next unless framework

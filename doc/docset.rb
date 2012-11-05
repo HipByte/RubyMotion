@@ -265,18 +265,20 @@ class DocsetGenerator
       name        = node_name[i].text
       abstract    = node_abstract[i].text
       declaration = node_declaration[i].text.strip
-      members     = declaration.lines.to_a[1..-1] # cut 'struct CGPoint {' line
+      members     = declaration.scan(/\{([^\}]+)\}/)
+      members     = members[0][0].strip.split(/;/) if members.size > 0
       unless members.empty?
         code << "# #{abstract}\n"
         code << "class #{name} < Boxed\n"
 
         node_field_description = node_termdef.xpath("dd")
         members.each_with_index do |item, index|
-          break if item =~ /\}/
-          item =~ /(.+)\s+(.+);/
+          item = item.strip
+          item =~ /(.+)\s+(.+)/
           type   = $1
           member = $2
-          code << "  # @return [#{parse_type(type)}] #{node_field_description[index].text}\n"
+          desc   = node_field_description[index]
+          code << "  # @return [#{parse_type(type)}] #{desc ? desc.text : ''}\n"
           code << "  attr_accessor :#{member}\n"
         end
         code << "end\n\n"
