@@ -113,6 +113,15 @@ class DocsetGenerator
     return code
   end
 
+  def find_framework_path(doc)
+    elem = doc.xpath(".//span[@class='FrameworkPath']")
+    if elem.size > 0
+      elem[0].parent.parent.parent.children[1].text
+    else
+      nil
+    end
+  end
+
   def parse_html_class(name, doc)
     # Find superclass (mandatory).
     sclass = nil
@@ -125,11 +134,7 @@ class DocsetGenerator
     return nil unless sclass
 
     code = ''
-
-    # Determine where the class is defined (optional).
-    elem = doc.xpath(".//span[@class='FrameworkPath']")
-    if elem.size > 0
-      framework_path = elem[0].parent.parent.parent.children[1].text
+    if framework_path = find_framework_path(doc)
       code << "# -*- framework: #{framework_path} -*-\n\n"
     else
       $stderr.puts "Can't determine framework path for: #{name}"
@@ -283,6 +288,12 @@ class DocsetGenerator
 
   def parse_html_reference(name, doc)
     code = ''
+    if framework_path = find_framework_path(doc)
+      code << "# -*- framework: #{framework_path} -*-\n\n"
+    else
+      #$stderr.puts "Can't determine framework path for: #{name}"
+      code << "\n\n"
+    end
 
     if node = doc.xpath("//section/a[@title='Functions']")
       parse_html_function(node, code)

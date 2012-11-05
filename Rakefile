@@ -204,7 +204,8 @@ namespace :doc do
     DOCSET_PATH + '/QuartzCore/Reference',
     DOCSET_PATH + '/Social/Reference',
     DOCSET_PATH + '/StoreKit/Reference',
-    DOCSET_PATH + '/UIKit/Reference'
+    DOCSET_PATH + '/UIKit/Reference',
+    DOCSET_PATH + '/UserExperience/Reference'
   ] 
   OUTPUT_DIR = "api"
   DOCSET_RUBY_FILES_DIR = '/tmp/rb_docset'
@@ -219,20 +220,47 @@ namespace :doc do
     ruby_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb'))
     ruby_files.each do |x|
       data = File.read(x)
-      md1 = data.match(/#\s+\-\*\-\s+framework:\s+\/System\/Library\/Frameworks\/(.+)\.framework\s+\-\*\-/)
-      md2 = data.match(/^class\s+([^\s\n]+)/)
-      if md1 and md2
-        (frameworks_hash[md1[1]] ||= []) << md2[1]
+      # determine framework name
+      framework = nil
+      if md = data.match(/#\s+\-\*\-\s+framework:\s+([^\s]+)\s+\-\*\-/)
+        path = md[1]
+        base = File.basename(path)
+        case File.extname(base)
+          when '.framework'
+            framework = base.sub(/\.framework/, '')
+          when '.h'
+            framework = File.split(path)[-2]
+        end
+      end
+      next unless framework
+      # get the list of classes
+      classes = data.scan(/^class\s+([^\s\n]+)/).flatten
+      # get the list of functions
+      functions = data.scan(/^def\s+([^\s\n\(]+)/).flatten
+      if !classes.empty? or !functions.empty?
+        ary = (frameworks_hash[framework] ||= [[], []])
+        ary[0].concat(classes)
+        ary[1].concat(functions)
       end
     end
-    frameworks_hash.each do |name, classes|
+    frameworks_hash.each do |name, ary|
+      classes, functions = ary
       next if name == 'AppKit'
       File.open("#{OUTPUT_DIR}/#{name}.md", 'w') do |io|
         io.puts "# @markup markdown"
         io.puts "# @title #{name}"
-        io.puts "# #{name}"
-        classes.sort.each do |klass|
-          io.puts "- [#{klass}](#{klass}.html)"
+        io.puts "# #{name} Reference"
+        unless classes.empty?
+          io.puts "\n## Classes"
+          classes.sort.each do |klass|
+            io.puts "- [#{klass}](#{klass}.html)"
+          end
+        end
+        unless functions.empty?
+          io.puts "\n## Functions"
+          functions.sort.each do |func|
+            io.puts "- [#{func}](top-level-namespace.html##{func}%3A-instance_method)"
+          end
         end
       end
     end
