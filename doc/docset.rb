@@ -3,6 +3,10 @@ class DocsetGenerator
   require 'nokogiri'
   require 'fileutils'
 
+  def sanitize(str)
+    str.to_s.gsub(/\n/, ' ')
+  end
+
   def parse_html_docref(node)
     code = ''
     code << node.xpath(".//p[@class='abstract']").text
@@ -75,13 +79,13 @@ class DocsetGenerator
           arg_doc = arg_docs[i]
           code << "  # @param "
           code << "[#{parse_type(types[i])}] " if has_types
-          code << "#{arg_name.text} #{arg_doc.text}\n"
+          code << "#{arg_name.text} #{sanitize(arg_doc.text)}\n"
         end
       end
       retdoc = node.xpath(".//div[@class='return_value']/p").text.strip
       code << "  # @return "
       code << "[#{parse_type(ret_type)}] " if ret_type
-      code << "#{retdoc}" unless retdoc.empty?
+      code << "#{sanitize(retdoc)}" unless retdoc.empty?
       code << "\n"
 
       is_class_method = decl.match(/^\s*\+/) != nil
@@ -200,7 +204,7 @@ class DocsetGenerator
       next unless args.size > 0
 
       return_type.strip!
-      code << "# #{abstract}\n"
+      code << "# #{sanitize(abstract)}\n"
 
       node_param_description = node_termdef.xpath("dd")
       params = []
@@ -216,11 +220,11 @@ class DocsetGenerator
         params << param
 
         description = node_param_description[index].text if node_param_description[index]
-        code << "# @param [#{parse_type(type)}] #{param} #{description}\n"
+        code << "# @param [#{parse_type(type)}] #{param} #{sanitize(description)}\n"
       end
 
       if node_return_val[i]
-        code << "# @return [#{parse_type(return_type)}] #{node_return_val[i].text}\n"
+        code << "# @return [#{parse_type(return_type)}] #{sanitize(node_return_val[i].text)}\n"
       elsif return_type != "void"
         code << "# @return [#{parse_type(return_type)}]\n"
       else
@@ -256,7 +260,7 @@ class DocsetGenerator
       members     = declaration.scan(/\{([^\}]+)\}/)
       members     = members[0][0].strip.split(/;/) if members.size > 0
       unless members.empty?
-        code << "# #{abstract}\n"
+        code << "# #{sanitize(abstract)}\n"
         code << "class #{name} < Boxed\n"
 
         node_field_description = node_termdef.xpath("dd")
@@ -266,7 +270,7 @@ class DocsetGenerator
           type   = $1
           member = $2
           desc   = node_field_description[index]
-          code << "  # @return [#{parse_type(type)}] #{desc ? desc.text : ''}\n"
+          code << "  # @return [#{parse_type(type)}] #{desc ? sanitize(desc.text) : ''}\n"
           code << "  attr_accessor :#{member}\n"
         end
         code << "end\n\n"
