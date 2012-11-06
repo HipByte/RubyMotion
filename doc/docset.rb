@@ -136,6 +136,20 @@ class DocsetGenerator
     return code
   end
 
+  def parse_html_constant(doc, code = "")
+    doc.xpath("//div[@id='Constants_section']").each do |node|
+      node_name        = node.xpath("./dl[@class='termdef']/dt")
+      node_description = node.xpath("./dl[@class='termdef']/dd")
+
+      node_name.size.times do |i|
+        code << "  # #{sanitize(node_description[i].text.capitalize)}\n"
+        code << "  #{node_name[i].text} = nil\n"
+      end
+    end
+
+    return code
+  end
+
   def find_framework_path(doc)
     elem = doc.xpath(".//span[@class='FrameworkPath']")
     if elem.size > 0
@@ -166,6 +180,7 @@ class DocsetGenerator
 
     parse_html_property(doc, code)
     parse_html_method(doc, code)
+    parse_html_constant(doc, code)
 
     code << "end"
     return code
