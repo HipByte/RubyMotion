@@ -241,12 +241,15 @@ class DocsetGenerator
   end
 
   def parse_html_struct(doc, code = "")
-    node_name        = doc.xpath("../h3[@class='tight jump struct']")
+    node_name        = doc.xpath("../h3[@class='tight jump struct']|../h3[@class='tight jump typeDef']")
     node_abstract    = doc.xpath("../p[@class='abstract']")
-    node_declaration = doc.xpath("../pre[@class='declaration']")
+    node_declaration = doc.xpath("../pre[@class='declaration']|../table[@class='zDeclaration']")
     node_termdef     = doc.xpath("../dl[@class='termdef']")
 
     node_name.size.times do |i|
+      if node_name[i].values[0].include?("typeDef")
+        next
+      end
       name        = node_name[i].text
       abstract    = node_abstract[i].text
       declaration = node_declaration[i].text.strip
