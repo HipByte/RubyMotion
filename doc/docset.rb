@@ -251,12 +251,14 @@ class DocsetGenerator
     node_termdef     = doc.xpath("../dl[@class='termdef']")
 
     node_name.size.times do |i|
-      if node_name[i].values[0].include?("typeDef")
-        next
-      end
       name        = node_name[i].text
       abstract    = node_abstract[i].text
       declaration = node_declaration[i].text.strip
+      if node_name[i].values[0].include?("typeDef") &&
+         !(declaration =~ /^typedef struct/)
+        next
+      end
+
       members     = declaration.scan(/\{([^\}]+)\}/)
       members     = members[0][0].strip.split(/;/) if members.size > 0
       unless members.empty?
