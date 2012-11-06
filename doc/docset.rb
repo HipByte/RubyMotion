@@ -63,7 +63,7 @@ class DocsetGenerator
       decl = node.xpath(".//div[@class='declaration']/div[@class='declaration']").text
       readonly = decl.include?('readonly')
       decl.sub!(/@property\s*(\([^\)]+\))?/, '')
-      md = decl.match(/(\w+)$/)
+      md = decl.match(/(\w+);?$/)
       next unless md
       title = md[1]
       type = md.pre_match
