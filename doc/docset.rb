@@ -60,7 +60,7 @@ class DocsetGenerator
   def parse_html_property(doc, code = "")
     # Properties.
     doc.xpath("//div[@class='api propertyObjC']").each do |node|
-      decl = node.xpath(".//div[@class='declaration']/div[@class='declaration']").text
+      decl = node.xpath(".//div[@class='declaration']").text
       readonly = decl.include?('readonly')
       decl.sub!(/@property\s*(\([^\)]+\))?/, '')
       md = decl.match(/(\w+);?$/)
