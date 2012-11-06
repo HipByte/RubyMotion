@@ -179,6 +179,7 @@ class DocsetGenerator
     code << node.text.gsub(/^/m, '# ')
     code << "\nmodule #{name}\n\n"
 
+    parse_html_property(doc, code)
     parse_html_method(doc, code)
 
     code << "end"
