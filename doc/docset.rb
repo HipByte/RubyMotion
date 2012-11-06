@@ -196,6 +196,7 @@ class DocsetGenerator
 
     parse_html_property(doc, code)
     parse_html_method(doc, code)
+    parse_html_constant(doc, code)
 
     code << "end"
 
