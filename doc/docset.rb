@@ -57,6 +57,25 @@ class DocsetGenerator
     end
   end
 
+  def parse_html_property(doc, code = "")
+    # Properties.
+    doc.xpath("//div[@class='api propertyObjC']").each do |node|
+      decl = node.xpath(".//div[@class='declaration']/div[@class='declaration']").text
+      readonly = decl.include?('readonly')
+      decl.sub!(/@property\s*(\([^\)]+\))?/, '')
+      md = decl.match(/(\w+)$/)
+      next unless md
+      title = md[1]
+      type = md.pre_match
+
+      code << parse_html_docref(node)
+      code << "  # @return [#{parse_type(type)}]\n"
+      code << '  ' << (readonly ? "attr_reader" : "attr_accessor") << " :#{title}\n\n"
+    end
+
+    return code
+  end
+
   def parse_html_method(doc, code = "")
     # Methods.
     methods = []
@@ -145,21 +164,7 @@ class DocsetGenerator
       code << "\nclass #{name} < #{sclass}\n\n"
     end
 
-    # Properties.
-    doc.xpath("//div[@class='api propertyObjC']").each do |node|
-      decl = node.xpath(".//div[@class='declaration']/div[@class='declaration']").text
-      readonly = decl.include?('readonly')
-      decl.sub!(/@property\s*(\([^\)]+\))?/, '')
-      md = decl.match(/(\w+)$/)
-      next unless md
-      title = md[1]
-      type = md.pre_match
-
-      code << parse_html_docref(node)
-      code << "  # @return [#{parse_type(type)}]\n"
-      code << '  ' << (readonly ? "attr_reader" : "attr_accessor") << " :#{title}\n\n"
-    end
-
+    parse_html_property(doc, code)
     parse_html_method(doc, code)
 
     code << "end"
