@@ -139,8 +139,9 @@ class DocsetGenerator
     return code
   end
 
-  def parse_html_constant(doc, code = "", code_struct = "")
+  def parse_html_constant(doc, code_const = "", code_struct = "")
     doc.xpath("//div[@id='Constants_section']").each do |node|
+      node_abstract    = node.xpath("./p[@class='abstract']")
       node_declaration = node.xpath("./pre[@class='declaration']")
       node_termdef     = node.xpath("./dl[@class='termdef']")
 
@@ -151,16 +152,24 @@ class DocsetGenerator
           next
         end
 
+        enum_name = (decl.match(/\}\s*([^\s]+);$/m).to_a)[1]
+        is_enum = true if enum_name.to_s.length > 0
+
+        if is_enum
+          code_const << "# #{sanitize(node_abstract[i].text)}\n"
+          code_const << "module #{enum_name} # Enumeration\n\n"
+        end
         node_name        = node_termdef[i].xpath("./dt")
         node_description = node_termdef[i].xpath("./dd")
         node_name.size.times do |i|
-          code << "  # #{sanitize(node_description[i].text.capitalize)}\n"
-          code << "  #{node_name[i].text} = nil\n"
+          code_const << "  # #{sanitize(node_description[i].text.capitalize)}\n"
+          code_const << "  #{node_name[i].text} = nil\n"
         end
+        code_const << "end\n" if is_enum
       end
     end
 
-    return code
+    return code_const
   end
 
   def find_framework_path(doc)
@@ -173,12 +182,14 @@ class DocsetGenerator
   end
 
   def parse_html_class_property_common(doc, code)
+    code_const  = ''
     code_struct = ''
     parse_html_property(doc, code)
     parse_html_method(doc, code)
-    parse_html_constant(doc, code, code_struct)
+    parse_html_constant(doc, code_const, code_struct)
 
     code << "end\n"
+    code << code_const
     code << code_struct
     return code
   end
@@ -212,7 +223,7 @@ class DocsetGenerator
     return nil if node.empty?
 
     code << node.text.gsub(/^/m, '# ')
-    code << "\nmodule #{name}\n\n"
+    code << "\nmodule #{name} # Protocol\n\n"
 
     parse_html_class_property_common(doc, code)
     return code
@@ -377,6 +388,18 @@ class DocsetGenerator
 
     File.open(path, "w") { |io| io.print data }
   end
+
+  def self.modify_enumeration_document(path)
+    unless File.exists?(path)
+      warn "File not exists : #{path}"
+      return nil
+    end
+    data = File.read(path)
+    data.gsub!(/\s*Module:/, 'Enumeration:')
+
+    File.open(path, "w") { |io| io.print data }
+  end
+
 
   def initialize(outpath, paths)
     @input_paths = []

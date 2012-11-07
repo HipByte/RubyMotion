@@ -219,6 +219,7 @@ namespace :doc do
     # generate .md files for frameworks
     frameworks_hash = {}
     all_protocols = []
+    all_enumerations = []
     ruby_files = Dir.glob(File.join(DOCSET_RUBY_FILES_DIR, '*.rb'))
     ruby_files.each do |x|
       data = File.read(x)
@@ -242,19 +243,23 @@ namespace :doc do
       # get the list of classes
       classes = data.scan(/^class\s+([^\s\n]+)/).flatten
       # get the list of protocols
-      protocols = data.scan(/^module\s+([^\s\n]+)/).flatten
+      protocols = data.scan(/^module\s+([^\s\n]+) # Protocol/).flatten
+      # get the list of enumerations
+      enumerations = data.scan(/^module\s+([^\s\n]+) # Enumeration/).flatten
       # get the list of functions
       functions = data.scan(/^def\s+([^\s\n\(]+)/).flatten
-      if !classes.empty? or !protocols.empty? or !functions.empty?
-        ary = (frameworks_hash[framework] ||= [[], [], []])
+      if !classes.empty? or !protocols.empty? or !functions.empty? or !enumerations.empty?
+        ary = (frameworks_hash[framework] ||= [[], [], [], []])
         ary[0].concat(classes)
         ary[1].concat(protocols)
         ary[2].concat(functions)
+        ary[3].concat(enumerations)
       end
       all_protocols.concat(protocols)
+      all_enumerations.concat(enumerations)
     end
     frameworks_hash.each do |name, ary|
-      classes, protocols, functions = ary
+      classes, protocols, functions, enumerations = ary
       next if name == 'AppKit'
       File.open("#{OUTPUT_DIR}/#{name}.md", 'w') do |io|
         io.puts "# @markup markdown"
@@ -278,6 +283,12 @@ namespace :doc do
             io.puts "- [#{func}](top-level-namespace.html##{func}%3A-instance_method)"
           end
         end
+        unless enumerations.empty?
+          io.puts "\n## Enumerations"
+          enumerations.sort.each do |enum|
+            io.puts "- [#{enum}](#{enum}.html)"
+          end
+        end
       end
     end
 
@@ -289,10 +300,10 @@ namespace :doc do
     sh "#{YARDOC} --title 'RubyMotion API Reference' -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files} - ../doc/RubyMotion.md #{frameworks}"
     FileUtils.ln "#{OUTPUT_DIR}/_index.html", "#{OUTPUT_DIR}/index.html" unless File.exist?("#{OUTPUT_DIR}/index.html")
 
-    # update Protocol documents
-    all_protocols.each do |protocol|
-      protocol.strip!
-      DocsetGenerator.modify_protocol_document("#{OUTPUT_DIR}/#{protocol}.html")
+    # update Enumeration documents
+    all_enumerations.each do |enumeration|
+      enumeration.strip!
+      DocsetGenerator.modify_enumeration_document("#{OUTPUT_DIR}/#{enumeration}.html")
     end
   end
 
