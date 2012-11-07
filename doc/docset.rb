@@ -139,14 +139,24 @@ class DocsetGenerator
     return code
   end
 
-  def parse_html_constant(doc, code = "")
+  def parse_html_constant(doc, code = "", code_struct = "")
     doc.xpath("//div[@id='Constants_section']").each do |node|
-      node_name        = node.xpath("./dl[@class='termdef']/dt")
-      node_description = node.xpath("./dl[@class='termdef']/dd")
+      node_declaration = node.xpath("./pre[@class='declaration']")
+      node_termdef     = node.xpath("./dl[@class='termdef']")
 
-      node_name.size.times do |i|
-        code << "  # #{sanitize(node_description[i].text.capitalize)}\n"
-        code << "  #{node_name[i].text} = nil\n"
+      node_termdef.size.times do |i|
+        decl = node_declaration[i].text.strip
+        if decl =~ /^(typedef\s+)?struct/
+          parse_html_struct(node.child, code_struct)
+          next
+        end
+
+        node_name        = node_termdef[i].xpath("./dt")
+        node_description = node_termdef[i].xpath("./dd")
+        node_name.size.times do |i|
+          code << "  # #{sanitize(node_description[i].text.capitalize)}\n"
+          code << "  #{node_name[i].text} = nil\n"
+        end
       end
     end
 
@@ -160,6 +170,17 @@ class DocsetGenerator
     else
       nil
     end
+  end
+
+  def parse_html_class_property_common(doc, code)
+    code_struct = ''
+    parse_html_property(doc, code)
+    parse_html_method(doc, code)
+    parse_html_constant(doc, code, code_struct)
+
+    code << "end\n"
+    code << code_struct
+    return code
   end
 
   def parse_html_class(name, doc, code)
@@ -181,11 +202,7 @@ class DocsetGenerator
       code << "\nclass #{name} < #{sclass}\n\n"
     end
 
-    parse_html_property(doc, code)
-    parse_html_method(doc, code)
-    parse_html_constant(doc, code)
-
-    code << "end"
+    parse_html_class_property_common(doc, code)
     return code
   end
 
@@ -197,12 +214,7 @@ class DocsetGenerator
     code << node.text.gsub(/^/m, '# ')
     code << "\nmodule #{name}\n\n"
 
-    parse_html_property(doc, code)
-    parse_html_method(doc, code)
-    parse_html_constant(doc, code)
-
-    code << "end"
-
+    parse_html_class_property_common(doc, code)
     return code
   end
 
@@ -304,6 +316,7 @@ class DocsetGenerator
       end
     end
 
+    node_name.remove
     return code
   end
 
