@@ -378,28 +378,16 @@ class DocsetGenerator
     end
   end
 
-  def self.modify_protocol_document(path)
+  def self.modify_document_title(path, new_title)
     unless File.exists?(path)
       warn "File not exists : #{path}"
       return nil
     end
     data = File.read(path)
-    data.gsub!(/\s*Module:/, 'Protocol:')
+    data.gsub!(/\s*Module:/, new_title + ':')
 
     File.open(path, "w") { |io| io.print data }
   end
-
-  def self.modify_enumeration_document(path)
-    unless File.exists?(path)
-      warn "File not exists : #{path}"
-      return nil
-    end
-    data = File.read(path)
-    data.gsub!(/\s*Module:/, 'Enumeration:')
-
-    File.open(path, "w") { |io| io.print data }
-  end
-
 
   def initialize(outpath, paths)
     @input_paths = []

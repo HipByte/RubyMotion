@@ -300,10 +300,11 @@ namespace :doc do
     sh "#{YARDOC} --title 'RubyMotion API Reference' -o ../#{OUTPUT_DIR} #{rubymotion_files} #{docset_files} - ../doc/RubyMotion.md #{frameworks}"
     FileUtils.ln "#{OUTPUT_DIR}/_index.html", "#{OUTPUT_DIR}/index.html" unless File.exist?("#{OUTPUT_DIR}/index.html")
 
-    # update Enumeration documents
-    all_enumerations.each do |enumeration|
-      enumeration.strip!
-      DocsetGenerator.modify_enumeration_document("#{OUTPUT_DIR}/#{enumeration}.html")
+    # update Enumeration/Protocol documents
+    [[all_protocols, 'Protocol'], [all_enumerations, 'Enumeration']].each do |ary, new_title|
+      ary.each do |name|
+        DocsetGenerator.modify_document_title("#{OUTPUT_DIR}/#{name.strip}.html", new_title)
+      end
     end
   end
 
