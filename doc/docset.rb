@@ -302,10 +302,22 @@ class DocsetGenerator
         code << "# #{sanitize(abstract)}\n"
         code << "class #{name} < Boxed\n"
 
+        members = members.inject([]) { |ary, item|
+          # split 'double x, y, z, w;' to each line
+          item.strip =~ /([^\s]+)\s+(.+)/
+          type   = $1
+          member = $2
+          if type && member
+            member.split(",").each do |m|
+              ary << "#{type} #{m}"
+            end
+          end
+          ary
+        }
+
         node_field_description = node_termdef.xpath("dd")
         members.each_with_index do |item, index|
-          item = item.strip
-          item =~ /(.+)\s+(.+)/
+          item.strip =~ /(.+)\s+(.+)/
           type   = $1
           member = $2
           desc   = node_field_description[index]
