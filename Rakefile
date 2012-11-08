@@ -169,6 +169,7 @@ end
 
 namespace :doc do
   require './doc/docset'
+  require './doc/docset_link'
   require 'fileutils'
 
   YARDOC = "cd vm; bundle exec yardoc --legacy"
@@ -305,6 +306,14 @@ namespace :doc do
       ary.each do |name|
         DocsetGenerator.modify_document_title("#{OUTPUT_DIR}/#{name.strip}.html", new_title)
       end
+    end
+
+    # generate link
+    print "\n\n"
+    puts "Now update object link... please wait"
+    linker = DocsetGenerator::Linker.new(OUTPUT_DIR)
+    Dir.glob(File.join(OUTPUT_DIR, "*.html")).each do |file|
+      linker.run(file)
     end
   end
 
