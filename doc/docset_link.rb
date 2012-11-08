@@ -26,7 +26,7 @@ class DocsetGenerator
         node.text.scan(/([A-Z]\w*)/).uniq.each do |item|
           word = item.first
           if @module_list.include?(word)
-            text.gsub!(word, "<a href='#{word}.html'>#{word}</a>")
+            text.gsub!(/\b#{word}\b/, "<a href='#{word}.html'>#{word}</a>")
             is_update = true
           end
         end
