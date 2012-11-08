@@ -297,6 +297,7 @@ class DocsetGenerator
     node_abstract    = doc.xpath("../p[@class='abstract']")
     node_declaration = doc.xpath("../pre[@class='declaration']|../table[@class='zDeclaration']")
     node_termdef     = doc.xpath("../dl[@class='termdef']")
+    current_member_position = 0
 
     node_name.size.times do |i|
       name        = node_name[i].text
@@ -327,13 +328,14 @@ class DocsetGenerator
         }
 
         node_field_description = node_termdef.xpath("dd")
-        members.each_with_index do |item, index|
+        members.each do |item|
           item.strip =~ /(.+)\s+(.+)/
           type   = $1
           member = $2
-          desc   = node_field_description[index]
+          desc   = node_field_description[current_member_position]
           code << "  # @return [#{parse_type(type)}] #{desc ? sanitize(desc.text) : ''}\n"
           code << "  attr_accessor :#{member}\n"
+          current_member_position += 1
         end
         code << "end\n\n"
       end
