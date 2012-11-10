@@ -71,7 +71,7 @@ task :install do
   binaries = public_binaries.dup.concat(['./bin/deploy', './bin/sim',
     './bin/llc', './bin/ruby', './bin/ctags'])
   data = ['./NEWS']
-  data.concat(Dir.glob('./lib/motion/**/*'))
+  data.concat(Dir.glob('./lib/**/*'))
   SDK_VERSIONS.each do |sdk_version|
     data.concat(Dir.glob("./data/#{sdk_version}/BridgeSupport/*.bridgesupport"))
     data.concat(Dir.glob("./data/#{sdk_version}/iPhoneOS/*"))
