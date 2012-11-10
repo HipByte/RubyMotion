@@ -55,7 +55,7 @@ module Motion; module Project
       :entitlements, :fonts, :status_bar_style, :motiondir
 
     # Internal only.
-    attr_accessor :build_mode, :spec_mode, :distribution_mode
+    attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies
 
     def initialize(project_dir, build_mode)
       @project_dir = project_dir
