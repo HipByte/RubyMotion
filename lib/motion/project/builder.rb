@@ -584,7 +584,11 @@ PLIST
   end
 
   class Dependency
-    require 'ripper'
+    begin
+      require 'ripper'
+    rescue LoadError
+      require 'ripper18/ripper'
+    end
 
     @file_paths = []
 
