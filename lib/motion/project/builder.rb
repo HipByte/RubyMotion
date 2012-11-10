@@ -137,6 +137,10 @@ module Motion; module Project;
         builders << [queue, th]
       end
 
+      # Resolve file dependencies
+      deps = Dependency.new(config.files).run
+      config.dependencies = deps.merge(config.dependencies)
+
       # Feed builders with work.
       builder_i = 0
       config.ordered_build_files.each do |path|
@@ -576,6 +580,70 @@ PLIST
         end
       end
 =end
+    end
+  end
+
+  class Dependency
+    require 'ripper'
+
+    @file_paths = []
+
+    def initialize(paths)
+      @file_paths = paths.sort
+    end
+
+    def run
+      consts_defined  = {}
+      consts_referred = {}
+      @file_paths.each do |path|
+        parser = Constant.new(File.read(path))
+        parser.parse
+        parser.defined.each do |const|
+          consts_defined[const] = path
+        end
+        parser.referred.each do |const|
+          consts_referred[const] ||= []
+          consts_referred[const] << path
+        end
+      end
+
+      dependency = {}
+      consts_defined.each do |const, def_path|
+        if consts_referred[const]
+          consts_referred[const].each do |ref_path|
+            if def_path != ref_path
+              dependency[ref_path] ||= []
+              dependency[ref_path] << def_path
+              dependency[ref_path].uniq!
+            end
+          end
+        end
+      end
+
+      return dependency
+    end
+
+    class Constant < Ripper::SexpBuilder
+      attr_accessor :defined
+      attr_accessor :referred
+
+      def initialize(source)
+        @defined  = []
+        @referred = []
+        super
+      end
+
+      def on_const_ref(args)
+        type, const_name, position = args
+        @defined << const_name
+      end
+
+      def on_var_ref(args)
+        type, name, position = args
+        if type == :@const
+          @referred << name
+        end
+      end
     end
   end
 end; end
