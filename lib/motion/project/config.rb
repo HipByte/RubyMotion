@@ -62,7 +62,7 @@ module Motion; module Project
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
       @info_plist = {}
       @dependencies = {}
-      @detect_dependencies = false
+      @detect_dependencies = true
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @weak_frameworks = []
       @framework_search_paths = []
