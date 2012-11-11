@@ -138,8 +138,10 @@ module Motion; module Project;
       end
 
       # Resolve file dependencies
-      deps = Dependency.new(config.files).run
-      config.dependencies = deps.merge(config.dependencies)
+      if config.detect_dependencies == true
+        deps = Dependency.new(config.files).run
+        config.dependencies = deps.merge(config.dependencies)
+      end
 
       # Feed builders with work.
       builder_i = 0
