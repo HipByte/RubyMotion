@@ -440,7 +440,7 @@ module Bacon
       end
 
       LOCATION_TO_POINT_INSET = 5
-
+      Y_ASYMETTRY_OFFSET = 1 #to ensure gesture is recognised when doing swipes e.g. flick :to => :right
       def _location_to_point(view, location, raise_if_invalid = true)
         frame = view.frame
         case location
@@ -451,7 +451,7 @@ module Bacon
         when :top_right
           CGPointMake(CGRectGetMaxX(frame) - LOCATION_TO_POINT_INSET, CGRectGetMinY(frame) + LOCATION_TO_POINT_INSET)
         when :right
-          CGPointMake(CGRectGetMaxX(frame) - LOCATION_TO_POINT_INSET, CGRectGetMidY(frame))
+          CGPointMake(CGRectGetMaxX(frame) - LOCATION_TO_POINT_INSET, CGRectGetMidY(frame)+Y_ASYMETTRY_OFFSET)
         when :bottom_right
           CGPointMake(CGRectGetMaxX(frame) - LOCATION_TO_POINT_INSET, CGRectGetMaxY(frame) - LOCATION_TO_POINT_INSET)
         when :bottom
@@ -459,7 +459,7 @@ module Bacon
         when :bottom_left
           CGPointMake(CGRectGetMinX(frame) + LOCATION_TO_POINT_INSET, CGRectGetMaxY(frame) - LOCATION_TO_POINT_INSET)
         when :left
-          CGPointMake(CGRectGetMinX(frame) + LOCATION_TO_POINT_INSET, CGRectGetMidY(frame))
+          CGPointMake(CGRectGetMinX(frame) + LOCATION_TO_POINT_INSET, CGRectGetMidY(frame)-Y_ASYMETTRY_OFFSET)
         else
           raise ArgumentError, "Invalid location value `#{location}'." if raise_if_invalid
         end
