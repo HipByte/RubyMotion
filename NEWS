@@ -15,6 +15,12 @@
   * Fixed the bug in Symbol#match and Symbol#=~ which does not return an index
     of the beginning of the match.
   * Fixed the bug in Symbol#succ and Symbol#next which returns a String object.
+  * Added the Complex#rationalize method.
+  * Fixed the bug in Complex#/ which raise an exception when passed Float 0.0.
+  * Fixed the bug in Complex.rect and Complex.polar which raises an
+    ArgumentError instead of TypeError if passed wrong value.
+  * Fixed the bug in Regexp.last_match which raise an IndexError if passed
+   index which is out of matched range.
 
 = RubyMotion 1.27 =
 
