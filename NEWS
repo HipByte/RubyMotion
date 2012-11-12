@@ -1,8 +1,20 @@
 = RubyMotion 1.28 =
 
+  * Added the feature to detect file dependencies. (In order to disable
+    this feature, set `app.detect_dependencies' to false in Rakefile)
   * Fixed the build system to set a 5 seconds timeout when accessing the
     software updates server. Thanks Nick Quaranto for the patch.
   * Fixed the bug in NSDictionary#select which always raises an exception.
+  * Fixed the bug in String#<< which raise an ArgumentError instead of
+    RangeError if passed the object which is out of range
+  * Fixed the bug in Kernel.catch which does not accept no argument.
+  * Fixed the bug in Kernel.Rational which does not raise a TypeError if passed
+    symbol.
+  * Fixed the bug in Symbol#clone and Sybmol#dup which does not raise a
+    TypeError.
+  * Fixed the bug in Symbol#match and Symbol#=~ which does not return an index
+    of the beginning of the match.
+  * Fixed the bug in Symbol#succ and Symbol#next which returns a String object.
 
 = RubyMotion 1.27 =
 
