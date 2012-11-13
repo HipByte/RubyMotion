@@ -946,7 +946,7 @@ main(int argc, char **argv)
        appEnvironment);
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
 	@selector(setSimulatedApplicationShouldWaitForDebugger:),
-	debug_mode == DEBUG_GDB);
+	(debug_mode == DEBUG_GDB || getenv("SIM_WAIT_FOR_DEBUGGER") != NULL));
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedDeviceFamily:), device_family);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
@@ -955,19 +955,34 @@ main(int argc, char **argv)
 	@selector(setLocalizedClientName:), @"NYANCAT");
 
     char path[MAXPATHLEN] = {'\0'};
-    if (fcntl(STDOUT_FILENO, F_GETPATH, &path) == -1
-	    && fcntl(STDERR_FILENO, F_GETPATH, &path) == -1) {
-	fprintf(stderr,
-		"*** stdout/stderr unavailable, process output is disabled\n");
+    const char *stdout_path = getenv("SIM_STDOUT_PATH");
+    if (stdout_path == NULL) {
+	if (fcntl(STDOUT_FILENO, F_GETPATH, &path) == -1) {
+	    printf("*** stdout unavailable, output disabled\n");
+	}
+	else {
+	    stdout_path = path;
+	}
     }
-    else {
+    if (stdout_path != NULL) {
 	((void (*)(id, SEL, id))objc_msgSend)(config,
 	    @selector(setSimulatedApplicationStdOutPath:),
-	    [NSString stringWithUTF8String:path]);
+	    [NSString stringWithUTF8String:stdout_path]);
+    }
 
+    const char *stderr_path = getenv("SIM_STDERR_PATH");
+    if (stderr_path == NULL) {
+	if (fcntl(STDERR_FILENO, F_GETPATH, &path) == -1) {
+	    printf("*** stderr unavailable, output disabled\n");
+	}
+	else {
+	    stderr_path = path;
+	}
+    }
+    if (stderr_path != NULL) {
 	((void (*)(id, SEL, id))objc_msgSend)(config,
 	    @selector(setSimulatedApplicationStdErrPath:),
-	    [NSString stringWithUTF8String:path]);
+	    [NSString stringWithUTF8String:stderr_path]);
     }
 
     // Create session.
