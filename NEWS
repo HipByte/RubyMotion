@@ -1,28 +1,35 @@
 = RubyMotion 1.28 =
 
-  * Added the feature to detect file dependencies. (In order to disable
-    this feature, set `app.detect_dependencies' to false in Rakefile)
+  * Improved the build system to detect file dependencies automatically.
+    This feature is experimental, if you encounter any problem you can disable
+    it by setting `app.detect_dependencies = false' in the Rakefile.
   * Fixed the build system to set a 5 seconds timeout when accessing the
     software updates server. Thanks Nick Quaranto for the patch.
-  * Fixed the bug in NSDictionary#select which always raises an exception.
-  * Fixed the bug in String#<< which raise an ArgumentError instead of
-    RangeError if passed the object which is out of range
-  * Fixed the bug in Kernel.catch which does not accept no argument.
-  * Fixed the bug in Kernel.Rational which does not raise a TypeError if passed
-    symbol.
-  * Fixed the bug in Symbol#clone and Sybmol#dup which does not raise a
-    TypeError.
-  * Fixed the bug in Symbol#match and Symbol#=~ which does not return an index
-    of the beginning of the match.
-  * Fixed the bug in Symbol#succ and Symbol#next which returns a String object.
-  * Added the Complex#rationalize, ENV#select! and ENV#keep_if method.
-  * Fixed the bug in Complex#/ which raise an exception when passed Float 0.0.
-  * Fixed the bug in Complex.rect and Complex.polar which raises an
-    ArgumentError instead of TypeError if passed wrong value.
-  * Fixed the bug in Regexp.last_match which raise an IndexError if passed
-    index which is out of matched range.
-  * Fixed the bug in ENV#[]= which does not raise an Errno::EINVAL passed
-    string including '=' as key
+  * Improved `rake simulator' to honor the SIM_STDOUT_PATH, SIM_STDERR_PATH
+    and SIM_WAIT_FOR_DEBUGGER environment variables, to respectively set the
+    path of the stdout and stderr streams and to tell the simulator launcher
+    that it should wait for a debugger before starting the application. These
+    variables will be used in the RubyMine integration.
+  * Fixed a bug in NSDictionary#select which always raised an exception.
+  * Fixed a bug in String#<< which raised an ArgumentError exception instead of
+    RangeError if the given object was is out of range.
+  * Fixed a bug in Kernel.catch when no argument was given.
+  * Fixed a bug in Kernel.Rational which was not raising a TypeError exception
+    if a Symbol object was passed.
+  * Fixed a bug in Symbol#clone and Sybmol#dup which didn't raised TypeError
+    exceptions.
+  * Fixed a bug in Symbol#match and Symbol#=~ which did not properly return
+    an index of the beginning match.
+  * Fixed a bug in Symbol#succ and Symbol#next which returned a String object.
+  * Added the following methods: Complex#rationalize, ENV#select! and
+    ENV#keep_if.
+  * Fixed a bug in Complex#/ which raised an exception when passed 0.0.
+  * Fixed a bug in Complex.rect and Complex.polar which raised an ArgumentError
+    exception instead of TypeError when a wrong value was given.
+  * Fixed a bug in Regexp.last_match which raised an IndexError exception when
+    an index out of the matched range was given.
+  * Fixed a bug in ENV#[]= which did not raise an Errno::EINVAL exception if
+    the given String object included the '=' character.
 
 = RubyMotion 1.27 =
 
