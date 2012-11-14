@@ -118,6 +118,14 @@ task :install do
     ln_sf destpath, File.join(bindir, File.basename(path))
   end
 
+  if File.exists?("vm/.yardoc")
+    docdir = File.join(motiondir, '/doc')
+    mkdir_p docdir
+    cp_r "vm/.yardoc", docdir
+    rm_rf "#{docdir}/yardoc"
+    mv "#{docdir}/.yardoc", "#{docdir}/yardoc"
+  end
+
 =begin
   # Gems (only for beta).
   gemsdir = File.join(destmotiondir, 'gems')
