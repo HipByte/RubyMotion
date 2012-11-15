@@ -222,6 +222,9 @@ class DocsetGenerator
     node = doc.xpath(".//p[@class='abstract']")
     return nil if node.empty?
 
+    # FIXME : To avoid overwriting NSObject class reference by NSObject protocol reference
+    return nil if name == "NSObject"
+
     code << node.text.gsub(/^/m, '# ')
     code << "\nmodule #{name} # Protocol\n\n"
 
