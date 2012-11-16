@@ -34,6 +34,8 @@
   * Fixed a bug in ENV#[]= which did not raise an Errno::EINVAL exception if
     the given String object included the '=' character.
   * Fixed an error message in `rake target' when it cannot find iOS simulator.
+  * Fixed a bug when using TWTweetComposeViewController's methods on iOS 6.0
+    below would trigger a crash at runtime.
 
 = RubyMotion 1.27 =
 
