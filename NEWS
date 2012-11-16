@@ -12,6 +12,7 @@
     path of the stdout and stderr streams and to tell the simulator launcher
     that it should wait for a debugger before starting the application. These
     variables will be used in the RubyMine integration.
+  * Fixed a bug in Dispatch::Object#dispatch_object on iOS versions below 6.0
   * Fixed a bug in NSDictionary#select which always raised an exception.
   * Fixed a bug in String#<< which raised an ArgumentError exception instead of
     RangeError if the given object was is out of range.
