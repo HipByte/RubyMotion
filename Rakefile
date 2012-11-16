@@ -121,7 +121,7 @@ task :install do
   end
 
   if File.exists?("vm/.yardoc")
-    docdir = File.join(motiondir, '/doc')
+    docdir = File.join(destmotiondir, '/doc')
     mkdir_p docdir
     cp_r "vm/.yardoc", docdir
     rm_rf "#{docdir}/yardoc"
@@ -183,7 +183,7 @@ namespace :doc do
   require './doc/docset_generator'
   require 'fileutils'
 
-  YARDOC = "cd vm; bundle exec yardoc --legacy"
+  YARDOC = "cd vm; bundle1.9.3 exec yardoc --legacy"
   RUBY_SOURCES = %w{
     array.c bignum.c class.c compar.c complex.c dir.c encoding.c enum.c
     enumerator.c env.c error.c eval.c eval_error.c eval_jump.c eval_safe.c
