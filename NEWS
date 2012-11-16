@@ -1,5 +1,7 @@
 = RubyMotion 1.28 =
 
+  * Added the `motion ri' command to access to API information on command line.
+    Ex: motion ri Dispatch::Queue#sync
   * Improved the build system to detect file dependencies automatically.
     This feature is experimental, if you encounter any problem you can disable
     it by setting `app.detect_dependencies = false' in the Rakefile.
@@ -30,6 +32,7 @@
     an index out of the matched range was given.
   * Fixed a bug in ENV#[]= which did not raise an Errno::EINVAL exception if
     the given String object included the '=' character.
+  * Fixed an error message in `rake target' when it cannot find iOS simulator.
 
 = RubyMotion 1.27 =
 
