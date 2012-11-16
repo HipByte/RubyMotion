@@ -1,6 +1,8 @@
 *.sw[ponm]
 .DS_Store
 
+s3config.yaml
+
 bin/deploy
 bin/llc
 bin/ruby
