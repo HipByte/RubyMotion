@@ -589,7 +589,8 @@ PLIST
     begin
       require 'ripper'
     rescue LoadError
-      require 'ripper18/ripper'
+      $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '../../ripper18')))
+      require 'ripper'
     end
 
     @file_paths = []

@@ -182,8 +182,21 @@ class UpdateCommand < Command
   end
 end
 
+class RICommand < Command
+  self.name = 'ri'
+  self.help = 'Display API reference'
+
+  def self.run(args)
+    if args.size <= 0
+      die "Usage: motion ri <API-name>"
+    end
+
+    system("/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc #{args[0]}")
+  end
+end
+
 class MotionMainCommand
-  Commands = [CreateCommand, ActivateCommand, UpdateCommand, SupportCommand]
+  Commands = [CreateCommand, ActivateCommand, UpdateCommand, RICommand, SupportCommand]
 
   def initialize(args)
     arg = args.shift

@@ -69,9 +69,11 @@ desc "Install"
 task :install do
   public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/deploy', './bin/sim',
-    './bin/llc', './bin/ruby', './bin/ctags'])
+    './bin/llc', './bin/ruby', './bin/ctags',
+    'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri'])
   data = ['./NEWS']
   data.concat(Dir.glob('./lib/**/*'))
+  data.delete_if { |x| true if x.include?("lib/yard/bin/") }
   SDK_VERSIONS.each do |sdk_version|
     data.concat(Dir.glob("./data/#{sdk_version}/BridgeSupport/*.bridgesupport"))
     data.concat(Dir.glob("./data/#{sdk_version}/iPhoneOS/*"))
@@ -116,6 +118,14 @@ task :install do
   public_binaries.each do |path|
     destpath = File.join(motiondir, path)
     ln_sf destpath, File.join(bindir, File.basename(path))
+  end
+
+  if File.exists?("vm/.yardoc")
+    docdir = File.join(motiondir, '/doc')
+    mkdir_p docdir
+    cp_r "vm/.yardoc", docdir
+    rm_rf "#{docdir}/yardoc"
+    mv "#{docdir}/.yardoc", "#{docdir}/yardoc"
   end
 
 =begin
@@ -170,6 +180,7 @@ end
 namespace :doc do
   require './doc/docset'
   require './doc/docset_link'
+  require './doc/docset_generator'
   require 'fileutils'
 
   YARDOC = "cd vm; bundle exec yardoc --legacy"
@@ -315,6 +326,49 @@ namespace :doc do
     Dir.glob(File.join(OUTPUT_DIR, "*.html")).each do |file|
       linker.run(file)
     end
+  end
+
+  desc "Generate RubyMotion.docset file"
+  task :docset do
+    PATH_DOCSET = "RubyMotion.docset"
+    INFO_PLIST =<<'END'
+<?xml version="1.0" encoding="UTF-8"?>
+<plist version="1.0">
+<dict>
+<key>CFBundleIdentifier</key>
+<string>rubymotion</string>
+<key>CFBundleName</key>
+<string>RubyMotion</string>
+<key>DocSetPlatformFamily</key>
+<string>rubymotion</string>
+<key>isDashDocset</key>
+<true/></dict>
+</plist>
+END
+
+    PATH_CONTENTS  = File.join(PATH_DOCSET, "Contents")
+    PATH_RESOURCES = File.join(PATH_CONTENTS, "Resources")
+    PATH_DOCUMENTS = File.join(PATH_RESOURCES, "Documents")
+    PATH_DOCS      = File.join(PATH_DOCUMENTS, OUTPUT_DIR)
+
+    mkdir_p PATH_DOCUMENTS
+    cp_r OUTPUT_DIR, PATH_DOCUMENTS
+
+    File.open(File.join(PATH_CONTENTS, "info.plist"), "w") { |io| io.print INFO_PLIST }
+
+    docset = DocsetGenerator::Generator.new
+    Dir.glob(File.join(PATH_DOCS, "/**/*.html")) do |path|
+      path.sub!("#{PATH_DOCUMENTS}/", '')
+      next if path =~ /index.html/
+      next if path =~ /class_list.html/
+      next if path =~ /frames.html/
+      next if path =~ /file_list.html/
+      next if path =~ /file\.\w+\.html/
+      next if path =~ /method_list.html/
+      docset.parse(PATH_DOCUMENTS, path)
+    end
+
+    docset.index(PATH_RESOURCES)
   end
 
   namespace :list do
