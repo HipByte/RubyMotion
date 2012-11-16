@@ -933,7 +933,10 @@ main(int argc, char **argv)
     // Create system root.
     id system_root = ((id (*)(id, SEL, id))objc_msgSend)(SystemRoot,
 	    @selector(rootWithSDKVersion:), sdk_version);
-    assert(system_root != nil);
+    if (system_root == nil) {
+	fprintf(stderr, "\nNot found iOS %s simulator.\n\n", [sdk_version UTF8String]);
+	exit(1);
+    }
 
     // Create session config.
     id config = [[SessionConfig alloc] init];
