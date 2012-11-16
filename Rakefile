@@ -225,6 +225,8 @@ namespace :doc do
 
   desc "Generate API Documents"
   task :api do
+    FileUtils.mkdir_p(OUTPUT_DIR)
+
     # generate Ruby code from iOS SDK docset
     DocsetGenerator.new('docset', DOCSET).generate_ruby_code
 
