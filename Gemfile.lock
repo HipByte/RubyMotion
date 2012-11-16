@@ -10,6 +10,7 @@ GEM
   specs:
     nokogiri (1.5.5)
     redcarpet (2.2.2)
+    sqlite3 (1.3.6)
 
 PLATFORMS
   ruby
@@ -17,4 +18,5 @@ PLATFORMS
 DEPENDENCIES
   nokogiri
   redcarpet
+  sqlite3
   yard!
