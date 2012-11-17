@@ -599,6 +599,20 @@ PLIST
       @file_paths = paths.sort
     end
 
+    def cyclic?(dependencies, def_path, ref_path)
+      deps = dependencies[def_path]
+      if deps
+        if deps.include?(ref_path)
+          return true
+        end
+        deps.each do |file|
+          return true if cyclic?(dependencies, file, ref_path)
+        end
+      end
+
+      return false
+    end
+
     def run
       consts_defined  = {}
       consts_referred = {}
@@ -619,6 +633,11 @@ PLIST
         if consts_referred[const]
           consts_referred[const].each do |ref_path|
             if def_path != ref_path
+              if cyclic?(dependency, def_path, ref_path)
+                # remove cyclic dependencies
+                next
+              end
+
               dependency[ref_path] ||= []
               dependency[ref_path] << def_path
               dependency[ref_path].uniq!
