@@ -596,7 +596,7 @@ PLIST
     @file_paths = []
 
     def initialize(paths)
-      @file_paths = paths.sort
+      @file_paths = paths.flatten.sort
     end
 
     def cyclic?(dependencies, def_path, ref_path)
