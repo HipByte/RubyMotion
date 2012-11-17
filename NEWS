@@ -1,3 +1,12 @@
+= RubyMotion 1.29 =
+
+  * Fixed a loading error with ripper library which was caused by using OSX
+    bundled Ruby.
+  * Fixed a bug where the files that contains only constants was not detected
+    the file dependencies.
+  * Fixed a bug where cyclic file dependencies would cause a `stack level too
+    deep' error.
+
 = RubyMotion 1.28 =
 
   * Added the `motion ri' command to access to API information on command line.
