@@ -645,6 +645,13 @@ PLIST
         @defined << const_name
       end
 
+      def on_var_field(args)
+        type, name, position = args
+        if type == :@const
+          @defined << name
+        end
+      end
+
       def on_var_ref(args)
         type, name, position = args
         if type == :@const
