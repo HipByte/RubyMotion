@@ -6,6 +6,8 @@
     the file dependencies.
   * Fixed a bug where cyclic file dependencies would cause a `stack level too
     deep' error.
+  * Fixed a bug where detecting file dependencies would cause a build error
+   when files list was not passed as flat array.
 
 = RubyMotion 1.28 =
 
