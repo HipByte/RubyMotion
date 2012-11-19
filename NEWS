@@ -1,13 +1,12 @@
 = RubyMotion 1.29 =
 
-  * Fixed a loading error with ripper library which was caused by using OSX
-    bundled Ruby.
-  * Fixed a bug where the files that contains only constants was not detected
-    the file dependencies.
+  * Fixed a loading error with the ripper library when using Ruby 1.8.
+  * Fixed a bug where the files that only contained constants were not detected
+    by the file dependencies system.
   * Fixed a bug where cyclic file dependencies would cause a `stack level too
     deep' error.
   * Fixed a bug where detecting file dependencies would cause a build error
-   when files list was not passed as flat array.
+    when the list of files would not be given as a flat array.
 
 = RubyMotion 1.28 =
 
