@@ -113,27 +113,27 @@ class TestEnv < Test::Unit::TestCase
     assert_equal("", ENV.fetch(PATH_ENV))
   end
 
-  # def test_aset
-  #   assert_raise(SecurityError) do
-  #     Thread.new do
-  #       $SAFE = 4
-  #       ENV["test"] = "foo"
-  #     end.join
-  #   end
-  #   assert_nothing_raised { ENV["test"] = nil }
-  #   assert_equal(nil, ENV["test"])
-  #   assert_raise(ArgumentError) { ENV["foo\0bar"] = "test" }
-  #   assert_raise(ArgumentError) { ENV["test"] = "foo\0bar" }
-  #   if /netbsd|openbsd/ =~ RUBY_PLATFORM
-  #     ENV["foo=bar"] = "test"
-  #     assert_equal("test", ENV["foo=bar"])
-  #     assert_equal("test", ENV["foo"])
-  #   else
-  #     assert_raise(Errno::EINVAL) { ENV["foo=bar"] = "test" }
-  #   end
-  #   ENV[PATH_ENV] = "/tmp/".taint
-  #   assert_equal("/tmp/", ENV[PATH_ENV])
-  # end
+  def test_aset
+    # assert_raise(SecurityError) do
+    #   Thread.new do
+    #     $SAFE = 4
+    #     ENV["test"] = "foo"
+    #   end.join
+    # end
+    assert_nothing_raised { ENV["test"] = nil }
+    assert_equal(nil, ENV["test"])
+    assert_raise(ArgumentError) { ENV["foo\0bar"] = "test" }
+    assert_raise(ArgumentError) { ENV["test"] = "foo\0bar" }
+    if /netbsd|openbsd/ =~ RUBY_PLATFORM
+      ENV["foo=bar"] = "test"
+      assert_equal("test", ENV["foo=bar"])
+      assert_equal("test", ENV["foo"])
+    else
+      assert_raise(Errno::EINVAL) { ENV["foo=bar"] = "test" }
+    end
+    ENV[PATH_ENV] = "/tmp/".taint
+    assert_equal("/tmp/", ENV[PATH_ENV])
+  end
 
   def test_keys
     a = nil
@@ -182,23 +182,23 @@ class TestEnv < Test::Unit::TestCase
     assert_equal(h1, h2)
   end
 
-  # def test_select_bang
-  #   h1 = {}
-  #   ENV.each_pair {|k, v| h1[k] = v }
-  #   ENV["test"] = "foo"
-  #   ENV.select! {|k, v| IGNORE_CASE ? k.upcase != "TEST" : k != "test" }
-  #   h2 = {}
-  #   ENV.each_pair {|k, v| h2[k] = v }
-  #   assert_equal(h1, h2)
+  def test_select_bang
+    h1 = {}
+    ENV.each_pair {|k, v| h1[k] = v }
+    ENV["test"] = "foo"
+    ENV.select! {|k, v| IGNORE_CASE ? k.upcase != "TEST" : k != "test" }
+    h2 = {}
+    ENV.each_pair {|k, v| h2[k] = v }
+    assert_equal(h1, h2)
 
-  #   h1 = {}
-  #   ENV.each_pair {|k, v| h1[k] = v }
-  #   ENV["test"] = "foo"
-  #   ENV.keep_if {|k, v| IGNORE_CASE ? k.upcase != "TEST" : k != "test" }
-  #   h2 = {}
-  #   ENV.each_pair {|k, v| h2[k] = v }
-  #   assert_equal(h1, h2)
-  # end
+    h1 = {}
+    ENV.each_pair {|k, v| h1[k] = v }
+    ENV["test"] = "foo"
+    ENV.keep_if {|k, v| IGNORE_CASE ? k.upcase != "TEST" : k != "test" }
+    h2 = {}
+    ENV.each_pair {|k, v| h2[k] = v }
+    assert_equal(h1, h2)
+  end
 
   def test_values_at
     ENV["test"] = "foo"

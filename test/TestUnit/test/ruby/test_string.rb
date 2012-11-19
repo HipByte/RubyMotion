@@ -222,11 +222,11 @@ class TestString < Test::Unit::TestCase
     s << "bar"
     assert_equal(l + 3, s.size)
 
-    # bug = '[ruby-core:27583]'
-    # assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << -3}
-    # assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << -2}
-    # assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << -1}
-    # assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << 0x81308130}
+    bug = '[ruby-core:27583]'
+    assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << -3}
+    assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << -2}
+    assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << -1}
+    assert_raise(RangeError, bug) {S("a".force_encoding(Encoding::UTF_8)) << 0x81308130}
     # assert_nothing_raised {S("a".force_encoding(Encoding::GB18030)) << 0x81308130}
   end
 
@@ -1255,9 +1255,9 @@ class TestString < Test::Unit::TestCase
 
     assert_raise(IndexError) { "foo"[/(?:(o$)|(x))/, 2] = 'bar' }
 
-    # o = Object.new
-    # def o.to_s; self; end
-    # assert_match(/^foo#<Object:0x.*>baz$/, "foobarbaz".sub("bar") { o })
+    o = Object.new
+    def o.to_s; self; end
+    assert_match(/^foo#<NSObject:0x.*>baz$/, "foobarbaz".sub("bar") { o })
   end
 
   def test_sub!

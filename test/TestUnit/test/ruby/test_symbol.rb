@@ -98,9 +98,9 @@ class TestSymbol < Test::Unit::TestCase
     assert_raise(ArgumentError) { :foo.to_proc.call }
   end
 
-  # def test_succ
-  #   assert_equal(:fop, :foo.succ)
-  # end
+  def test_succ
+    assert_equal(:fop, :foo.succ)
+  end
 
   def test_cmp
     assert_equal(0, :FoO <=> :FoO)
