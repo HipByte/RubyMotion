@@ -1,3 +1,23 @@
+= RubyMotion 1.30 =
+
+  * Fixed a bug in Float#hash where (-0.0).hash returns different value with
+    (0.0).hash.
+  * Fixed a bug in Float#** and Fixnum#** which would return Complex value when
+    receiver is negative value.
+  * Fixed a bug in Float#round which would return inaccurate value.
+  * Fixed a bug in Numeric#div which will not call subclass's #floor method.
+  * Fixed a bug in Range#step where it will return wrong type value when use
+    a Float value as range.
+  * Fixed a bug in Range#inspect which it would causes crash when receiver is a
+    cyclic range object.
+  * Fixed a bug in Range#{eql?, ==} which they would cause crash when passed a
+    cyclic range object.
+  * Fixed a bug in Range#hash which it would cause crash when receiver is a
+    cyclic range object.
+  * Fixed a bug in  Range#each where does not accept the range object when
+    create it with object which has #to_str method as begin of range.
+  * fix a bug in Range#first(n) where returns (n + 1) elements.
+
 = RubyMotion 1.29 =
 
   * Fixed a loading error with the ripper library when using Ruby 1.8.
