@@ -677,6 +677,10 @@ PLIST
           @referred << name
         end
       end
+
+      def on_const_path_ref(parent, args)
+        on_var_ref(args)
+      end
     end
   end
 end; end
