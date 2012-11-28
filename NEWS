@@ -16,7 +16,16 @@
     cyclic range object.
   * Fixed a bug in  Range#each where does not accept the range object when
     create it with object which has #to_str method as begin of range.
-  * fix a bug in Range#first(n) where returns (n + 1) elements.
+  * Fixed a bug in Range#first(n) where returns (n + 1) elements.
+  * Added a Object#singleton_class method.
+  * Fixed a bug in String#upto which it will not return an Enumerator when not
+    given a block.
+  * Fixed a bug in MatchData#[] which it would return wrong value when passed a
+    negative Fixnum object as index.
+  * Fixed a bug in Regexp#options which it would returns wrong value.
+  * Fixed a bug in Range#{min, max} which it would not evaluate a block.
+  * Fixed a bug which cannot detecting file dependencies when include a nesting
+    class.
 
 = RubyMotion 1.29 =
 
