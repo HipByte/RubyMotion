@@ -1,5 +1,8 @@
 = RubyMotion 1.30 =
 
+  * Added formatter for RubyMine tests runner. Thanks Dennis Ushakov for the
+    patch.
+  * Fixed a bug where MapKit annotation pins would disappear.
   * Fixed a bug in Float#hash where (-0.0).hash returns different value with
     (0.0).hash.
   * Fixed a bug in Float#** and Fixnum#** which would return Complex value when
@@ -26,6 +29,27 @@
   * Fixed a bug in Range#{min, max} which it would not evaluate a block.
   * Fixed a bug which cannot detecting file dependencies when include a nesting
     class.
+  * Fixed a bug in File::Stat.new which would cause a crash.
+  * Fixed a bug in Dir.new which would cause a crash.
+  * Fixed a bug in StructClass.new which would cause a crash
+  * Fixed a memory leak where following class object would not be released.
+      Class:
+        Class of Objecitive-C Structure (like CGRect), Pointer, Range, Time
+  * Fixed a memory leak where following method would generate the object which
+    would not be released.
+      Method:
+        Object#{dup, clone}, Time#{gm, getgm} Time._load, Objecct#enum_for,
+        NSDictionary#{inspect, dup, to_a, keys, values, value_at, select,
+        reject, merge}, NSMutableDictionary#{delete_if, select!}, NSArray#{dup,
+        inspect, [], select, values_at, +, *}, NSMutableArray#{select!, uniq!}
+        Pointer.magic_cookie, Class of Objecitive-C Structure #dup
+  * Fixed a memory leak where internal data in following classes and method
+    would be not be released.
+      Class:
+        Bignum, Random, Symbol, File::Stat, StructClass, Dispatch::Queue
+      Method:
+        Marshal.{dump, load}, Kernel.sprintf, Regexp.{new, quote}, Hash.new
+        String#{split, count, delete}, Array#hash, Symbol#inspect
 
 = RubyMotion 1.29 =
 
