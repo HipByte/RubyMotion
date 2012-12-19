@@ -49,7 +49,8 @@
         Bignum, Random, Symbol, File::Stat, StructClass, Dispatch::Queue
       Method:
         Marshal.{dump, load}, Kernel.sprintf, Regexp.{new, quote}, Hash.new
-        String#{split, count, delete}, Array#hash, Symbol#inspect
+        String#{split, count, delete, tr, tr!, tr_s, tr_s!}, Array#hash,
+        Symbol#inspect
 
 = RubyMotion 1.29 =
 
