@@ -1,56 +1,47 @@
 = RubyMotion 1.30 =
 
-  * Added formatter for RubyMine tests runner. Thanks Dennis Ushakov for the
+  * Fixed a bug in the build system where it could not detect file dependencies
+    using nested classes (ex. `module M; class C' and `class C2 < M::C').
+  * Fixed a bug where MapKit annotation pins would disappear, because certain
+    Ruby objects (in this case, MKAnnotations) would use a Bignum value as the
+    return value of the `hash' method, which would not work properly when used
+    within MapKit.
+  * Added formatter for RubyMine tests runner. Thanks to Dennis Ushakov for the
     patch.
-  * Fixed a bug where MapKit annotation pins would disappear.
-  * Fixed a bug in Float#hash where (-0.0).hash returns different value with
+  * Fixed a bug in Float#hash where (-0.0).hash returned a different value with
     (0.0).hash.
-  * Fixed a bug in Float#** and Fixnum#** which would return Complex value when
-    receiver is negative value.
-  * Fixed a bug in Float#round which would return inaccurate value.
-  * Fixed a bug in Numeric#div which will not call subclass's #floor method.
-  * Fixed a bug in Range#step where it will return wrong type value when use
-    a Float value as range.
-  * Fixed a bug in Range#inspect which it would causes crash when receiver is a
-    cyclic range object.
-  * Fixed a bug in Range#{eql?, ==} which they would cause crash when passed a
-    cyclic range object.
-  * Fixed a bug in Range#hash which it would cause crash when receiver is a
-    cyclic range object.
-  * Fixed a bug in  Range#each where does not accept the range object when
-    create it with object which has #to_str method as begin of range.
-  * Fixed a bug in Range#first(n) where returns (n + 1) elements.
-  * Added a Object#singleton_class method.
-  * Fixed a bug in String#upto which it will not return an Enumerator when not
-    given a block.
-  * Fixed a bug in MatchData#[] which it would return wrong value when passed a
-    negative Fixnum object as index.
-  * Fixed a bug in Regexp#options which it would returns wrong value.
-  * Fixed a bug in Range#{min, max} which it would not evaluate a block.
-  * Fixed a bug which cannot detecting file dependencies when include a nesting
-    class.
-  * Fixed a bug in File::Stat.new which would cause a crash.
-  * Fixed a bug in Dir.new which would cause a crash.
-  * Fixed a bug in StructClass.new which would cause a crash
-  * Fixed a memory leak where following class object would not be released.
-      Class:
-        Class of Objecitive-C Structure (like CGRect), Pointer, Range, Time
-  * Fixed a memory leak where following method would generate the object which
-    would not be released.
-      Method:
-        Object#{dup, clone}, Time#{gm, getgm} Time._load, Objecct#enum_for,
-        NSDictionary#{inspect, dup, to_a, keys, values, value_at, select,
-        reject, merge}, NSMutableDictionary#{delete_if, select!}, NSArray#{dup,
-        inspect, [], select, values_at, +, *}, NSMutableArray#{select!, uniq!}
-        Pointer.magic_cookie, Class of Objecitive-C Structure #dup
-  * Fixed a memory leak where internal data in following classes and method
-    would be not be released.
-      Class:
-        Bignum, Random, Symbol, File::Stat, StructClass, Dispatch::Queue
-      Method:
-        Marshal.{dump, load}, Kernel.sprintf, Regexp.{new, quote}, Hash.new
-        String#{split, count, delete, tr, tr!, tr_s, tr_s!}, Array#hash,
-        Symbol#inspect
+  * Fixed a bug in Float#** and Fixnum#** which would return a Complex object
+    when the receiver was a negative value.
+  * Fixed a bug in Float#round which would return an inaccurate value.
+  * Fixed a bug in Numeric#div which would not call the super `floor' method.
+  * Fixed a bug in Range#step where it would return an object of the wrong type
+    when a float value was given as range.
+  * Fixed a bug in Range#{inspect, eql?, ==, hash} where crashes would happen
+    when using cyclic range objects.
+  * Fixed a bug in Range#each where it would not work if the receiver was
+    created using #to_str for the beginning of the range.
+  * Fixed a bug in Range#first(n) where it returned (n + 1) elements.
+  * Added the Object#singleton_class method.
+  * Fixed a bug in String#upto where it did not return an Enumerator object
+    when a block was not given.
+  * Fixed a bug in MatchData#[] where it would return a wrong value when a
+    negative Fixnum object was passed as the index.
+  * Fixed a bug in Regexp#options where it was returning a wrong value.
+  * Fixed a bug in Range#{min, max} where it would not evaluate the block.
+  * Fixed a bug in {File::Stat, Dir, StructClass}.new where it was crashing.
+  * Fixed memory leaks in the following classes: Boxed classes (ex. `CGRect'),
+    Pointer, Range and Time.
+  * Fixed memory leaks where the following methods would return an object that
+    would be leaking: Object#{dup, clone}, Time#{gm, getgm} Time._load,
+    Object#enum_for, NSDictionary#{inspect, dup, to_a, keys, values, value_at,
+    select, reject, merge}, NSMutableDictionary#{delete_if, select!},
+    NSArray#{dup, inspect, [], select, values_at, +, *},
+    NSMutableArray#{select!, uniq!}, Pointer.magic_cookie, Boxed#dup.
+  * Fixed memory leaks where some internal data in following classes and
+    methods would be leaking: Bignum, Random, Symbol, File::Stat, StructClass,
+    Dispatch::Queue, Marshal.{dump, load}, Kernel.sprintf, Regexp.{new, quote},
+    Hash.new, String#{split, count, delete, tr, tr!, tr_s, tr_s!}, Array#hash,
+    Symbol#inspect.
 
 = RubyMotion 1.29 =
 
