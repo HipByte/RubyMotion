@@ -14,7 +14,7 @@ class TestRange < Test::Unit::TestCase
   def test_range_numeric_string
     assert_equal(["6", "7", "8"], ("6".."8").to_a, "[ruby-talk:343187]")
     assert_equal(["6", "7"], ("6"..."8").to_a)
-    # assert_equal(["9", "10"], ("9".."10").to_a)
+    assert_equal(["9", "10"], ("9".."10").to_a)
     assert_equal(["09", "10"], ("09".."10").to_a, "[ruby-dev:39361]")
     # assert_equal(["9", "10"], (SimpleDelegator.new("9").."10").to_a)
     # assert_equal(["9", "10"], ("9"..SimpleDelegator.new("10")).to_a)
@@ -307,11 +307,11 @@ class TestRange < Test::Unit::TestCase
   class CyclicRange < Range
     def <=>(other); true; end
   end
-  # def test_cyclic_range_inspect
-  #   o = CyclicRange.allocate
-  #   o.instance_eval { initialize(o, 1) }
-  #   assert_equal("(... .. ...)..1", o.inspect)
-  # end
+  def test_cyclic_range_inspect
+    o = CyclicRange.allocate
+    o.instance_eval { initialize(o, 1) }
+    assert_equal("(... .. ...)..1", o.inspect)
+  end
 
   # def test_comparison_when_recursive
   #   x = CyclicRange.allocate; x.send(:initialize, x, 1)

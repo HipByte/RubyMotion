@@ -47,16 +47,16 @@ class TestFile < Test::Unit::TestCase
     f.close
   end
 
-  # def test_truncate_rbuf
-  #   f = Tempfile.new("test-truncate")
-  #   f.puts "abc"
-  #   f.puts "def"
-  #   f.close
-  #   f.open
-  #   assert_equal("abc\n", f.gets)
-  #   f.truncate(3)
-  #   assert_equal(nil, f.gets, "[ruby-dev:24197]")
-  # end
+  def test_truncate_rbuf
+    f = Tempfile.new("test-truncate")
+    f.puts "abc"
+    f.puts "def"
+    f.close
+    f.open
+    assert_equal("abc\n", f.gets)
+    # f.truncate(3)
+    # assert_equal(nil, f.gets, "[ruby-dev:24197]")
+  end
 
   def test_truncate_beyond_eof
     f = Tempfile.new("test-truncate")
@@ -153,10 +153,10 @@ class TestFile < Test::Unit::TestCase
     }
   end
 
-  # def test_uninitialized
-  #   assert_raise(TypeError) { File::Stat.allocate.readable? }
-  #   assert_nothing_raised { File::Stat.allocate.inspect }
-  # end
+  def test_uninitialized
+    assert_raise(TypeError) { File::Stat.allocate.readable? }
+    # assert_nothing_raised { File::Stat.allocate.inspect }
+  end
 
   # def test_realpath
   #   Dir.mktmpdir('rubytest-realpath') {|tmpdir|

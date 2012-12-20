@@ -190,11 +190,11 @@ class TestRegexp < Test::Unit::TestCase
     assert_equal(false, /(?i:a)/.casefold?)
   end
 
-  # def test_options
-  #   assert_equal(Regexp::IGNORECASE, /a/i.options)
-  #   assert_equal(Regexp::EXTENDED, /a/x.options)
-  #   assert_equal(Regexp::MULTILINE, /a/m.options)
-  # end
+  def test_options
+    assert_equal(Regexp::IGNORECASE, /a/i.options)
+    assert_equal(Regexp::EXTENDED, /a/x.options)
+    assert_equal(Regexp::MULTILINE, /a/m.options)
+  end
 
   def test_match_init_copy
     m = /foo/.match("foo")
