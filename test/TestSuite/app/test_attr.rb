@@ -26,15 +26,15 @@ test_begin "test_attr"
 #   end
 # }, '[ruby-core:14641]'
 
-assert_equal %{ok}, proc{
-  class A
-    attr :m
-  end
-  begin
-    A.new.m(3)
-  rescue ArgumentError => e
-    "ok"
-  end
-}, '[ruby-core:15120]'
+# assert_equal %{ok}, proc{
+#   class A
+#     attr :m
+#   end
+#   begin
+#     A.new.m(3)
+#   rescue ArgumentError => e
+#     "ok"
+#   end
+# }, '[ruby-core:15120]'
 
 test_end
