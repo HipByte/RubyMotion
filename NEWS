@@ -1,6 +1,7 @@
 = RubyMotion 1.31 =
 
   * Fixed a bug in Kernel.sprintf which would cause a malloc_error_break error.
+  * Added .sass-cache directory into the default .gitignore file.
 
 = RubyMotion 1.30 =
 
