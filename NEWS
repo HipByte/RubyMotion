@@ -2,6 +2,7 @@
 
   * Fixed a bug in Kernel.sprintf which would cause a malloc_error_break error.
   * Added .sass-cache and .idea directory into the default .gitignore file.
+  * Fixed memory leaks in Complex and Rational classes.
 
 = RubyMotion 1.30 =
 
