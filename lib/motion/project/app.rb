@@ -108,6 +108,7 @@ module Motion; module Project
             io.puts "*.sw[po]"
             io.puts ".eprj"
             io.puts ".sass-cache"
+            io.puts ".idea"
           end
           App.log 'Create', File.join(app_name, 'Rakefile')
           File.open('Rakefile', 'w') do |io|
