@@ -3,6 +3,10 @@
   * Fixed a bug in Kernel.sprintf which would cause a malloc_error_break error.
   * Added .sass-cache and .idea directory into the default .gitignore file.
   * Fixed memory leaks in Complex and Rational classes.
+  * Improved String#{[]=, index} performance when a String object has only
+    ASCII code range characters. 5-14 times faster.
+  * Improved String#{==, eql?} performance when  the length of the string does
+    not match. 15 times faster.
 
 = RubyMotion 1.30 =
 
