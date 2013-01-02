@@ -7,6 +7,8 @@
     ASCII code range characters. 5-14 times faster.
   * Improved String#{==, eql?} performance when  the length of the string does
     not match. 15 times faster.
+  * Fixed a bug in MatchData where it causes a crash due to an assertion when
+    calls a method with uninitialized MatchData object.
 
 = RubyMotion 1.30 =
 
