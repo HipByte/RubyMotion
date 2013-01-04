@@ -1,6 +1,7 @@
 = RubyMotion 1.31 =
 
-  * Fixed a bug in Kernel.sprintf which would cause a malloc_error_break error.
+  * Fixed a bug in Kernel.sprintf and NSDate.new which would cause a
+    malloc_error_break error.
   * Added .sass-cache and .idea directory into the default .gitignore file.
   * Fixed memory leaks in Complex and Rational classes.
   * Improved String#{[]=, index} performance when a String object has only
