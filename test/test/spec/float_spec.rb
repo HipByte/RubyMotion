@@ -37,4 +37,15 @@ describe "Float" do
   it "Range#eql?" do
     (0.5..2.4).eql?(0.5..2.4).should == true
   end
+
+  it "fixfloat" do
+    # in 32bit env, integral multiple become to fixfloat
+    100.times do |i|
+      i.to_f.__fixfloat__?.should == true
+    end
+
+    0.7.step(100.0, 1.0) do |f|
+      f.__fixfloat__?.should == false
+    end
+  end
 end
