@@ -12,9 +12,9 @@ describe "Float" do
   end
 
   it "/" do
-    # issue 214, 362, 409
+    # issue 214, 409
+    (1350929196 * 1000.0).to_i.should == 1350929196000
     (288338838383383 / 1000.0).to_i.should == 288338838383
-    (89.0 / 100.0 * 100.0).to_i.should == 89
   end
 
   it "step" do
@@ -28,24 +28,13 @@ describe "Float" do
     number.should == 3000000000
   end
 
-  it "Marshal" do
-    # issue 430
-    flt = 199 / 100.0
-    (Marshal.load(Marshal.dump(flt)) * 100.0).to_i.should == 199
-  end
-
   it "Range#eql?" do
     (0.5..2.4).eql?(0.5..2.4).should == true
   end
 
   it "fixfloat" do
-    # in 32bit env, integral multiple become to fixfloat
-    100.times do |i|
-      i.to_f.__fixfloat__?.should == true
-    end
-
-    0.7.step(100.0, 1.0) do |f|
-      f.__fixfloat__?.should == false
+    0.1.step(100.0, 0.1) do |f|
+      f.__fixfloat__?.should == true
     end
   end
 end
