@@ -10,6 +10,8 @@
     not match. 15 times faster.
   * Fixed a bug in MatchData where it causes a crash due to an assertion when
     calls a method with uninitialized MatchData object.
+  * Fixex a bug in detecting dependencies where it would cause build error when
+    passed non-flat array into `app.files'.
 
 = RubyMotion 1.30 =
 
