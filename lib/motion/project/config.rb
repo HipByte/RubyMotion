@@ -258,7 +258,7 @@ EOS
     def files_dependencies(deps_hash)
       res_path = lambda do |x|
         path = /^\./.match(x) ? x : File.join('.', x)
-        unless @files.include?(path)
+        unless @files.flatten.include?(path)
           App.fail "Can't resolve dependency `#{x}'"
         end
         path
@@ -292,7 +292,7 @@ EOS
 
     def ordered_build_files
       @ordered_build_files ||= begin
-        flat_deps = @files.map { |file| file_dependencies(file) }.flatten
+        flat_deps = @files.flatten.map { |file| file_dependencies(file) }.flatten
         paths = flat_deps.dup
         flat_deps.each do |path|
           n = paths.count(path)
