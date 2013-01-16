@@ -10,6 +10,11 @@ describe "Float" do
     sleep 0.2
     (NSDate.date.timeIntervalSince1970 - start).should != 0
 
+    # issue 188
+    date = NSDate.alloc.initWithString("2013-01-01 23:59:59 +000")
+    date.timeIntervalSince1970.to_f.should == date.to_f
+    NSDate.dateWithTimeIntervalSince1970(date.timeIntervalSince1970).should == date
+
     # issue 193
     t1 = NSDate.dateWithNaturalLanguageString("midnight")
     t2 = Time.dateWithNaturalLanguageString("midnight")
