@@ -9,6 +9,11 @@ describe "Float" do
     start = Time.now.to_f
     sleep 0.2
     (NSDate.date.timeIntervalSince1970 - start).should != 0
+
+    # issue 193
+    t1 = NSDate.dateWithNaturalLanguageString("midnight")
+    t2 = Time.dateWithNaturalLanguageString("midnight")
+    t1.to_f.should == t2.to_f
   end
 
   it "/" do
