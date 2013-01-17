@@ -12,6 +12,8 @@
     calls a method with uninitialized MatchData object.
   * Fixex a bug in detecting dependencies where it would cause build error when
     passed non-flat array into `app.files'.
+  * Fixed a memory crasher that would happen when symbolicating large exception
+    backtraces (simulator only). Thanks Doug Puchalski for the help.
 
 = RubyMotion 1.30 =
 
