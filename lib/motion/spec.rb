@@ -187,6 +187,7 @@ module Bacon
 
     def handle_requirement_begin(description)
       @description = @@describe + description
+      @description.sub!(/^[#\s]+/, "")
       ErrorLog.replace ""
     end
 
