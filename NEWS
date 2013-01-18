@@ -16,8 +16,9 @@
     backtraces (simulator only). Thanks Doug Puchalski for the help.
   * Fixed a bug in `rake spec' which it would raise an ArgumentError when use
     `it' without block in spec files.
-  * Fixed a tap format in `rake spec' to output the each test numbers instead
-    of the total number.
+  * Fixed a tap format in `rake spec' in order to output the each test numbers
+    instead of the total number and add a message of `describe' to description
+    of tap's output.
 
 = RubyMotion 1.30 =
 
