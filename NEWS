@@ -14,6 +14,8 @@
     passed non-flat array into `app.files'.
   * Fixed a memory crasher that would happen when symbolicating large exception
     backtraces (simulator only). Thanks Doug Puchalski for the help.
+  * Fixed a bug in `rake spec' which it would raise an ArgumentError when use
+    `it' without block in spec files.
 
 = RubyMotion 1.30 =
 
