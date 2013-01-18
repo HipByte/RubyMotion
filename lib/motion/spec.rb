@@ -174,6 +174,8 @@ module Bacon
   end
 
   module TapOutput
+    @@count = 1
+
     def handle_specification_begin(name); end
     def handle_specification_end        ; end
 
@@ -184,12 +186,14 @@ module Bacon
 
     def handle_requirement_end(error)
       if error.empty?
-        puts "ok %-3d - %s" % [Counter[:specifications], @description]
+        puts "ok %-3d - %s" % [@@count, @description]
       else
         puts "not ok %d - %s: %s" %
-          [Counter[:specifications], @description, error]
+          [@@count, @description, error]
         puts ErrorLog.strip.gsub(/^/, '# ')  if Backtraces
       end
+
+      @@count += 1
     end
 
     def handle_summary
