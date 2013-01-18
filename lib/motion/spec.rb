@@ -490,7 +490,7 @@ module Bacon
 
     def it(description, &block)
       return  unless description =~ RestrictName
-      block ||= lambda { should.flunk "not implemented" }
+      block ||= proc { should.flunk "not implemented" }
       Counter[:specifications] += 1
       @specifications << Specification.new(self, description, block, @before, @after)
     end
