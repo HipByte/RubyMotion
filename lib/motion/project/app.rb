@@ -97,6 +97,7 @@ module Motion; module Project
             io.puts ".repl_history"
             io.puts "build"
             io.puts "tags"
+            io.puts "app/pixate_code.rb"
             io.puts "resources/*.nib"
             io.puts "resources/*.momd"
             io.puts "resources/*.storyboardc"
