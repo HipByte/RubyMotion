@@ -2,7 +2,8 @@
 
   * Fixed a bug in Kernel.sprintf and NSDate.new which would cause a
     malloc_error_break error.
-  * Added .sass-cache and .idea directory into the default .gitignore file.
+  * Added .sass-cache, .idea and app/pixate_code.rb into the default .gitignore
+    file.
   * Fixed memory leaks in Complex and Rational classes.
   * Improved String#{[]=, index} performance when a String object has only
     ASCII code range characters. 5-14 times faster.
