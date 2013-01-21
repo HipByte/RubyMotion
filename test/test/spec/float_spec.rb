@@ -38,6 +38,23 @@ describe "Float" do
     number.should == 3000000000
   end
 
+  it "with NSNumber" do
+    flt = NSNumber.numberWithDouble(1234567890.to_f)
+    flt.should == 1234567890.to_f
+    flt.should != NSNumber.numberWithFloat(1234567890.to_f)
+  end
+
+  it "with NSArray" do
+    flt = 1234567890.to_f
+    ary = NSMutableArray.alloc.initWithCapacity(5)
+    ary.addObject(flt)
+    ary[1] = (1350929196 * 1000.0)
+    ary.objectAtIndex(0).should == 1234567890.to_f
+    ary[0].should == 1234567890.to_f
+    ary.objectAtIndex(1).to_i.should == 1350929196000
+    ary[1].to_i.should == 1350929196000
+  end
+
   it "Range#eql?" do
     (0.5..2.4).eql?(0.5..2.4).should == true
   end
