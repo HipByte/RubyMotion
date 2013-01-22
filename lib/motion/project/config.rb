@@ -292,15 +292,7 @@ EOS
 
     def ordered_build_files
       @ordered_build_files ||= begin
-        flat_deps = @files.flatten.map { |file| file_dependencies(file) }.flatten
-        paths = flat_deps.dup
-        flat_deps.each do |path|
-          n = paths.count(path)
-          if n > 1
-            (n - 1).times { paths.delete_at(paths.rindex(path)) }
-          end
-        end
-        paths
+        @files.flatten.map { |file| file_dependencies(file) }.flatten.uniq
       end
     end
 
