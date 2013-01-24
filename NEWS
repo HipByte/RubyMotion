@@ -2,24 +2,26 @@
 
   * Fixed a bug in Kernel.sprintf and NSDate.new which would cause a
     malloc_error_break error.
-  * Added .sass-cache, .idea and app/pixate_code.rb into the default .gitignore
+  * Added .sass-cache, .idea and app/pixate_code.rb to the default .gitignore
     file.
   * Fixed memory leaks in Complex and Rational classes.
   * Improved String#{[]=, index} performance when a String object has only
     ASCII code range characters. 5-14 times faster.
-  * Improved String#{==, eql?} performance when  the length of the string does
+  * Improved String#{==, eql?} performance when the length of the strings do
     not match. 15 times faster.
-  * Fixed a bug in MatchData where it causes a crash due to an assertion when
-    calls a method with uninitialized MatchData object.
-  * Fixex a bug in detecting dependencies where it would cause build error when
-    passed non-flat array into `app.files'.
+  * Improved String#+ performance by pre-allocating heap memory.
+  * Fixed a bug in MatchData where it caused a crash due to an assertion when
+    used on an uninitialized MatchData object.
+  * Fixex a bug in the automatic dependencies checker where it would cause a
+    build error when `app.files' contained a non-flag Array.
+  * Improved the automatic dependencies checker in the build system to be way
+    faster. Thanks to Yury Korolev for the patch.
   * Fixed a memory crasher that would happen when symbolicating large exception
-    backtraces (simulator only). Thanks Doug Puchalski for the help.
-  * Fixed a bug in `rake spec' which it would raise an ArgumentError when use
-    `it' without block in spec files.
-  * Fixed a tap format in `rake spec' in order to output the each test numbers
-    instead of the total number and add a message of `describe' to description
-    of tap's output.
+    backtraces (simulator only). Thanks to Doug Puchalski for the help.
+  * Fixed a bug in `rake spec' where an ArgumentError exception would be raised
+    when `it' clauses in spec files would not be defined with a block.
+  * Improved the `tap' format of `rake spec' to print the number of each test
+    instead of the total number, and also a better description.
 
 = RubyMotion 1.30 =
 
