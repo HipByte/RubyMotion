@@ -17,7 +17,7 @@
   * Fixed a bug in MatchData where it caused a crash due to an assertion when
     used on an uninitialized MatchData object.
   * Fixex a bug in the automatic dependencies checker where it would cause a
-    build error when `app.files' contained a non-flag Array.
+    build error when `app.files' contained a non-flat Array.
   * Improved the automatic dependencies checker in the build system to be way
     faster. Thanks to Yury Korolev for the patch.
   * Fixed a memory crasher that would happen when symbolicating large exception
