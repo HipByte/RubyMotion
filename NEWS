@@ -1,3 +1,6 @@
+= RubyMotion 1.32 =
+  * Improved Array#hash performance
+
 = RubyMotion 1.31 =
 
   * Fixed a bug in Kernel.sprintf and NSDate.new which would cause a
