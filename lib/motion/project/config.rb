@@ -665,8 +665,26 @@ EOS
     end
     private :read_provisioned_profile_array
 
+    def read_provisioned_profile_boolean(key)
+      text = File.read(provisioning_profile)
+      text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+      case text.scan(/<key>\s*#{key}\s*<\/key>\s*<(true|false)\/>/m)[0]
+      when ['true']
+        true
+      when ['false']
+        false
+      else
+        nil
+      end
+    end
+    private :read_provisioned_profile_boolean
+
     def provisioned_devices
       @provisioned_devices ||= read_provisioned_profile_array('ProvisionedDevices')
+    end
+
+    def provisions_all_devices?
+      @provisions_all_devices ||= !!read_provisioned_profile_boolean('ProvisionsAllDevices')
     end
 
     def seed_id

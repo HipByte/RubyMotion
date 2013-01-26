@@ -138,7 +138,7 @@ desc "Deploy on the device"
 task :device => :archive do
   App.info 'Deploy', App.config.archive
   device_id = (ENV['id'] or App.config.device_id)
-  unless App.config.provisioned_devices.include?(device_id)
+  unless App.config.provisions_all_devices? || App.config.provisioned_devices.include?(device_id)
     App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
