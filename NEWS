@@ -1,6 +1,11 @@
 = RubyMotion 1.32 =
 
   * Improved Array#hash performance
+  * Fixed a bug in IO#closed? and File#closed? which did not raise an exception
+    when receiver object was not initialized.
+  * Fixed a bug in IO#gets where would trigger heap overrun.
+  * Fixed a bug in IO#close where it would close wrong stream when it opened
+    the both of read/write stream by IO#open.
 
 = RubyMotion 1.31 =
 
