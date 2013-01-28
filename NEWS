@@ -1,11 +1,12 @@
 = RubyMotion 1.32 =
 
-  * Improved Array#hash performance
-  * Fixed a bug in IO#closed? and File#closed? which did not raise an exception
-    when receiver object was not initialized.
-  * Fixed a bug in IO#gets where would trigger heap overrun.
-  * Fixed a bug in IO#close where it would close wrong stream when it opened
-    the both of read/write stream by IO#open.
+  * Added support for Xcode 4.6 and iOS 6.1 SDK.
+  * Improved Array#hash performance.
+  * Fixed a bug in IO#closed? and File#closed? where an exception wasn't raised
+    if the receiver wasn't initialized.
+  * Fixed a bug in IO#gets where a memory heap overrun would be triggered.
+  * Fixed a bug in IO#close where it would close the wrong stream when opened
+    in both read/write mode by IO#open.
 
 = RubyMotion 1.31 =
 
