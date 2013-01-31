@@ -186,10 +186,18 @@ locate_simulator_app_bounds(void)
     }
 
     // Inset the main view frame.
-    bounds.origin.x += 30;
-    bounds.size.width -= 60;
-    bounds.origin.y += 120;
-    bounds.size.height -= 240;
+    if (bounds.size.width < bounds.size.height) {
+	bounds.origin.x += 30;
+	bounds.size.width -= 60;
+	bounds.origin.y += 120;
+	bounds.size.height -= 240;
+    }
+    else {
+	bounds.origin.x += 120;
+	bounds.size.width -= 240;
+	bounds.origin.y += 30;
+	bounds.size.height -= 60;
+    }
     simulator_app_bounds = bounds;
 }
 
