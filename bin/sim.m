@@ -112,6 +112,9 @@ sigforwarder(int sig)
 
 @implementation Delegate
 
+#define DEVICE_FAMILY_IPHONE 1
+#define DEVICE_FAMILY_IPAD   2
+
 static void
 locate_simulator_app_bounds(void)
 {
@@ -123,6 +126,7 @@ locate_simulator_app_bounds(void)
 	    kCGNullWindowID);
     NSRect bounds = NSZeroRect;
     bool bounds_ok = false;
+    int device_family = DEVICE_FAMILY_IPHONE;
     for (NSDictionary *dict in (NSArray *)windows) {
 #define validate(obj, klass) \
     if (obj == nil || ![obj isKindOfClass:[klass class]]) { \
@@ -150,6 +154,9 @@ locate_simulator_app_bounds(void)
 	}
 	if (!found) {
 	    continue;
+	}
+	if ([name rangeOfString:@"iPad"].location != NSNotFound) {
+	    device_family = DEVICE_FAMILY_IPAD;
 	}
 
 	id bounds_dict = [dict objectForKey:@"kCGWindowBounds"];
@@ -186,17 +193,23 @@ locate_simulator_app_bounds(void)
     }
 
     // Inset the main view frame.
-    if (bounds.size.width < bounds.size.height) {
-	bounds.origin.x += 30;
-	bounds.size.width -= 60;
-	bounds.origin.y += 120;
-	bounds.size.height -= 240;
+    if (device_family == DEVICE_FAMILY_IPHONE) {
+	if (bounds.size.width < bounds.size.height) {
+	    bounds.origin.x += 30;
+	    bounds.size.width -= 60;
+	    bounds.origin.y += 120;
+	    bounds.size.height -= 240;
+	}
+	else {
+	    bounds.origin.x += 120;
+	    bounds.size.width -= 240;
+	    bounds.origin.y += 30;
+	    bounds.size.height -= 60;
+	}
     }
     else {
-	bounds.origin.x += 120;
-	bounds.size.width -= 240;
-	bounds.origin.y += 30;
-	bounds.size.height -= 60;
+	bounds.origin.y += 25;
+	bounds.size.height -= 50;
     }
     simulator_app_bounds = bounds;
 }
