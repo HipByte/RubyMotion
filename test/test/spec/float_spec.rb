@@ -32,6 +32,12 @@ describe "Float" do
     1356890400.step(1356908032.0, 7200.0).to_a.should == [1356890400.0, 1356897600.0, 1356904800.0]
   end
 
+  it "round" do
+    # issue 506
+    flt = 0.678547.round(2)
+    flt.to_s.should == "0.68"
+  end
+
   it "NSDecimalNumber.decimalNumberWithMantissa" do
     # issue 427
     number = NSDecimalNumber.decimalNumberWithMantissa(3000000000, exponent: 0,isNegative: false)
