@@ -306,7 +306,7 @@ EOS
 - (void)appLaunched:(id)notification
 {
     // Give a bit of time for the simulator to attach...
-    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.1];
+    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.2];
 }
 
 - (void)runSpecs
