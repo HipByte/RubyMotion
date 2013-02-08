@@ -113,7 +113,7 @@ class UpdateCommand < Command
   self.help = 'Update the software'
 
   def self.curl(cmd)
-    resp = `/usr/bin/curl --connect-timeout 5 #{cmd}`
+    resp = `/usr/bin/curl --connect-timeout 60 #{cmd}`
     if $?.exitstatus != 0
       die "Error when connecting to the server. Check your Internet connection and try again."
     end
