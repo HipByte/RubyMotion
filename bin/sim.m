@@ -14,6 +14,14 @@
 
 #include "builtin_debugger_cmds.h"
 
+#define DEVICE_FAMILY_IPHONE 1
+#define DEVICE_FAMILY_IPAD   2
+
+#define DEVICE_RETINA_FALSE 0
+#define DEVICE_RETINA_TRUE  1
+#define DEVICE_RETINA_3_5   2
+#define DEVICE_RETINA_4     4
+
 @interface Delegate : NSObject
 - (NSString *)replEval:(NSString *)expression;
 @end
@@ -33,6 +41,7 @@ static NSString *sdk_version = nil;
 static NSString *replSocketPath = nil;
 
 static NSRect simulator_app_bounds = { {0, 0}, {0, 0} };
+static int simulator_retina_type = DEVICE_RETINA_FALSE;
 static int repl_fd = -1;
 static NSLock *repl_fd_lock = nil;
 
@@ -123,6 +132,7 @@ locate_simulator_app_bounds(void)
 	    kCGNullWindowID);
     NSRect bounds = NSZeroRect;
     bool bounds_ok = false;
+    int device_family = DEVICE_FAMILY_IPHONE;
     for (NSDictionary *dict in (NSArray *)windows) {
 #define validate(obj, klass) \
     if (obj == nil || ![obj isKindOfClass:[klass class]]) { \
@@ -138,6 +148,12 @@ locate_simulator_app_bounds(void)
 		[NSString stringWithFormat:@"iPad - iOS %@", sdk_version],
 		[NSString stringWithFormat:@"iPhone / iOS %@", sdk_version],
 		[NSString stringWithFormat:@"iPad / iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPhone (Retina 3.5-inch) - iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPhone (Retina 3.5-inch) / iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPhone (Retina 4-inch) - iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPhone (Retina 4-inch) / iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPad (Retina) - iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPad (Retina) / iOS %@", sdk_version],
 		nil];
 	}
 
@@ -150,6 +166,18 @@ locate_simulator_app_bounds(void)
 	}
 	if (!found) {
 	    continue;
+	}
+	if ([name rangeOfString:@"Retina"].location != NSNotFound) {
+	    simulator_retina_type = DEVICE_RETINA_TRUE;
+	    if ([name rangeOfString:@"3.5-inch"].location != NSNotFound) {
+		simulator_retina_type = DEVICE_RETINA_3_5;
+	    }
+	    else if ([name rangeOfString:@"4-inch"].location != NSNotFound) {
+		simulator_retina_type = DEVICE_RETINA_4;
+	    }
+	}
+	if ([name rangeOfString:@"iPad"].location != NSNotFound) {
+	    device_family = DEVICE_FAMILY_IPAD;
 	}
 
 	id bounds_dict = [dict objectForKey:@"kCGWindowBounds"];
@@ -186,17 +214,38 @@ locate_simulator_app_bounds(void)
     }
 
     // Inset the main view frame.
-    if (bounds.size.width < bounds.size.height) {
-	bounds.origin.x += 30;
-	bounds.size.width -= 60;
-	bounds.origin.y += 120;
-	bounds.size.height -= 240;
+    if (device_family == DEVICE_FAMILY_IPHONE) {
+	switch (simulator_retina_type) {
+	    case DEVICE_RETINA_4:
+		bounds.origin.y += 25;
+		bounds.size.height -= 50;
+		break;
+
+	    case DEVICE_RETINA_3_5:
+		bounds.origin.x += 45;
+		bounds.size.width -= 90;
+		bounds.origin.y += 45;
+		bounds.size.height -= 90;
+		break;
+
+	    default:
+		if (bounds.size.width < bounds.size.height) {
+		    bounds.origin.x += 30;
+		    bounds.size.width -= 60;
+		    bounds.origin.y += 120;
+		    bounds.size.height -= 240;
+		}
+		else {
+		    bounds.origin.x += 120;
+		    bounds.size.width -= 240;
+		    bounds.origin.y += 30;
+		    bounds.size.height -= 60;
+		}
+	}
     }
     else {
-	bounds.origin.x += 120;
-	bounds.size.width -= 240;
-	bounds.origin.y += 30;
-	bounds.size.height -= 60;
+	bounds.origin.y += 25;
+	bounds.size.height -= 50;
     }
     simulator_app_bounds = bounds;
 }
@@ -317,6 +366,10 @@ CONCURRENT_BEGIN
 	// Inset the mouse location.
 	mouseLocation.x -= simulator_app_bounds.origin.x;
 	mouseLocation.y -= simulator_app_bounds.origin.y;
+	if (simulator_retina_type) {
+	    mouseLocation.x /= 2.0f;
+	    mouseLocation.y /= 2.0f;
+	}
 
 	// Send coordinate to the repl.
 	previousHighlight = true;
