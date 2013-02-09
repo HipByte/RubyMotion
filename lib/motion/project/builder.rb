@@ -456,6 +456,7 @@ EOS
       # Delete old resource files.
       Dir.chdir(bundle_path) do
         Dir.glob('**/*').each do |bundle_res|
+          bundle_res = convert_filesystem_encoding(bundle_res)
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
@@ -475,6 +476,16 @@ EOS
       if main_exec_created and config.distribution_mode
         App.info "Strip", main_exec
         sh "#{config.locate_binary('strip')} \"#{main_exec}\""
+      end
+    end
+
+    def convert_filesystem_encoding(string)
+      begin
+        string.encode("UTF-8", "UTF8-MAC")
+      rescue
+        # for Ruby 1.8
+        require 'iconv'
+        Iconv.conv("UTF-8", "UTF8-MAC", string)
       end
     end
 
