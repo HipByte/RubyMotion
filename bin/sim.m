@@ -222,10 +222,8 @@ locate_simulator_app_bounds(void)
 		break;
 
 	    case DEVICE_RETINA_3_5:
-		bounds.origin.x += 45;
-		bounds.size.width -= 90;
-		bounds.origin.y += 45;
-		bounds.size.height -= 90;
+		bounds.origin.y += 25;
+		bounds.size.height -= 50;
 		break;
 
 	    default:
