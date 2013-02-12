@@ -1,3 +1,12 @@
+= RubyMotion 1.33 =
+
+  * Added a feature which creates `Default-568h@2x.png' in resource directory
+    by `motion create' in order to support 4-inch screen by default.
+  * Fixed a bug in build system which cannot compile an app if it contained
+    the incompatible character encoding in UTF8_MAC and UTF-8 as app name.
+  * Fixed a bug in simulator mouse-over which cannot select a view when rotated
+    an iOS simulator.
+
 = RubyMotion 1.32 =
 
   * Added support for Xcode 4.6 and iOS 6.1 SDK.
