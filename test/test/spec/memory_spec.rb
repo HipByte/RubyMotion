@@ -187,3 +187,20 @@ describe "Random" do
     1.should == 1
   end
 end
+
+describe "NSDate" do
+  it "#new should work without malloc_error_break" do
+    autorelease_pool do
+      100.times { NSDate.new }
+    end
+    1.should == 1
+  end
+
+  it "alloc.init.timeIntervalSince1970 should work without malloc_error_break" do
+    autorelease_pool do
+      100.times { NSDate.alloc.init.timeIntervalSince1970 }
+    end
+    1.should == 1
+  end
+end
+
