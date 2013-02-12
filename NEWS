@@ -7,6 +7,8 @@
   * Fixed a bug in simulator mouse-over which cannot select a view when rotated
     an iOS simulator.
   * Fixed a bug which it cannot launch iOS simulator on OSX 10.6 Snow Leopard.
+  * Fixed a bug in `NSDate.alloc.init.timeIntervalSince1970' which would cause
+    a malloc_error_break error.
 
 = RubyMotion 1.32 =
 
