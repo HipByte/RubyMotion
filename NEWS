@@ -6,6 +6,7 @@
     the incompatible character encoding in UTF8-MAC and UTF-8 as app name.
   * Fixed a bug in simulator mouse-over which cannot select a view when rotated
     an iOS simulator.
+  * Fixed a bug which it cannot launch iOS simulator on OSX 10.6 Snow Leopard.
 
 = RubyMotion 1.32 =
 
