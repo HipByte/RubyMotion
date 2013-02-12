@@ -138,6 +138,10 @@ EOS
           end
           App.log 'Create', File.join(app_name, 'resources')
           Dir.mkdir('resources')
+          Dir.glob("#{$motion_libdir}/../resources/**/*").each do |file|
+            App.log 'Create', File.join(app_name, 'resources', File.basename(file))
+            FileUtils.cp(file, 'resources')
+          end
           App.log 'Create', File.join(app_name, 'spec')
           Dir.mkdir('spec')
           App.log 'Create', File.join(app_name, 'spec/main_spec.rb')
