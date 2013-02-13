@@ -9,6 +9,7 @@
   * Fixed a bug which it cannot launch iOS simulator on OSX 10.6 Snow Leopard.
   * Fixed a bug in `NSDate.alloc.init.timeIntervalSince1970' which would cause
     a malloc_error_break error.
+  * Fixed memory leaks in NSDate.new and NSDate.alloc.init.
 
 = RubyMotion 1.32 =
 
