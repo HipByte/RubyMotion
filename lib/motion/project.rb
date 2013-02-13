@@ -134,8 +134,11 @@ namespace :spec do
   end
 end
 
+desc "Build archive and deploy on the device"
+task :device => [:archive, :deploy]
+
 desc "Deploy on the device"
-task :device => :archive do
+task :deploy do
   App.info 'Deploy', App.config.archive
   device_id = (ENV['id'] or App.config.device_id)
   unless App.config.provisioned_devices.include?(device_id)
