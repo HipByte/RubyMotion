@@ -10,6 +10,7 @@
   * Fixed a bug in `NSDate.alloc.init.timeIntervalSince1970' which would cause
     a malloc_error_break error.
   * Fixed memory leaks in NSDate.new and NSDate.alloc.init.
+  * Fixed a bug in Dir.entries and Dir.foreach which always raise an exception.
 
 = RubyMotion 1.32 =
 
