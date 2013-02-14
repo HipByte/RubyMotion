@@ -4,6 +4,7 @@
 ```
 $ curl -O http://llvm.org/releases/2.9/llvm-2.9.tgz
 $ tar xvzf llvm-2.9.tgz
+$ cd llvm-2.9
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ ./configure --enable-bindings=none --enable-optimized --with-llvmgccdir=/tmp
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make
 $ sudo env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make install
@@ -38,10 +39,17 @@ Then, build RubyMotion
 
 ```
 $ rake optz_level=0
+$ sudo rake install
 ```
 
 At last, debug on RubyMotion app
 
 ```
 $ rake debug=1 no_continue=1
+```
+
+Or, debug on RubyMotion app in iOS device
+
+```
+$ rake device debug=1 no_continue=1
 ```
