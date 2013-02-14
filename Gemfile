@@ -1,5 +1,6 @@
 source :rubygems
 
+gem "mizuho"
 gem "nokogiri"
 gem "redcarpet"
 gem "sqlite3"
