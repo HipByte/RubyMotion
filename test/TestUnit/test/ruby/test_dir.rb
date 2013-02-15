@@ -173,9 +173,9 @@ class TestDir < Test::Unit::TestCase
     # assert_raise(Encoding::CompatibilityError) {Dir.glob(m.new)}
   end
 
-  # def test_foreach
-  #   assert_equal(Dir.foreach(@root).to_a.sort, %w(. ..) + (?a..?z).to_a)
-  # end
+  def test_foreach
+    assert_equal(Dir.foreach(@root).to_a.sort, %w(. ..) + (?a..?z).to_a)
+  end
 
  #  def test_dir_enc
  #    dir = Dir.open(@root, encoding: "UTF-8")
@@ -197,20 +197,20 @@ class TestDir < Test::Unit::TestCase
  #    end
  #  end
 
- #  def test_symlink
- #    begin
- #      ["dummy", *?a..?z].each do |f|
-	# File.symlink(File.join(@root, f),
-	# 	     File.join(@root, "symlink-#{ f }"))
- #      end
- #    rescue NotImplementedError
- #      return
- #    end
+  def test_symlink
+    begin
+      ["dummy", *?a..?z].each do |f|
+	File.symlink(File.join(@root, f),
+		     File.join(@root, "symlink-#{ f }"))
+      end
+    rescue NotImplementedError
+      return
+    end
 
- #    assert_equal([*?a..?z, *"symlink-a".."symlink-z"].each_slice(2).map {|f, _| File.join(@root, f + "/") }.sort,
-	# 	 Dir.glob(File.join(@root, "*/")).sort)
+    assert_equal([*?a..?z, *"symlink-a".."symlink-z"].each_slice(2).map {|f, _| File.join(@root, f + "/") }.sort,
+		 Dir.glob(File.join(@root, "*/")).sort)
 
- #    Dir.glob(File.join(@root, "**/"))
- #  end
+    Dir.glob(File.join(@root, "**/"))
+  end
 
 end

@@ -162,7 +162,7 @@ class TestFixnum < Test::Unit::TestCase
     assert_equal(0, 1.div(2.0))
 
     ### rational changes the behavior of Fixnum#quo
-    #assert_raise(TypeError) { 2.quo(nil) }
+    assert_raise(TypeError) { 2.quo(nil) }
     assert_raise(TypeError, NoMethodError) { 2.quo(nil) }
     assert_raise(TypeError) { 2 / nil }
     assert_raise(TypeError) { 2.div(nil) }
@@ -189,7 +189,7 @@ class TestFixnum < Test::Unit::TestCase
     assert_equal(0, 0**0.5)
     assert_equal(1, (0**-1.0).infinite?)
     ### rational changes the behavior of Fixnum#**
-    #assert_raise(TypeError) { 1 ** nil }
+    assert_raise(TypeError) { 1 ** nil }
     assert_raise(TypeError, NoMethodError) { 1 ** nil }
   end
 

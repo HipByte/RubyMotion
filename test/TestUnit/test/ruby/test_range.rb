@@ -244,7 +244,7 @@ class TestRange < Test::Unit::TestCase
   end
 
   def test_first_last
-    # assert_equal([0, 1, 2], (0..10).first(3))
+    assert_equal([0, 1, 2], (0..10).first(3))
     assert_equal([8, 9, 10], (0..10).last(3))
   end
 

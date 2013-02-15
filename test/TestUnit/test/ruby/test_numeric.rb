@@ -208,13 +208,13 @@ class TestNumeric < Test::Unit::TestCase
     10.step(1, -(2**32)) {|x| a << x }
     assert_equal([10], a)
 
-    # a = []
-    # 1.step(0, Float::INFINITY) {|x| a << x }
-    # assert_equal([], a)
+    a = []
+    1.step(0, Float::INFINITY) {|x| a << x }
+    assert_equal([], a)
 
-    # a = []
-    # 0.step(1, -Float::INFINITY) {|x| a << x }
-    # assert_equal([], a)
+    a = []
+    0.step(1, -Float::INFINITY) {|x| a << x }
+    assert_equal([], a)
   end
 
   def test_num2long

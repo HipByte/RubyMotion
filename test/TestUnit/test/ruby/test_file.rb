@@ -6,25 +6,25 @@ class TestFile < Test::Unit::TestCase
 
   # I don't know Ruby's spec about "unlink-before-close" exactly.
   # This test asserts current behaviour.
-  # def test_unlink_before_close
-  #   Dir.mktmpdir('rubytest-file') {|tmpdir|
-  #     filename = tmpdir + '/' + File.basename(__FILE__) + ".#{$$}"
-  #     w = File.open(filename, "w")
-  #     w << "foo"
-  #     w.close
-  #     r = File.open(filename, "r")
-  #     begin
-  #       if /(mswin|bccwin|mingw|emx)/ =~ RUBY_PLATFORM
-  #         assert_raise(Errno::EACCES) {File.unlink(filename)}
-  #       else
-  #         assert_nothing_raised {File.unlink(filename)}
-  #       end
-  #     ensure
-  #       r.close
-  #       File.unlink(filename) if File.exist?(filename)
-  #     end
-  #   }
-  # end
+  def test_unlink_before_close
+    Dir.mktmpdir('rubytest-file') {|tmpdir|
+      filename = tmpdir + '/' + File.basename(__FILE__) + ".#{$$}"
+      w = File.open(filename, "w")
+      w << "foo"
+      w.close
+      r = File.open(filename, "r")
+      begin
+        if /(mswin|bccwin|mingw|emx)/ =~ RUBY_PLATFORM
+          assert_raise(Errno::EACCES) {File.unlink(filename)}
+        else
+          assert_nothing_raised {File.unlink(filename)}
+        end
+      ensure
+        r.close
+        File.unlink(filename) if File.exist?(filename)
+      end
+    }
+  end
 
   include TestEOF
   def open_file(content)
@@ -158,27 +158,27 @@ class TestFile < Test::Unit::TestCase
     # assert_nothing_raised { File::Stat.allocate.inspect }
   end
 
-  # def test_realpath
-  #   Dir.mktmpdir('rubytest-realpath') {|tmpdir|
-  #     realdir = File.realpath(tmpdir)
-  #     tst = realdir.sub(/#{Regexp.escape(File::SEPARATOR)}/, '\0\0\0')
-  #     assert_equal(realdir, File.realpath(tst))
-  #     assert_equal(realdir, File.realpath(".", tst))
-  #     if File::ALT_SEPARATOR
-  #       bug2961 = '[ruby-core:28653]'
-  #       assert_equal(realdir, File.realpath(realdir.tr(File::SEPARATOR, File::ALT_SEPARATOR)), bug2961)
-  #     end
-  #   }
-  # end
+  def test_realpath
+    Dir.mktmpdir('rubytest-realpath') {|tmpdir|
+      realdir = File.realpath(tmpdir)
+      tst = realdir.sub(/#{Regexp.escape(File::SEPARATOR)}/, '\0\0\0')
+      assert_equal(realdir, File.realpath(tst))
+      assert_equal(realdir, File.realpath(".", tst))
+      if File::ALT_SEPARATOR
+        bug2961 = '[ruby-core:28653]'
+        assert_equal(realdir, File.realpath(realdir.tr(File::SEPARATOR, File::ALT_SEPARATOR)), bug2961)
+      end
+    }
+  end
 
-  # def test_realdirpath
-  #   Dir.mktmpdir('rubytest-realdirpath') {|tmpdir|
-  #     realdir = File.realpath(tmpdir)
-  #     tst = realdir.sub(/#{Regexp.escape(File::SEPARATOR)}/, '\0\0\0')
-  #     assert_equal(realdir, File.realdirpath(tst))
-  #     assert_equal(realdir, File.realdirpath(".", tst))
-  #     assert_equal(File.join(realdir, "foo"), File.realdirpath("foo", tst))
-  #   }
-  # end
+  def test_realdirpath
+    Dir.mktmpdir('rubytest-realdirpath') {|tmpdir|
+      realdir = File.realpath(tmpdir)
+      tst = realdir.sub(/#{Regexp.escape(File::SEPARATOR)}/, '\0\0\0')
+      assert_equal(realdir, File.realdirpath(tst))
+      assert_equal(realdir, File.realdirpath(".", tst))
+      assert_equal(File.join(realdir, "foo"), File.realdirpath("foo", tst))
+    }
+  end
 
 end
