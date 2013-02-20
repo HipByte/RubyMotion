@@ -11,6 +11,7 @@
     a malloc_error_break error.
   * Fixed memory leaks in NSDate.new and NSDate.alloc.init.
   * Fixed a bug in Dir.entries and Dir.foreach which always raise an exception.
+  * Added the NSData#to_s method which is alias for NSData#to_str.
 
 = RubyMotion 1.32 =
 
