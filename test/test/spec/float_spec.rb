@@ -38,6 +38,12 @@ describe "Float" do
     flt.to_s.should == "0.68"
   end
 
+  it "::MAX constant" do
+    # RM-34
+    Float::MAX.__fixfloat__?.should == false
+    Float::MAX.should != Float::INFINITY
+  end
+
   it "NSDecimalNumber.decimalNumberWithMantissa" do
     # issue 427
     number = NSDecimalNumber.decimalNumberWithMantissa(3000000000, exponent: 0,isNegative: false)
