@@ -135,7 +135,7 @@ class TestFloat < Test::Unit::TestCase
     assert_equal("-Infinity", (-inf).to_s)
     assert_equal("NaN", (inf / inf).to_s)
 
-    # assert_equal("1.0e+18", 1000_00000_00000_00000.0.to_s)
+    assert_equal("1.0e+18", 1000_00000_00000_00000.0.to_s)
 
     bug3273 = '[ruby-core:30145]'
     [0.21611564636388508, 0.56].each do |f|
@@ -234,10 +234,10 @@ class TestFloat < Test::Unit::TestCase
 
     assert_equal(-1, 1.0 <=> 2**32)
 
-    # assert_equal(1, inf <=> (Float::MAX.to_i*2))
-    # assert_equal(-1, -inf <=> (-Float::MAX.to_i*2))
-    # assert_equal(-1, (Float::MAX.to_i*2) <=> inf)
-    # assert_equal(1, (-Float::MAX.to_i*2) <=> -inf)
+    assert_equal(1, inf <=> (Float::MAX.to_i*2))
+    assert_equal(-1, -inf <=> (-Float::MAX.to_i*2))
+    assert_equal(-1, (Float::MAX.to_i*2) <=> inf)
+    assert_equal(1, (-Float::MAX.to_i*2) <=> -inf)
 
     assert_raise(ArgumentError) { 1.0 > nil }
     assert_raise(ArgumentError) { 1.0 >= nil }
@@ -291,13 +291,13 @@ class TestFloat < Test::Unit::TestCase
     assert_raise(FloatDomainError) { inf.round }
     assert_raise(FloatDomainError) { inf.truncate }
 
-    assert_equal(1.100, 1.111.round(1))
-    assert_equal(1.110, 1.111.round(2))
+    assert_equal("1.1", 1.111.round(1).to_s)
+    assert_equal("1.11", 1.111.round(2).to_s)
     assert_equal(11110.0, 11111.1.round(-1))
     assert_equal(11100.0, 11111.1.round(-2))
 
-    # assert_equal(10**300, 1.1e300.round(-300))
-    # assert_equal(-10**300, -1.1e300.round(-300))
+    assert_equal(10**300, 1.1e300.round(-300))
+    assert_equal(-10**300, -1.1e300.round(-300))
   end
 
   VS = [
@@ -430,7 +430,7 @@ class TestFloat < Test::Unit::TestCase
     assert_in_delta(0.125, Float("0.1_2_5"), 0.00001)
     assert_in_delta(0.125, "0.1_2_5__".to_f, 0.00001)
     assert_equal(1, Float(([1] * 10000).join).infinite?)
-    # assert(!Float(([1] * 10000).join("_")).infinite?) # is it really OK?
+    assert(!Float(([1] * 10000).join("_")).infinite?) # is it really OK?
     assert_raise(ArgumentError) { Float("1.0\x001") }
     assert_equal(15.9375, Float('0xf.fp0'))
     # assert_warn(/malformed value for Float\(\).*?Ruby 1\.9\.3/) { Float('0x') }
