@@ -1,5 +1,9 @@
 = RubyMotion 1.33 =
 
+  * Fixed a bug where certain Float object would be losing 2-bits of precision.
+    This was happening because the compiler optimized floats to fit in a 30-bit
+    data structure. The runtime will now allocate 32-bit floats on the heap
+    when they cannot be accurately stored as 30-bit.
   * Added a feature which creates `Default-568h@2x.png' in resource directory
     by `motion create' in order to support 4-inch screen by default.
   * Fixed a bug in build system which cannot compile an app if it contained
