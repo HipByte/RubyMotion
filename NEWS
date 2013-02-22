@@ -16,6 +16,8 @@
   * Fixed memory leaks in NSDate.new and NSDate.alloc.init.
   * Fixed a bug in Dir.entries and Dir.foreach which always raise an exception.
   * Added the NSData#to_s method which is alias for NSData#to_str.
+  * Fixed a bug in Hash#delete where the deleted object would be prematurely
+    released by the table.
 
 = RubyMotion 1.32 =
 
