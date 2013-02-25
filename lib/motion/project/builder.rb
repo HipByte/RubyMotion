@@ -40,7 +40,7 @@ module Motion; module Project;
         App.fail "No spec files in `#{config.specs_dir}'"
       end
 
-      config.resources_dir.flatten!
+      config.resources_dirs.flatten!
 
       # Locate SDK and compilers.
       sdk = config.sdk(platform)
@@ -405,7 +405,7 @@ EOS
       end
 
       # Compile IB resources.
-      config.resources_dir.each do |dir|
+      config.resources_dirs.each do |dir|
         if File.exist?(dir)
           ib_resources = []
           ib_resources.concat((Dir.glob(File.join(dir, '**', '*.xib')) + Dir.glob(File.join(dir, '*.lproj', '*.xib'))).map { |xib| [xib, xib.sub(/\.xib$/, '.nib')] })
@@ -420,7 +420,7 @@ EOS
       end
 
       # Compile CoreData Model resources.
-      config.resources_dir.each do |dir|
+      config.resources_dirs.each do |dir|
         if File.exist?(dir)
           Dir.glob(File.join(dir, '*.xcdatamodeld')).each do |model|
             momd = model.sub(/\.xcdatamodeld$/, '.momd')
@@ -441,7 +441,7 @@ EOS
         config.name
       ]
       resources_paths = []
-      config.resources_dir.each do |dir|
+      config.resources_dirs.each do |dir|
         if File.exist?(dir)
           resources_paths << Dir.chdir(dir) do
             Dir.glob('*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }.map { |file| File.join(dir, file) }
@@ -470,7 +470,7 @@ EOS
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
-          App.warn "File `#{bundle_res}' found in app bundle but not in `#{config.resources_dir}', removing"
+          App.warn "File `#{bundle_res}' found in app bundle but not in resource directories, removing"
           FileUtils.rm_rf(bundle_res)
         end
       end
