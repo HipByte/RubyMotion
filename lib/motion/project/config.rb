@@ -49,7 +49,7 @@ module Motion; module Project
 
     variable :files, :xcode_dir, :sdk_version, :deployment_target, :frameworks,
       :weak_frameworks, :framework_search_paths, :libs, :delegate_class, :name, :build_dir,
-      :resources_dir, :specs_dir, :identifier, :codesign_certificate,
+      :resources_dirs, :specs_dir, :identifier, :codesign_certificate,
       :provisioning_profile, :device_family, :interface_orientations, :version,
       :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
       :entitlements, :fonts, :status_bar_style, :motiondir, :detect_dependencies
@@ -69,7 +69,7 @@ module Motion; module Project
       @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
-      @resources_dir = [File.join(project_dir, 'resources')]
+      @resources_dirs = [File.join(project_dir, 'resources')]
       @build_dir = File.join(project_dir, 'build')
       @specs_dir = File.join(project_dir, 'spec')
       @device_family = :iphone
@@ -207,9 +207,14 @@ EOS
       end
     end
 
+    def resources_dir
+      warn("`app.resources_dir' is deprecated; use `app.resources_dirs'");
+      @resources_dirs.first
+    end
+
     def resources_dir=(dir)
-      dir = [dir] if dir.is_a?(String)
-      @resources_dir = dir
+      warn("`app.resources_dir' is deprecated; use `app.resources_dirs'");
+      @resources_dirs = [dir]
     end
 
     def build_dir
@@ -709,7 +714,7 @@ EOS
 
     def fonts
       @fonts ||= begin
-        resources_dir.flatten.inject([]) do |fonts, dir|
+        resources_dirs.flatten.inject([]) do |fonts, dir|
           if File.exist?(dir)
             Dir.chdir(dir) do
               fonts.concat(Dir.glob('*.{otf,ttf}'))

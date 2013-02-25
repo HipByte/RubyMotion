@@ -152,7 +152,7 @@ task :clean do
   App.info 'Delete', App.config.build_dir
   rm_rf(App.config.build_dir)
   App.config.vendor_projects.each { |vendor| vendor.clean }
-  Dir.glob(App.config.resources_dir.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }).each do |p|
+  Dir.glob(App.config.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }).each do |p|
     App.info 'Delete', p
     rm_rf p
   end
