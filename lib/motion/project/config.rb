@@ -146,12 +146,21 @@ EOS
 
         App.fail "Can't locate any version of Xcode on the system."
       end
+      unescape_path(@xcode_dir)
+    end
+
+    def unescape_path(path)
+      path.gsub('\\', '')
+    end
+
+    def escape_path(path)
+      path.gsub(' ', '\\ ')
     end
 
     def locate_binary(name)
       [File.join(xcode_dir, 'usr/bin'), '/usr/bin'].each do |dir|
         path = File.join(dir, name)
-        return path if File.exist?(path)
+        return escape_path(path) if File.exist?(path)
       end
       App.fail "Can't locate binary `#{name}' on the system."
     end
@@ -412,8 +421,9 @@ EOS
     end
 
     def sdk(platform)
-      File.join(platform_dir(platform), 'Developer/SDKs',
+      path = File.join(platform_dir(platform), 'Developer/SDKs',
         platform + sdk_version + '.sdk')
+      escape_path(path)
     end
 
     def locate_compiler(platform, *execs)
@@ -423,7 +433,7 @@ EOS
       execs.each do |exec|
         paths.each do |path|
           cc = File.join(path, exec)
-          return cc if File.exist?(cc)
+          return escape_path(cc) if File.exist?(cc)
         end
       end
       App.fail "Can't locate compilers for platform `#{platform}'"
@@ -446,7 +456,7 @@ EOS
     end
 
     def common_flags(platform)
-      "#{arch_flags(platform)} -isysroot \"#{sdk(platform)}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
+      "#{arch_flags(platform)} -isysroot \"#{unescape_path(sdk(platform))}\" -miphoneos-version-min=#{deployment_target} -F#{sdk(platform)}/System/Library/Frameworks"
     end
 
     def cflags(platform, cplusplus)
