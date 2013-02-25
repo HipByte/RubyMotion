@@ -69,7 +69,7 @@ module Motion; module Project
       @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
-      @resources_dir = File.join(project_dir, 'resources')
+      @resources_dir = [File.join(project_dir, 'resources')]
       @build_dir = File.join(project_dir, 'build')
       @specs_dir = File.join(project_dir, 'spec')
       @device_family = :iphone
@@ -196,6 +196,11 @@ EOS
       @supported_versions ||= Dir.glob(File.join(motiondir, 'data/*')).select{|path| File.directory?(path)}.map do |path|
         File.basename path
       end
+    end
+
+    def resources_dir=(dir)
+      dir = [dir] if dir.is_a?(String)
+      @resources_dir = dir
     end
 
     def build_dir
@@ -694,12 +699,14 @@ EOS
 
     def fonts
       @fonts ||= begin
-        if File.exist?(resources_dir)
-          Dir.chdir(resources_dir) do
-            Dir.glob('*.{otf,ttf}')
+        resources_dir.flatten.inject([]) do |fonts, dir|
+          if File.exist?(dir)
+            Dir.chdir(dir) do
+              fonts.concat(Dir.glob('*.{otf,ttf}'))
+            end
+          else
+            fonts
           end
-        else
-          []
         end
       end
     end

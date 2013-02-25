@@ -40,6 +40,8 @@ module Motion; module Project;
         App.fail "No spec files in `#{config.specs_dir}'"
       end
 
+      config.resources_dir.flatten!
+
       # Locate SDK and compilers.
       sdk = config.sdk(platform)
       cc = config.locate_compiler(platform, 'gcc')
@@ -403,27 +405,31 @@ EOS
       end
 
       # Compile IB resources.
-      if File.exist?(config.resources_dir)
-        ib_resources = []
-        ib_resources.concat((Dir.glob(File.join(config.resources_dir, '**', '*.xib')) + Dir.glob(File.join(config.resources_dir, '*.lproj', '*.xib'))).map { |xib| [xib, xib.sub(/\.xib$/, '.nib')] })
-        ib_resources.concat(Dir.glob(File.join(config.resources_dir, '**', '*.storyboard')).map { |storyboard| [storyboard, storyboard.sub(/\.storyboard$/, '.storyboardc')] })
-        ib_resources.each do |src, dest|
-          if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
-            App.info 'Compile', src
-            sh "/usr/bin/ibtool --compile \"#{dest}\" \"#{src}\""
+      config.resources_dir.each do |dir|
+        if File.exist?(dir)
+          ib_resources = []
+          ib_resources.concat((Dir.glob(File.join(dir, '**', '*.xib')) + Dir.glob(File.join(dir, '*.lproj', '*.xib'))).map { |xib| [xib, xib.sub(/\.xib$/, '.nib')] })
+          ib_resources.concat(Dir.glob(File.join(dir, '**', '*.storyboard')).map { |storyboard| [storyboard, storyboard.sub(/\.storyboard$/, '.storyboardc')] })
+          ib_resources.each do |src, dest|
+            if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
+              App.info 'Compile', src
+              sh "/usr/bin/ibtool --compile \"#{dest}\" \"#{src}\""
+            end
           end
         end
       end
 
       # Compile CoreData Model resources.
-      if File.exist?(config.resources_dir)
-        Dir.glob(File.join(config.resources_dir, '*.xcdatamodeld')).each do |model|
-          momd = model.sub(/\.xcdatamodeld$/, '.momd')
-          if !File.exist?(momd) or File.mtime(model) > File.mtime(momd)
-            App.info 'Compile', model
-            model = File.expand_path(model) # momc wants absolute paths.
-            momd = File.expand_path(momd)
-            sh "\"#{App.config.xcode_dir}/usr/bin/momc\" \"#{model}\" \"#{momd}\""
+      config.resources_dir.each do |dir|
+        if File.exist?(dir)
+          Dir.glob(File.join(dir, '*.xcdatamodeld')).each do |model|
+            momd = model.sub(/\.xcdatamodeld$/, '.momd')
+            if !File.exist?(momd) or File.mtime(model) > File.mtime(momd)
+              App.info 'Compile', model
+              model = File.expand_path(model) # momc wants absolute paths.
+              momd = File.expand_path(momd)
+              sh "\"#{App.config.xcode_dir}/usr/bin/momc\" \"#{model}\" \"#{momd}\""
+            end
           end
         end
       end
@@ -434,32 +440,36 @@ EOS
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
         config.name
       ]
-      resources_files = []
-      if File.exist?(config.resources_dir)
-        resources_files = Dir.chdir(config.resources_dir) do
-          Dir.glob('**{,/*/**}/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }
+      resources_paths = []
+      config.resources_dir.each do |dir|
+        if File.exist?(dir)
+          resources_paths << Dir.chdir(dir) do
+            Dir.glob('*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }.map { |file| File.join(dir, file) }
+          end
         end
-        resources_files.each do |res|
-          res_path = File.join(config.resources_dir, res)
-          if reserved_app_bundle_files.include?(res)
-            App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
-          end
-          dest_path = File.join(bundle_path, res)
-          if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
-            FileUtils.mkdir_p(File.dirname(dest_path))
-            App.info 'Copy', res_path
-            FileUtils.cp_r(res_path, File.dirname(dest_path))
-          end
+      end
+      resources_paths.flatten!
+      resources_paths.each do |res_path|
+        res = File.basename(res_path)
+        if reserved_app_bundle_files.include?(res)
+          App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
+        end
+        dest_path = File.join(bundle_path, res)
+        if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+          FileUtils.mkdir_p(File.dirname(dest_path))
+          App.info 'Copy', res_path
+          FileUtils.cp_r(res_path, dest_path)
         end
       end
 
       # Delete old resource files.
+      resource_files = resources_paths.map { |x| File.basename(x) }
       Dir.chdir(bundle_path) do
-        Dir.glob('**/*').each do |bundle_res|
+        Dir.glob('*').each do |bundle_res|
           bundle_res = convert_filesystem_encoding(bundle_res)
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
-          next if resources_files.include?(bundle_res)
+          next if resource_files.include?(bundle_res)
           App.warn "File `#{bundle_res}' found in app bundle but not in `#{config.resources_dir}', removing"
           FileUtils.rm_rf(bundle_res)
         end
