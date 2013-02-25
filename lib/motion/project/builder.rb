@@ -463,13 +463,13 @@ EOS
       end
 
       # Delete old resource files.
-      resource_files = resources_paths.map { |x| File.basename(x) }
+      resources_files = resources_paths.map { |x| File.basename(x) }
       Dir.chdir(bundle_path) do
         Dir.glob('*').each do |bundle_res|
           bundle_res = convert_filesystem_encoding(bundle_res)
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
-          next if resource_files.include?(bundle_res)
+          next if resources_files.include?(bundle_res)
           App.warn "File `#{bundle_res}' found in app bundle but not in `#{config.resources_dir}', removing"
           FileUtils.rm_rf(bundle_res)
         end
