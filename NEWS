@@ -23,6 +23,8 @@
     released by the table.
   * Fixed a bug which does not launch iOS simulator when `app.xcode_dir' is
     specified a path other than the '/Applications' folder.
+  * Fixed a bug which iOS simulator would be re-launched at every time with
+    `rake' command.
 
 = RubyMotion 1.32 =
 
