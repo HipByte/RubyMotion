@@ -5,7 +5,8 @@
     data structure. The runtime will now allocate 32-bit floats on the heap
     when they cannot be accurately stored as 30-bit.
   * Added a feature to support multiple resource directories. By this changing,
-    `app.resources_dir' would accept an Array.
+    `app.resources_dir' would be deprecated and added the `app.resources_dirs'
+     which would accept an Array.
   * Added a feature which creates `Default-568h@2x.png' in resource directory
     by `motion create' in order to support 4-inch screen by default.
   * Fixed a bug in build system which cannot compile an app if it contained
