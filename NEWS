@@ -21,6 +21,8 @@
   * Added the NSData#to_s method which is alias for NSData#to_str.
   * Fixed a bug in Hash#delete where the deleted object would be prematurely
     released by the table.
+  * Fixed a bug which does not launch iOS simulator when `app.xcode_dir' is
+    specified a path other than the '/Applications' folder.
 
 = RubyMotion 1.32 =
 
