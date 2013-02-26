@@ -4,27 +4,28 @@
     This was happening because the compiler optimized floats to fit in a 30-bit
     data structure. The runtime will now allocate 32-bit floats on the heap
     when they cannot be accurately stored as 30-bit.
-  * Added a feature to support multiple resource directories. By this changing,
-    `app.resources_dir' would be deprecated and added the `app.resources_dirs'
-     which would accept an Array.
-  * Added a feature which creates `Default-568h@2x.png' in resource directory
-    by `motion create' in order to support 4-inch screen by default.
-  * Fixed a bug in build system which cannot compile an app if it contained
-    the incompatible character encoding in UTF8-MAC and UTF-8 as app name.
-  * Fixed a bug in simulator mouse-over which cannot select a view when rotated
-    an iOS simulator.
-  * Fixed a bug which it cannot launch iOS simulator on OSX 10.6 Snow Leopard.
+  * Added a feature to support multiple resource directories. Introduced the
+    `app.resources_dirs' variable which defaults to `['./resources']' and can be 
+    modified to specify another resource directory to the build system. The previous
+    `app.resources_dir' variable is now deprecated.
+  * Added a feature to automatically create the `Default-568h@2x.png' file in the
+    resources directory during `motion create', in order to support 4-inch screens.
+  * Fixed a bug in the build system where apps whose names include an UTF-8 or
+    UTF8-MAC character would not compile.
+  * Fixed a bug in the simulator mouse-over which could not properly select views
+    if the iOS simulator was rotated.
+  * Fixed a bug where the iOS simulator would not launch on OSX 10.6 Snow Leopard.
   * Fixed a bug in `NSDate.alloc.init.timeIntervalSince1970' which would cause
     a malloc_error_break error.
   * Fixed memory leaks in NSDate.new and NSDate.alloc.init.
-  * Fixed a bug in Dir.entries and Dir.foreach which always raise an exception.
+  * Fixed a bug in Dir.entries and Dir.foreach where an exception was always raised.
   * Added the NSData#to_s method which is alias for NSData#to_str.
-  * Fixed a bug in Hash#delete where the deleted object would be prematurely
-    released by the table.
-  * Fixed a bug which does not launch iOS simulator when `app.xcode_dir' is
-    specified a path other than the '/Applications' folder.
-  * Fixed a bug which iOS simulator would be re-launched at every time with
-    `rake' command.
+  * Fixed a bug in Hash#delete where the deleted object would be prematurely released
+    by the table.
+  * Fixed a bug where the iOS simulator would not launch if `app.xcode_dir' pointed to
+    a path other than the '/Applications' folder.
+  * Fixed a bug where the iOS simulator would be relaunched every time with `rake'
+    command.
 
 = RubyMotion 1.32 =
 
