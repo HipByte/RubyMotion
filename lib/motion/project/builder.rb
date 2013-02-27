@@ -444,13 +444,13 @@ EOS
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
           resources_paths << Dir.chdir(dir) do
-            Dir.glob('*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }.map { |file| File.join(dir, file) }
+            Dir.glob('**{,/*/**}/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }.map { |file| File.join(dir, file) }
           end
         end
       end
       resources_paths.flatten!
       resources_paths.each do |res_path|
-        res = File.basename(res_path)
+        res = resource_path_without_dir(config.resources_dirs, res_path)
         if reserved_app_bundle_files.include?(res)
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
@@ -463,7 +463,7 @@ EOS
       end
 
       # Delete old resource files.
-      resources_files = resources_paths.map { |x| File.basename(x) }
+      resources_files = resources_paths.map { |x| resource_path_without_dir(config.resources_dirs, x) }
       Dir.chdir(bundle_path) do
         Dir.glob('*').each do |bundle_res|
           bundle_res = convert_filesystem_encoding(bundle_res)
@@ -487,6 +487,14 @@ EOS
         App.info "Strip", main_exec
         sh "#{config.locate_binary('strip')} \"#{main_exec}\""
       end
+    end
+
+    def resource_path_without_dir(dirs, path)
+      dir = dirs.each do |dir|
+        break dir if path =~ /^#{dir}/
+      end
+      path = path.sub(/^#{dir}\/*/, '') if dir
+      path
     end
 
     def convert_filesystem_encoding(string)
