@@ -1,3 +1,8 @@
+= RubyMotion 1.34 =
+
+  * Fixed a bug which it would not work command + mouse over in simulator.
+  * Fixed a bug in build system which updated resource files are not copied.
+
 = RubyMotion 1.33 =
 
   * Fixed a bug where certain Float object would be losing 2-bits of precision.
