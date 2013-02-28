@@ -450,7 +450,7 @@ EOS
       end
       resources_paths.flatten!
       resources_paths.each do |res_path|
-        res = resource_path_without_dir(config.resources_dirs, res_path)
+        res = path_on_resources_dirs(config.resources_dirs, res_path)
         if reserved_app_bundle_files.include?(res)
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
@@ -463,7 +463,7 @@ EOS
       end
 
       # Delete old resource files.
-      resources_files = resources_paths.map { |x| resource_path_without_dir(config.resources_dirs, x) }
+      resources_files = resources_paths.map { |x| path_on_resources_dirs(config.resources_dirs, x) }
       Dir.chdir(bundle_path) do
         Dir.glob('*').each do |bundle_res|
           bundle_res = convert_filesystem_encoding(bundle_res)
@@ -489,7 +489,7 @@ EOS
       end
     end
 
-    def resource_path_without_dir(dirs, path)
+    def path_on_resources_dirs(dirs, path)
       dir = dirs.each do |dir|
         break dir if path =~ /^#{dir}/
       end
