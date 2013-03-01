@@ -1,7 +1,9 @@
 = RubyMotion 1.34 =
 
-  * Fixed a bug which it would not work command + mouse over in simulator.
-  * Fixed a bug in build system which updated resource files are not copied.
+  * Fixed a regression where command + mouse-over would not work in the
+    simulator window.
+  * Fixed a regression in the build system where updated resource files would
+    not be copied.
 
 = RubyMotion 1.33 =
 
