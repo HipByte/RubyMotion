@@ -10,3 +10,9 @@ describe "kCFBooleanTrue" do
     KCFBooleanTrue.should == true
   end
 end
+
+describe "Constants starting with a lower-case character" do
+  it "can be retrieved when renamed with a upper-case character" do
+    LowerCaseConstant.should == 42
+  end
+end
