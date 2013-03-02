@@ -58,3 +58,6 @@ static inline int TestInlineFunction(int x, int y, int z) {
 extern int lowerCaseConstant;
 @interface lowerCaseClass : NSObject
 @end
+
+#define TestStringConstant "foo"
+#define TestNSStringConstant @"foo"
