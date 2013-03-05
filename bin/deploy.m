@@ -435,15 +435,7 @@ start_debugger(am_device_t dev)
     CFDataRef address_data = CFDataCreate(NULL, (const UInt8 *)&address,
 	    sizeof(address));
 
-    unlink(gdb_unix_socket_path);
-
-    CFSocketSetAddress(fdvendor, address_data);
-    CFRelease(address_data);
-    CFRunLoopAddSource(CFRunLoopGetMain(),
-	    CFSocketCreateRunLoopSource(NULL, fdvendor, 0),
-	    kCFRunLoopCommonModes);
-
-    // Prepare gdb commands file.
+    // Locate app path on device.
 
     NSDictionary *info_plist = [NSDictionary dictionaryWithContentsOfFile:
 	[app_path stringByAppendingPathComponent:@"Info.plist"]];
@@ -457,6 +449,24 @@ start_debugger(am_device_t dev)
     NSDictionary *app = [apps objectForKey:app_identifier];
     assert(app != nil);
     NSString *app_remote_path = [app objectForKey:@"Path"];
+
+    // If we need to attach an external debugger, we can quit here.
+
+    if (getenv("no_start")) {
+	printf("%s\n%s\n", [app_remote_path fileSystemRepresentation],
+		gdb_unix_socket_path);
+	return;
+    }
+
+    unlink(gdb_unix_socket_path);
+
+    CFSocketSetAddress(fdvendor, address_data);
+    CFRelease(address_data);
+    CFRunLoopAddSource(CFRunLoopGetMain(),
+	    CFSocketCreateRunLoopSource(NULL, fdvendor, 0),
+	    kCFRunLoopCommonModes);
+
+    // Prepare gdb commands file.
 
     NSString *cmds_path = [NSString pathWithComponents:
 	[NSArray arrayWithObjects:NSTemporaryDirectory(), @"_deploygdbcmds",
