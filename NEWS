@@ -2,6 +2,8 @@
 
   * Added support for string constants defined in 3rd-party header files
     using the macro system (ex. #define MyConstant @"SomeValue").
+  * Added the `no_start' option to `rake device debug=1' to let the user
+    attach a custom debugger. This is for the RubyMine integration. 
 
 = RubyMotion 1.34 =
 
