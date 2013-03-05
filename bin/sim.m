@@ -61,7 +61,7 @@ save_repl_history(void)
     NSString *data = [lines componentsJoinedByString:@"\n"];
     NSError *error = nil;
     if (![data writeToFile:HISTORY_FILE atomically:YES
-	encoding:NSASCIIStringEncoding error:&error]) {
+	encoding:NSUTF8StringEncoding error:&error]) {
 	fprintf(stderr, "Cannot save REPL history file to `%s': %s\n",
 		[HISTORY_FILE UTF8String], [[error description] UTF8String]);
     }
@@ -71,7 +71,7 @@ static void
 load_repl_history(void)
 {
     NSString *data = [NSString stringWithContentsOfFile:HISTORY_FILE
-	encoding:NSASCIIStringEncoding error:nil];
+	encoding:NSUTF8StringEncoding error:nil];
     if (data != nil) {
 	NSArray *lines = [data componentsSeparatedByString:@"\n"];
 	for (NSString *line in lines) {
