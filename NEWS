@@ -4,6 +4,8 @@
     using the macro system (ex. #define MyConstant @"SomeValue").
   * Added the `no_start' option to `rake device debug=1' to let the user
     attach a custom debugger. This is for the RubyMine integration. 
+  * Fixed a bug in REPL which cannot save the history which contains UTF-8
+    strings into file.
 
 = RubyMotion 1.34 =
 
