@@ -6,6 +6,8 @@
     attach a custom debugger. This is for the RubyMine integration. 
   * Fixed a bug in REPL which cannot save the history which contains UTF-8
     strings into file.
+  * Fixed a bug in Object#respond_to? which might return true for a method that
+    does not exist.
 
 = RubyMotion 1.34 =
 
