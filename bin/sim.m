@@ -793,6 +793,9 @@ again:
 	add_history([expr UTF8String]);
 	NSString *res = [self replEval:expr];
 	if (res == nil) {
+	    if ([line compare:@"quit"] == NSOrderedSame) {
+		terminate_session();
+	    }
 	    break;
 	}
 	printf("=> %s\n", [res UTF8String]);
