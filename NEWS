@@ -9,6 +9,8 @@
   * Fixed a bug in Object#respond_to? which might return true for a method that
     does not exist.
   * Fixed a bug in REPL which often causes an error with "quit" command.
+  * Fixed a bug which AVPlayer#currentTime causes `{?=qiIq}@:' not precompiled'
+    error.
 
 = RubyMotion 1.34 =
 
