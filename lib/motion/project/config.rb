@@ -379,7 +379,7 @@ EOS
           # Filter specs we want to run. A filter can be either the basename of a spec file or its path.
           files_filter = files_filter.split(',')
           files_filter.map! { |x| File.exist?(x) ? File.expand_path(x) : x }
-          specs.delete_if { |x| !files_filter.include?(File.expand_path(x)) and !files_filter.include?(File.basename(x, '.rb')) }
+          specs.delete_if { |x| [File.expand_path(x), File.basename(x, '.rb'), File.basename(x, '_spec.rb')].none? { |p| files_filter.include?(p) } }
         end
         core + helpers + specs
       end
