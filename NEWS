@@ -11,6 +11,10 @@
   * Fixed a bug in REPL which often causes an error with "quit" command.
   * Fixed a bug which AVPlayer#currentTime causes `{?=qiIq}@:' not precompiled'
     error.
+  * Improved `rake spec' error message to include the details. Thanks to
+    Steven Webb for pull request #68.
+  * Improved `rake spec files=...' to make _spec suffix optional. Thanks to
+    Dave Lee for pull request #71.
 
 = RubyMotion 1.34 =
 
