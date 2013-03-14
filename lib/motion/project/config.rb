@@ -76,7 +76,7 @@ module Motion; module Project
       @bundle_signature = '????'
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @version = '1.0'
-      @short_version = '1'
+      @short_version = nil
       @status_bar_style = :default
       @background_modes = []
       @icons = []
@@ -600,7 +600,7 @@ EOS
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
-        'CFBundleShortVersionString' => @short_version,
+        'CFBundleShortVersionString' => (@short_version || @version),
         'CFBundleSignature' => @bundle_signature,
         'CFBundleSupportedPlatforms' => ['iPhoneOS'],
         'CFBundleVersion' => @version,
