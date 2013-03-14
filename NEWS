@@ -15,6 +15,7 @@
     Steven Webb for pull request #68.
   * Improved `rake spec files=...' to make _spec suffix optional. Thanks to
     Dave Lee for pull request #71.
+  * Fixed a bug where it caused a crash when use AudioQueueBuffer structure.
 
 = RubyMotion 1.34 =
 
