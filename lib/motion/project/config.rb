@@ -291,6 +291,7 @@ EOS
     attr_reader :vendor_projects
 
     def vendor_project(path, type, opts={})
+      opts[:force_load] = true unless opts[:force_load] == false
       @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
     end
 
