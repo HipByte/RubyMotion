@@ -164,9 +164,6 @@ UIView.send(:include, UIViewExt)
 
 module Bacon
   class Context
-    # TODO
-    # * :navigation => true
-    # * :tab => true
     def tests(controller_class, options = {})
       @controller_class, @options = controller_class, options
       extend Bacon::Functional::API
@@ -204,10 +201,58 @@ module Bacon
           # a new window is shown. Make our windows black, just to make it a
           # bit prettier.
           @window.backgroundColor = UIColor.blackColor
-          @window.rootViewController = controller
+          @window.rootViewController = rootViewController
         end
         @window.makeKeyAndVisible
         @window
+      end
+
+      # As documented, the order of containment, from child to parent, is as follows:
+      # (see "Combined View Controller Interfaces")
+      #
+      # 1. Content view controllers, and container view controllers that have flexible bounds
+      # 2. Navigation view controller
+      # 3. Tab bar controller
+      # 4. Split view controller
+      #
+      # Lastly, the view controller can be presented modally.
+      def rootViewController
+        # 1. Content view controller
+        root = controller
+
+        # 2. Embed in navigation controller, if specified
+        if @options[:navigation]
+          root = UINavigationController.alloc.initWithRootViewController(root)
+        end
+
+        # 3. Embed in tab bar controller, if specified
+        if @options[:tab]
+          root = UITabBarController.new.tap do |tabBarController|
+            tabBarController.viewControllers = [root]
+          end
+        end
+
+        # 4. TODO Embed in split view controller
+
+        # Present modally, if specified
+        if @options[:present]
+          root = PresentingViewController.alloc.initWithPresenteeViewController(root)
+        end
+
+        root
+      end
+
+      class PresentingViewController < UIViewController
+        def initWithPresenteeViewController(presentee)
+          init.tap do
+            @presentee = presentee
+          end
+        end
+
+        def viewDidAppear(animated)
+          super
+          presentViewController(@presentee, animated: animated, completion: nil)
+        end
       end
 
       attr_accessor :controller
