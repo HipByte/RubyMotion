@@ -4,6 +4,10 @@ struct MyStruct4C {
     char a, b, c, d;
 };
 
+struct MyStructHasStructPointer {
+    struct MyStruct4C *field;
+};
+
 typedef id (^MyBlock)(void);
 
 @protocol TestProtocol <NSObject>
