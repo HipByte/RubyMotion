@@ -387,7 +387,7 @@ EOS
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
           libs << vendor_project.libs.map { |x|
-            (vendor_project.opts[:force_load] ? '-force_load ' : '') + "\"#{x}\""
+            (vendor_project.opts[:force_load] ? '-force_load ' : '-ObjC ') + "\"#{x}\""
           }
         end.join(' ')
         sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
