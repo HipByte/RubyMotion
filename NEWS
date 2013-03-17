@@ -21,6 +21,7 @@
     compile time. It will be useful in such libraries when specify false in
     :force_load option (by default true).
     EX) app.vendor_project('path/to/lib', :static, :force_load => false, ...)
+  * Added Dir#to_path method for CRuby compatibility.
 
 = RubyMotion 1.34 =
 
