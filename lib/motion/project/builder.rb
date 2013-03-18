@@ -385,7 +385,12 @@ EOS
         framework_search_paths = config.framework_search_paths.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
         frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs.map { |x| '-force_load "' + x + '"' }.join(' ')}"
+        vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
+          libs << vendor_project.libs.map { |x|
+            (vendor_project.opts[:force_load] ? '-force_load ' : '-ObjC ') + "\"#{x}\""
+          }
+        end.join(' ')
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
       end
 

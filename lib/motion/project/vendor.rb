@@ -34,7 +34,7 @@ module Motion; module Project;
       @bs_files = []
     end
 
-    attr_reader :path, :libs, :bs_files
+    attr_reader :path, :libs, :bs_files, :opts
 
     def build(platform)
       App.info 'Build', @path
