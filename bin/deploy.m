@@ -450,12 +450,15 @@ start_debugger(am_device_t dev)
     assert(app != nil);
     NSString *app_remote_path = [app objectForKey:@"Path"];
 
-    // If we need to attach an external debugger, we can quit here.
+    // If we need to attach an external debugger, we can stop here.
 
     if (getenv("no_start")) {
-	printf("%s\n%s\n", [app_remote_path fileSystemRepresentation],
+	printf("device_support_path: %s\nremote_app_path: %s\n"\
+		"debug_server_socket_path: %s\n",
+		[device_support_path fileSystemRepresentation],
+		[app_remote_path fileSystemRepresentation],
 		gdb_unix_socket_path);
-	return;
+	pause();
     }
 
     unlink(gdb_unix_socket_path);
