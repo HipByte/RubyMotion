@@ -60,6 +60,7 @@
     pointed to a path other than the '/Applications' folder.
   * Fixed a bug where the iOS simulator would be relaunched every time with
     `rake' command.
+  * Fixed a bug where it would cause a crash when call #alias on new method.
 
 = RubyMotion 1.32 =
 
