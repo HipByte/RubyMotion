@@ -22,6 +22,7 @@
     :force_load option (by default true).
     EX) app.vendor_project('path/to/lib', :static, :force_load => false, ...)
   * Added Dir#to_path method for CRuby compatibility.
+  * Fixed a bug where it would cause a crash when call #alias on new method.
 
 = RubyMotion 1.34 =
 
@@ -60,7 +61,6 @@
     pointed to a path other than the '/Applications' folder.
   * Fixed a bug where the iOS simulator would be relaunched every time with
     `rake' command.
-  * Fixed a bug where it would cause a crash when call #alias on new method.
 
 = RubyMotion 1.32 =
 
