@@ -52,6 +52,7 @@ end
 
 class TestIncludedModule
   include TestDefineMethodAlias
+  include TestDefineModuleExtendSelfBefore
 end
 
 describe "define_method" do
@@ -60,5 +61,6 @@ describe "define_method" do
     obj = TestIncludedModule.new
     obj.test.should == 42
     obj.test2.should == 42
+    obj.foo.should == 42
   end
 end
