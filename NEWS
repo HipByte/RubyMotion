@@ -23,6 +23,8 @@
     EX) app.vendor_project('path/to/lib', :static, :force_load => false, ...)
   * Added Dir#to_path method for CRuby compatibility.
   * Fixed a bug where it would cause a crash when call #alias on new method.
+  * Fixed a bug where it causes a crash when defined a method by define_method
+    on module and then use its method.
 
 = RubyMotion 1.34 =
 
