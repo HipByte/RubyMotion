@@ -25,6 +25,8 @@
   * Fixed a bug where it would cause a crash when call #alias on new method.
   * Fixed a bug where it causes a crash when defined a method by define_method
     on module and then use its method.
+  * Fixed a bug where 'rake device debug=1' will cause a crash when contained
+    UTF-8 characters in app name.
 
 = RubyMotion 1.34 =
 
