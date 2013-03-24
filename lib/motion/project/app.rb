@@ -111,9 +111,22 @@ module Motion; module Project
             io.puts ".sass-cache"
             io.puts ".idea"
           end
-          App.log 'Create', File.join(app_name, 'Rakefile')
-          File.open('Rakefile', 'w') do |io|
-            io.puts <<EOS
+
+          rakefileTemplate = File.expand_path("Rakefile", "~/.rubymotion")
+          if File.exist?(rakefileTemplate)
+            App.log 'Create', File.join(app_name, 'Rakefile') + " From " + rakefileTemplate
+            File.open(rakefileTemplate, 'r') do |src|
+              File.open('Rakefile', 'w') do |dest|
+                source = src.read
+                source = source.gsub(/\#\{\$motion_libdir\}/){"#{$motion_libdir}"}
+                source = source.gsub(/\#\{app_name\}/){"#{app_name}"}
+                dest.write(source)
+              end
+            end
+          else
+            App.log 'Create', File.join(app_name, 'Rakefile')
+            File.open('Rakefile', 'w') do |io|
+              io.puts <<EOS
 # -*- coding: utf-8 -*-
 $:.unshift(\"#{$motion_libdir}\")
 require 'motion/project'
@@ -123,6 +136,7 @@ Motion::Project::App.setup do |app|
   app.name = '#{app_name}'
 end
 EOS
+            end
           end
           App.log 'Create', File.join(app_name, 'app')
           Dir.mkdir('app')
