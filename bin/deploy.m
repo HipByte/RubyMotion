@@ -508,7 +508,7 @@ start_debugger(am_device_t dev)
 	cmds = [cmds stringByAppendingString:@"continue\n"];
     }
     assert([cmds writeToFile:cmds_path atomically:YES
-	    encoding:NSASCIIStringEncoding error:nil]);
+	    encoding:NSUTF8StringEncoding error:nil]);
 
     // Start gdb.
 
