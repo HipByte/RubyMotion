@@ -27,6 +27,7 @@ require 'motion/project/config'
 require 'motion/project/builder'
 require 'motion/project/vendor'
 require 'motion/project/plist'
+require 'motion/project/settings'
 
 App = Motion::Project::App
 
