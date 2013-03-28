@@ -8,7 +8,7 @@
     strings into file.
   * Fixed a bug in Object#respond_to? which might return true for a method that
     does not exist.
-  * Fixed a bug in REPL which often causes an error with "quit" command.
+  * Fixed a bug in REPL which often causes an error with quit and exit command.
   * Fixed a bug which AVPlayer#currentTime causes `{?=qiIq}@:' not precompiled'
     error.
   * Improved `rake spec' error message to include the details. Thanks to
