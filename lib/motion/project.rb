@@ -30,6 +30,8 @@ require 'motion/project/plist'
 
 App = Motion::Project::App
 
+Bundler.require if Object.const_defined?(:Bundler)
+
 # Check for software updates.
 system('/usr/bin/motion update --check')
 if $?.exitstatus == 2
@@ -124,6 +126,7 @@ namespace :spec do
   desc "Run the test/spec suite on the simulator"
   task :simulator do
     App.config.spec_mode = true
+    Bundler.require :default, :spec if Object.const_defined?(:Bundler)
     Rake::Task["simulator"].invoke
   end
 
