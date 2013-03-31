@@ -1,0 +1,14 @@
+#!/usr/bin/env rake
+$:.unshift("<%= $motion_libdir %>")
+require 'motion/project'
+require "bundler/gem_tasks"
+Bundler.setup
+Bundler.require
+
+$:.unshift("./lib/")
+require './lib/<%= @name %>'
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = '<%= @name %>'
+end
