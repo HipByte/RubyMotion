@@ -1,0 +1,9 @@
+.repl_history
+build
+resources/*.nib
+resources/*.momd
+resources/*.storyboardc
+*.gem
+.bundle
+Gemfile.lock
+pkg/*
