@@ -319,21 +319,21 @@ EOS
     def frameworks_dependencies
       @frameworks_dependencies ||= begin
         # Compute the list of frameworks, including dependencies, that the project uses.
-        deps = []
+        deps = frameworks.dup.uniq
         slf = File.join(sdk('iPhoneSimulator'), 'System', 'Library', 'Frameworks')
-        frameworks.each do |framework|
+        deps.each do |framework|
           framework_path = File.join(slf, framework + '.framework', framework)
           if File.exist?(framework_path)
             `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
               # Only care about public, non-umbrella frameworks (for now).
               if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(.+)$/) and md[1] == md[2]
                 deps << md[1]
+                deps.uniq!
               end
             end
           end
-          deps << framework
         end
-        deps.uniq!
+
         if @framework_search_paths.empty?
           deps = deps.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
         end
