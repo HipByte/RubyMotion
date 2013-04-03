@@ -51,7 +51,7 @@ module Motion; module Project
       :weak_frameworks, :framework_search_paths, :libs, :delegate_class, :name, :build_dir,
       :resources_dirs, :specs_dir, :identifier, :codesign_certificate,
       :provisioning_profile, :device_family, :interface_orientations, :version,
-      :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
+      :short_version, :icons, :prerendered_icon, :simulator_env, :background_modes, :seed_id,
       :entitlements, :fonts, :status_bar_style, :motiondir, :detect_dependencies
 
     # Internal only.
@@ -81,6 +81,7 @@ module Motion; module Project
       @background_modes = []
       @icons = []
       @prerendered_icon = false
+      @simulator_env = nil
       @vendor_projects = []
       @entitlements = {}
       @spec_mode = false
