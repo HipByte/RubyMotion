@@ -4,32 +4,31 @@
     using the macro system (ex. #define MyConstant @"SomeValue").
   * Added the `no_start' option to `rake device debug=1' to let the user
     attach a custom debugger. This is for the RubyMine integration. 
-  * Fixed a bug in REPL which cannot save the history which contains UTF-8
-    strings into file.
-  * Fixed a bug in Object#respond_to? which might return true for a method that
-    does not exist.
-  * Fixed a bug in REPL which often causes an error with quit and exit command.
-  * Fixed a bug which AVPlayer#currentTime causes `{?=qiIq}@:' not precompiled'
-    error.
-  * Improved `rake spec' error message to include the details. Thanks to
-    Steven Webb for pull request #68.
-  * Improved `rake spec files=...' to make _spec suffix optional. Thanks to
-    Dave Lee for pull request #71.
-  * Fixed a bug where it caused a crash when use AudioQueueBuffer structure.
-  * Added :force_load option into configuration of `app.vendor_project'. There
-    are 3rd-party library which would trigger "duplicate symbol" error at
-    compile time. It will be useful in such libraries when specify false in
-    :force_load option (by default true).
-    EX) app.vendor_project('path/to/lib', :static, :force_load => false, ...)
-  * Added Dir#to_path method for CRuby compatibility.
-  * Fixed a bug where it would cause a crash when call #alias on new method.
-  * Fixed a bug where it causes a crash when defined a method by define_method
-    on module and then use its method.
-  * Fixed a bug where 'rake device debug=1' will cause a crash when contained
-    UTF-8 characters in app name.
-  * Fixed a bug in build system which does not load all depended frameworks.
-  * Fixed a bug in super which fails to look up method in method which called
-    by super.
+  * Fixed a bug in the REPL where the history could not be saved if it contained
+    UTF-8 characters.
+  * Fixed a caching bug in Object#respond_to? which could return true for a method
+    that did not exist.
+  * Fixed a bug in REPL where an error message was often printed after using the
+    `quit' or `exit' command.
+  * Fixed a bug where the AVPlayer#currentTime method caused a `{?=qiIq}@:' not
+    precompiled' error.
+  * Improved `rake spec' error messages to include more details. Thanks to Steven Webb
+    for the patch (pull request #68).
+  * Improved `rake spec files=...' to make the `_spec' suffix optional. Thanks to
+    Dave Lee for the patch (pull request #71).
+  * Fixed a bug where using the AudioQueueBuffer structure would cause a crash.
+  * Added the `:force_load' option for the `app.vendor_project' Rakefile method.
+    This flag has a default value of `true' and can be set of `false' when vendoring
+    3rd-party libraries that include duplicated symbols.
+  * Added the Dir#to_path method for CRuby compatibility.
+  * Fixed a bug where calling #alias on a new method would cause a crash.
+  * Fixed a bug where defining a method with #define_method on a module then messaging
+    the method would cause a crash.
+  * Fixed a bug where 'rake device debug=1' would cause a crash if the project name
+    included UTF-8 characters.
+  * Fixed a bug in the build system where framework dependencies would not properly
+    be loaded.
+  * Fixed a rare bug in the `super' dispatcher.
 
 = RubyMotion 1.34 =
 
