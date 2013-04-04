@@ -27,7 +27,9 @@
     on module and then use its method.
   * Fixed a bug where 'rake device debug=1' will cause a crash when contained
     UTF-8 characters in app name.
-  * Fix a bug in build system which does not load all depended frameworks.
+  * Fixed a bug in build system which does not load all depended frameworks.
+  * Fixed a bug in super which fails to look up method in method which called
+    by super.
 
 = RubyMotion 1.34 =
 
