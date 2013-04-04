@@ -141,7 +141,7 @@ module Motion; module Project;
 
       # Resolve file dependencies
       if config.detect_dependencies == true
-        deps = Dependency.new(config.files).run
+        deps = Dependency.new(config.files - config.exclude_from_detect_dependencies).run
         config.dependencies = deps.merge(config.dependencies)
       end
 

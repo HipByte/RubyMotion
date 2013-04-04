@@ -52,7 +52,8 @@ module Motion; module Project
       :resources_dirs, :specs_dir, :identifier, :codesign_certificate,
       :provisioning_profile, :device_family, :interface_orientations, :version,
       :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
-      :entitlements, :fonts, :status_bar_style, :motiondir, :detect_dependencies
+      :entitlements, :fonts, :status_bar_style, :motiondir, :detect_dependencies,
+      :exclude_from_detect_dependencies
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies
@@ -63,6 +64,7 @@ module Motion; module Project
       @info_plist = {}
       @dependencies = {}
       @detect_dependencies = true
+      @exclude_from_detect_dependencies = []
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @weak_frameworks = []
       @framework_search_paths = []
