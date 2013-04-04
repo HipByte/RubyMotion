@@ -8,7 +8,7 @@
     strings into file.
   * Fixed a bug in Object#respond_to? which might return true for a method that
     does not exist.
-  * Fixed a bug in REPL which often causes an error with "quit" command.
+  * Fixed a bug in REPL which often causes an error with quit and exit command.
   * Fixed a bug which AVPlayer#currentTime causes `{?=qiIq}@:' not precompiled'
     error.
   * Improved `rake spec' error message to include the details. Thanks to
@@ -27,6 +27,9 @@
     on module and then use its method.
   * Fixed a bug where 'rake device debug=1' will cause a crash when contained
     UTF-8 characters in app name.
+  * Fixed a bug in build system which does not load all depended frameworks.
+  * Fixed a bug in super which fails to look up method in method which called
+    by super.
 
 = RubyMotion 1.34 =
 

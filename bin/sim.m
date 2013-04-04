@@ -793,7 +793,8 @@ again:
 	add_history([expr UTF8String]);
 	NSString *res = [self replEval:expr];
 	if (res == nil) {
-	    if ([line compare:@"quit"] == NSOrderedSame) {
+	    if ([line compare:@"quit"] == NSOrderedSame
+		    || [line compare:@"exit"] == NSOrderedSame) {
 		terminate_session();
 	    }
 	    break;
