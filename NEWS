@@ -1,3 +1,5 @@
+= RubyMotion 1.36 =
+
 = RubyMotion 1.35 =
 
   * Added support for string constants defined in 3rd-party header files
