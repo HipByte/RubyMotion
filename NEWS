@@ -1,3 +1,8 @@
+= RubyMotion 1.36 =
+
+  * Improved detecting file dependencies to accept absolute paths. Thanks to
+    Clay Allsopp for the patch (pull request #82).
+
 = RubyMotion 1.35 =
 
   * Added support for string constants defined in 3rd-party header files
