@@ -65,7 +65,8 @@ module Motion; module Project
       @detect_dependencies = true
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @weak_frameworks = []
-      @framework_search_paths = []
+      frameworks_dir = File.join(project_dir,'frameworks')
+      @framework_search_paths = File.exist?(frameworks_dir) ? [frameworks_dir] : []
       @libs = []
       @delegate_class = 'AppDelegate'
       @name = 'Untitled'
