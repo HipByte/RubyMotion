@@ -55,6 +55,17 @@ class TestIncludedModule
   include TestDefineModuleExtendSelfBefore
 end
 
+class TestIncludedModule2
+  include TestDefineMethodAlias
+end
+
+class TestInheritedClass < TestIncludedModule2
+end
+
+class TestExtendedClass
+  extend TestDefineMethodAlias
+end
+
 describe "define_method" do
   # RM-37 Assertion failed when trying to define a method on a module
   it "should work on class which included module" do
@@ -62,5 +73,16 @@ describe "define_method" do
     obj.test.should == 42
     obj.test2.should == 42
     obj.foo.should == 42
+  end
+
+  # RM-104 Assertion failed where inherits a class which includes a module which contains define_method
+  it "should work on class which inherits class" do
+    obj = TestInheritedClass.new
+    obj.test.should == 42
+  end
+
+  # RM-105 Assertion failed where extend a module which contains define_method
+  it "should work on extended class" do
+    TestExtendedClass.test.should == 42
   end
 end
