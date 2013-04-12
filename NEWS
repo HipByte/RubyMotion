@@ -5,6 +5,8 @@
   * Fixed a bug where it causes a crash when use a method which is defined by
     defind_method, and its method is contained in extended module or inherited
     class which included a module.
+  * Fix a bug where it will cause a crash when add a 'drawMapRect:zoomScale:inContext:'
+    into inherited MKOverlayView class
 
 = RubyMotion 1.35 =
 
