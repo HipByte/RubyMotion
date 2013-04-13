@@ -9,6 +9,8 @@
     into inherited MKOverlayView class
   * Improve `rake spec' to display error message if it does not exist spec
     files in project's spec directory
+  * Fixed a bug where set a constant which it will not raise an exception if it
+    contains Fixnum in namaspec.
 
 = RubyMotion 1.35 =
 
