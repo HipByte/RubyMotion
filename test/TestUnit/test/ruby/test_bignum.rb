@@ -4,8 +4,8 @@ class TestBignum < Test::Unit::TestCase
   def setup
     @verbose = $VERBOSE
     $VERBOSE = nil
-    # @fmax = Float::MAX.to_i
-    # @fmax2 = @fmax * 2
+    @fmax = Float::MAX.to_i
+    @fmax2 = @fmax * 2
     @big = (1 << 63) - 1
   end
 
@@ -191,7 +191,7 @@ class TestBignum < Test::Unit::TestCase
 
   def test_eq
     assert(T31P != 1)
-    # assert(T31P == 2147483647.0)
+    assert(T31P == 2147483647.0)
     assert(T31P != "foo")
   end
 
@@ -255,9 +255,9 @@ class TestBignum < Test::Unit::TestCase
     assert_equal(0x20000000, 0x40000001.div(2.0), "[ruby-dev:34553]")
   end
 
-  # def test_idiv
-  #   assert_equal(715827882, 1073741824.div(Rational(3,2)), ' [ruby-dev:34066]')
-  # end
+  def test_idiv
+    assert_equal(715827882, 1073741824.div(Rational(3,2)), ' [ruby-dev:34066]')
+  end
 
   def test_modulo
     assert_raise(TypeError) { T32 % "foo" }
@@ -274,22 +274,20 @@ class TestBignum < Test::Unit::TestCase
     assert_raise(TypeError) { T32.divmod("foo") }
   end
 
-  # def test_quo
-  #   skip("[BUG : #???] Timeout, MacRuby doesn't finish")
+  def test_quo
+    assert_equal(T32.to_f, T32.quo(1))
+    assert_equal(T32.to_f, T32.quo(1.0))
+    assert_equal(T32.to_f, T32.quo(T_ONE))
 
-  #   assert_equal(T32.to_f, T32.quo(1))
-  #   assert_equal(T32.to_f, T32.quo(1.0))
-  #   assert_equal(T32.to_f, T32.quo(T_ONE))
+    assert_raise(TypeError) { T32.quo("foo") }
 
-  #   assert_raise(TypeError) { T32.quo("foo") }
+    assert_equal(1024**1024, (1024**1024).quo(1))
+    assert_equal(1024**1024, (1024**1024).quo(1.0))
+    assert_equal(1024**1024*2, (1024**1024*2).quo(1))
+    inf = 1 / 0.0; nan = inf / inf
 
-  #   assert_equal(1024**1024, (1024**1024).quo(1))
-  #   assert_equal(1024**1024, (1024**1024).quo(1.0))
-  #   assert_equal(1024**1024*2, (1024**1024*2).quo(1))
-  #   inf = 1 / 0.0; nan = inf / inf
-
-  #   assert((1024**1024*2).quo(nan).nan?)
-  # end
+    assert((1024**1024*2).quo(nan).nan?)
+  end
 
   def test_pow
     assert_equal(1.0, T32 ** 0.0)
@@ -411,25 +409,21 @@ class TestBignum < Test::Unit::TestCase
   #   assert_in_delta(0.5, 1.fdiv(@fmax2) * @fmax, 0.01)
   # end
 
-  # def test_big_fdiv
-  #   skip("[BUG : #???] Timeout, MacRuby doesn't finish")
+  def test_big_fdiv
+    assert_equal(1, @big.fdiv(@big))
+    # assert_not_equal(0, @big.fdiv(@fmax2))
+    assert_not_equal(0, @fmax2.fdiv(@big))
+    assert_not_equal(0, @fmax2.fdiv(@fmax2))
+    # assert_in_delta(0.5, @fmax.fdiv(@fmax2), 0.01)
+    assert_in_delta(1.0, @fmax2.fdiv(@fmax2), 0.01)
+  end
 
-  #   assert_equal(1, @big.fdiv(@big))
-  #   assert_not_equal(0, @big.fdiv(@fmax2))
-  #   assert_not_equal(0, @fmax2.fdiv(@big))
-  #   assert_not_equal(0, @fmax2.fdiv(@fmax2))
-  #   assert_in_delta(0.5, @fmax.fdiv(@fmax2), 0.01)
-  #   assert_in_delta(1.0, @fmax2.fdiv(@fmax2), 0.01)
-  # end
-
-  # def test_float_fdiv
-  #   skip("[BUG : #???] Timeout, MacRuby doesn't finish")
-
-  #   b = 1E+300.to_i
-  #   assert_equal(b, (b ** 2).fdiv(b))
-  #   assert(@big.fdiv(0.0 / 0.0).nan?)
-  #   assert_in_delta(1E+300, (10**500).fdiv(1E+200), 1E+285)
-  # end
+  def test_float_fdiv
+    b = 1E+300.to_i
+    assert_equal(b, (b ** 2).fdiv(b))
+    assert(@big.fdiv(0.0 / 0.0).nan?)
+    assert_in_delta(1E+300, (10**500).fdiv(1E+200), 1E+285)
+  end
 
   def test_obj_fdiv
     o = Object.new

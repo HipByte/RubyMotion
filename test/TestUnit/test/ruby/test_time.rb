@@ -103,14 +103,14 @@ class TestTime < Test::Unit::TestCase
     assert_equal(Time.utc(2000,1,2,3,4,5), t)
   end
 
-  # def test_huge_difference
-  #   if negative_time_t?
-  #     assert_equal(Time.at(-0x80000000), Time.at(0x7fffffff) - 0xffffffff, "[ruby-dev:22619]")
-  #     assert_equal(Time.at(-0x80000000), Time.at(0x7fffffff) + (-0xffffffff))
-  #     assert_equal(Time.at(0x7fffffff), Time.at(-0x80000000) + 0xffffffff, "[ruby-dev:22619]")
-  #     assert_equal(Time.at(0x7fffffff), Time.at(-0x80000000) - (-0xffffffff))
-  #   end
-  # end
+  def test_huge_difference
+    if negative_time_t?
+      assert_equal(Time.at(-0x80000000), Time.at(0x7fffffff) - 0xffffffff, "[ruby-dev:22619]")
+      assert_equal(Time.at(-0x80000000), Time.at(0x7fffffff) + (-0xffffffff))
+      assert_equal(Time.at(0x7fffffff), Time.at(-0x80000000) + 0xffffffff, "[ruby-dev:22619]")
+      assert_equal(Time.at(0x7fffffff), Time.at(-0x80000000) - (-0xffffffff))
+    end
+  end
 
   def test_big_minus
     begin
@@ -294,14 +294,14 @@ class TestTime < Test::Unit::TestCase
 
   def test_at3
     assert_equal(T2000, Time.at(T2000))
-#    assert_raise(RangeError) do
-#      Time.at(2**31-1, 1_000_000)
-#      Time.at(2**63-1, 1_000_000)
-#    end
-#    assert_raise(RangeError) do
-#      Time.at(-2**31, -1_000_000)
-#      Time.at(-2**63, -1_000_000)
-#    end
+    assert_raise(RangeError) do
+      Time.at(2**31-1, 1_000_000)
+      Time.at(2**63-1, 1_000_000)
+    end
+    assert_raise(RangeError) do
+      Time.at(-2**31, -1_000_000)
+      Time.at(-2**63, -1_000_000)
+    end
   end
 
   def test_utc_or_local
@@ -428,9 +428,9 @@ class TestTime < Test::Unit::TestCase
   end
 
   def test_plus_minus_succ
-    # assert_raise(RangeError) { T2000 + 10000000000 }
-    # assert_raise(RangeError)  T2000 - 3094168449 }
-    # assert_raise(RangeError) { T2000 + 1200798848 }
+    assert_raise(RangeError) { T2000 + 10000000000 }
+    assert_raise(RangeError) { T2000 - 3094168449 }
+    assert_raise(RangeError) { T2000 + 1200798848 }
     assert_raise(TypeError) { T2000 + Time.now }
     assert_equal(T2000 + 1, T2000.succ)
   end

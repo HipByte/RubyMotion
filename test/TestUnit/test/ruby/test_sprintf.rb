@@ -186,8 +186,8 @@ class TestSprintf < Test::Unit::TestCase
   end
 
   def test_float
-    # assert_equal("36893488147419111424",
-    #              sprintf("%20.0f", 36893488147419107329.0))
+    assert_equal("36893488147419111424",
+                 sprintf("%20.0f", 36893488147419107329.0))
     assert_equal(" Inf", sprintf("% 0e", 1.0/0.0), "moved from btest/knownbug")
   end
 
@@ -198,7 +198,7 @@ class TestSprintf < Test::Unit::TestCase
     assert_equal("0x1p+0", sprintf("%a", 1.0))
     assert_equal("0x1p+1", sprintf("%a", 2.0))
     assert_equal("0x1p+10", sprintf("%a", 1024))
-    # assert_equal("0x1.23456p+789", sprintf("%a", 3.704450999893983e+237))
+    assert_equal("0x1.23456p+789", sprintf("%a", 3.704450999893983e+237))
     # assert_equal("0x1p-1074", sprintf("%a", 4.9e-324))
     assert_equal("Inf", sprintf("%e", Float::INFINITY))
     assert_equal("Inf", sprintf("%E", Float::INFINITY))
