@@ -5,8 +5,10 @@
   * Fixed a bug where it causes a crash when use a method which is defined by
     defind_method, and its method is contained in extended module or inherited
     class which included a module.
-  * Fix a bug where it will cause a crash when add a 'drawMapRect:zoomScale:inContext:'
+  * Fixed a bug where it will cause a crash when add a 'drawMapRect:zoomScale:inContext:'
     into inherited MKOverlayView class
+  * Improve `rake spec' to display error message if it does not exist spec
+    files in project's spec directory
 
 = RubyMotion 1.35 =
 
