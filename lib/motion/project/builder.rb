@@ -36,7 +36,7 @@ module Motion; module Project;
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
 
-      if config.spec_mode and config.spec_files.empty?
+      if config.spec_mode and (config.spec_files - config.spec_core_files).empty?
         App.fail "No spec files in `#{config.specs_dir}'"
       end
 
