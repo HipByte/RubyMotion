@@ -13,6 +13,9 @@
     contains Fixnum in namaspec.
   * Fixed a bug where Module#include? will not raise an exception if receiver
     is not module.
+  * Fixed a bug where `return' on a yield block that uses `ensure' would not
+    work.
+  * Fixed a bug where `catch' and `throw' would not work on iOS device.
 
 = RubyMotion 1.35 =
 
