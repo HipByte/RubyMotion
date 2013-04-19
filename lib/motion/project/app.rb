@@ -117,7 +117,7 @@ module Motion; module Project
       def initialize(app_name, template_name)
         @name = @app_name = app_name
         @template_name = template_name
-        @template_directory = File.expand_path(File.join(__FILE__, "../../template/#{@template_name}"))
+        @template_directory = File.expand_path(File.join(__FILE__, "../template/#{@template_name}"))
 
         unless app_name.match(/^[\w\s-]+$/)
           fail "Invalid app name"
