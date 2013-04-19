@@ -16,6 +16,7 @@
   * Fixed a bug where `return' on a yield block that uses `ensure' would not
     work.
   * Fixed a bug where `catch' and `throw' would not work on iOS device.
+  * Added the `motion account' command to open the license account page.
 
 = RubyMotion 1.35 =
 

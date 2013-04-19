@@ -28,6 +28,18 @@ class Command
         die "You need to be root to run this command."
       end
     end
+
+    def read_license_key
+      unless File.exist?(LicensePath)
+        die "License file not present. Please activate RubyMotion with `motion activate' and try again."
+      end
+      File.read(LicensePath).strip
+    end
+
+    def guess_email_address
+      # Guess the default email address from git.
+      URI.escape(`git config --get user.email`.strip)
+    end
   end
 end
 
@@ -71,6 +83,22 @@ class ActivateCommand < Command
   end
 end
 
+class AccountCommand < Command
+  self.name = 'account'
+  self.help = 'Access the software license account'
+
+  def self.run(args)
+    unless args.empty?
+      die "Usage: motion account"
+    end
+
+    license_key = read_license_key
+    email = guess_email_address
+
+    system("open \"https://secure.rubymotion.com/account?license_key=#{license_key}&email=#{email}\"")
+  end
+end
+
 class SupportCommand < Command
   self.name = 'support'
   self.help = 'Create a support ticket'
@@ -80,13 +108,8 @@ class SupportCommand < Command
       die "Usage: motion support"
     end
 
-    unless File.exist?(LicensePath)
-      die "License file not present. Please activate RubyMotion with `motion activate' and try again."
-    end
-    license_key = File.read(LicensePath).strip
-
-    # Guess the default email address from git.
-    email = URI.escape(`git config --get user.email`.strip)
+    license_key = read_license_key
+    email = guess_email_address
 
     # Collect details about the environment.
     osx_vers = `/usr/bin/sw_vers -productVersion`.strip
@@ -196,7 +219,7 @@ class RICommand < Command
 end
 
 class MotionMainCommand
-  Commands = [CreateCommand, ActivateCommand, UpdateCommand, RICommand, SupportCommand]
+  Commands = [CreateCommand, ActivateCommand, UpdateCommand, RICommand, SupportCommand, AccountCommand]
 
   def initialize(args)
     arg = args.shift
