@@ -1,0 +1,16 @@
+<%=
+indent = 0
+string = ""
+module_names = name.split(/[-_]/).map{ |x| x.capitalize }
+module_names.each do |m|
+  string.concat(" " * indent + "class #{m}\n")
+  indent += 2
+end
+string = string + "\n"
+module_names.size.times do
+  indent -= 2
+  string.concat(" " * indent + "end\n")
+end
+
+string
+%>

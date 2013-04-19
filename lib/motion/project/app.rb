@@ -21,6 +21,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'erb'
+
 module Motion; module Project
   class App
     VERBOSE =
@@ -80,85 +82,8 @@ module Motion; module Project
         builder.codesign(config, platform)
       end
 
-      def create(app_name)
-        unless app_name.match(/^[\w\s-]+$/)
-          fail "Invalid app name"
-        end
-    
-        if File.exist?(app_name)
-          fail "Directory `#{app_name}' already exists"
-        end
-
-        App.log 'Create', app_name 
-        Dir.mkdir(app_name)
-        Dir.chdir(app_name) do
-          App.log 'Create', File.join(app_name, '.gitignore')
-          File.open('.gitignore', 'w') do |io|
-            io.puts ".repl_history"
-            io.puts "build"
-            io.puts "tags"
-            io.puts "app/pixate_code.rb"
-            io.puts "resources/*.nib"
-            io.puts "resources/*.momd"
-            io.puts "resources/*.storyboardc"
-            io.puts ".DS_Store"
-            io.puts "nbproject"
-            io.puts ".redcar"
-            io.puts "#*#"
-            io.puts "*~"
-            io.puts "*.sw[po]"
-            io.puts ".eprj"
-            io.puts ".sass-cache"
-            io.puts ".idea"
-          end
-          App.log 'Create', File.join(app_name, 'Rakefile')
-          File.open('Rakefile', 'w') do |io|
-            io.puts <<EOS
-# -*- coding: utf-8 -*-
-$:.unshift(\"#{$motion_libdir}\")
-require 'motion/project'
-
-Motion::Project::App.setup do |app|
-  # Use `rake config' to see complete project settings.
-  app.name = '#{app_name}'
-end
-EOS
-          end
-          App.log 'Create', File.join(app_name, 'app')
-          Dir.mkdir('app')
-          App.log 'Create', File.join(app_name, 'app/app_delegate.rb')
-          File.open('app/app_delegate.rb', 'w') do |io|
-            io.puts <<EOS
-class AppDelegate
-  def application(application, didFinishLaunchingWithOptions:launchOptions)
-    true
-  end
-end
-EOS
-          end
-          App.log 'Create', File.join(app_name, 'resources')
-          Dir.mkdir('resources')
-          Dir.glob("#{$motion_libdir}/../resources/**/*").each do |file|
-            App.log 'Create', File.join(app_name, 'resources', File.basename(file))
-            FileUtils.cp(file, 'resources')
-          end
-          App.log 'Create', File.join(app_name, 'spec')
-          Dir.mkdir('spec')
-          App.log 'Create', File.join(app_name, 'spec/main_spec.rb')
-          File.open('spec/main_spec.rb', 'w') do |io|
-            io.puts <<EOS
-describe "Application '#{app_name}'" do
-  before do
-    @app = UIApplication.sharedApplication
-  end
-
-  it "has one window" do
-    @app.windows.size.should == 1
-  end
-end
-EOS
-          end
-        end
+      def create(app_name, template_name="ios")
+        Template.new(app_name, template_name).generate
       end
 
       def log(what, msg)
@@ -182,6 +107,76 @@ EOS
 
       def info(what, msg)
         log what, msg unless VERBOSE
+      end
+    end
+
+    class Template
+      # for ERB
+      attr_reader :name
+
+      def initialize(app_name, template_name)
+        @name = @app_name = app_name
+        @template_name = template_name
+        @template_directory = File.expand_path(File.join(__FILE__, "../../template/#{@template_name}"))
+
+        unless app_name.match(/^[\w\s-]+$/)
+          fail "Invalid app name"
+        end
+
+        if File.exist?(app_name)
+          fail "Directory `#{app_name}' already exists"
+        end
+
+        unless File.exist?(@template_directory)
+          fail "Invalid template name"
+        end
+      end
+
+      def generate
+        App.log 'Create', @app_name
+        FileUtils.mkdir(@app_name)
+
+        Dir.chdir(@app_name) do
+          create_directories()
+          create_files()
+        end
+      end
+
+      private
+
+      def template_directory
+        @template_directory
+      end
+
+      def create_directories
+        Dir.glob(File.join(template_directory, "**/")).each do |dir|
+          dir.sub!("#{template_directory}/", '')
+          FileUtils.mkdir_p(dir) if dir.length > 0
+        end
+      end
+
+      def create_files
+        Dir.glob(File.join(template_directory, "**/*"), File::FNM_DOTMATCH).each do |src|
+          dest = src.sub("#{template_directory}/", '')
+          next if File.directory?(src)
+          next if dest.include?(".DS_Store")
+
+          dest = replace_file_name(dest)
+          if dest =~ /(.+)\.erb$/
+            App.log 'Create', "#{@app_name}/#{$1}"
+            File.open($1, "w") { |io|
+              io.print ERB.new(File.read(src)).result(binding)
+            }
+          else
+            App.log 'Create', "#{@app_name}/#{dest}"
+            FileUtils.cp(src, dest)
+          end
+        end
+      end
+
+      def replace_file_name(file_name)
+        file_name = file_name.sub("{name}", "#{@name}")
+        file_name
       end
     end
   end

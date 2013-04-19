@@ -48,12 +48,22 @@ class CreateCommand < Command
   self.help = 'Create a new project'
 
   def self.run(args)
-    if args.size != 1
-      die "Usage: motion create <appname>"
+    if args.size < 1 || args.size > 2
+      die "Usage: motion create <appname> [--template=<template_name>]"
     end
 
-    app_name = args.shift
-    Motion::Project::App.create(app_name)
+    app_name = ''
+    template_name = 'ios'
+    args.each do |a|
+      case a
+        when /--template=(.+)/
+          template_name = $1.to_s
+        else
+          app_name = a
+      end
+    end
+
+    Motion::Project::App.create(app_name, template_name)
   end
 end
 
