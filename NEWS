@@ -17,6 +17,9 @@
     work.
   * Fixed a bug where `catch' and `throw' would not work on iOS device.
   * Added the `motion account' command to open the license account page.
+  * Added the `motion create <gem name> --template=gem' for RubyMotion gem.
+  * Fixed a bug where it would cause a crash when use a Cocos2D's variadic
+    method.
 
 = RubyMotion 1.35 =
 
