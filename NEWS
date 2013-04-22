@@ -20,6 +20,8 @@
   * Added the `motion create <gem name> --template=gem' for RubyMotion gem.
   * Fixed a bug where it would cause a crash when use a Cocos2D's variadic
     method.
+  * Fixed a bug where it will cause a memory leak when an object-creating
+    expression is passed to initializers.
 
 = RubyMotion 1.35 =
 
