@@ -141,8 +141,7 @@ module Motion; module Project;
 
       # Resolve file dependencies
       if config.detect_dependencies == true
-        deps = Dependency.new(config.files).run
-        config.dependencies = deps.merge(config.dependencies)
+        config.dependencies = Dependency.new(config.files, config.dependencies).run
       end
 
       # Feed builders with work.
@@ -629,8 +628,9 @@ PLIST
 
     @file_paths = []
 
-    def initialize(paths)
+    def initialize(paths, dependencies)
       @file_paths = paths.flatten.sort
+      @dependencies = dependencies
     end
 
     def cyclic?(dependencies, def_path, ref_path)
@@ -662,7 +662,7 @@ PLIST
         end
       end
 
-      dependency = {}
+      dependency = @dependencies.dup
       consts_defined.each do |const, def_path|
         if consts_referred[const]
           consts_referred[const].each do |ref_path|
