@@ -28,9 +28,9 @@ assert_equal %q{7}, proc{
   end
   
   def make_closure
-    a = 0
+    @proc_a = 0
     make_proc{
-      a+=1
+      @proc_a+=1
     }
   end
   
