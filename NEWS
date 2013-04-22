@@ -22,6 +22,7 @@
     method.
   * Fixed a bug where it will cause a memory leak when an object-creating
     expression is passed to initializers.
+  * Fixed a bug in build system where it would cause "stack level too deep".
 
 = RubyMotion 1.35 =
 
