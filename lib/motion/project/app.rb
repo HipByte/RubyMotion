@@ -21,7 +21,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'erb'
+require 'motion/project/template'
 
 module Motion; module Project
   class App
@@ -38,6 +38,8 @@ module Motion; module Project
       end
 
     class << self
+      attr_accessor :template
+
       def config_mode
         @config_mode ||= begin
           if mode = ENV['mode']
@@ -55,7 +57,7 @@ module Motion; module Project
 
       def config_without_setup
         @configs ||= {}
-        @configs[config_mode] ||= Motion::Project::Config.new('.', config_mode)
+        @configs[config_mode] ||= Motion::Project::Config.make(@template, '.', config_mode)
       end
 
       def config
@@ -82,8 +84,8 @@ module Motion; module Project
         builder.codesign(config, platform)
       end
 
-      def create(app_name, template_name="ios")
-        Template.new(app_name, template_name).generate
+      def create(app_name, template_name=:ios)
+        Motion::Project::Template.new(app_name, template_name).generate
       end
 
       def log(what, msg)
@@ -107,76 +109,6 @@ module Motion; module Project
 
       def info(what, msg)
         log what, msg unless VERBOSE
-      end
-    end
-
-    class Template
-      # for ERB
-      attr_reader :name
-
-      def initialize(app_name, template_name)
-        @name = @app_name = app_name
-        @template_name = template_name
-        @template_directory = File.expand_path(File.join(__FILE__, "../template/#{@template_name}"))
-
-        unless app_name.match(/^[\w\s-]+$/)
-          fail "Invalid app name"
-        end
-
-        if File.exist?(app_name)
-          fail "Directory `#{app_name}' already exists"
-        end
-
-        unless File.exist?(@template_directory)
-          fail "Invalid template name"
-        end
-      end
-
-      def generate
-        App.log 'Create', @app_name
-        FileUtils.mkdir(@app_name)
-
-        Dir.chdir(@app_name) do
-          create_directories()
-          create_files()
-        end
-      end
-
-      private
-
-      def template_directory
-        @template_directory
-      end
-
-      def create_directories
-        Dir.glob(File.join(template_directory, "**/")).each do |dir|
-          dir.sub!("#{template_directory}/", '')
-          FileUtils.mkdir_p(dir) if dir.length > 0
-        end
-      end
-
-      def create_files
-        Dir.glob(File.join(template_directory, "**/*"), File::FNM_DOTMATCH).each do |src|
-          dest = src.sub("#{template_directory}/", '')
-          next if File.directory?(src)
-          next if dest.include?(".DS_Store")
-
-          dest = replace_file_name(dest)
-          if dest =~ /(.+)\.erb$/
-            App.log 'Create', "#{@app_name}/#{$1}"
-            File.open($1, "w") { |io|
-              io.print ERB.new(File.read(src)).result(binding)
-            }
-          else
-            App.log 'Create', "#{@app_name}/#{dest}"
-            FileUtils.cp(src, dest)
-          end
-        end
-      end
-
-      def replace_file_name(file_name)
-        file_name = file_name.sub("{name}", "#{@name}")
-        file_name
       end
     end
   end

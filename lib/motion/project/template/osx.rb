@@ -21,43 +21,25 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/version'
 require 'motion/project/app'
-require 'motion/project/config'
-require 'motion/project/builder'
-require 'motion/project/vendor'
-require 'motion/project/template'
-require 'motion/project/plist'
 
-if Motion::Project::App.template == nil
-  warn "require 'lib/motion/project' is deprecated, please require 'lib/motion/project/template/ios' instead"
-  require 'motion/project/template/ios'
+App = Motion::Project::App
+App.template = :osx
+
+require 'motion/project'
+require 'motion/project/template/osx/config'
+
+desc "Build the project, then run it"
+task :default => :run
+
+desc "Build the project"
+task :build do
+  App.build('MacOSX')
 end
 
-# Check for updates.
-system('/usr/bin/motion update --check')
-if $?.exitstatus == 2
-  puts '=' * 80
-  puts " A new version of RubyMotion is available. Run `sudo motion update' to upgrade."
-  puts '=' * 80
-  puts ''
-end
-
-desc "Clear build objects"
-task :clean do
-  App.info 'Delete', App.config.build_dir
-  rm_rf(App.config.build_dir)
-  App.config.vendor_projects.each { |vendor| vendor.clean }
-  Dir.glob(App.config.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }).each do |p|
-    App.info 'Delete', p
-    rm_rf p
-  end
-end
-
-desc "Show project config"
-task :config do
-  map = App.config.variables
-  map.keys.sort.each do |key|
-    puts key.ljust(22) + " : #{map[key].inspect}"
-  end
+desc "Run the project"
+task :run => 'build' do
+  exec = App.config.app_bundle_executable('MacOSX')
+  App.info 'Run', exec
+  sh exec
 end
