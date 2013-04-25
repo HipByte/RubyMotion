@@ -25,7 +25,7 @@ require 'thread'
 
 module Motion; module Project;
   class Builder
-    include Rake::DSL if Rake.const_defined?(:DSL)
+    include Rake::DSL if Object.const_defined?(:Rake) && Rake.const_defined?(:DSL)
 
     def build(config, platform, opts)
       datadir = config.datadir
@@ -65,10 +65,17 @@ module Motion; module Project;
       objs_build_dir = File.join(build_dir, 'objs')
       FileUtils.mkdir_p(objs_build_dir)
       any_obj_file_built = false
+      project_files = Dir.glob("**/*.rb").map{ |x| File.expand_path(x) }
+      is_default_archs = (archs == config.default_archs[platform])
+
       build_file = Proc.new do |path|
         rpath = path
         path = File.expand_path(path)
-        obj = File.join(objs_build_dir, "#{path}.o")
+        files_build_dir = objs_build_dir
+        if is_default_archs && !project_files.include?(path)
+          files_build_dir = File.expand_path(File.join(Builder.common_build_dir, files_build_dir))
+        end
+        obj = File.join(files_build_dir, "#{path}.o")
         should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
@@ -86,13 +93,13 @@ module Motion; module Project;
             raise "Can't locate kernel file" unless File.exist?(kernel)
    
             # LLVM bitcode.
-            bc = File.join(objs_build_dir, "#{path}.#{arch}.bc")
+            bc = File.join(files_build_dir, "#{path}.#{arch}.bc")
             bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
             arch_cmd = (arch =~ /^arm/) ? "/usr/bin/arch -arch i386" : "/usr/bin/arch -arch #{arch}"
             sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{arch_cmd} #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
    
             # Assembly.
-            asm = File.join(objs_build_dir, "#{path}.#{arch}.s")
+            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
             llc_arch = case arch
               when 'i386'; 'x86'
               when 'x86_64'; 'x86-64'
@@ -102,7 +109,7 @@ module Motion; module Project;
             sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh -disable-cfi"
    
             # Object.
-            arch_obj = File.join(objs_build_dir, "#{path}.#{arch}.o")
+            arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
             sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
   
             [bc, asm].each { |x| File.unlink(x) }
@@ -518,6 +525,16 @@ PLIST
         end
       end
 =end
+    end
+
+    class << self
+      def common_build_dir
+        dir = File.expand_path("~/Library/RubyMotion/build")
+        unless File.exist?(dir)
+          FileUtils.mkdir_p dir
+        end
+        dir
+      end
     end
   end
 
