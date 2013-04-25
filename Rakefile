@@ -113,8 +113,6 @@ task :install do
   #data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   data.reject! { |path| /^\./.match(File.basename(path)) }
 
-  data.concat(Dir.glob('./resources/**/*'))
-
   motiondir = '/Library/RubyMotion'
   destdir = (ENV['DESTDIR'] || '/')
   destmotiondir = File.join(destdir, motiondir)
