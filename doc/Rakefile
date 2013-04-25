@@ -4,7 +4,9 @@ verbose(true)
 
 task :default => :all
 #task :all => [:guides, :docset]
-task :all => [:guides] # no docset in the main distribution...
+#task :all => [:guides] # no docset in the main distribution...
+task :all do
+end
 
 task :guides do
   Dir.glob('*.txt').each do |src|

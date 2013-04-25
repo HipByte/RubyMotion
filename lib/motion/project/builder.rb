@@ -88,7 +88,7 @@ module Motion; module Project;
             # LLVM bitcode.
             bc = File.join(objs_build_dir, "#{path}.#{arch}.bc")
             bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
-            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{arch} #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
    
             # Assembly.
             asm = File.join(objs_build_dir, "#{path}.#{arch}.s")
@@ -180,8 +180,6 @@ module Motion; module Project;
 
       # Generate init file.
       init_txt = <<EOS
-#import <UIKit/UIKit.h>
-
 extern "C" {
     void ruby_sysinit(int *, char ***);
     void ruby_init(void);
@@ -213,17 +211,21 @@ RubyMotionInit(int argc, char **argv)
 	    const char *progname = argv[0];
 	    ruby_script(progname);
 	}
+#if !__LP64__
 	try {
+#endif
 	    void *self = rb_vm_top_self();
 EOS
       app_objs.each do |_, init_func|
         init_txt << "#{init_func}(self, 0);\n"
       end
       init_txt << <<EOS
+#if !__LP64__
 	}
 	catch (...) {
 	    rb_rb2oc_exc_handler();
 	}
+#endif
 	initialized = true;
     }
 }
@@ -248,112 +250,7 @@ EOS
       end
 
       # Generate main file.
-      main_txt = <<EOS
-#import <UIKit/UIKit.h>
-
-extern "C" {
-    void rb_define_global_const(const char *, void *);
-    void rb_rb2oc_exc_handler(void);
-    void rb_exit(int);
-    void RubyMotionInit(int argc, char **argv);
-EOS
-      if config.spec_mode
-        spec_objs.each do |_, init_func|
-          main_txt << "void #{init_func}(void *, void *);\n"
-        end
-      end
-      main_txt << <<EOS
-}
-EOS
-
-      if config.spec_mode
-        main_txt << <<EOS
-@interface SpecLauncher : NSObject
-@end
-
-#include <dlfcn.h>
-
-@implementation SpecLauncher
-
-+ (id)launcher
-{
-    [UIApplication sharedApplication];
-
-    // Enable simulator accessibility.
-    // Thanks http://www.stewgleadow.com/blog/2011/10/14/enabling-accessibility-for-ios-applications/
-    NSString *simulatorRoot = [[[NSProcessInfo processInfo] environment] objectForKey:@"IPHONE_SIMULATOR_ROOT"];
-    if (simulatorRoot != nil) {
-        void *appSupportLibrary = dlopen([[simulatorRoot stringByAppendingPathComponent:@"/System/Library/PrivateFrameworks/AppSupport.framework/AppSupport"] fileSystemRepresentation], RTLD_LAZY);
-        CFStringRef (*copySharedResourcesPreferencesDomainForDomain)(CFStringRef domain) = (CFStringRef (*)(CFStringRef)) dlsym(appSupportLibrary, "CPCopySharedResourcesPreferencesDomainForDomain");
-
-        if (copySharedResourcesPreferencesDomainForDomain != NULL) {
-            CFStringRef accessibilityDomain = copySharedResourcesPreferencesDomainForDomain(CFSTR("com.apple.Accessibility"));
-
-            if (accessibilityDomain != NULL) {
-                CFPreferencesSetValue(CFSTR("ApplicationAccessibilityEnabled"), kCFBooleanTrue, accessibilityDomain, kCFPreferencesAnyUser, kCFPreferencesAnyHost);
-                CFRelease(accessibilityDomain);
-            }
-        }
-    }
-
-    // Load the UIAutomation framework.
-    dlopen("/Developer/Library/PrivateFrameworks/UIAutomation.framework/UIAutomation", RTLD_LOCAL);
-
-    SpecLauncher *launcher = [[self alloc] init];
-    [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
-    return launcher; 
-}
-
-- (void)appLaunched:(id)notification
-{
-    // Give a bit of time for the simulator to attach...
-    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
-}
-
-- (void)runSpecs
-{
-EOS
-        spec_objs.each do |_, init_func|
-          main_txt << "#{init_func}(self, 0);\n"
-        end
-        main_txt << "[NSClassFromString(@\"Bacon\") performSelector:@selector(run)];\n"
-        main_txt << <<EOS
-}
-
-@end
-EOS
-      end
-      main_txt << <<EOS
-int
-main(int argc, char **argv)
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    int retval = 0;
-    try {
-EOS
-      main_txt << "[SpecLauncher launcher];\n" if config.spec_mode
-      main_txt << <<EOS
-        RubyMotionInit(argc, argv);
-EOS
-      rubymotion_env =
-        if config.spec_mode
-          'test'
-        else
-          config.development? ? 'development' : 'release'
-        end
-      main_txt << "rb_define_global_const(\"RUBYMOTION_ENV\", @\"#{rubymotion_env}\");\n"
-      main_txt << "rb_define_global_const(\"RUBYMOTION_VERSION\", @\"#{Motion::Version}\");\n"
-      main_txt << <<EOS
-        retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
-        rb_exit(retval);
-    }
-    catch (...) {
-	rb_rb2oc_exc_handler();
-    }
-    [pool release];
-    return retval;
-}
-EOS
+      main_txt = config.main_cpp_file_txt(spec_objs)
  
       # Compile main file.
       main = File.join(objs_build_dir, 'main.mm')
@@ -372,6 +269,10 @@ EOS
 
       # Link executable.
       main_exec = config.app_bundle_executable(platform)
+      unless File.exist?(File.dirname(main_exec))
+        App.info 'Create', File.dirname(main_exec)
+        FileUtils.mkdir_p(File.dirname(main_exec))
+      end
       main_exec_created = false
       if !File.exist?(main_exec) \
           or File.mtime(config.project_file) > File.mtime(main_exec) \
@@ -439,6 +340,7 @@ EOS
       end
 
       # Copy resources, handle subdirectories.
+      app_resources_dir = config.app_resources_dir(platform)
       reserved_app_bundle_files = [
         '_CodeSignature/CodeResources', 'CodeResources', 'embedded.mobileprovision',
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
@@ -458,7 +360,7 @@ EOS
         if reserved_app_bundle_files.include?(res)
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
-        dest_path = File.join(bundle_path, res)
+        dest_path = File.join(app_resources_dir, res)
         if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
           FileUtils.mkdir_p(File.dirname(dest_path))
           App.info 'Copy', res_path
@@ -468,7 +370,7 @@ EOS
 
       # Delete old resource files.
       resources_files = resources_paths.map { |x| path_on_resources_dirs(config.resources_dirs, x) }
-      Dir.chdir(bundle_path) do
+      Dir.chdir(app_resources_dir) do
         Dir.glob('*').each do |bundle_res|
           bundle_res = convert_filesystem_encoding(bundle_res)
           next if File.directory?(bundle_res)

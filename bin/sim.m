@@ -980,6 +980,7 @@ main(int argc, char **argv)
 	replPath = [replPath stringByDeletingLastPathComponent];
 	replPath = [replPath stringByDeletingLastPathComponent];
 	replPath = [replPath stringByAppendingPathComponent:@"data"];
+	replPath = [replPath stringByAppendingPathComponent:@"ios"];
 	replPath = [replPath stringByAppendingPathComponent:sdk_version];
 	replPath = [replPath stringByAppendingPathComponent:@"iPhoneSimulator"];
 	replPath = [replPath stringByAppendingPathComponent:@"libmacruby-repl.dylib"];

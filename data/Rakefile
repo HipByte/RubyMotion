@@ -1,5 +1,6 @@
 PLATFORMS_DIR = ENV['platforms_dir']
-SDK_VERSIONS = ENV['sdk_versions'].split(',')
+IOS_SDK_VERSIONS = ENV['ios_sdk_versions'].split(',')
+OSX_SDK_VERSIONS = ENV['osx_sdk_versions'].split(',')
 
 verbose(true)
 
@@ -7,8 +8,25 @@ task :default => :all
 task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
 
 task :vm_files do
-  SDK_VERSIONS.each do |sdk_version|
-    ios = File.join(sdk_version, 'iPhoneOS')
+  strip = File.join(PLATFORMS_DIR, '../usr/bin/strip')
+
+  OSX_SDK_VERSIONS.each do |sdk_version|
+    sdk = File.join('osx', sdk_version, 'MacOSX')
+    mkdir_p sdk
+    objs = "../vm/MacOSX#{sdk_version}.objs"
+    Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
+      install path, sdk
+    end
+    install File.join(objs, 'libmacruby-static.a'), sdk
+    objs = "../vm/MacOSX#{sdk_version}-repl.objs"
+    install File.join(objs, 'libmacruby-repl.dylib'), sdk
+
+    # remove debug symbols
+    Dir.glob(sdk + '/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+  end
+
+  IOS_SDK_VERSIONS.each do |sdk_version|
+    ios = File.join('ios', sdk_version, 'iPhoneOS')
     mkdir_p ios
     objs = "../vm/iPhoneOS#{sdk_version}.objs"
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
@@ -16,7 +34,7 @@ task :vm_files do
     end
     install File.join(objs, 'libmacruby-static.a'), ios
 
-    sim = File.join(sdk_version, 'iPhoneSimulator')
+    sim = File.join('ios', sdk_version, 'iPhoneSimulator')
     mkdir_p sim
     objs = "../vm/iPhoneSimulator#{sdk_version}.objs"
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
@@ -27,7 +45,6 @@ task :vm_files do
     install File.join(objs, 'libmacruby-repl.dylib'), sim
 
     # remove debug symbols
-    strip = File.join(PLATFORMS_DIR, '../usr/bin/strip')
     [ios, sim].map { |x| Dir.glob(x + '/*.{a,dylib}') }.flatten.each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
   end
 end
@@ -47,13 +64,38 @@ end
 
 EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit']
 task :bridgesupport_files do
+  platform_dev_path = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
+  OSX_SDK_VERSIONS.each do |sdk_version|
+    sdk_path = "#{platform_dev_path}/SDKs/MacOSX#{sdk_version}.sdk"
+    sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
+    mkdir_p "osx/#{sdk_version}/BridgeSupport"
+
+    Dir.glob('*.bridgesupport').each { |bs| cp bs, "osx/#{sdk_version}/BridgeSupport" }
+    Dir.glob('osx/*.bridgesupport').each { |bs| cp bs, "osx/#{sdk_version}/BridgeSupport" }
+
+    Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
+      framework = File.basename(framework_path, '.framework')
+      next if EXCLUDED_FRAMEWORKS.include?(framework)
+      next unless File.exist?(File.join(framework_path, framework))
+      next unless File.exist?(File.join(framework_path, 'Headers'))
+      dest = "osx/#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
+      unless File.exist?(dest)
+        a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
+        sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+        sh "/usr/bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -mmacosx-version-min=#{sdk_version} -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
+        apply_bridgesupport_fixes(dest)
+      end
+    end
+  end
+
   platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
-  SDK_VERSIONS.each do |sdk_version|
+  IOS_SDK_VERSIONS.each do |sdk_version|
     sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
     sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
-    mkdir_p "#{sdk_version}/BridgeSupport"
+    mkdir_p "ios/#{sdk_version}/BridgeSupport"
 
-    Dir.glob('*.bridgesupport').each { |bs| cp bs, "#{sdk_version}/BridgeSupport" }
+    Dir.glob('*.bridgesupport').each { |bs| cp bs, "ios/#{sdk_version}/BridgeSupport" }
+    Dir.glob('ios/*.bridgesupport').each { |bs| cp bs, "ios/#{sdk_version}/BridgeSupport" }
 
     next if ENV['SDK_BETA']
 
@@ -62,7 +104,7 @@ task :bridgesupport_files do
       next if EXCLUDED_FRAMEWORKS.include?(framework)
       next unless File.exist?(File.join(framework_path, framework))
       next unless File.exist?(File.join(framework_path, 'Headers'))
-      dest = "#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
+      dest = "ios/#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
       unless File.exist?(dest)
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
         sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
@@ -108,11 +150,11 @@ def generate_bs_static_stub(file, includes)
 end
 
 task :bridgesupport_static_stubs do
-  SDK_VERSIONS.each do |sdk_version|
-    Dir.glob("#{sdk_version}/BridgeSupport/*.bridgesupport") do |bs_path|
+  IOS_SDK_VERSIONS.each do |sdk_version|
+    Dir.glob("ios/#{sdk_version}/BridgeSupport/*.bridgesupport") do |bs_path|
       framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
   
-      code = "#{sdk_version}/BridgeSupport/#{framework}_stubs.m"
+      code = "ios/#{sdk_version}/BridgeSupport/#{framework}_stubs.m"
       includes = case framework
         when 'OpenGLES'
           ['OpenGLES/EAGLDrawable.h']
@@ -135,7 +177,7 @@ task :bridgesupport_static_stubs do
         end
 
       [['iPhoneOS', *device_archs], %w{iPhoneSimulator i386}].each do |platform, *archs|
-        obj = "#{sdk_version}/#{platform}/#{framework}_stubs.o"
+        obj = "ios/#{sdk_version}/#{platform}/#{framework}_stubs.o"
         next if File.exist?(obj)
         platform_dev = "#{PLATFORMS_DIR}/#{platform}.platform/Developer"
         cflags = "-isysroot #{platform_dev}/SDKs/#{platform}#{sdk_version}.sdk "
@@ -148,5 +190,6 @@ task :bridgesupport_static_stubs do
 end
 
 task :clean do
-  SDK_VERSIONS.each { |path| rm_rf(path) }
+  IOS_SDK_VERSIONS.each { |path| rm_rf('ios/' + path) }
+  OSX_SDK_VERSIONS.each { |path| rm_rf('osx/' + path) }
 end

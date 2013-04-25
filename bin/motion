@@ -49,18 +49,33 @@ class CreateCommand < Command
 
   def self.run(args)
     if args.size < 1 || args.size > 2
-      die "Usage: motion create <appname> [--template=<template_name>]"
     end
 
-    app_name = ''
+    app_name = nil
     template_name = 'ios'
     args.each do |a|
       case a
-        when /--template=(.+)/
-          template_name = $1.to_s
+        when /--([^=]+)=(.+)/
+          opt_name = $1.to_s.strip
+          opt_val = $2.to_s.strip
+          case opt_name
+            when 'template'
+              template_name = opt_val
+            else
+              die "Incorrect option `#{opt_name}'"
+          end
         else
-          app_name = a
+          if app_name
+            app_name = nil
+            break
+          else
+            app_name = a
+          end
       end
+    end
+
+    unless app_name
+      die "Usage: motion create [--template=<template_name>] <app-name>"
     end
 
     Motion::Project::App.create(app_name, template_name)

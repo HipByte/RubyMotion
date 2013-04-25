@@ -7,10 +7,19 @@ end
 ios_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneOS(.+)\.sdk$/)[0][0]
 end
-SDK_VERSIONS = (sim_sdks & ios_sdks)
+IOS_SDK_VERSIONS = (sim_sdks & ios_sdks)
 
-if SDK_VERSIONS.empty?
-  $stderr.puts "Can't locate any SDK"
+if IOS_SDK_VERSIONS.empty?
+  $stderr.puts "Can't locate any iOS SDK"
+  exit 1
+end
+
+OSX_SDK_VERSIONS = Dir.glob(File.join(PLATFORMS_DIR, 'MacOSX.platform/Developer/SDKs/MacOSX*.sdk')).map do |path|
+  File.basename(path).scan(/^MacOSX(.+)\.sdk$/)[0][0]
+end
+
+if OSX_SDK_VERSIONS.empty?
+  $stderr.puts "Can't locate any OSX SDK"
   exit 1
 end
 
@@ -20,7 +29,7 @@ def rake(dir, cmd='all')
   Dir.chdir(dir) do
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
     trace = Rake.application.options.trace
-    sh "rake platforms_dir=\"#{PLATFORMS_DIR}\" sdk_versions=\"#{SDK_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{cmd} #{trace ? '--trace' : ''}"
+    sh "rake platforms_dir=\"#{PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{cmd} #{trace ? '--trace' : ''}"
   end
 end
 
@@ -74,12 +83,16 @@ task :install do
   data = ['./NEWS']
   data.concat(Dir.glob('./lib/**/*'))
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
-  SDK_VERSIONS.each do |sdk_version|
-    data.concat(Dir.glob("./data/#{sdk_version}/BridgeSupport/*.bridgesupport"))
-    data.concat(Dir.glob("./data/#{sdk_version}/iPhoneOS/*"))
-    data.concat(Dir.glob("./data/#{sdk_version}/iPhoneSimulator/*"))
+  [['ios', IOS_SDK_VERSIONS]].each do |name, sdk_versions|
+    IOS_SDK_VERSIONS.each do |sdk_version|
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*"))
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
+    end
   end
 
+
+=begin
   # === 6.0 support (beta) ===
   data.concat(Dir.glob("./data/6.0/Rakefile"))
   data.concat(Dir.glob("./data/6.0/BridgeSupport/RubyMotion.bridgesupport"))
@@ -87,6 +100,7 @@ task :install do
   data.concat(Dir.glob("./data/6.0/iPhoneOS/*"))
   data.concat(Dir.glob("./data/6.0/iPhoneSimulator/*"))
   # ==========================
+=end
 
   data.concat(Dir.glob('./data/*-ctags.cfg'))
   #data.concat(Dir.glob('./doc/*.html'))
