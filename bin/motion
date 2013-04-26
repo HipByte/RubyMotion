@@ -12,6 +12,7 @@ $motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_li
 $:.unshift($motion_libdir)
 require 'motion/version'
 require 'motion/project/app.rb'
+require 'motion/project/builder.rb'
 
 class Command
   class << self
@@ -227,6 +228,8 @@ class UpdateCommand < Command
       $stderr.puts line
     end
     $stderr.puts "(See the `/Library/RubyMotion/NEWS' file for all changes.)"
+
+    FileUtils.rm_rf Motion::Project::Builder.common_build_dir
   end
 end
 

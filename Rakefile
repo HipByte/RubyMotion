@@ -86,8 +86,6 @@ task :install do
   [['ios', IOS_SDK_VERSIONS]].each do |name, sdk_versions|
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
-      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*"))
-      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
     end
   end
   [['osx', OSX_SDK_VERSIONS]].each do |name, sdk_versions|
@@ -112,8 +110,6 @@ task :install do
   #data.concat(Dir.glob('./doc/docset/**/*'))
   #data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   data.reject! { |path| /^\./.match(File.basename(path)) }
-
-  data.concat(Dir.glob('./resources/**/*'))
 
   motiondir = '/Library/RubyMotion'
   destdir = (ENV['DESTDIR'] || '/')

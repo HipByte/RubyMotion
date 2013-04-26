@@ -8,11 +8,8 @@ bin/llc
 bin/ruby
 bin/sim
 
-data/4.3
-data/5.0
-data/5.1
-data/6.0
-data/6.1
+data/ios
+data/osx
 
 doc/.yardoc
 doc/*.html

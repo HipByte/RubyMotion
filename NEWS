@@ -2,6 +2,8 @@
 
   * Improved detecting file dependencies to accept absolute paths. Thanks to
     Clay Allsopp for the patch (pull request #82).
+  * Improved the build system by changing the build directory for outside files
+    of project to reduce compilation time.
   * Fixed a bug where it causes a crash when use a method which is defined by
     defind_method, and its method is contained in extended module or inherited
     class which included a module.

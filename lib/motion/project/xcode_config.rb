@@ -209,16 +209,18 @@ EOS
       end
     end
 
-    def archs
-      @archs ||= begin
-        h = {}
-        platforms.each do |platform|
-          h[platform] = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
-            path.scan(/kernel-(.+).bc$/)[0][0]
-          end
+    def default_archs
+      h = {}
+      platforms.each do |platform|
+        h[platform] = Dir.glob(File.join(datadir, platform, '*.bc')).map do |path|
+          path.scan(/kernel-(.+).bc$/)[0][0]
         end
-        h
       end
+      h
+    end
+
+    def archs
+      @archs ||= default_archs
     end
 
     def arch_flags(platform)
