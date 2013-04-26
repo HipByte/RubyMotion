@@ -633,7 +633,11 @@ PLIST
       end
 
       def on_const_path_ref(parent, args)
-        on_var_ref(args)
+        type, name, position = args
+        if type == :@const
+          @defined << name
+          @referred << name
+        end
       end
     end
   end
