@@ -45,6 +45,6 @@ task :run => 'build' do
     sh "/usr/bin/gdb --args \"#{exec}\""
   else
     App.info 'Run', exec
-    sh exec
+    sh "\"#{exec}\""
   end
 end
