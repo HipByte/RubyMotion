@@ -25,6 +25,8 @@
   * Fixed a bug where it will cause a memory leak when an object-creating
     expression is passed to initializers.
   * Fixed a bug in build system where it would cause "stack level too deep".
+  * Fixed a bug in detecting file dependencies which cannot detect dependency
+    when declare class/module with like "class XXX::YYY".
 
 = RubyMotion 1.35 =
 
