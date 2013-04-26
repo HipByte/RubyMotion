@@ -150,6 +150,39 @@ def generate_bs_static_stub(file, includes)
 end
 
 task :bridgesupport_static_stubs do
+  OSX_SDK_VERSIONS.each do |sdk_version|
+    Dir.glob("osx/#{sdk_version}/BridgeSupport/*.bridgesupport") do |bs_path|
+      framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
+
+      case framework
+        when 'Ruby'
+        when 'GLKit' # TODO
+          next
+      end 
+ 
+      code = "osx/#{sdk_version}/BridgeSupport/#{framework}_stubs.m"
+      includes = case framework
+        when 'OpenGLES'
+          ['OpenGLES/EAGLDrawable.h']
+        else
+          ['Cocoa/Cocoa.h', "#{framework}/#{framework}.h"]
+      end
+      unless File.exist?(code)
+        text = generate_bs_static_stub(bs_path, includes)
+        next unless text
+        File.open(code, 'w') { |io| io.write(text) }
+      end
+
+      obj = "osx/#{sdk_version}/MacOSX/#{framework}_stubs.o"
+      next if File.exist?(obj)
+      platform_dev = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
+      cflags = "-isysroot #{platform_dev}/SDKs/MacOSX#{sdk_version}.sdk"
+      cflags << " -arch i386 -arch x86_64"
+      cflags << " -mmacosx-version-min=#{sdk_version} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
+      sh "/usr/bin/gcc #{cflags} #{code} -c -o #{obj}"
+    end
+  end
+
   IOS_SDK_VERSIONS.each do |sdk_version|
     Dir.glob("ios/#{sdk_version}/BridgeSupport/*.bridgesupport") do |bs_path|
       framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
