@@ -84,13 +84,18 @@ task :install do
   data.concat(Dir.glob('./lib/**/*'))
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
   [['ios', IOS_SDK_VERSIONS]].each do |name, sdk_versions|
-    IOS_SDK_VERSIONS.each do |sdk_version|
+    sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*"))
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
     end
   end
-
+  [['osx', OSX_SDK_VERSIONS]].each do |name, sdk_versions|
+    sdk_versions.each do |sdk_version|
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*"))
+    end
+  end
 
 =begin
   # === 6.0 support (beta) ===
