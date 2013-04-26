@@ -40,6 +40,11 @@ end
 desc "Run the project"
 task :run => 'build' do
   exec = App.config.app_bundle_executable('MacOSX')
-  App.info 'Run', exec
-  sh exec
+  if ENV['debug']
+    App.info 'Debug', exec
+    sh "/usr/bin/gdb --args \"#{exec}\""
+  else
+    App.info 'Run', exec
+    sh exec
+  end
 end
