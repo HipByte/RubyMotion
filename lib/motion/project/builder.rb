@@ -68,10 +68,9 @@ module Motion; module Project;
       project_files = Dir.glob("**/*.rb").map{ |x| File.expand_path(x) }
       is_default_archs = (archs == config.default_archs[platform])
 
-      build_file = Proc.new do |path|
+      build_file = Proc.new do |files_build_dir, path|
         rpath = path
         path = File.expand_path(path)
-        files_build_dir = objs_build_dir
         if is_default_archs && !project_files.include?(path)
           files_build_dir = File.expand_path(File.join(Builder.common_build_dir, files_build_dir))
         end
@@ -140,7 +139,7 @@ module Motion; module Project;
           sleep
           objs = []
           while path = queue.shift
-            objs << build_file.call(path)
+            objs << build_file.call(objs_build_dir, path)
           end
           queue.concat(objs)
         end
