@@ -86,6 +86,8 @@ task :install do
   [['ios', IOS_SDK_VERSIONS]].each do |name, sdk_versions|
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*"))
     end
   end
   [['osx', OSX_SDK_VERSIONS]].each do |name, sdk_versions|
