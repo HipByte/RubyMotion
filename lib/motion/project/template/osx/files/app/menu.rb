@@ -90,6 +90,8 @@ class AppDelegate
     NSApp.mainMenu = @mainMenu
   end
 
+  private
+
   def addMenu(title, &b)
     item = createMenu(title, &b)
     @mainMenu.addItem item
