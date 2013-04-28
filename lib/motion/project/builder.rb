@@ -181,7 +181,7 @@ module Motion; module Project;
       spec_objs = []
       if config.spec_mode
         # Build spec files too, but sequentially.
-        spec_objs = config.spec_files.map { |path| build_file.call(path) }
+        spec_objs = config.spec_files.map { |path| build_file.call(objs_build_dir, path) }
         objs += spec_objs
       end
 
