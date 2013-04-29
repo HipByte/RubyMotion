@@ -3,10 +3,11 @@
 
 s3config.yaml
 
-bin/deploy
 bin/llc
 bin/ruby
-bin/sim
+bin/ios/deploy
+bin/ios/sim
+bin/osx/sim
 
 data/ios
 data/osx

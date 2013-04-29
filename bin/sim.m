@@ -34,14 +34,16 @@ static int debug_mode = -1;
 
 static Delegate *delegate = nil;
 static NSTask *gdb_task = nil;
-static BOOL debugger_killed_session = NO;
+#if defined(SIMULATOR_IOS)
 static id current_session = nil;
+static BOOL debugger_killed_session = NO;
 static NSString *xcode_path = nil;
+static NSRect simulator_app_bounds = { {0, 0}, {0, 0} };
+static int simulator_retina_type = DEVICE_RETINA_FALSE;
+#endif
 static NSString *sdk_version = nil;
 static NSString *replSocketPath = nil;
 
-static NSRect simulator_app_bounds = { {0, 0}, {0, 0} };
-static int simulator_retina_type = DEVICE_RETINA_FALSE;
 static int repl_fd = -1;
 static NSLock *repl_fd_lock = nil;
 
@@ -87,27 +89,21 @@ terminate_session(void)
 {
     static bool terminated = false;
     if (!terminated) {
+#if defined(SIMULATOR_IOS)
 	// requestEndWithTimeout: must be called only once.
 	assert(current_session != nil);
 	((void (*)(id, SEL, double))objc_msgSend)(current_session,
 	    @selector(requestEndWithTimeout:), 0.0);
+#endif
 	terminated = true;
     }
 }
 
+#if defined(SIMULATOR_IOS)
 static void
 sigterminate(int sig)
 {
     terminate_session();
-    exit(1);
-}
-
-static void
-sigcleanup(int sig)
-{
-    if (debug_mode == DEBUG_REPL) {
-	save_repl_history(); 
-    }
     exit(1);
 }
 
@@ -118,8 +114,99 @@ sigforwarder(int sig)
 	kill([gdb_task processIdentifier], sig);
     }
 }
+#endif
+
+static void
+sigcleanup(int sig)
+{
+    if (debug_mode == DEBUG_REPL) {
+	save_repl_history(); 
+    }
+    exit(1);
+}
 
 @implementation Delegate
+
+static int expr_level = 0;
+
+static NSString *
+current_repl_prompt(NSString *top_level)
+{
+    char question = '?';
+    if (top_level == nil) {
+	static bool first_time = true;
+	if (first_time) {
+	    top_level = @"main";
+	    first_time = false;
+	}
+	else {
+	    top_level = [delegate replEval:@"self"];
+	}
+	question = '>';
+    }
+
+    if ([top_level length] > 30) {
+	top_level = [[top_level substringToIndex:30]
+	    stringByAppendingString:@"..."];
+    }
+
+    NSString *prompt = [NSString stringWithFormat:@"(%@)%c ",
+	top_level, question];
+
+    for (int i = 0; i < expr_level; i++) {
+	prompt = [prompt stringByAppendingString:@"  "];
+    }
+    return prompt;
+}
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
+// This readline function is not implemented in Snow Leopard.
+// Code copied from http://cvsweb.netbsd.org/bsdweb.cgi/src/lib/libedit/readline.c?only_with_tag=MAIN
+#if !defined(RL_PROMPT_START_IGNORE)
+# define RL_PROMPT_START_IGNORE  '\1'
+#endif
+#if !defined(RL_PROMPT_END_IGNORE)
+# define RL_PROMPT_END_IGNORE    '\2'
+#endif
+int
+rl_set_prompt(const char *prompt)
+{
+    char *p;
+
+    if (!prompt)
+	prompt = "";
+    if (rl_prompt != NULL && strcmp(rl_prompt, prompt) == 0) 
+	return 0;
+    if (rl_prompt)
+	/*el_*/free(rl_prompt);
+    rl_prompt = strdup(prompt);
+    if (rl_prompt == NULL)
+	return -1;
+
+    while ((p = strchr(rl_prompt, RL_PROMPT_END_IGNORE)) != NULL)
+	*p = RL_PROMPT_START_IGNORE;
+
+    return 0;
+}
+#endif
+
+#if defined(SIMULATOR_IOS)
+static void
+refresh_repl_prompt(NSString *top_level, bool clear)
+{
+    static int previous_prompt_length = 0;
+    rl_set_prompt([current_repl_prompt(top_level) UTF8String]);
+    if (clear) {
+	putchar('\r');
+	for (int i = 0; i < previous_prompt_length; i++) {
+	    putchar(' ');
+	}
+	putchar('\r');
+	//printf("\n\033[F\033[J"); // Clear.
+	rl_forced_update_display();
+    }
+    previous_prompt_length = strlen(rl_prompt);
+}
 
 static void
 locate_simulator_app_bounds(void)
@@ -248,86 +335,6 @@ locate_simulator_app_bounds(void)
     simulator_app_bounds = bounds;
 }
 
-static int expr_level = 0;
-
-static NSString *
-current_repl_prompt(NSString *top_level)
-{
-    char question = '?';
-    if (top_level == nil) {
-	static bool first_time = true;
-	if (first_time) {
-	    top_level = @"main";
-	    first_time = false;
-	}
-	else {
-	    top_level = [delegate replEval:@"self"];
-	}
-	question = '>';
-    }
-
-    if ([top_level length] > 30) {
-	top_level = [[top_level substringToIndex:30]
-	    stringByAppendingString:@"..."];
-    }
-
-    NSString *prompt = [NSString stringWithFormat:@"(%@)%c ",
-	top_level, question];
-
-    for (int i = 0; i < expr_level; i++) {
-	prompt = [prompt stringByAppendingString:@"  "];
-    }
-    return prompt;
-}
-
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
-// This readline function is not implemented in Snow Leopard.
-// Code copied from http://cvsweb.netbsd.org/bsdweb.cgi/src/lib/libedit/readline.c?only_with_tag=MAIN
-#if !defined(RL_PROMPT_START_IGNORE)
-# define RL_PROMPT_START_IGNORE  '\1'
-#endif
-#if !defined(RL_PROMPT_END_IGNORE)
-# define RL_PROMPT_END_IGNORE    '\2'
-#endif
-int
-rl_set_prompt(const char *prompt)
-{
-    char *p;
-
-    if (!prompt)
-	prompt = "";
-    if (rl_prompt != NULL && strcmp(rl_prompt, prompt) == 0) 
-	return 0;
-    if (rl_prompt)
-	/*el_*/free(rl_prompt);
-    rl_prompt = strdup(prompt);
-    if (rl_prompt == NULL)
-	return -1;
-
-    while ((p = strchr(rl_prompt, RL_PROMPT_END_IGNORE)) != NULL)
-	*p = RL_PROMPT_START_IGNORE;
-
-    return 0;
-}
-#endif
-
-static void
-refresh_repl_prompt(NSString *top_level, bool clear)
-{
-    static int previous_prompt_length = 0;
-    rl_set_prompt([current_repl_prompt(top_level) UTF8String]);
-    if (clear) {
-	putchar('\r');
-	for (int i = 0; i < previous_prompt_length; i++) {
-	    putchar(' ');
-	}
-	putchar('\r');
-	//printf("\n\033[F\033[J"); // Clear.
-	rl_forced_update_display();
-    }
-    previous_prompt_length = strlen(rl_prompt);
-}
-
 #define CONCURRENT_BEGIN dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 #define CONCURRENT_END });
 
@@ -414,6 +421,7 @@ start_capture(id delegate)
     CFRunLoopAddSource(CFRunLoopGetCurrent(), eventTapRLSrc,
 	    kCFRunLoopDefaultMode);
 }
+#endif
 
 static bool
 send_string(NSString *string)
@@ -803,9 +811,53 @@ again:
 
 	expr = nil;
 	expr_level = 0;
-    }	
+    }
 }
 
+static NSString *
+gdb_commands_file(void)
+{
+#if defined(SIMULATOR_IOS)
+# define SIMGDBCMDS_BASE	@"_simgdbcmds_ios"
+#else
+# define SIMGDBCMDS_BASE	@"_simgdbcmds_osx"
+#endif
+    NSString *cmds_path = [NSString pathWithComponents:
+	[NSArray arrayWithObjects:NSTemporaryDirectory(), SIMGDBCMDS_BASE,
+	nil]];
+    NSString *cmds = @""\
+		     "set breakpoint pending on\n"\
+		     "break rb_exc_raise\n"\
+		     "break malloc_error_break\n";
+    cmds = [cmds stringByAppendingFormat:@"%s\n", BUILTIN_DEBUGGER_CMDS];
+    NSString *user_cmds = [NSString stringWithContentsOfFile:
+	@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
+    if (user_cmds != nil) {
+	cmds = [cmds stringByAppendingString:user_cmds];
+	cmds = [cmds stringByAppendingString:@"\n"];
+    }
+    if (getenv("no_continue") == NULL) {
+	cmds = [cmds stringByAppendingString:
+#if defined(SIMULATOR_IOS)
+	    @"continue\n"
+#else
+	    @"run\n"
+#endif
+	    ];
+    }
+    NSError *error = nil;
+    if (![cmds writeToFile:cmds_path atomically:YES
+	    encoding:NSASCIIStringEncoding error:&error]) {
+	fprintf(stderr,
+		"can't write gdb commands file into path %s: %s\n",
+		[cmds_path UTF8String],
+		[[error description] UTF8String]);
+	exit(1);
+    }
+    return cmds_path;
+}
+
+#if defined(SIMULATOR_IOS)
 - (void)session:(id)session didEndWithError:(NSError *)error
 {
     if (gdb_task != nil) {
@@ -860,42 +912,12 @@ again:
 	// Forward ^C to gdb.
 	signal(SIGINT, sigforwarder);
 
-	// Create the gdb commands file (used to 'continue' the process).
-	NSString *cmds_path = [NSString pathWithComponents:
-	    [NSArray arrayWithObjects:NSTemporaryDirectory(), @"_simgdbcmds",
-	    nil]];
-	//if (![[NSFileManager defaultManager] fileExistsAtPath:cmds_path]) {
-	    NSString *cmds = @""\
-		"set breakpoint pending on\n"\
-		"break rb_exc_raise\n"\
-		"break malloc_error_break\n";
-	    cmds = [cmds stringByAppendingFormat:@"%s\n",
-		 BUILTIN_DEBUGGER_CMDS];
-	    NSString *user_cmds = [NSString stringWithContentsOfFile:
-		@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
-	    if (user_cmds != nil) {
-		cmds = [cmds stringByAppendingString:user_cmds];
-		cmds = [cmds stringByAppendingString:@"\n"];
-	    }
-	    if (getenv("no_continue") == NULL) {
-		cmds = [cmds stringByAppendingString:@"continue\n"];
-	    }
-	    NSError *error = nil;
-	    if (![cmds writeToFile:cmds_path atomically:YES
-		    encoding:NSASCIIStringEncoding error:&error]) {
-		fprintf(stderr,
-			"can't write gdb commands file into path %s: %s\n",
-			[cmds_path UTF8String],
-			[[error description] UTF8String]);
-		exit(1);
-	    }
-	//}
-
 	// Run the gdb process.
 	NSString *gdb_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin"];
 	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
 	    arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"-q",
-	    @"--pid", [pidNumber description], @"-x", cmds_path, nil]] retain];
+	    @"--pid", [pidNumber description], @"-x", gdb_commands_file(),
+	    nil]] retain];
 	[gdb_task waitUntilExit];
 	gdb_task = nil;
 
@@ -904,12 +926,14 @@ again:
 	    @selector(requestEndWithTimeout:), 0);
     }
     else if (debug_mode == DEBUG_REPL) {
-	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop) toTarget:self withObject:nil];
+	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
+	    toTarget:self withObject:nil];
 	start_capture(self);
     }
 
     //fprintf(stderr, "*** simulator session started\n");
 }
+#endif
 
 @end
 
@@ -925,18 +949,29 @@ main(int argc, char **argv)
 {
     [[NSAutoreleasePool alloc] init];
 
+#if defined(SIMULATOR_IOS)
     if (argc != 6) {
+#else
+    if (argc != 4) {
+#endif
 	usage();
     }
 
     spec_mode = getenv("SIM_SPEC_MODE") != NULL;
-    debug_mode = atoi(argv[1]);
-    NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[2])];
-    sdk_version = [[NSString stringWithUTF8String:argv[3]] retain];
-    xcode_path = [[NSString stringWithUTF8String:argv[4]] retain];
+    int argv_n = 1;
+    debug_mode = atoi(argv[argv_n++]);
+#if defined(SIMULATOR_IOS)
+    NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[argv_n++])];
+#endif
+    sdk_version = [[NSString stringWithUTF8String:argv[argv_n++]] retain];
+#if defined(SIMULATOR_IOS)
+    xcode_path = [[NSString stringWithUTF8String:argv[argv_n++]] retain];
+#endif
     NSString *app_path =
-	[NSString stringWithUTF8String:realpath(argv[5], NULL)];
+	[NSString stringWithUTF8String:realpath(argv[argv_n++], NULL)];
 
+
+#if defined(SIMULATOR_IOS)
     // Load the framework.
     [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/iPhoneSimulatorRemoteClient.framework"]] load];
 
@@ -952,6 +987,7 @@ main(int argc, char **argv)
 
     Class Session = NSClassFromString(@"DTiPhoneSimulatorSession");
     assert(Session != nil);
+#endif
 
     // Prepare app environment.
     NSMutableDictionary *appEnvironment = [[[NSProcessInfo processInfo]
@@ -979,16 +1015,26 @@ main(int argc, char **argv)
 	    stringWithFileSystemRepresentation:argv[0] length:strlen(argv[0])];
 	replPath = [replPath stringByDeletingLastPathComponent];
 	replPath = [replPath stringByDeletingLastPathComponent];
+	replPath = [replPath stringByDeletingLastPathComponent];
 	replPath = [replPath stringByAppendingPathComponent:@"data"];
+#if defined(SIMULATOR_IOS)
 	replPath = [replPath stringByAppendingPathComponent:@"ios"];
+#else
+	replPath = [replPath stringByAppendingPathComponent:@"osx"];
+#endif
 	replPath = [replPath stringByAppendingPathComponent:sdk_version];
+#if defined(SIMULATOR_IOS)
 	replPath = [replPath stringByAppendingPathComponent:@"iPhoneSimulator"];
+#else
+	replPath = [replPath stringByAppendingPathComponent:@"MacOSX"];
+#endif
 	replPath = [replPath stringByAppendingPathComponent:@"libmacruby-repl.dylib"];
 	[appEnvironment setObject:replPath forKey:@"REPL_DYLIB_PATH"];
     }
 
     //[NSDictionary dictionaryWithObjectsAndKeys:@"/usr/lib/libgmalloc.dylib", @"DYLD_INSERT_LIBRARIES", nil]);
 
+#if defined(SIMULATOR_IOS)
     // Create application specifier.
     id app_spec = ((id (*)(id, SEL, id))objc_msgSend)(AppSpecifier,
 	    @selector(specifierWithApplicationPath:), app_path);
@@ -998,7 +1044,8 @@ main(int argc, char **argv)
     id system_root = ((id (*)(id, SEL, id))objc_msgSend)(SystemRoot,
 	    @selector(rootWithSDKVersion:), sdk_version);
     if (system_root == nil) {
-	fprintf(stderr, "\nNot found iOS %s simulator.\n\n", [sdk_version UTF8String]);
+	fprintf(stderr, "iOS simulator for %s SDK not found.\n\n",
+		[sdk_version UTF8String]);
 	exit(1);
     }
 
@@ -1081,5 +1128,46 @@ main(int argc, char **argv)
     }
 
     [[NSRunLoop mainRunLoop] run];
+
+#else // !SIMULATOR_IOS
+
+    if (debug_mode != DEBUG_GDB) {
+	signal(SIGPIPE, sigcleanup);
+
+	delegate = [[Delegate alloc] init];
+	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
+	    toTarget:delegate withObject:nil];
+
+	NSTask *task = [[NSTask alloc] init];
+	[task setEnvironment:appEnvironment];
+	[task setLaunchPath:app_path];
+	[task launch];
+	[task waitUntilExit];
+    }
+    else {
+	// Run the gdb process.
+	// XXX using system(3) as NSTask isn't working well (termios issue).
+	char line[1014];
+	snprintf(line, sizeof line, "/usr/bin/gdb -x \"%s\" %s",
+		[gdb_commands_file() fileSystemRepresentation],
+		[app_path UTF8String]);
+	system(line);
+#if 0
+	// Forward ^C to gdb.
+	signal(SIGINT, sigforwarder);
+
+	gdb_task = [[NSTask alloc] init];
+	[gdb_task setEnvironment:appEnvironment];
+	[gdb_task setLaunchPath:@"/usr/bin/gdb"];
+	[gdb_task setArguments:[NSArray arrayWithObjects:@"-x",
+	    gdb_commands_file(), app_path, nil]];
+	[gdb_task launch];
+	[gdb_task waitUntilExit];
+	gdb_task = nil;
+#endif
+    }
+
+#endif
+
     return 0;
 }

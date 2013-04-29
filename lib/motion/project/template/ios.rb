@@ -85,7 +85,7 @@ task :simulator => ['build:simulator'] do
   xcode = App.config.xcode_dir
   env = "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\""
   env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
-  sim = File.join(App.config.bindir, 'sim')
+  sim = File.join(App.config.bindir, 'ios/sim')
   debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
   App.info 'Simulate', app
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
@@ -133,7 +133,7 @@ task :device => :archive do
     App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
-  deploy = File.join(App.config.bindir, 'deploy')
+  deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   sh "#{env} #{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
 end

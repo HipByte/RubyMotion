@@ -22,7 +22,7 @@ task :vm_files do
     install File.join(objs, 'libmacruby-repl.dylib'), sdk
 
     # remove debug symbols
-    Dir.glob(sdk + '/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+    #Dir.glob(sdk + '/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
   end
 
   IOS_SDK_VERSIONS.each do |sdk_version|
