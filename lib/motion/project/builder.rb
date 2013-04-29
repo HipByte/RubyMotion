@@ -635,8 +635,24 @@ PLIST
       def on_const_path_ref(parent, args)
         type, name, position = args
         if type == :@const
-          @defined << name
           @referred << name
+        end
+        args
+      end
+
+      def on_module(const, *args)
+        type, name = const
+        if type == :@const
+          @defined << name
+          @referred.delete(name)
+        end
+      end
+
+      def on_class(const, *args)
+        type, name = const
+        if type == :@const
+          @defined << name
+          @referred.delete(name)
         end
       end
     end
