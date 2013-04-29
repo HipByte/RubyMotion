@@ -181,7 +181,7 @@ module Motion; module Project;
       spec_objs = []
       if config.spec_mode
         # Build spec files too, but sequentially.
-        spec_objs = config.spec_files.map { |path| build_file.call(path) }
+        spec_objs = config.spec_files.map { |path| build_file.call(objs_build_dir, path) }
         objs += spec_objs
       end
 
@@ -370,6 +370,7 @@ EOS
         end
         dest_path = File.join(app_resources_dir, res)
         if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+          FileUtils.mkdir_p(File.dirname(dest_path))
           App.info 'Copy', res_path
           FileUtils.cp_r(res_path, dest_path)
         end
@@ -613,15 +614,11 @@ PLIST
       end
 
       def on_const_ref(args)
-        type, const_name, position = args
-        @defined << const_name
+        args
       end
 
       def on_var_field(args)
-        type, name, position = args
-        if type == :@const
-          @defined << name
-        end
+        args
       end
 
       def on_var_ref(args)
@@ -634,9 +631,27 @@ PLIST
       def on_const_path_ref(parent, args)
         type, name, position = args
         if type == :@const
-          @defined << name
           @referred << name
         end
+        args
+      end
+
+      def on_module(const, *args)
+        type, name, position = const
+        if type == :@const
+          @defined << name
+          @referred.delete(name)
+        end
+        []
+      end
+
+      def on_class(const, *args)
+        type, name, position = const
+        if type == :@const
+          @defined << name
+          @referred.delete(name)
+        end
+        []
       end
     end
   end
