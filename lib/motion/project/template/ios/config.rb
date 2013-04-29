@@ -133,7 +133,7 @@ module Motion; module Project;
 
     def device_id
       @device_id ||= begin
-        deploy = File.join(App.config.bindir, 'deploy')
+        deploy = File.join(App.config.bindir, 'ios/deploy')
         device_id = `#{deploy} -D`.strip
         if device_id.empty?
           App.fail "Can't find an iOS device connected on USB"

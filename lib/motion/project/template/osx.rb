@@ -40,11 +40,12 @@ end
 desc "Run the project"
 task :run => 'build' do
   exec = App.config.app_bundle_executable('MacOSX')
-  if ENV['debug']
-    App.info 'Debug', exec
-    sh "/usr/bin/gdb --args \"#{exec}\""
-  else
-    App.info 'Run', exec
-    sh "\"#{exec}\""
-  end
+  env = ''
+  env << 'SIM_SPEC_MODE=1' if App.config.spec_mode
+  sim = File.join(App.config.bindir, 'osx/sim')
+  debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
+  target = App.config.sdk_version
+  App.info 'Run', exec
+  at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
+  sh "#{env} #{sim} #{debug} #{target} #{exec}"
 end
