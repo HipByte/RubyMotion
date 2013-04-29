@@ -47,5 +47,5 @@ task :run => 'build' do
   target = App.config.sdk_version
   App.info 'Run', exec
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
-  sh "#{env} #{sim} #{debug} #{target} #{exec}"
+  sh "#{env} #{sim} #{debug} #{target} \"#{exec}\""
 end
