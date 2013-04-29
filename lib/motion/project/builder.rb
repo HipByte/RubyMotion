@@ -614,15 +614,11 @@ PLIST
       end
 
       def on_const_ref(args)
-        type, const_name, position = args
-        @defined << const_name
+        args
       end
 
       def on_var_field(args)
-        type, name, position = args
-        if type == :@const
-          @defined << name
-        end
+        args
       end
 
       def on_var_ref(args)
@@ -641,19 +637,21 @@ PLIST
       end
 
       def on_module(const, *args)
-        type, name = const
+        type, name, position = const
         if type == :@const
           @defined << name
           @referred.delete(name)
         end
+        []
       end
 
       def on_class(const, *args)
-        type, name = const
+        type, name, position = const
         if type == :@const
           @defined << name
           @referred.delete(name)
         end
+        []
       end
     end
   end
