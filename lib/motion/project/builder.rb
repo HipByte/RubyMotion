@@ -348,6 +348,7 @@ EOS
 
       # Copy resources, handle subdirectories.
       app_resources_dir = config.app_resources_dir(platform)
+      FileUtils.mkdir_p(app_resources_dir)
       reserved_app_bundle_files = [
         '_CodeSignature/CodeResources', 'CodeResources', 'embedded.mobileprovision',
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
