@@ -18,51 +18,51 @@ class AppDelegate
       addItem(NSMenuItem.separatorItem)
       addItemWithTitle("Quit #{appName}", action: 'terminate:', keyEquivalent: 'q')
     end
- 
-    addMenu('File') do 
-      addItemWithTitle('New', action: 'newDocument:', keyEquivalent: 'n') 
+
+    addMenu('File') do
+      addItemWithTitle('New', action: 'newDocument:', keyEquivalent: 'n')
       addItemWithTitle('Open…', action: 'openDocument:', keyEquivalent: 'o')
       addItem(NSMenuItem.separatorItem)
-      addItemWithTitle('Close', action: 'performClose:', keyEquivalent: 'w') 
-      addItemWithTitle('Save…', action: 'saveDocument:', keyEquivalent: 's') 
-      addItemWithTitle('Revert to Saved', action: 'revertDocumentToSaved:', keyEquivalent: '') 
+      addItemWithTitle('Close', action: 'performClose:', keyEquivalent: 'w')
+      addItemWithTitle('Save…', action: 'saveDocument:', keyEquivalent: 's')
+      addItemWithTitle('Revert to Saved', action: 'revertDocumentToSaved:', keyEquivalent: '')
       addItem(NSMenuItem.separatorItem)
-      addItemWithTitle('Page Setup…', action: 'runPageLayout:', keyEquivalent: 'P') 
-      addItemWithTitle('Print…', action: 'printDocument:', keyEquivalent: 'p') 
+      addItemWithTitle('Page Setup…', action: 'runPageLayout:', keyEquivalent: 'P')
+      addItemWithTitle('Print…', action: 'printDocument:', keyEquivalent: 'p')
     end
 
-    addMenu('Edit') do 
-      addItemWithTitle('Undo', action: 'undo:', keyEquivalent: 'z') 
-      addItemWithTitle('Redo', action: 'redo:', keyEquivalent: 'Z') 
+    addMenu('Edit') do
+      addItemWithTitle('Undo', action: 'undo:', keyEquivalent: 'z')
+      addItemWithTitle('Redo', action: 'redo:', keyEquivalent: 'Z')
       addItem(NSMenuItem.separatorItem)
-      addItemWithTitle('Cut', action: 'cut:', keyEquivalent: 'x') 
-      addItemWithTitle('Copy', action: 'copy:', keyEquivalent: 'c') 
-      addItemWithTitle('Paste', action: 'paste:', keyEquivalent: 'v') 
+      addItemWithTitle('Cut', action: 'cut:', keyEquivalent: 'x')
+      addItemWithTitle('Copy', action: 'copy:', keyEquivalent: 'c')
+      addItemWithTitle('Paste', action: 'paste:', keyEquivalent: 'v')
       item = addItemWithTitle('Paste and Match Style', action: 'pasteAsPlainText:', keyEquivalent: 'V')
       item.keyEquivalentModifierMask = NSCommandKeyMask|NSAlternateKeyMask
-      addItemWithTitle('Delete', action: 'delete:', keyEquivalent: '') 
-      addItemWithTitle('Select All', action: 'selectAll:', keyEquivalent: 'a') 
+      addItemWithTitle('Delete', action: 'delete:', keyEquivalent: '')
+      addItemWithTitle('Select All', action: 'selectAll:', keyEquivalent: 'a')
     end
 
     fontMenu = createMenu('Font') do
-      addItemWithTitle('Show Fonts', action: 'orderFrontFontPanel:', keyEquivalent: 't') 
-      addItemWithTitle('Bold', action: 'addFontTrait:', keyEquivalent: 'b') 
-      addItemWithTitle('Italic', action: 'addFontTrait:', keyEquivalent: 'b') 
-      addItemWithTitle('Underline', action: 'underline:', keyEquivalent: 'u') 
+      addItemWithTitle('Show Fonts', action: 'orderFrontFontPanel:', keyEquivalent: 't')
+      addItemWithTitle('Bold', action: 'addFontTrait:', keyEquivalent: 'b')
+      addItemWithTitle('Italic', action: 'addFontTrait:', keyEquivalent: 'b')
+      addItemWithTitle('Underline', action: 'underline:', keyEquivalent: 'u')
       addItem(NSMenuItem.separatorItem)
-      addItemWithTitle('Bigger', action: 'modifyFont:', keyEquivalent: '+') 
-      addItemWithTitle('Smaller', action: 'modifyFont:', keyEquivalent: '-') 
+      addItemWithTitle('Bigger', action: 'modifyFont:', keyEquivalent: '+')
+      addItemWithTitle('Smaller', action: 'modifyFont:', keyEquivalent: '-')
     end
 
     textMenu = createMenu('Text') do
-      addItemWithTitle('Align Left', action: 'alignLeft:', keyEquivalent: '{') 
-      addItemWithTitle('Center', action: 'alignCenter:', keyEquivalent: '|') 
-      addItemWithTitle('Justify', action: 'alignJustified:', keyEquivalent: '') 
-      addItemWithTitle('Align Right', action: 'alignRight:', keyEquivalent: '}') 
+      addItemWithTitle('Align Left', action: 'alignLeft:', keyEquivalent: '{')
+      addItemWithTitle('Center', action: 'alignCenter:', keyEquivalent: '|')
+      addItemWithTitle('Justify', action: 'alignJustified:', keyEquivalent: '')
+      addItemWithTitle('Align Right', action: 'alignRight:', keyEquivalent: '}')
       addItem(NSMenuItem.separatorItem)
-      addItemWithTitle('Show Ruler', action: 'toggleRuler:', keyEquivalent: '') 
-      addItemWithTitle('Copy Ruler', action: 'copyRuler:', keyEquivalent: 'c') 
-      addItemWithTitle('Paste Ruler', action: 'pasteRuler:', keyEquivalent: 'v') 
+      addItemWithTitle('Show Ruler', action: 'toggleRuler:', keyEquivalent: '')
+      addItemWithTitle('Copy Ruler', action: 'copyRuler:', keyEquivalent: 'c')
+      addItemWithTitle('Paste Ruler', action: 'pasteRuler:', keyEquivalent: 'v')
     end
 
     addMenu('Format') do
