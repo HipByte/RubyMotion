@@ -1157,6 +1157,13 @@ main(int argc, char **argv)
 	[osx_task setEnvironment:appEnvironment];
 	[osx_task setLaunchPath:app_path];
 	[osx_task launch];
+
+	// move to the foreground.
+	usleep(0.1 * 1000000);
+	ProcessSerialNumber psn;
+	GetProcessForPID([osx_task processIdentifier], &psn);
+	SetFrontProcess(&psn);
+
 	[osx_task waitUntilExit];
     }
     else {
