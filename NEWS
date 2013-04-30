@@ -27,6 +27,8 @@
   * Fixed a bug in build system where it would cause "stack level too deep".
   * Fixed a bug in detecting file dependencies which cannot detect dependency
     when declare class/module with like "class XXX::YYY".
+  * Fixed a bug in Struct where creating a struct with more than 10 fields
+    was not possible. We moved the limit to 100 fields.
 
 = RubyMotion 1.35 =
 
