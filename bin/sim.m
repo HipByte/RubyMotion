@@ -33,8 +33,8 @@ static int debug_mode = -1;
 #define DEBUG_NOTHING 0
 
 static Delegate *delegate = nil;
-static NSTask *gdb_task = nil;
 #if defined(SIMULATOR_IOS)
+static NSTask *gdb_task = nil;
 static id current_session = nil;
 static BOOL debugger_killed_session = NO;
 static NSString *xcode_path = nil;
@@ -468,9 +468,6 @@ receive_string(void)
 	if (len > 0) {
 	    buf[len] = '\0';
 	    [res appendString:[NSString stringWithUTF8String:buf]];
-	    if (len < sizeof buf) {
-		break;
-	    }
 	}
 	else {
 	    if ([res length] == 0) {
