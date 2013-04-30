@@ -94,6 +94,8 @@ terminate_session(void)
 	assert(current_session != nil);
 	((void (*)(id, SEL, double))objc_msgSend)(current_session,
 	    @selector(requestEndWithTimeout:), 0.0);
+#else
+	save_repl_history();
 #endif
 	terminated = true;
     }
@@ -124,6 +126,21 @@ sigcleanup(int sig)
     }
     exit(1);
 }
+
+#if defined(SIMULATOR_OSX)
+
+static NSTask *osx_task = nil;
+
+static void
+sigint_osx(int sig)
+{
+    if (osx_task != nil) {
+	kill([osx_task processIdentifier], sig);
+    }
+    sigcleanup(sig);
+}
+
+#endif
 
 @implementation Delegate
 
@@ -1129,17 +1146,18 @@ main(int argc, char **argv)
 #else // !SIMULATOR_IOS
 
     if (debug_mode != DEBUG_GDB) {
+	signal(SIGINT, sigint_osx);
 	signal(SIGPIPE, sigcleanup);
 
 	delegate = [[Delegate alloc] init];
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
 	    toTarget:delegate withObject:nil];
 
-	NSTask *task = [[NSTask alloc] init];
-	[task setEnvironment:appEnvironment];
-	[task setLaunchPath:app_path];
-	[task launch];
-	[task waitUntilExit];
+	osx_task = [[NSTask alloc] init];
+	[osx_task setEnvironment:appEnvironment];
+	[osx_task setLaunchPath:app_path];
+	[osx_task launch];
+	[osx_task waitUntilExit];
     }
     else {
 	// Run the gdb process.
