@@ -29,6 +29,8 @@
     when declare class/module with like "class XXX::YYY".
   * Fixed a bug in Struct where creating a struct with more than 10 fields
     was not possible. We moved the limit to 100 fields.
+  * Fixed a bug in the REPL where it would get corrupted when receiving too
+    much input from the evaluator (ex. when using auto-completion).
 
 = RubyMotion 1.35 =
 
