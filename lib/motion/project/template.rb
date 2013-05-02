@@ -28,21 +28,29 @@ module Motion; module Project
     # for ERB
     attr_reader :name
 
+    Paths = [
+      File.expand_path(File.join(__FILE__, '../template')),
+      File.expand_path(File.join(ENV['HOME'], 'Library/RubyMotion/template'))
+    ]
+
     def initialize(app_name, template_name)
       @name = @app_name = app_name
       @template_name = template_name.to_s
-      @template_directory = File.expand_path(File.join(__FILE__, "../template/#{@template_name}"))
+
+      @template_directory = Paths.map { |x| File.join(x, @template_name) }.find { |x| File.exist?(x) }
+      unless @template_directory
+        $stderr.puts "Cannot find template `#{@template_name}' in #{Paths.join(' or ')}"
+        exit 1
+      end
 
       unless app_name.match(/^[\w\s-]+$/)
-        fail "Invalid app name"
+        $stderr.puts "Invalid app name"
+        exit 1
       end
 
       if File.exist?(app_name)
-        fail "Directory `#{app_name}' already exists"
-      end
-
-      unless File.exist?(@template_directory)
-        fail "Invalid template name"
+        $stderr.puts "Directory `#{app_name}' already exists"
+        exit 1
       end
     end
 
