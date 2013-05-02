@@ -636,6 +636,14 @@ PLIST
         args
       end
 
+      def on_assign(const, *args)
+        type, name, position = const
+        if type == :@const
+          @defined << name
+        end
+        []
+      end
+
       def on_module(const, *args)
         type, name, position = const
         if type == :@const
