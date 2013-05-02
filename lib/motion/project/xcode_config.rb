@@ -232,13 +232,11 @@ EOS
     end
 
     def cflags(platform, cplusplus)
-      "#{common_flags(platform)} -fexceptions -fblocks -fobjc-legacy-dispatch -fobjc-abi-version=2" + (cplusplus ? '' : ' -std=c99')
+      "#{common_flags(platform)} -fexceptions -fblocks" + (cplusplus ? '' : ' -std=c99')
     end
 
     def ldflags(platform)
-      ldflags = common_flags(platform)
-      ldflags << " -fobjc-arc" if deployment_target < '5.0'
-      ldflags
+      common_flags(platform)
     end
 
     def bundle_name

@@ -49,8 +49,6 @@ module Motion; module Project;
       App.fail "Can't locate compilers for platform `#{platform}'"
     end
 
-    def archs; { 'MacOSX' => ['x86_64'] }; end
-
     def common_flags(platform)
       super + " -mmacosx-version-min=#{deployment_target}"
     end
