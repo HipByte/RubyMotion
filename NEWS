@@ -2,7 +2,7 @@
 
   * Added OSX development support. Use `motion create --template=osx' to create
     an OSX project. Use `rake -T' inside to see the available tasks.
-    RubyMotion OSX Apps are built for both i386 and x86_64 architectures and
+    RubyMotion OSX apps are built for both i386 and x86_64 architectures and
     can support OSX v10.7 and v10.8 as deployment targets.
   * Added a RubyMotion gem project template. Use `motion create --template=gem'
     to create one and check `rake -T' inside to see the available tasks.
