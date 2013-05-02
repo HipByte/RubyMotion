@@ -1,10 +1,14 @@
 = RubyMotion 1.36 =
 
-  * Added OSX development! Use `motion create --template=osx' to create an OSX
+  * Added OSX development. Use `motion create --template=osx' to create an OSX
     project. Use `rake -T' inside to see the available tasks.
+  * Added a gem template. Use `motion create --template=gem' to create a
+    RubyMotion gem project and use `rake -T' inside to see the tasks.
   * Added project templates support (see `motion create --template=xxx).
     Templates can be created by users as plugins. RubyMotion comes with 3
     templates by default: ios, osx and gem.
+  * Deprecated `motion/project', existing iOS projects should now require
+    `motion/project/template/ios' instead. We preserve compatibility for now.
   * Added the `motion account' command to open the license account page.
   * Improved the detection of file dependencies to handle absolute paths.
     Thanks to Clay Allsopp for the patch (pull request #82).
@@ -18,57 +22,64 @@
     `drawMapRect:zoomScale:inContext:' method in a MKOverlayView subclass.
   * Improve `rake spec' to display an error message if there are no spec files
     in the `spec' project directory.
-  * Fixed a bug where set a constant which it will not raise an exception if it
-    contains Fixnum in namaspec.
-  * Fixed a bug where Module#include? will not raise an exception if receiver
-    is not module.
-  * Fixed a bug where `return' on a yield block that uses `ensure' would not
+  * Fixed a bug where trying to set a constant inside another constant that is
+    not a Module object would not raise an exception (ex. `A=42; A::B=42').
+  * Fixed a bug where Module#include? would not be raising an exception if the
+    receiver was not a Module object.
+  * Fixed a bug where `return' on a yielded block that used `ensure' would not
     work.
-  * Fixed a bug where `catch' and `throw' would not work on iOS device.
-  * Fixed a bug where it would cause a crash when use a Cocos2D's variadic
-    method.
-  * Fixed a bug where it will cause a memory leak when an object-creating
-    expression is passed to initializers.
-  * Fixed a bug in build system where it would cause "stack level too deep".
-  * Fixed a bug in detecting file dependencies which cannot detect dependency
-    when declare class/module with like "class XXX::YYY".
+  * Fixed a bug where `catch' and `throw' would not work on an iOS device.
+  * Fixed a bug where a crash would happen when using a variadic method from
+    the Cocos2D framework.
+  * Fixed a bug where a memory leak would happen when creating an object and
+    passing an arbitrary expression to the initializer method.
+  * Fixed a bug in build system where a "stack level too deep" exception could
+    happen.
+  * Fixed a bug when detecting file dependencies where classes or modules
+    defined using the `XXX:YYY: syntax could not be properly parsed.
   * Fixed a bug in Struct where creating a struct with more than 10 fields
     was not possible. We moved the limit to 100 fields.
   * Fixed a bug in the REPL where it would get corrupted when receiving too
     much input from the evaluator (ex. when using auto-completion).
-  * Fixed a bug where compile error would be caused when handled a bridgesupprt
-    which has very large field.
+  * Fixed a bug where a compilation error would happen when parsing a
+    BridgeSupport structure that included a very large field.
+  * RubyMotion is one year old! Thanks everyone for your support.
+
+       |\      _,,,---,,_
+       /,`.-'`'    -.  ;-;;,_
+      |,4-  ) )-,_..;\ (  `'-'
+     '---''(_/--'  `-'\_)  
 
 = RubyMotion 1.35 =
 
-  * Added support for string constants defined in 3rd-party header files
-    using the macro system (ex. #define MyConstant @"SomeValue").
-  * Added the `no_start' option to `rake device debug=1' to let the user
-    attach a custom debugger. This is for the RubyMine integration. 
-  * Fixed a bug in the REPL where the history could not be saved if it contained
+  * Added support for string constants defined in 3rd-party header files using
+    the macro system (ex. #define MyConstant @"SomeValue").
+  * Added the `no_start' option to `rake device debug=1' to let the user attach
+    a custom debugger. This is for the RubyMine integration. 
+  * Fixed a bug in the REPL where the history could not be saved if it included
     UTF-8 characters.
-  * Fixed a caching bug in Object#respond_to? which could return true for a method
-    that did not exist.
+  * Fixed a caching bug in Object#respond_to? which could return true for a
+    method that did not exist.
   * Fixed a bug in REPL where an error message was often printed after using the
     `quit' or `exit' command.
   * Fixed a bug where the AVPlayer#currentTime method caused a `{?=qiIq}@:' not
     precompiled' error.
-  * Improved `rake spec' error messages to include more details. Thanks to Steven Webb
-    for the patch (pull request #68).
-  * Improved `rake spec files=...' to make the `_spec' suffix optional. Thanks to
-    Dave Lee for the patch (pull request #71).
+  * Improved `rake spec' error messages to include more details. Thanks to
+    Steven Webb for the patch (pull request #68).
+  * Improved `rake spec files=...' to make the `_spec' suffix optional. Thanks
+    to Dave Lee for the patch (pull request #71).
   * Fixed a bug where using the AudioQueueBuffer structure would cause a crash.
   * Added the `:force_load' option for the `app.vendor_project' Rakefile method.
-    This flag has a default value of `true' and can be set of `false' when vendoring
-    3rd-party libraries that include duplicated symbols.
+    This flag has a default value of `true' and can be set of `false' when
+    vendoring 3rd-party libraries that include duplicated symbols.
   * Added the Dir#to_path method for CRuby compatibility.
   * Fixed a bug where calling #alias on a new method would cause a crash.
-  * Fixed a bug where defining a method with #define_method on a module then messaging
-    the method would cause a crash.
-  * Fixed a bug where 'rake device debug=1' would cause a crash if the project name
-    included UTF-8 characters.
-  * Fixed a bug in the build system where framework dependencies would not properly
-    be loaded.
+  * Fixed a bug where defining a method with #define_method on a module then
+    messaging the method would cause a crash.
+  * Fixed a bug where 'rake device debug=1' would cause a crash if the project
+    name included UTF-8 characters.
+  * Fixed a bug in the build system where framework dependencies would not
+    properly be loaded.
   * Fixed a rare bug in the `super' dispatcher.
 
 = RubyMotion 1.34 =
