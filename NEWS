@@ -39,7 +39,7 @@
   * Fixed a bug in build system where a "stack level too deep" exception could
     happen.
   * Fixed a bug when detecting file dependencies where classes or modules
-    defined using the `XXX:YYY: syntax could not be properly parsed.
+    defined using the `XXX::YYY' syntax could not be properly parsed.
   * Fixed a bug in Struct where creating a struct with more than 10 fields
     was not possible. We moved the limit to 100 fields.
   * Fixed a bug in the REPL where it would get corrupted when receiving too
