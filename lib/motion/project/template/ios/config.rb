@@ -60,6 +60,16 @@ module Motion; module Project;
       super + " -miphoneos-version-min=#{deployment_target}"
     end
 
+    def cflags(platform, cplusplus)
+      super + " -fobjc-legacy-dispatch -fobjc-abi-version=2"
+    end
+
+    def ldflags(platform)
+      ldflags = super
+      ldflags << " -fobjc-arc" if deployment_target < '5.0'
+      ldflags
+    end
+
     def device_family_int(family)
       case family
         when :iphone then 1
