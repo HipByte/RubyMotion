@@ -167,7 +167,7 @@ EOS
           if File.exist?(framework_path)
             `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
               # Only care about public, non-umbrella frameworks (for now).
-              if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(.+)$/) and md[1] == md[2]
+              if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(Versions\/.\/)?(.+)$/) and md[1] == md[3]
                 deps << md[1]
                 deps.uniq!
               end
