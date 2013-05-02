@@ -1,12 +1,15 @@
 = RubyMotion 1.36 =
 
-  * Added OSX development. Use `motion create --template=osx' to create an OSX
-    project. Use `rake -T' inside to see the available tasks.
-  * Added a gem template. Use `motion create --template=gem' to create a
-    RubyMotion gem project and use `rake -T' inside to see the tasks.
-  * Added project templates support (see `motion create --template=xxx).
-    Templates can be created by users as plugins. RubyMotion comes with 3
-    templates by default: ios, osx and gem.
+  * Added OSX development support. Use `motion create --template=osx' to create
+    an OSX project. Use `rake -T' inside to see the available tasks.
+    RubyMotion OSX Apps are built for both i386 and x86_64 architectures and
+    can support OSX v10.7 and v10.8 as deployment targets.
+  * Added a RubyMotion gem project template. Use `motion create --template=gem'
+    to create one and check `rake -T' inside to see the available tasks.
+  * Added project templates support (usage: `motion create --template=xxx').
+    RubyMotion comes with 3 templates: `ios' (default), `osx' and `gem'.
+    3rd-party project templates can be created inside the
+    `~/Library/RubyMotion/template' directory.
   * Deprecated `motion/project', existing iOS projects should now require
     `motion/project/template/ios' instead. We preserve compatibility for now.
   * Added the `motion account' command to open the license account page.
