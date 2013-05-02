@@ -1,16 +1,23 @@
 = RubyMotion 1.36 =
 
-  * Improved detecting file dependencies to accept absolute paths. Thanks to
-    Clay Allsopp for the patch (pull request #82).
-  * Improved the build system by changing the build directory for outside files
-    of project to reduce compilation time.
-  * Fixed a bug where it causes a crash when use a method which is defined by
-    defind_method, and its method is contained in extended module or inherited
-    class which included a module.
-  * Fixed a bug where it will cause a crash when add a 'drawMapRect:zoomScale:inContext:'
-    into inherited MKOverlayView class
-  * Improve `rake spec' to display error message if it does not exist spec
-    files in project's spec directory
+  * Added OSX development! Use `motion create --template=osx' to create an OSX
+    project. Use `rake -T' inside to see the available tasks.
+  * Added project templates support (see `motion create --template=xxx).
+    Templates can be created by users as plugins. RubyMotion comes with 3
+    templates by default: ios, osx and gem.
+  * Added the `motion account' command to open the license account page.
+  * Improved the detection of file dependencies to handle absolute paths.
+    Thanks to Clay Allsopp for the patch (pull request #82).
+  * Improved the build system by using a separate build directory for source
+    files that resides outside of the project (ex. gems) in order to reduce
+    the compilation time.
+  * Fixed a bug where a crash would happen when calling a method defined using
+    #define_method that was contained in an extended module or in an inherited
+    class that includes a module.
+  * Fixed a bug where a crash would happen when trying to override the
+    `drawMapRect:zoomScale:inContext:' method in a MKOverlayView subclass.
+  * Improve `rake spec' to display an error message if there are no spec files
+    in the `spec' project directory.
   * Fixed a bug where set a constant which it will not raise an exception if it
     contains Fixnum in namaspec.
   * Fixed a bug where Module#include? will not raise an exception if receiver
@@ -18,8 +25,6 @@
   * Fixed a bug where `return' on a yield block that uses `ensure' would not
     work.
   * Fixed a bug where `catch' and `throw' would not work on iOS device.
-  * Added the `motion account' command to open the license account page.
-  * Added the `motion create <gem name> --template=gem' for RubyMotion gem.
   * Fixed a bug where it would cause a crash when use a Cocos2D's variadic
     method.
   * Fixed a bug where it will cause a memory leak when an object-creating
