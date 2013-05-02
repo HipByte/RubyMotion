@@ -31,6 +31,8 @@
     was not possible. We moved the limit to 100 fields.
   * Fixed a bug in the REPL where it would get corrupted when receiving too
     much input from the evaluator (ex. when using auto-completion).
+  * Fixed a bug where compile error would be caused when handled a bridgesupprt
+    which has very large field.
 
 = RubyMotion 1.35 =
 
