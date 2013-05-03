@@ -14,6 +14,12 @@
     projects should now require `motion/project/template/ios' instead. We
     preserve compatibility for now but please do migrate.
   * Added the `motion account' command to open the license account page.
+  * Added the `WeakRef' class to create weak references. Usage is
+    `WeakRef.new(obj)' and follows CRuby's WeakRef stdlib class. Passed
+    references will not be retained. Use with caution as sending a message
+    to a WeakRef object whose reference has been prematurely collected will
+    cause a runtime crash. The `WeakRef' class will be replaced by a no-op
+    once the runtime is able to deal with cyclic references.
   * Improved the detection of file dependencies to handle absolute paths.
     Thanks to Clay Allsopp for the patch (pull request #82).
   * Improved the build system by using a separate build directory for source
@@ -49,10 +55,10 @@
     BridgeSupport structure that included a very large field.
   * RubyMotion is one year old! Thanks all for your support.
 
-       |\      _,,,---,,_
-       /,`.-'`'    -.  ;-;;,_
-      |,4-  ) )-,_..;\ (  `'-'
-     '---''(_/--'  `-'\_)  
+                          |\      _,,,---,,_
+                          /,`.-'`'    -.  ;-;;,_
+                         |,4-  ) )-,_..;\ (  `'-'
+                        '---''(_/--'  `-'\_)  
 
 = RubyMotion 1.35 =
 
