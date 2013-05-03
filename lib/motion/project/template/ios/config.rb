@@ -208,6 +208,10 @@ module Motion; module Project;
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
 
+    def supported_sdk_versions(versions)
+      versions.reverse.find { |vers| File.exist?(datadir(vers)) }
+    end
+
     def main_cpp_file_txt(spec_objs)
       main_txt = <<EOS
 #import <UIKit/UIKit.h>
