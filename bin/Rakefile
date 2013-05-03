@@ -3,9 +3,13 @@ verbose(true)
 task :default => :all
 task :all => [:files, :deploy, :sim]
 
+STRIP = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip"
+
 task :files do
   install '../vm/miniruby', 'ruby'
   install '/usr/local/bin/llc', 'llc'  
+  sh "#{STRIP} -x ruby"
+  sh "#{STRIP} -x llc"
 end
 
 task :deploy do
@@ -13,7 +17,7 @@ task :deploy do
   bin = 'ios/deploy'
   if !File.exist?(bin) or File.mtime('deploy.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
     sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 deploy.m -o \"#{bin}\" -framework Foundation -I."
-    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -x \"#{bin}\""
+    sh "#{STRIP} -x \"#{bin}\""
   end
 end
 
@@ -24,7 +28,7 @@ task :sim do
     if !File.exist?(bin) or File.mtime('sim.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
       define = "-DSIMULATOR_#{template.upcase}"
       sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{define} -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 sim.m -o \"#{bin}\" -framework Foundation -framework ApplicationServices -L. -ledit -Wl,-rpath,/usr/lib -I."
-      sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip -x \"#{bin}\""
+    sh "#{STRIP} -x \"#{bin}\""
     end
   end
 end
