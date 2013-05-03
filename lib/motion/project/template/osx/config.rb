@@ -72,6 +72,23 @@ module Motion; module Project;
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
  
+    def supported_sdk_versions(versions)
+      osx_version = `sw_vers -productVersion`.strip
+      versions.reverse.find { |vers|
+        compare_version(osx_version, vers) >= 0 && File.exist?(datadir(vers)) }
+    end
+
+    def compare_version(version1, version2)
+      v1 = version1.match(/(\d+)\.(\d+)/)
+      v2 = version2.match(/(\d+)\.(\d+)/)
+      return -1 if v1[1] < v2[1]
+      return  1 if v1[1] > v2[1]
+
+      return  0 if v1[2] == v2[2]
+      return -1 if v1[2] < v2[2]
+      return  1
+    end
+
     def main_cpp_file_txt(spec_objs)
       main_txt = <<EOS
 #import <AppKit/AppKit.h>

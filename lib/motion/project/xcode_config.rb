@@ -139,7 +139,7 @@ EOS
         if versions.size == 0
           App.fail "Can't find an iOS SDK in `#{platforms_dir}'"
         end
-        supported_vers = versions.reverse.find { |vers| File.exist?(datadir(vers)) }
+        supported_vers = supported_sdk_versions(versions)
         unless supported_vers
           App.fail "RubyMotion doesn't support any of these SDK versions: #{versions.join(', ')}"
         end
