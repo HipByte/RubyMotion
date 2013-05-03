@@ -6,12 +6,13 @@
     can support OSX v10.7 and v10.8 as deployment targets.
   * Added a RubyMotion gem project template. Use `motion create --template=gem'
     to create one and check `rake -T' inside to see the available tasks.
-  * Added project templates support (usage: `motion create --template=xxx').
+  * Added project templates system (usage: `motion create --template=xxx').
     RubyMotion comes with 3 templates: `ios' (default), `osx' and `gem'.
     3rd-party project templates can be created inside the
     `~/Library/RubyMotion/template' directory.
-  * Deprecated `motion/project', existing iOS projects should now require
-    `motion/project/template/ios' instead. We preserve compatibility for now.
+  * Deprecated `require "motion/project"' in project Rakefiles. Existing iOS
+    projects should now require `motion/project/template/ios' instead. We
+    preserve compatibility for now but please do migrate.
   * Added the `motion account' command to open the license account page.
   * Improved the detection of file dependencies to handle absolute paths.
     Thanks to Clay Allsopp for the patch (pull request #82).
@@ -46,7 +47,7 @@
     much input from the evaluator (ex. when using auto-completion).
   * Fixed a bug where a compilation error would happen when parsing a
     BridgeSupport structure that included a very large field.
-  * RubyMotion is one year old! Thanks everyone for your support.
+  * RubyMotion is one year old! Thanks all for your support.
 
        |\      _,,,---,,_
        /,`.-'`'    -.  ;-;;,_
