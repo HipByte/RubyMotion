@@ -33,13 +33,26 @@ module Motion; module Project
       File.expand_path(File.join(ENV['HOME'], 'Library/RubyMotion/template'))
     ]
 
+    def self.all_templates
+      @all_templates ||= begin
+        h = {}
+        Paths.map { |path| Dir.glob(path + '/*') }.flatten.select { |x| !x.match(/^\./) and File.directory?(x) }.each do |template_path|
+          h[File.basename(template_path)] = template_path
+        end
+        h
+      end
+    end
+
+    Templates = Paths.map { |path| Dir.glob(path + '/*') }.flatten.select { |x| !x.match(/^\./) and File.directory?(x) }.map { |x| File.basename(x) }
+
     def initialize(app_name, template_name)
       @name = @app_name = app_name
       @template_name = template_name.to_s
 
-      @template_directory = Paths.map { |x| File.join(x, @template_name) }.find { |x| File.exist?(x) }
+      @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
         $stderr.puts "Cannot find template `#{@template_name}' in #{Paths.join(' or ')}"
+        $stderr.puts "Available templates: " + self.class.all_templates.keys.join(', ')
         exit 1
       end
 
