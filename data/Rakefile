@@ -62,6 +62,16 @@ def apply_bridgesupport_fixes(bs)
   File.open(bs, 'w') { |io| io.write(txt) }
 end
 
+def merge_bridgesupport(base_bridgesupport, merge_brigesupport)
+  return unless base_bridgesupport && merge_brigesupport
+  base = File.read(base_bridgesupport)
+  merge = File.read(merge_brigesupport)
+  File.open(base_bridgesupport, "w") { |io|
+    io.print base.lines.to_a[0..-2].join  # skip last "</signatures>" in base
+    io.print merge.lines.to_a[2..-1].join # skip first "<?xml version='1.0'?>\n<signatures version='1.0'>" in merge
+  }
+end
+
 EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit']
 task :bridgesupport_files do
   platform_dev_path = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
@@ -69,21 +79,35 @@ task :bridgesupport_files do
     sdk_path = "#{platform_dev_path}/SDKs/MacOSX#{sdk_version}.sdk"
     sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
     mkdir_p "osx/#{sdk_version}/BridgeSupport"
+    mkdir_p "osx/#{sdk_version}/BridgeSupport/child"
 
     Dir.glob('*.bridgesupport').each { |bs| cp bs, "osx/#{sdk_version}/BridgeSupport" }
     Dir.glob('osx/*.bridgesupport').each { |bs| cp bs, "osx/#{sdk_version}/BridgeSupport" }
 
-    Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
+    generate_bridgesupport_file = lambda do |sdk_path, sdk_version, framework_path, is_handle_nested|
       framework = File.basename(framework_path, '.framework')
-      next if EXCLUDED_FRAMEWORKS.include?(framework)
-      next unless File.exist?(File.join(framework_path, framework))
-      next unless File.exist?(File.join(framework_path, 'Headers'))
+      break if EXCLUDED_FRAMEWORKS.include?(framework)
+      break unless File.exist?(File.join(framework_path, framework))
+      break unless File.exist?(File.join(framework_path, 'Headers'))
       dest = "osx/#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
+      dest = "osx/#{sdk_version}/BridgeSupport/child/#{framework}.bridgesupport" if is_handle_nested
       unless File.exist?(dest)
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
         sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
-        sh "/usr/bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -mmacosx-version-min=#{sdk_version} -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework}\" --framework #{sdk_frameworks}/#{framework}.framework > #{dest}"
+        sh "/usr/bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -mmacosx-version-min=#{sdk_version} -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework}\" --framework #{framework_path} > #{dest}"
         apply_bridgesupport_fixes(dest)
+        return dest
+      end
+      return dest if is_handle_nested
+    end
+
+    Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
+      base_bridgesupport_path = generate_bridgesupport_file.call(sdk_path, sdk_version, framework_path, false)
+      if base_bridgesupport_path
+        Dir.glob(File.join(framework_path, '/Frameworks/*.framework')).each do |child_framework_path|
+          merge_path = generate_bridgesupport_file.call(sdk_path, sdk_version, child_framework_path, true)
+          merge_bridgesupport(base_bridgesupport_path, merge_path)
+        end
       end
     end
   end
