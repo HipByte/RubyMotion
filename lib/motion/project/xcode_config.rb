@@ -361,13 +361,14 @@ EOS
       end
     end
 
-    def gen_bridge_metadata(headers, bs_file)
+    def gen_bridge_metadata(headers, bs_file, c_flags, exceptions)
       sdk_path = self.sdk(local_platform)
       includes = headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
+      exceptions = exceptions.map { |x| "\"#{x}\"" }.join(' ')
       a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
       sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
       extra_flags = OSX_VERSION >= 10.7 ? '--no-64-bit' : ''
-      sh "RUBYOPT='' /usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\""
+      sh "RUBYOPT='' /usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \" #{c_flags} -isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\" #{ "-e #{exceptions}" unless exceptions.nil?}"
     end
 
     def define_global_env_txt
