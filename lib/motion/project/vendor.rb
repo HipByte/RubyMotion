@@ -78,13 +78,13 @@ module Motion; module Project;
             File.open(pch, 'w') do |io|
               case platform
                 when "MacOSX"
-                  header = <<EOS
+                  header =<<EOS
 #ifdef __OBJC__
 #  import <Cocoa/Cocoa.h>
 #endif
 EOS
                 when /^iPhone/
-                  header = <<EOS
+                  header =<<EOS
 #ifdef __OBJC__
 #  import <UIKit/UIKit.h>
 #endif
