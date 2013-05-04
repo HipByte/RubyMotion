@@ -76,11 +76,23 @@ module Motion; module Project;
           unless File.exist?(pch)
             FileUtils.mkdir_p File.dirname(pch)
             File.open(pch, 'w') do |io|
-              io.puts <<EOS
+              case platform
+                when "MacOSX"
+                  header = <<EOS
+#ifdef __OBJC__
+#  import <Cocoa/Cocoa.h>
+#endif
+EOS
+                when /^iPhone/
+                  header = <<EOS
 #ifdef __OBJC__
 #  import <UIKit/UIKit.h>
 #endif
 EOS
+                else
+                  App.fail "Unknown platform : #{platform}"
+              end
+              io.puts header
             end
           end
 
