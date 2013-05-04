@@ -81,11 +81,13 @@ module Motion; module Project;
     def compare_version(version1, version2)
       v1 = version1.match(/(\d+)\.(\d+)/)
       v2 = version2.match(/(\d+)\.(\d+)/)
-      return -1 if v1[1] < v2[1]
-      return  1 if v1[1] > v2[1]
+      ver1 = v1[1].to_i; ver2 = v2[1].to_i
+      return -1 if ver1 < ver2
+      return  1 if ver1 > ver2
 
-      return  0 if v1[2] == v2[2]
-      return -1 if v1[2] < v2[2]
+      ver1 = v1[2].to_i; ver2 = v2[2].to_i
+      return  0 if ver1 == ver2
+      return -1 if ver1 < ver2
       return  1
     end
 
