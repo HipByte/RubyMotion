@@ -30,8 +30,13 @@ module Motion; module Project
       if args.size <= 0
         die "Usage: motion ri <API-name>"
       end
-  
-      system("/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc #{args[0]}")
+ 
+      line = "/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc "
+      if pager = ENV['PAGER']
+        line << "-p #{pager} "
+      end
+      line << "#{args[0]}"
+      system(line)
     end
   end
 end; end
