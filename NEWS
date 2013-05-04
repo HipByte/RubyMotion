@@ -10,6 +10,10 @@
     RubyMotion comes with 3 templates: `ios' (default), `osx' and `gem'.
     3rd-party project templates can be created inside the
     `~/Library/RubyMotion/template' directory.
+  * Added command-line plugin system, which lets developers extend the
+    `/usr/bin/motion' command-line tool with new commands. Existing builtin
+    commands have been extracted as plugins and 3rd-party plugins can be
+    created inside the `~/Library/RubyMotion/command' directory.
   * Deprecated `require "motion/project"' in project Rakefiles. Existing iOS
     projects should now require `motion/project/template/ios' instead. We
     preserve compatibility for now but please do migrate.
