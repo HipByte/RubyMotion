@@ -4,16 +4,16 @@
     an OSX project. Use `rake -T' inside to see the available tasks.
     RubyMotion OSX apps are built for both i386 and x86_64 architectures and
     can support OSX v10.7 and v10.8 as deployment targets.
+  * Added command-line plugin system, which lets developers extend the
+    `/usr/bin/motion' command-line tool with new commands (ex. `motion foo').
+    Builtin commands have been extracted as plugins and 3rd-party plugins can
+    be created inside the `~/Library/RubyMotion/command' directory.
   * Added a RubyMotion gem project template. Use `motion create --template=gem'
     to create one and check `rake -T' inside to see the available tasks.
   * Added project templates system (usage: `motion create --template=xxx').
     RubyMotion comes with 3 templates: `ios' (default), `osx' and `gem'.
     3rd-party project templates can be created inside the
     `~/Library/RubyMotion/template' directory.
-  * Added command-line plugin system, which lets developers extend the
-    `/usr/bin/motion' command-line tool with new commands. Existing builtin
-    commands have been extracted as plugins and 3rd-party plugins can be
-    created inside the `~/Library/RubyMotion/command' directory.
   * Deprecated `require "motion/project"' in project Rakefiles. Existing iOS
     projects should now require `motion/project/template/ios' instead. We
     preserve compatibility for now but please do migrate.
@@ -51,8 +51,11 @@
     happen.
   * Fixed a bug when detecting file dependencies where classes or modules
     defined using the `XXX::YYY' syntax could not be properly parsed.
-  * Fixed a bug in Struct where creating a struct with more than 10 fields
-    was not possible. We moved the limit to 100 fields.
+  * Fixed a limitation in Struct where creating a struct with more than 10
+    fields was not possible. We moved the limit to 100 fields.
+  * Fixed a limitation in the dispatcher where dynamically sending a message
+    or yielding a block with more than 10 arguments was not possible. We moved
+    the limit to 100 arguments.
   * Fixed a bug in the REPL where it would get corrupted when receiving too
     much input from the evaluator (ex. when using auto-completion).
   * Fixed a bug where a compilation error would happen when parsing a
