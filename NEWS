@@ -60,6 +60,7 @@
     much input from the evaluator (ex. when using auto-completion).
   * Fixed a bug where a compilation error would happen when parsing a
     BridgeSupport structure that included a very large field.
+  * Improved the `motion ri' command to honor the $PAGER environment variable.
   * RubyMotion is one year old! Thanks all for your support.
 
                           |\      _,,,---,,_
