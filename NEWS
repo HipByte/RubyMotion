@@ -61,6 +61,9 @@
   * Fixed a bug where a compilation error would happen when parsing a
     BridgeSupport structure that included a very large field.
   * Improved the `motion ri' command to honor the $PAGER environment variable.
+  * Improved the `app.vendor_project' method to honor the :bridgesupport_cflags
+    and :bridgesupport_exceptions options, which will be appropriately passed
+    to the BridgeSupport generator. Thanks to Juan Karam for the patch.
   * RubyMotion is one year old! Thanks all for your support.
 
                           |\      _,,,---,,_
