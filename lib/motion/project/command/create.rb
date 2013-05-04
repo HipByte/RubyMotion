@@ -22,15 +22,18 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/app'
+require 'motion/project/template'
 
 module Motion; module Project
   class CreateCommand < Command
     self.name = 'create'
     self.help = 'Create a new project'
-  
+ 
+    DefaultTemplate = 'ios'
+ 
     def run(args)
       app_name = nil
-      template_name = 'ios'
+      template_name = DefaultTemplate
       args.each do |a|
         case a
           when /--([^=]+)=(.+)/
@@ -53,7 +56,9 @@ module Motion; module Project
       end
   
       unless app_name
-        die "Usage: motion create [--template=<template_name>] <app-name>"
+        $stderr.puts "Usage: motion create [--template=<template_name>] <app-name>"
+        $stderr.puts "Available templates: " + Motion::Project::Template.all_templates.keys.map { |x| x == DefaultTemplate ? "#{x} (default)" : x }.join(', ')
+        exit 1
       end
   
       Motion::Project::App.create(app_name, template_name)
