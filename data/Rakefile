@@ -194,7 +194,10 @@ task :bridgesupport_static_stubs do
       unless File.exist?(code)
         text = generate_bs_static_stub(bs_path, includes)
         next unless text
-        File.open(code, 'w') { |io| io.write(text) }
+        File.open(code, 'w') { |io|
+          io.puts '#pragma GCC diagnostic ignored "-Wdeprecated-declarations"'
+          io.write(text)
+        }
       end
 
       obj = "osx/#{sdk_version}/MacOSX/#{framework}_stubs.o"
