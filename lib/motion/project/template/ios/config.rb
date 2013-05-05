@@ -28,7 +28,7 @@ module Motion; module Project;
     register :ios
 
     variable :device_family, :interface_orientations, :background_modes,
-      :status_bar_style
+      :status_bar_style, :icons, :prerendered_icon, :fonts
 
     def initialize(project_dir, build_mode)
       super
@@ -37,11 +37,22 @@ module Motion; module Project;
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @background_modes = []
       @status_bar_style = :default
+      @icons = []
+      @prerendered_icon = false
     end
 
     def platforms; ['iPhoneSimulator', 'iPhoneOS']; end
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
+
+    def validate
+      # icons
+      if !(icons.is_a?(Array) and icons.all? { |x| x.is_a?(String) })
+        App.fail "app.icons should be an array of strings."
+      end
+
+      super
+    end
 
     def locate_compiler(platform, *execs)
       paths = [File.join(platform_dir(platform), 'Developer/usr/bin')]
@@ -162,6 +173,20 @@ module Motion; module Project;
 
     def app_resources_dir(platform)
       app_bundle(platform)
+    end
+
+    def fonts
+      @fonts ||= begin
+        resources_dirs.flatten.inject([]) do |fonts, dir|
+          if File.exist?(dir)
+            Dir.chdir(dir) do
+              fonts.concat(Dir.glob('*.{otf,ttf}'))
+            end
+          else
+            fonts
+          end
+        end
+      end
     end
 
     def info_plist_data

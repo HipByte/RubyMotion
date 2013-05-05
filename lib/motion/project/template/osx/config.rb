@@ -29,11 +29,12 @@ module Motion; module Project;
   class OSXConfig < XcodeConfig
     register :osx
 
-    variable :copyright
+    variable :icon, :copyright
 
     def initialize(project_dir, build_mode)
       super
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
+      @icon = ''
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
     end
 
@@ -68,7 +69,8 @@ module Motion; module Project;
     def info_plist_data
       Motion::PropertyList.to_s({
         'NSHumanReadableCopyright' => copyright,
-        'NSPrincipalClass' => 'NSApplication'
+        'NSPrincipalClass' => 'NSApplication',
+        'CFBundleIconFile' => (icon or '')
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
  
