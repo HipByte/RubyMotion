@@ -26,8 +26,7 @@ module Motion; module Project;
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
       :weak_frameworks, :framework_search_paths, :libs, :resources_dirs,
       :identifier, :codesign_certificate, :provisioning_profile,
-      :short_version, :icons, :prerendered_icon, :seed_id, :entitlements,
-      :fonts, :delegate_class
+      :short_version, :seed_id, :entitlements, :delegate_class
 
     def initialize(project_dir, build_mode)
       super
@@ -39,8 +38,6 @@ module Motion; module Project;
       @libs = []
       @bundle_signature = '????'
       @short_version = '1'
-      @icons = []
-      @prerendered_icon = false
       @vendor_projects = []
       @entitlements = {}
       @delegate_class = 'AppDelegate'
@@ -113,11 +110,6 @@ EOS
       end
       unless File.exist?(datadir)
         App.fail "iOS deployment target #{deployment_target} is not supported by this version of RubyMotion"
-      end
-
-      # icons
-      if !(icons.is_a?(Array) and icons.all? { |x| x.is_a?(String) })
-        App.fail "app.icons should be an array of strings."
       end
 
       super
@@ -345,20 +337,6 @@ EOS
         dict['get-task-allow'] = true if dict['get-task-allow'].nil?
       end
       Motion::PropertyList.to_s(dict)
-    end
-
-    def fonts
-      @fonts ||= begin
-        resources_dirs.flatten.inject([]) do |fonts, dir|
-          if File.exist?(dir)
-            Dir.chdir(dir) do
-              fonts.concat(Dir.glob('*.{otf,ttf}'))
-            end
-          else
-            fonts
-          end
-        end
-      end
     end
 
     def gen_bridge_metadata(headers, bs_file, c_flags, exceptions)
