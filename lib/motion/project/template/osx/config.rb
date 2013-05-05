@@ -115,7 +115,7 @@ main(int argc, char **argv)
         #{define_global_env_txt}
         NSApplication *app = [NSApplication sharedApplication];
         [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
-        [app run];
+        NSApplicationMain(argc, (const char **)argv);
         rb_exit(0);
 #if !__LP64__
     }
