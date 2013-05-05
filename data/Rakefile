@@ -105,9 +105,16 @@ task :bridgesupport_files do
       base_bridgesupport_path = generate_bridgesupport_file.call(sdk_path, sdk_version, framework_path, false)
       if base_bridgesupport_path
         child_framework_paths = Dir.glob(File.join(framework_path, '/Frameworks/*.framework'))
-        child_framework_paths.delete_if { |x| x.include?("CoreGraphics") }
+        child_framework_paths.delete_if { |x| x.include?("CoreGraphics") } if sdk_version != "10.7"
         child_framework_paths.each do |child_framework_path|
-          merge_path = generate_bridgesupport_file.call(sdk_path, sdk_version, child_framework_path, true)
+          if sdk_version == "10.7" && child_framework_path.include?("CoreGraphics")
+            dest = 'osx/10.7/BridgeSupport/child/CoreGraphics.bridgesupport'
+            sh "/usr/bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -F#{sdk_path}/System/Library/Frameworks/ApplicationServices.framework/Frameworks -mmacosx-version-min=10.7 -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=100700 -framework ApplicationServices\" --framework #{child_framework_path} > #{dest}"
+            apply_bridgesupport_fixes(dest)
+            merge_path = dest
+          else
+            merge_path = generate_bridgesupport_file.call(sdk_path, sdk_version, child_framework_path, true)
+          end
           merge_bridgesupport(base_bridgesupport_path, merge_path)
         end
       end
