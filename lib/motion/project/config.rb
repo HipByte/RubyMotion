@@ -248,7 +248,12 @@ module Motion; module Project
     def spec_core_files
       @spec_core_files ||= begin
         # Core library + core helpers.
-        Dir.chdir(File.join(File.dirname(__FILE__), '..')) { (['spec.rb'] + Dir.glob(File.join('spec', 'helpers', '*.rb'))).map { |x| File.expand_path(x) } }
+        Dir.chdir(File.join(File.dirname(__FILE__), '..')) do
+          (['spec.rb'] +
+          Dir.glob(File.join('spec', 'helpers', '*.rb')) +
+          Dir.glob(File.join('project', 'template', App.template.to_s, 'spec-helpers', '*.rb'))).
+            map { |x| File.expand_path(x) }
+        end
       end
     end
 
