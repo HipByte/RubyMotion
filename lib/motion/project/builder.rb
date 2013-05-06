@@ -68,13 +68,16 @@ module Motion; module Project;
       project_files = Dir.glob("**/*.rb").map{ |x| File.expand_path(x) }
       is_default_archs = (archs == config.default_archs[platform])
 
+      if !File.directory?(Builder.common_build_dir) or !File.writable?(Builder.common_build_dir)
+        $stderr.puts "Cannot write into the `#{Builder.common_build_dir}' directory, please remove or check permissions and try again."
+        exit 1
+      end
+
       build_file = Proc.new do |files_build_dir, path|
         rpath = path
         path = File.expand_path(path)
         if is_default_archs && !project_files.include?(path)
-          if File.writable?(Builder.common_build_dir)
-            files_build_dir = File.expand_path(File.join(Builder.common_build_dir, files_build_dir))
-          end
+          files_build_dir = File.expand_path(File.join(Builder.common_build_dir, files_build_dir))
         end
         obj = File.join(files_build_dir, "#{path}.o")
         should_rebuild = (!File.exist?(obj) \
