@@ -32,4 +32,14 @@ describe "WeakRef" do
   it "cannot be subclassed" do
     lambda { class Foo < WeakRef; end }.should.raise(RuntimeError)
   end
+
+  it "are destroyed like regular objects" do
+    $weakref_destroyed = false
+    autorelease_pool do
+      obj = Object.new
+      ref = WeakRef.new(obj)
+      ObjectSpace.define_finalizer(ref, proc { $weakref_destroyed = true })
+    end
+    $weakref_destroyed.should == true
+  end
 end
