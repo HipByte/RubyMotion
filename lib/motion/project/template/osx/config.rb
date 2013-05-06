@@ -102,8 +102,42 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
+EOS
+      if spec_mode
+        spec_objs.each do |_, init_func|
+          main_txt << "void #{init_func}(void *, void *);\n"
+        end
+      end
+      main_txt << <<EOS
+}
+EOS
+      if spec_mode
+        main_txt << <<EOS
+@interface SpecLauncher : NSObject
+@end
+
+@implementation SpecLauncher
+
+- (void)runSpecs
+{
+EOS
+        spec_objs.each do |_, init_func|
+          main_txt << "#{init_func}(self, 0);\n"
+        end
+        main_txt << <<EOS
+        [NSClassFromString(@\"Bacon\") performSelector:@selector(run)];
 }
 
+- (void)appLaunched:(NSNotification *)notification
+{
+    [self runSpecs];
+}
+
+@end
+EOS
+      end
+
+      main_txt << <<EOS
 int
 main(int argc, char **argv)
 {
@@ -115,6 +149,12 @@ main(int argc, char **argv)
         #{define_global_env_txt}
         NSApplication *app = [NSApplication sharedApplication];
         [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
+EOS
+      if spec_mode
+        main_txt << "SpecLauncher *specLauncher = [[SpecLauncher alloc] init];\n"
+        main_txt << "[[NSNotificationCenter defaultCenter] addObserver:specLauncher selector:@selector(appLaunched:) name:NSApplicationDidFinishLaunchingNotification object:nil];\n"
+      end
+      main_txt << <<EOS
         NSApplicationMain(argc, (const char **)argv);
         rb_exit(0);
 #if !__LP64__

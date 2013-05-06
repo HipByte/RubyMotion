@@ -49,3 +49,9 @@ task :run => 'build' do
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
   sh "#{env} #{sim} #{debug} #{target} \"#{exec}\""
 end
+
+desc "Run the test/spec suite"
+task :spec do
+  App.config.spec_mode = true
+  Rake::Task["run"].invoke
+end
