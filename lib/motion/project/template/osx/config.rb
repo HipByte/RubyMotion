@@ -42,6 +42,18 @@ module Motion; module Project;
     def local_platform; 'MacOSX'; end
     def deploy_platform; 'MacOSX'; end
 
+    def archs
+      archs = super
+      if development? 
+        # We only build for the native architecture in development mode, to speed up builds.
+        native_arch = `/usr/bin/uname -m`.strip
+        if archs['MacOSX'].include?(native_arch)
+          archs['MacOSX'] = [native_arch] 
+        end
+      end
+      archs
+    end
+
     def locate_compiler(platform, *execs)
       execs.each do |exec|
         cc = File.join('/usr/bin', exec)
