@@ -1,9 +1,11 @@
 = RubyMotion 1.36 =
 
   * Added OSX development support. Use `motion create --template=osx' to create
-    an OSX project. Use `rake -T' inside to see the available tasks.
-    RubyMotion OSX apps are built for both i386 and x86_64 architectures and
-    can support OSX v10.7 and v10.8 as deployment targets.
+    an OSX project. Use `rake -T' inside to see the available tasks and
+    `rake config' to see the application config variables. RubyMotion OSX apps
+    are built for both i386 and x86_64 architectures and can support OSX v10.7
+    and v10.8 as deployment targets. Check out the HipByte/RubyMotionSamples
+    repository on GitHub for sample code and the devcenter for documentation.
   * Added command-line plugin system, which lets developers extend the
     `/usr/bin/motion' command-line tool with new commands (ex. `motion foo').
     Builtin commands have been extracted as plugins and 3rd-party plugins can
