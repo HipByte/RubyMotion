@@ -72,7 +72,9 @@ module Motion; module Project;
         rpath = path
         path = File.expand_path(path)
         if is_default_archs && !project_files.include?(path)
-          files_build_dir = File.expand_path(File.join(Builder.common_build_dir, files_build_dir))
+          if File.writable?(Builder.common_build_dir)
+            files_build_dir = File.expand_path(File.join(Builder.common_build_dir, files_build_dir))
+          end
         end
         obj = File.join(files_build_dir, "#{path}.o")
         should_rebuild = (!File.exist?(obj) \
@@ -531,7 +533,10 @@ PLIST
       def common_build_dir
         dir = File.expand_path("~/Library/RubyMotion/build")
         unless File.exist?(dir)
-          FileUtils.mkdir_p dir
+          begin
+            FileUtils.mkdir_p dir
+          rescue
+          end
         end
         dir
       end
