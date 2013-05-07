@@ -104,6 +104,7 @@ task :bridgesupport_files do
     Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
       base_bridgesupport_path = generate_bridgesupport_file.call(sdk_path, sdk_version, framework_path, false)
       if base_bridgesupport_path
+        next if base_bridgesupport_path.include?("Carbon.bridgesupport")
         child_framework_paths = Dir.glob(File.join(framework_path, '/Frameworks/*.framework'))
         child_framework_paths.delete_if { |x| x.include?("CoreGraphics") } if sdk_version != "10.7"
         child_framework_paths.each do |child_framework_path|
