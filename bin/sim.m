@@ -292,10 +292,11 @@ locate_app_windows_bounds(void)
         if (window_pid != [osx_task processIdentifier]) {
 	    continue;
 	}
-	if ([[dict objectForKey:@"kCGWindowName"] isEqualToString:@"__HIGHLIGHT_OVERLAY__"]) {
+	if ([[dict objectForKey:@"kCGWindowName"]
+		isEqualToString:@"__HIGHLIGHT_OVERLAY__"]) {
 	    continue;
 	}
-NSLog(@"found %@", dict);
+//NSLog(@"found %@", dict);
 #endif
 
 	id bounds_dict = [dict objectForKey:@"kCGWindowBounds"];
@@ -318,9 +319,52 @@ NSLog(@"found %@", dict);
 
 #undef validate
 	bounds_ok = true;
-	break; // TODO keep looping for more windows
+
+#if defined(SIMULATOR_IOS)
+	// Inset the main view frame.
+	if (device_family == DEVICE_FAMILY_IPHONE) {
+	    switch (simulator_retina_type) {
+		case DEVICE_RETINA_4:
+		    bounds.origin.y += 25;
+		    bounds.size.height -= 50;
+		    break;
+
+		case DEVICE_RETINA_3_5:
+		    bounds.origin.y += 25;
+		    bounds.size.height -= 50;
+		    break;
+
+		default:
+		    if (bounds.size.width < bounds.size.height) {
+			bounds.origin.x += 30;
+			bounds.size.width -= 60;
+			bounds.origin.y += 120;
+			bounds.size.height -= 240;
+		    }
+		    else {
+			bounds.origin.x += 120;
+			bounds.size.width -= 240;
+			bounds.origin.y += 30;
+			bounds.size.height -= 60;
+		    }
+	    }
+	}
+	else {
+	    bounds.origin.y += 25;
+	    bounds.size.height -= 50;
+	}
+#endif
+
+	[app_windows_bounds addObject:[NSValue valueWithRect:bounds]];
+
+#if defined(SIMULATOR_IOS)
+	// On iOS there is only one app window (the simulator).
+	break;
+#endif
     }
+
     CFRelease(windows);
+
     if (!bounds_ok) {
 #if defined(SIMULATOR_IOS)
 	static bool error_printed = false;
@@ -330,45 +374,7 @@ NSLog(@"found %@", dict);
 	    error_printed = true;
 	}
 #endif
-	return;
     }
-
-#if defined(SIMULATOR_IOS)
-    // Inset the main view frame.
-    if (device_family == DEVICE_FAMILY_IPHONE) {
-	switch (simulator_retina_type) {
-	    case DEVICE_RETINA_4:
-		bounds.origin.y += 25;
-		bounds.size.height -= 50;
-		break;
-
-	    case DEVICE_RETINA_3_5:
-		bounds.origin.y += 25;
-		bounds.size.height -= 50;
-		break;
-
-	    default:
-		if (bounds.size.width < bounds.size.height) {
-		    bounds.origin.x += 30;
-		    bounds.size.width -= 60;
-		    bounds.origin.y += 120;
-		    bounds.size.height -= 240;
-		}
-		else {
-		    bounds.origin.x += 120;
-		    bounds.size.width -= 240;
-		    bounds.origin.y += 30;
-		    bounds.size.height -= 60;
-		}
-	}
-    }
-    else {
-	bounds.origin.y += 25;
-	bounds.size.height -= 50;
-    }
-#endif
-
-    [app_windows_bounds addObject:[NSValue valueWithRect:bounds]];
 }
 
 #define CONCURRENT_BEGIN dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
