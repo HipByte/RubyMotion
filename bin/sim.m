@@ -33,12 +33,12 @@ static int debug_mode = -1;
 #define DEBUG_NOTHING 0
 
 static Delegate *delegate = nil;
+static NSMutableArray *app_windows_bounds = nil;
 #if defined(SIMULATOR_IOS)
 static NSTask *gdb_task = nil;
 static id current_session = nil;
 static BOOL debugger_killed_session = NO;
 static NSString *xcode_path = nil;
-static NSRect simulator_app_bounds = { {0, 0}, {0, 0} };
 static int simulator_retina_type = DEVICE_RETINA_FALSE;
 #endif
 static NSString *sdk_version = nil;
@@ -207,7 +207,6 @@ rl_set_prompt(const char *prompt)
 }
 #endif
 
-#if defined(SIMULATOR_IOS)
 static void
 refresh_repl_prompt(NSString *top_level, bool clear)
 {
@@ -226,17 +225,21 @@ refresh_repl_prompt(NSString *top_level, bool clear)
 }
 
 static void
-locate_simulator_app_bounds(void)
+locate_app_windows_bounds(void)
 {
-    if (!CGRectEqualToRect(simulator_app_bounds, CGRectZero)) {
+    if (app_windows_bounds != nil) {
 	return;
-    }	
+    }
+
+    app_windows_bounds = [[NSMutableArray alloc] init];
 
     CFArrayRef windows = CGWindowListCopyWindowInfo(kCGWindowListOptionAll,
 	    kCGNullWindowID);
     NSRect bounds = NSZeroRect;
     bool bounds_ok = false;
+#if defined(SIMULATOR_IOS)
     int device_family = DEVICE_FAMILY_IPHONE;
+#endif
     for (NSDictionary *dict in (NSArray *)windows) {
 #define validate(obj, klass) \
     if (obj == nil || ![obj isKindOfClass:[klass class]]) { \
@@ -245,6 +248,7 @@ locate_simulator_app_bounds(void)
 	id name = [dict objectForKey:@"kCGWindowName"];
 	validate(name, NSString);
 
+#if defined(SIMULATOR_IOS)
 	static NSArray *patterns = nil;
 	if (patterns == nil) {
 	    patterns = [[NSArray alloc] initWithObjects:
@@ -283,6 +287,16 @@ locate_simulator_app_bounds(void)
 	if ([name rangeOfString:@"iPad"].location != NSNotFound) {
 	    device_family = DEVICE_FAMILY_IPAD;
 	}
+#else // !SIMULATOR_IOS
+	int window_pid = [[dict objectForKey:@"kCGWindowOwnerPID"] intValue];
+        if (window_pid != [osx_task processIdentifier]) {
+	    continue;
+	}
+	if ([[dict objectForKey:@"kCGWindowName"] isEqualToString:@"__HIGHLIGHT_OVERLAY__"]) {
+	    continue;
+	}
+NSLog(@"found %@", dict);
+#endif
 
 	id bounds_dict = [dict objectForKey:@"kCGWindowBounds"];
 	validate(bounds_dict, NSDictionary);
@@ -304,19 +318,22 @@ locate_simulator_app_bounds(void)
 
 #undef validate
 	bounds_ok = true;
-	break;
+	break; // TODO keep looping for more windows
     }
     CFRelease(windows);
     if (!bounds_ok) {
+#if defined(SIMULATOR_IOS)
 	static bool error_printed = false;
 	if (!error_printed) {
 	    fprintf(stderr,
 		    "Cannot locate the Simulator app, mouse over disabled\n");
 	    error_printed = true;
 	}
+#endif
 	return;
     }
 
+#if defined(SIMULATOR_IOS)
     // Inset the main view frame.
     if (device_family == DEVICE_FAMILY_IPHONE) {
 	switch (simulator_retina_type) {
@@ -349,7 +366,9 @@ locate_simulator_app_bounds(void)
 	bounds.origin.y += 25;
 	bounds.size.height -= 50;
     }
-    simulator_app_bounds = bounds;
+#endif
+
+    [app_windows_bounds addObject:[NSValue valueWithRect:bounds]];
 }
 
 #define CONCURRENT_BEGIN dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -372,7 +391,7 @@ CONCURRENT_BEGIN
 CONCURRENT_END
 	if (type == kCGEventLeftMouseDown) {
 	    // Reset the simulator app bounds as it may have moved.
-	    simulator_app_bounds = CGRectZero;
+	    app_windows_bounds = nil;
 	}
 	return event;
     }
@@ -381,17 +400,32 @@ CONCURRENT_END
     const bool capture = type == kCGEventLeftMouseDown;
 
 CONCURRENT_BEGIN
-    locate_simulator_app_bounds();
+    locate_app_windows_bounds();
     NSString *res = @"nil";
-    if (NSPointInRect(mouseLocation, simulator_app_bounds)) {
+
+    bool mouseInBounds = false;
+    NSRect bounds = { {0, 0}, {0, 0} };
+    if (app_windows_bounds != nil) {
+	for (NSValue *val in app_windows_bounds) {
+	    bounds = [val rectValue];
+	    if (NSPointInRect(mouseLocation, bounds)) {
+		mouseInBounds = true;
+		break;
+	    }
+	}
+    }
+
+    if (mouseInBounds) {
 	// We are over the Simulator.app main view.
 	// Inset the mouse location.
-	mouseLocation.x -= simulator_app_bounds.origin.x;
-	mouseLocation.y -= simulator_app_bounds.origin.y;
+	mouseLocation.x -= bounds.origin.x;
+	mouseLocation.y -= bounds.origin.y;
+#if defined(SIMULATOR_IOS)
 	if (simulator_retina_type) {
 	    mouseLocation.x /= 2.0f;
 	    mouseLocation.y /= 2.0f;
 	}
+#endif
 
 	// Send coordinate to the repl.
 	previousHighlight = true;
@@ -438,7 +472,6 @@ start_capture(id delegate)
     CFRunLoopAddSource(CFRunLoopGetCurrent(), eventTapRLSrc,
 	    kCFRunLoopDefaultMode);
 }
-#endif
 
 static bool
 send_string(NSString *string)
@@ -1164,6 +1197,7 @@ main(int argc, char **argv)
 	GetProcessForPID([osx_task processIdentifier], &psn);
 	SetFrontProcess(&psn);
 
+	start_capture(delegate);
 	[osx_task waitUntilExit];
     }
     else {
