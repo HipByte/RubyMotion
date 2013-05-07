@@ -25,8 +25,8 @@ module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
       :weak_frameworks, :framework_search_paths, :libs, :resources_dirs,
-      :identifier, :codesign_certificate, :provisioning_profile,
-      :short_version, :seed_id, :entitlements, :delegate_class
+      :identifier, :codesign_certificate, :short_version, :entitlements,
+      :delegate_class
 
     def initialize(project_dir, build_mode)
       super
@@ -239,8 +239,12 @@ EOS
       File.join(versionized_build_dir(platform), bundle_name + '.dSYM')
     end
 
+    def archive_extension
+      raise "not implemented"
+    end
+
     def archive
-      File.join(versionized_build_dir(deploy_platform), bundle_name + '.ipa')
+      File.join(versionized_build_dir(deploy_platform), bundle_name + archive_extension)
     end
 
     def identifier
@@ -276,67 +280,17 @@ EOS
       "AAPL#{@bundle_signature}"
     end
 
-    def codesign_certificate
+    def codesign_certificate(platform)
       @codesign_certificate ||= begin
         cert_type = (distribution_mode ? 'Distribution' : 'Developer')
-        certs = `/usr/bin/security -q find-certificate -a`.scan(/"iPhone #{cert_type}: [^"]+"/).uniq
+        certs = `/usr/bin/security -q find-certificate -a`.scan(/"#{platform} #{cert_type}: [^"]+"/).uniq
         if certs.size == 0
-          App.fail "Can't find an iPhone Developer certificate in the keychain"
+          App.fail "Cannot find any #{platform} #{cert_type} certificate in the keychain"
         elsif certs.size > 1
-          App.warn "Found #{certs.size} iPhone Developer certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
+          App.warn "Found #{certs.size} #{platform} #{cert_type} certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
         end
         certs[0][1..-2] # trim trailing `"` characters
       end 
-    end
-
-    def provisioning_profile(name = /iOS Team Provisioning Profile/)
-      @provisioning_profile ||= begin
-        paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
-          text = File.read(path)
-          text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
-          text.scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0].match(name)
-        end
-        if paths.size == 0
-          App.fail "Can't find a provisioning profile named `#{name}'"
-        elsif paths.size > 1
-          App.warn "Found #{paths.size} provisioning profiles named `#{name}'. Set the `provisioning_profile' project setting. Will use the first one: `#{paths[0]}'"
-        end
-        paths[0]
-      end
-    end
-
-    def read_provisioned_profile_array(key)
-      text = File.read(provisioning_profile)
-      text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
-      text.scan(/<key>\s*#{key}\s*<\/key>\s*<array>(.*?)\s*<\/array>/m)[0][0].scan(/<string>(.*?)<\/string>/).map { |str| str[0].strip }
-    end
-    private :read_provisioned_profile_array
-
-    def provisioned_devices
-      @provisioned_devices ||= read_provisioned_profile_array('ProvisionedDevices')
-    end
-
-    def seed_id
-      @seed_id ||= begin
-        seed_ids = read_provisioned_profile_array('ApplicationIdentifierPrefix')
-        if seed_ids.size == 0
-          App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
-        elsif seed_ids.size > 1
-          App.warn "Found #{seed_ids.size} seed IDs in the provisioning profile. Set the `seed_id' project setting. Will use the last one: `#{seed_ids.last}'"
-        end
-        seed_ids.last
-      end
-    end
-
-    def entitlements_data
-      dict = entitlements
-      if distribution_mode
-        dict['application-identifier'] ||= seed_id + '.' + identifier
-      else
-        # Required for gdb.
-        dict['get-task-allow'] = true if dict['get-task-allow'].nil?
-      end
-      Motion::PropertyList.to_s(dict)
     end
 
     def gen_bridge_metadata(headers, bs_file, c_flags, exceptions=[])

@@ -62,12 +62,24 @@ module Motion; module Project;
       App.fail "Can't locate compilers for platform `#{platform}'"
     end
 
+    def archive_extension
+      '.pkg'
+    end
+
+    def codesign_certificate
+      super('Mac')
+    end
+
     def common_flags(platform)
       super + " -mmacosx-version-min=#{deployment_target}"
     end
 
+    def app_bundle_raw(platform)
+      File.join(versionized_build_dir(platform), bundle_name + '.app')
+    end
+
     def app_bundle(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app', 'Contents')
+      File.join(app_bundle_raw(platform), 'Contents')
     end
 
     def app_bundle_executable(platform)

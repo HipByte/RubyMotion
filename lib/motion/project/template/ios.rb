@@ -28,6 +28,7 @@ App.template = :ios
 
 require 'motion/project'
 require 'motion/project/template/ios/config'
+require 'motion/project/template/ios/builder'
 
 desc "Build the project, then run the simulator"
 task :default => :simulator
@@ -102,8 +103,7 @@ namespace :archive do
   task :distribution do
     App.config_without_setup.build_mode = :release
     App.config.distribution_mode = true
-    Rake::Task["build:device"].invoke
-    App.archive
+    Rake::Task["archive"].invoke
   end
 end
 
