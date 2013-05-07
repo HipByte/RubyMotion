@@ -28,17 +28,26 @@ App.template = :osx
 
 require 'motion/project'
 require 'motion/project/template/osx/config'
+require 'motion/project/template/osx/builder'
 
 desc "Build the project, then run it"
 task :default => :run
 
-desc "Build the project"
-task :build do
-  App.build('MacOSX')
+namespace :build do
+  desc "Build the project for development"
+  task :development do
+    App.build('MacOSX')
+  end
+
+  desc "Build the project for release"
+  task :release do
+    App.config_without_setup.build_mode = :release
+    App.build('MacOSX')
+  end
 end
 
 desc "Run the project"
-task :run => 'build' do
+task :run => 'build:development' do
   exec = App.config.app_bundle_executable('MacOSX')
   env = ''
   env << 'SIM_SPEC_MODE=1' if App.config.spec_mode
@@ -54,4 +63,18 @@ desc "Run the test/spec suite"
 task :spec do
   App.config.spec_mode = true
   Rake::Task["run"].invoke
+end
+
+desc "Create a .pkg archive"
+task :archive => 'build:release' do
+  App.codesign('MacOSX')
+  App.archive
+end
+
+namespace :archive do
+  desc "Create a .pkg archive for distribution (AppStore)"
+  task :distribution do
+    App.config.distribution_mode = true
+    Rake::Task['archive'].invoke
+  end
 end

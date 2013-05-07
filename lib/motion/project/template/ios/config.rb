@@ -28,7 +28,8 @@ module Motion; module Project;
     register :ios
 
     variable :device_family, :interface_orientations, :background_modes,
-      :status_bar_style, :icons, :prerendered_icon, :fonts
+      :status_bar_style, :icons, :prerendered_icon, :fonts, :seed_id,
+      :provisioning_profile
 
     def initialize(project_dir, build_mode)
       super
@@ -65,6 +66,64 @@ module Motion; module Project;
         end
       end
       App.fail "Can't locate compilers for platform `#{platform}'"
+    end
+
+    def archive_extension
+      '.ipa'
+    end
+
+    def codesign_certificate
+      super('iPhone')
+    end
+
+    def provisioning_profile(name = /iOS Team Provisioning Profile/)
+      @provisioning_profile ||= begin
+        paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
+          text = File.read(path)
+          text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+          text.scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0].match(name)
+        end
+        if paths.size == 0
+          App.fail "Can't find a provisioning profile named `#{name}'"
+        elsif paths.size > 1
+          App.warn "Found #{paths.size} provisioning profiles named `#{name}'. Set the `provisioning_profile' project setting. Will use the first one: `#{paths[0]}'"
+        end
+        paths[0]
+      end
+    end
+
+    def read_provisioned_profile_array(key)
+      text = File.read(provisioning_profile)
+      text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+      text.scan(/<key>\s*#{key}\s*<\/key>\s*<array>(.*?)\s*<\/array>/m)[0][0].scan(/<string>(.*?)<\/string>/).map { |str| str[0].strip }
+    end
+    private :read_provisioned_profile_array
+
+    def provisioned_devices
+      @provisioned_devices ||= read_provisioned_profile_array('ProvisionedDevices')
+    end
+
+    def seed_id
+      @seed_id ||= begin
+        seed_ids = read_provisioned_profile_array('ApplicationIdentifierPrefix')
+        if seed_ids.size == 0
+          App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
+        elsif seed_ids.size > 1
+          App.warn "Found #{seed_ids.size} seed IDs in the provisioning profile. Set the `seed_id' project setting. Will use the last one: `#{seed_ids.last}'"
+        end
+        seed_ids.last
+      end
+    end
+
+    def entitlements_data
+      dict = entitlements
+      if distribution_mode
+        dict['application-identifier'] ||= seed_id + '.' + identifier
+      else
+        # Required for gdb.
+        dict['get-task-allow'] = true if dict['get-task-allow'].nil?
+      end
+      Motion::PropertyList.to_s(dict)
     end
 
     def common_flags(platform)
