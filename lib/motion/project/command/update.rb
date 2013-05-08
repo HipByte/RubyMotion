@@ -50,18 +50,32 @@ module Motion; module Project
         end
       end
   
+      license_key = read_license_key
       product_version = Motion::Version
+
       if check_mode
         update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
         if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
-          resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" http://secure.rubymotion.com/latest_software_version")
+          resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/latest_software_version")
           exit 1 unless resp.match(/^\d+\.\d+/)
           File.open(update_check_file, 'w') { |io| io.write(resp) }
         end
-        exit File.read(update_check_file) > product_version ? 2 : 0
+
+        latest_version, message = File.read(update_check_file).split('|', 2)
+        message ||= ''
+        if latest_version > product_version
+          message = "A new version of RubyMotion is available. Run `sudo motion update' to upgrade.\n" + message
+        end
+        message.strip!
+        unless message.empty?
+          puts '=' * 80
+          puts message
+          puts '=' * 80
+          puts ''
+        end
+        exit 1
       end
   
-      license_key = read_license_key
       need_root
   
       $stderr.puts "Connecting to the server..."
