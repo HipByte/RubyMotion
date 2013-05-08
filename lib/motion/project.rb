@@ -35,13 +35,8 @@ if Motion::Project::App.template == nil
 end
 
 # Check for updates.
-system('/usr/bin/motion update --check')
-if $?.exitstatus == 2
-  puts '=' * 80
-  puts " A new version of RubyMotion is available. Run `sudo motion update' to upgrade."
-  puts '=' * 80
-  puts ''
-end
+motion_bin_path = File.join(File.dirname(__FILE__), '../../bin/motion')
+system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
 
 desc "Clear build objects"
 task :clean do
