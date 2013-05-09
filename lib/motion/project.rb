@@ -30,7 +30,7 @@ require 'motion/project/template'
 require 'motion/project/plist'
 
 if Motion::Project::App.template == nil
-  warn "require 'lib/motion/project' is deprecated, please require 'lib/motion/project/template/ios' instead"
+  warn "require 'motion/project' is deprecated, please require 'motion/project/template/ios' instead"
   require 'motion/project/template/ios'
 end
 
