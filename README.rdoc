@@ -1,7 +1,7 @@
 = RubyMotion
 
-RubyMotion is a commercial toolchain for iOS development using the Ruby
-programming language.
+RubyMotion is a commercial toolchain for iOS and OS X development using the
+Ruby programming language.
 
 This repository contains the parts of the RubyMotion product that are
 opensource. It does not contain the full product, which can be purchased at
