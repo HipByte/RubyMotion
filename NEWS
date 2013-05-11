@@ -4,6 +4,8 @@
     is used in some lines.
   * Updated require statement in gem template Rakefile. Thanks to Devon Blandin
     for the patch (pull request #88).
+  * Updated the library path to require in warning message. Thanks to Tom Milewski
+    for the patch (pull request #86).
 
 = RubyMotion 2.0 =
 
