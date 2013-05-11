@@ -2,6 +2,8 @@
 
   * Fixed a bug in Dispatch.once where it would not be called correctly if it
     is used in some lines.
+  * Updated require statement in gem template Rakefile. Thanks to Devon Blandin
+    for the patch (pull request #88).
 
 = RubyMotion 2.0 =
 
