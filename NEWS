@@ -1,3 +1,5 @@
+= RubyMotion 2.1 =
+
 = RubyMotion 2.0 =
 
   * Added OSX development support. Use `motion create --template=osx' to create
