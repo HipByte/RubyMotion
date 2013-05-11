@@ -1,5 +1,8 @@
 = RubyMotion 2.1 =
 
+  * Fixed a bug in Dispatch.once where it would not be called correctly if it
+    is used in some lines.
+
 = RubyMotion 2.0 =
 
   * Added OSX development support. Use `motion create --template=osx' to create
