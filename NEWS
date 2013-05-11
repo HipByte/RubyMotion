@@ -1,4 +1,4 @@
-= RubyMotion 1.36 =
+= RubyMotion 2.0 =
 
   * Added OSX development support. Use `motion create --template=osx' to create
     an OSX project. Use `rake -T' inside to see the available tasks and
