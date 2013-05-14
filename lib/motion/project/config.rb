@@ -205,7 +205,7 @@ module Motion; module Project
 
     def files_dependencies(deps_hash)
       res_path = lambda do |x|
-        path = /^\.?\//.match(x) ? x : File.join('.', x)
+        path = /^\.{0,2}\//.match(x) ? x : File.join('.', x)
         unless @files.flatten.include?(path)
           App.fail "Can't resolve dependency `#{path}'"
         end
