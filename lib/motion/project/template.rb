@@ -49,6 +49,8 @@ module Motion; module Project
       @name = @app_name = app_name
       @template_name = template_name.to_s
 
+      handle_git if @template_name.is_git?
+
       @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
         $stderr.puts "Cannot find template `#{@template_name}' in #{Paths.join(' or ')}"
@@ -114,6 +116,17 @@ module Motion; module Project
     def replace_file_name(file_name)
       file_name = file_name.sub("{name}", "#{@name}")
       file_name
+    end
+
+    def handle_git
+      puts "Handling git"
+    end
+  end
+
+  class String
+    def is_git?
+      puts "Checking for git"
+      false
     end
   end
 end; end
