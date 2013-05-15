@@ -9,6 +9,8 @@
   * Fixed a bug in `app.files_dependencies' where it would not allow the path
     which contains "../" (ex app.files_dependencies 'foo.rb' => '../bar.rb')
     Thanks to Jeremy Ruppel for the patch (pull request #90).
+  * Fixed a bug where it would not create .gitignore file when it would create
+    a new project.
 
 = RubyMotion 2.0 =
 
