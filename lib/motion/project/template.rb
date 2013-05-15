@@ -49,7 +49,7 @@ module Motion; module Project
       @name = @app_name = app_name
       @template_name = template_name.to_s
 
-      handle_git if @template_name.is_git?
+      handle_git if is_git? @template_name
 
       @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
@@ -121,12 +121,11 @@ module Motion; module Project
     def handle_git
       puts "Handling git"
     end
-  end
 
-  class String
-    def is_git?
-      puts "Checking for git"
-      false
+    def is_git? template
+      #template[0,4].downcase == "git@"
+      template.match(/git@.+:.+\.git/i)
     end
   end
+
 end; end
