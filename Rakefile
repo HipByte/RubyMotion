@@ -81,7 +81,7 @@ task :install do
     './bin/osx/sim', './bin/llc', './bin/ruby', './bin/ctags',
     'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri'])
   data = ['./NEWS']
-  data.concat(Dir.glob('./lib/**/*'))
+  data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH))
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
   [['ios', IOS_SDK_VERSIONS]].each do |name, sdk_versions|
     sdk_versions.each do |sdk_version|
@@ -111,7 +111,14 @@ task :install do
   #data.concat(Dir.glob('./doc/*.html'))
   #data.concat(Dir.glob('./doc/docset/**/*'))
   #data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
-  data.reject! { |path| /^\./.match(File.basename(path)) }
+  data.reject! { |path|
+    case File.basename(path)
+    when ".", "..", ".DS_Store"
+      true
+    else
+      false
+    end
+  }
 
   motiondir = '/Library/RubyMotion'
   destdir = (ENV['DESTDIR'] || '/')
