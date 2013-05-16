@@ -4,7 +4,8 @@
     is used in some lines.
   * Updated require statement in gem template Rakefile. Thanks to Devon Blandin
     for the patch (pull request #88).
-  * Updated the library path to require in warning message. Thanks to Tom Milewski
+  * Updated the library path to require in warning message. Thanks to Tom
+    Milewski
     for the patch (pull request #86).
   * Fixed a bug in `app.files_dependencies' where it would not allow the path
     which contains "../" (ex app.files_dependencies 'foo.rb' => '../bar.rb')
