@@ -49,7 +49,11 @@ module Motion; module Project
       @name = @app_name = app_name
       @template_name = template_name.to_s
 
-      handle_git if is_git? @template_name
+      if @git_name = find_git(@template_name)
+        App.log 'Git', "Getting template #{@git_name}"
+        handle_git
+        @template_name = @git_name
+      end
 
       @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
@@ -119,11 +123,24 @@ module Motion; module Project
     end
 
     def handle_git
-      puts "Handling git"
+      path = self.class.all_templates[@git_name]
+      # check if directory exists
+      if path
+        # directory exists just do a pull
+        App.log 'Git', "#{@git_name} exists performing a pull"
+        system("GIT_DIR=#{path}/.git git pull origin master")
+      else
+        # no directory exists so clone
+        system("git clone #{@template_name} ~/Library/RubyMotion/template/#{@git_name}")
+        #clear @all_templates cache
+        #self.instance_variable_set(:@all_templates, nil)
+        self.instance_eval('@all_templates = nil')
+      end
     end
 
-    def is_git? template
-      template.match(/git@.+:.+\.git/i)
+    def find_git template
+      # regex play http://rubular.com/r/z14JRrkqXa
+      template =~ /git@.+:.+\/(.+)\.git/i ? $1 : false
     end
   end
 
