@@ -123,7 +123,6 @@ module Motion; module Project
     end
 
     def is_git? template
-      #template[0,4].downcase == "git@"
       template.match(/git@.+:.+\.git/i)
     end
   end
