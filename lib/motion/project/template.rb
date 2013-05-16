@@ -133,8 +133,7 @@ module Motion; module Project
         # no directory exists so clone
         system("git clone #{@template_name} ~/Library/RubyMotion/template/#{@git_name}")
         #clear @all_templates cache
-        #self.instance_variable_set(:@all_templates, nil)
-        self.instance_eval('@all_templates = nil')
+        self.class.instance_variable_set(:@all_templates, nil)
       end
     end
 
