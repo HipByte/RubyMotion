@@ -48,10 +48,11 @@ module Motion; module Project
     def initialize(app_name, template_name)
       @name = @app_name = app_name
       @template_name = template_name.to_s
+      @git_name = extract_repo_name(@template_name)
 
-      if @git_name = find_git(@template_name)
-        App.log 'Git', "Getting template #{@git_name}"
-        handle_git
+      if @git_name
+        App.log 'Git', "Cloning #{@git_name} template"
+        clone_template_repository
         @template_name = @git_name
       end
 
@@ -122,7 +123,7 @@ module Motion; module Project
       file_name
     end
 
-    def handle_git
+    def clone_template_repository
       path = self.class.all_templates[@git_name]
       # check if directory exists
       if path
@@ -137,9 +138,11 @@ module Motion; module Project
       end
     end
 
-    def find_git template
-      # regex play http://rubular.com/r/z14JRrkqXa
-      template =~ /git@.+:.+\/(.+)\.git/i ? $1 : false
+    # Extract repo name from HTTP, SSH or Git URLs:
+    def extract_repo_name template
+      http_template = template =~ /\w+:\/\/.+@*[\w\d\.]+\/.+\/(.+).git/i ? $1 : false
+      git_template  = template =~ /git@.+:.+\/(.+)\.git/i ? $1 : false
+      http_template || git_template
     end
   end
 
