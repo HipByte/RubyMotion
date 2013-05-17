@@ -128,12 +128,16 @@ module Motion; module Project
       # check if directory exists
       if path
         # directory exists just do a pull
-        App.log 'Git', "#{@git_name} exists performing a pull"
+        App.log 'Git', "#{@git_name} already exists, performing a pull"
         system("GIT_DIR=#{path}/.git git pull origin master")
       else
         # no directory exists so clone
-        system("git clone #{@template_name} ~/Library/RubyMotion/template/#{@git_name}")
-        #clear @all_templates cache
+        result = system("git clone #{@template_name} ~/Library/RubyMotion/template/#{@git_name}")
+        unless result
+          App.log 'Git', "Unable to clone #{@template_name}"
+        end
+        # clear @all_templates cache, which should cause the motion command to fail 
+        # without blowing up, regardless of the clone result
         self.class.instance_variable_set(:@all_templates, nil)
       end
     end
