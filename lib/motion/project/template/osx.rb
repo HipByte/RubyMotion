@@ -52,7 +52,7 @@ task :run => 'build:development' do
   env = ''
   env << 'SIM_SPEC_MODE=1' if App.config.spec_mode
   sim = File.join(App.config.bindir, 'osx/sim')
-  debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
+  debug = ((ENV['debug'] || ENV['DEBUG']) ? 1 : (App.config.spec_mode ? '0' : '2'))
   target = App.config.sdk_version
   App.info 'Run', exec
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
