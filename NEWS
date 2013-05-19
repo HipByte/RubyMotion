@@ -12,6 +12,7 @@
   * Fixed a bug where it would not create .gitignore file when it would create
     a new project.
   * Added .gitignore file into gem template.
+  * Added the BasicObject#__id__ method for CRuby compatibility.
 
 = RubyMotion 2.0 =
 
