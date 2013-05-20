@@ -13,6 +13,8 @@
     a new project.
   * Added .gitignore file into gem template.
   * Added the BasicObject#__id__ method for CRuby compatibility.
+  * Fixed a bug in undef and Module#remove_method which it could call undefined
+    method if the method was called before removing.
 
 = RubyMotion 2.0 =
 
