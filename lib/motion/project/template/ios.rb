@@ -102,7 +102,7 @@ namespace :archive do
   desc "Create an .ipa archive for distribution (AppStore)"
   task :distribution do
     App.config_without_setup.build_mode = :release
-    App.config.distribution_mode = true
+    App.config_without_setup.distribution_mode = true
     Rake::Task["archive"].invoke
   end
 end
@@ -113,13 +113,13 @@ task :spec => ['spec:simulator']
 namespace :spec do
   desc "Run the test/spec suite on the simulator"
   task :simulator do
-    App.config.spec_mode = true
+    App.config_without_setup.spec_mode = true
     Rake::Task["simulator"].invoke
   end
 
   desc "Run the test/spec suite on the device"
   task :device do
-    App.config.spec_mode = true
+    App.config_without_setup.spec_mode = true
     ENV['debug'] ||= '1'
     Rake::Task["device"].invoke
   end

@@ -61,7 +61,7 @@ end
 
 desc "Run the test/spec suite"
 task :spec do
-  App.config.spec_mode = true
+  App.config_without_setup.spec_mode = true
   Rake::Task["run"].invoke
 end
 
@@ -74,7 +74,7 @@ end
 namespace :archive do
   desc "Create a .pkg archive for distribution (AppStore)"
   task :distribution do
-    App.config.distribution_mode = true
+    App.config_without_setup.distribution_mode = true
     Rake::Task['archive'].invoke
   end
 end
