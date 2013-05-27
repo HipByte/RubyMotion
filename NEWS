@@ -15,6 +15,8 @@
   * Added the BasicObject#__id__ method for CRuby compatibility.
   * Fixed a bug in undef and Module#remove_method which it could call undefined
     method if the method was called before removing.
+  * Fixed a bug where it would hold an object if it would call the #initXXX in
+    the #initialize of a class inherited Objective-C class.
 
 = RubyMotion 2.0 =
 
