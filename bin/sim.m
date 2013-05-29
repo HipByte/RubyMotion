@@ -1003,10 +1003,12 @@ main(int argc, char **argv)
     [[NSAutoreleasePool alloc] init];
 
 #if defined(SIMULATOR_IOS)
-    if (argc != 7) {
+# define MIN_ARGS 6
 #else
-    if (argc != 5) {
+# define MIN_ARGS 4
 #endif
+ 
+    if (argc < MIN_ARGS) {
 	usage();
     }
 
@@ -1023,7 +1025,10 @@ main(int argc, char **argv)
     NSString *app_path =
 	[NSString stringWithUTF8String:realpath(argv[argv_n++], NULL)];
 
-    NSArray *app_args = [[NSString stringWithUTF8String:argv[argv_n++]] componentsSeparatedByString:@" "];
+    NSMutableArray *app_args = [NSMutableArray new];
+    for (unsigned i = MIN_ARGS; i < argc; i++) {
+	[app_args addObject:[NSString stringWithUTF8String:argv[i]]];
+    }
 
 #if defined(SIMULATOR_IOS)
     // Load the framework.
@@ -1108,7 +1113,7 @@ main(int argc, char **argv)
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setApplicationToSimulateOnStart:), app_spec);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
-					  @selector(setSimulatedApplicationLaunchArgs:), app_args);
+	@selector(setSimulatedApplicationLaunchArgs:), app_args);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
        @selector(setSimulatedApplicationLaunchEnvironment:),
        appEnvironment);

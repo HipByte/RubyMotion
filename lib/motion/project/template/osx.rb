@@ -54,7 +54,7 @@ task :run => 'build:development' do
   sim = File.join(App.config.bindir, 'osx/sim')
   debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
   target = App.config.sdk_version
-  app_args = App.config.arguments_passed_on_launch || ""
+  app_args = App.config.sim_args.map { |x| '"' + x + '"' }
   App.info 'Run', exec
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
   sh "#{env} #{sim} #{debug} #{target} \"#{exec}\" \"#{app_args}\""
