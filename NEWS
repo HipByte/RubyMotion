@@ -22,6 +22,8 @@
     (Ex app.sim_args = "-com.apple.CoreData.SQLDebug 1")
   * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
     start in case the application name includes a space character.
+  * [OSX] Added `rake ctags' task to generate `tags' file.
+  * [OSX] Added `rake static' task to create a static .a archive file.
 
 = RubyMotion 2.0 =
 
