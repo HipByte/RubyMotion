@@ -47,7 +47,7 @@ module Motion; module Project
       end
     end
 
-    variable :name, :files, :build_dir, :specs_dir, :version, :motiondir, :arguments_passed_on_launch
+    variable :name, :files, :build_dir, :specs_dir, :version, :motiondir, :sim_args
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
@@ -80,6 +80,7 @@ module Motion; module Project
       @specs_dir = File.join(project_dir, 'spec')
       @version = '1.0'
       @detect_dependencies = true
+      @sim_args = []
     end
 
     OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
