@@ -48,9 +48,42 @@ describe "&block dvars" do
 end
 
 class DeallocTest
+  def initTest(*args)
+    init
+
+    1 + 2
+    "test"
+    self
+  end
+
   def self.test
     DeallocTest.new
   end
+  def self.test_expression
+    obj = DeallocTest.alloc
+    obj.send('init')
+  end
+  def self.test_nested_init
+    obj = DeallocTest.alloc.initTest("test")
+  end
+
+  def dealloc
+    super
+    $dealloc_test = true
+  end
+end
+
+class DeallocTest2 < UIViewController
+  def initialize(*args)
+    initWithNibName(nil, bundle:nil)
+    1 + 2
+    "test"
+  end
+
+  def self.test_nested_initialize
+    obj = DeallocTest2.new("test")
+  end
+
   def dealloc
     super
     $dealloc_test = true
@@ -58,12 +91,34 @@ class DeallocTest
 end
 
 describe "dealloc" do
-  it "can be defined and is called" do
+  before do
     $dealloc_test = false
+  end
+
+  it "can be defined and is called" do
     DeallocTest.performSelectorOnMainThread(:'test', withObject:nil, waitUntilDone:false)
     NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))
-    $dealloc_test.should == true  
+    $dealloc_test.should == true
   end
+
+  it "should work if the expression is invoked before initialized" do
+    DeallocTest.performSelectorOnMainThread(:'test_expression', withObject:nil, waitUntilDone:false)
+    NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))
+    $dealloc_test.should == true
+  end
+
+  it "should work with nested #initXXX" do
+    DeallocTest.performSelectorOnMainThread(:'test_nested_init', withObject:nil, waitUntilDone:false)
+    NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))
+    $dealloc_test.should == true
+  end
+
+  it "should work with nested initialize" do
+    DeallocTest2.performSelectorOnMainThread(:'test_nested_initialize', withObject:nil, waitUntilDone:false)
+    NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))
+    $dealloc_test.should == true
+  end
+
 end
 
 $retain_test = false
@@ -203,4 +258,3 @@ describe "NSDate" do
     1.should == 1
   end
 end
-

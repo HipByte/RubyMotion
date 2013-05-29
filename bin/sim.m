@@ -1003,9 +1003,9 @@ main(int argc, char **argv)
     [[NSAutoreleasePool alloc] init];
 
 #if defined(SIMULATOR_IOS)
-    if (argc != 6) {
+    if (argc != 7) {
 #else
-    if (argc != 4) {
+    if (argc != 5) {
 #endif
 	usage();
     }
@@ -1023,6 +1023,7 @@ main(int argc, char **argv)
     NSString *app_path =
 	[NSString stringWithUTF8String:realpath(argv[argv_n++], NULL)];
 
+    NSArray *app_args = [[NSString stringWithUTF8String:argv[argv_n++]] componentsSeparatedByString:@" "];
 
 #if defined(SIMULATOR_IOS)
     // Load the framework.
@@ -1107,7 +1108,7 @@ main(int argc, char **argv)
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setApplicationToSimulateOnStart:), app_spec);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
-	@selector(setSimulatedApplicationLaunchArgs:), [NSArray array]);
+					  @selector(setSimulatedApplicationLaunchArgs:), app_args);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
        @selector(setSimulatedApplicationLaunchEnvironment:),
        appEnvironment);
@@ -1195,6 +1196,7 @@ main(int argc, char **argv)
 	osx_task = [[NSTask alloc] init];
 	[osx_task setEnvironment:appEnvironment];
 	[osx_task setLaunchPath:app_path];
+	[osx_task setArguments:app_args];
 	[osx_task launch];
 
 	// move to the foreground.
