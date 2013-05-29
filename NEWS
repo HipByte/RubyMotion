@@ -19,7 +19,7 @@
   * Fixed a bug where it would hold an object if it would call the #initXXX in
     the #initialize of a class inherited Objective-C class.
   * Added a feature which passing the arguments on launching app.
-    (Ex app.arguments_passed_on_launch = "-com.apple.CoreData.SQLDebug 1")
+    (Ex app.sim_args = "-com.apple.CoreData.SQLDebug 1")
 
 = RubyMotion 2.0 =
 
