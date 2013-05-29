@@ -20,6 +20,8 @@
     the #initialize of a class inherited Objective-C class.
   * Added a feature which passing the arguments on launching app.
     (Ex app.sim_args = "-com.apple.CoreData.SQLDebug 1")
+  * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
+    start in case the application name includes a space character.
 
 = RubyMotion 2.0 =
 

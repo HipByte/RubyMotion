@@ -1217,7 +1217,7 @@ main(int argc, char **argv)
 	// Run the gdb process.
 	// XXX using system(3) as NSTask isn't working well (termios issue).
 	char line[1014];
-	snprintf(line, sizeof line, "/usr/bin/gdb -x \"%s\" %s",
+	snprintf(line, sizeof line, "/usr/bin/gdb -x \"%s\" \"%s\"",
 		[gdb_commands_file() fileSystemRepresentation],
 		[app_path UTF8String]);
 	system(line);
