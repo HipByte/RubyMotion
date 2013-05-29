@@ -79,3 +79,8 @@ namespace :archive do
     Rake::Task['archive'].invoke
   end
 end
+
+desc "Create a .a static library"
+task :static do
+  App.build('MacOSX', :static => true)
+end
