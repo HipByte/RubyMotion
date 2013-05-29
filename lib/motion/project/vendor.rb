@@ -170,12 +170,13 @@ EOS
           # Build project into a build directory. We delete the build directory
           # each time because Xcode is too stupid to be trusted to use the
           # same build directory for different platform builds.
-          rm_rf XcodeBuildDir
+          xcode_build_dir = File.expand_path(XcodeBuildDir)
+          rm_rf xcode_build_dir
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
-          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=#{XcodeBuildDir} IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
-  
+          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=#{xcode_build_dir} IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
           Dir.glob(File.join(XcodeBuildDir, '*.a')).each do |lib|
