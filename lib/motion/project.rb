@@ -56,3 +56,15 @@ task :config do
     puts key.ljust(22) + " : #{map[key].inspect}"
   end
 end
+
+desc "Generate ctags"
+task :ctags do
+  tags_file = 'tags'
+  config = App.config
+  if !File.exist?(tags_file) or File.mtime(config.project_file) > File.mtime(tags_file)
+    bs_files = config.bridgesupport_files + config.vendor_projects.map { |p| Dir.glob(File.join(p.path, '*.bridgesupport')) }.flatten
+    ctags = File.join(config.bindir, 'ctags')
+    config = File.join(config.motiondir, 'data', 'bridgesupport-ctags.cfg')
+    sh "#{ctags} --options=\"#{config}\" #{bs_files.map { |x| '"' + x + '"' }.join(' ')}"
+  end
+end
