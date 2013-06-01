@@ -3,10 +3,18 @@ describe "WeakRef" do
     ary = [1, 2, 3]
     ref = WeakRef.new(ary)
     ref.class.should == Array
+
     ref[0].should == 1
     ref[1].should == 2
     ref[2].should == 3
     ref.should == ary
+
+    1.should == ref[0]
+    2.should == ref[1]
+    3.should == ref[2]
+    ary.should == ref
+
+    WeakRef.new('a').should < WeakRef.new('b')
   end
 
   it "creates proxy objects that forward respond_to?" do
