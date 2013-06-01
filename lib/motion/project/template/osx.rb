@@ -46,6 +46,9 @@ namespace :build do
   end
 end
 
+desc "Build everything"
+task :build => ['build:development', 'build:release']
+
 desc "Run the project"
 task :run => 'build:development' do
   exec = App.config.app_bundle_executable('MacOSX')
