@@ -70,6 +70,11 @@ module Motion; module Project;
       super('Mac')
     end
 
+    def entitlements_data
+      dict = entitlements
+      Motion::PropertyList.to_s(dict)
+    end
+
     def common_flags(platform)
       super + " -mmacosx-version-min=#{deployment_target}"
     end
