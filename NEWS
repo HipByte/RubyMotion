@@ -28,6 +28,8 @@
   * [OSX] Added `rake static' task to create a static .a archive file.
   * [OSX] Added `rake build' task as a shortcut for both `build:development'
     and `build:release'.
+  * [OSX] Fixed `rake archive' to honor the content of the `app.entitlements'
+    project variable when code-signing the binary.
 
 = RubyMotion 2.0 =
 
