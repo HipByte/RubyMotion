@@ -527,6 +527,7 @@ EOS
         type, name, position = args
         if type == :@const
           @referred << name
+          return [:referred, name]
         end
       end
 
@@ -534,6 +535,9 @@ EOS
         type, name, position = args
         if type == :@const
           @referred << name
+          if parent && parent[0] == :referred
+            register_referred_constants(parent[1], name)
+          end
         end
         args
       end
@@ -542,26 +546,49 @@ EOS
         type, name, position = const
         if type == :@const
           @defined << name
+          return [:defined, name]
         end
-        []
       end
 
       def on_module(const, *args)
-        type, name, position = const
-        if type == :@const
-          @defined << name
-          @referred.delete(name)
-        end
-        []
+        handle_module_class_event(const, args)
       end
 
       def on_class(const, *args)
+        handle_module_class_event(const, args)
+      end
+
+      def handle_module_class_event(const, *args)
         type, name, position = const
         if type == :@const
           @defined << name
           @referred.delete(name)
+          children = args.flatten
+          children.each_with_index do |key, i|
+            if key == :defined
+              register_defined_constants(name, children[i+1])
+            end
+          end
+          return [:defined, name]
         end
-        []
+      end
+
+      def register_defined_constants(parent, child)
+        construct_nest_constants!(@defined, parent, child)
+      end
+
+      def register_referred_constants(parent, child)
+        construct_nest_constants!(@referred, parent, child)
+      end
+
+      def construct_nest_constants!(consts, parent, child)
+        nested = []
+        consts.each do |const|
+          if md = const.match(/^([^:]+)/)
+            nested << "#{parent}::#{const}" if md[0] == child
+          end
+        end
+        consts.concat(nested)
       end
     end
   end
