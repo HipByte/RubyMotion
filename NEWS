@@ -24,6 +24,8 @@
     (Ex app.sim_args += ["-com.apple.CoreData.SQLDebug", "1"])
   * Fixed a bug in #respond_to? where WeakRef objects would not be properly
     handled.
+  * Fixed a bug in detecting file dependencies where it will not detect file
+    dependencies if the files contain the nested constants.
   * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
     start in case the application name includes a space character.
   * [OSX] Added `rake ctags' task to generate `tags' file.
