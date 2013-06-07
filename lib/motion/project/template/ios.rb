@@ -54,6 +54,22 @@ task :simulator => ['build:simulator'] do
   app = App.config.app_bundle('iPhoneSimulator')
   target = ENV['target'] || App.config.sdk_version
 
+  if ENV['TMUX']
+    tmux_default_command = `tmux show-options -g default-command`.strip
+    unless tmux_default_command.include?("reattach-to-user-namespace")
+      App.warn(<<END
+
+    If you use tmux, please run the following operations (using Homebrew)
+
+      $ brew install reattach-to-user-namespace
+      $ echo 'set-option -g default-command "reattach-to-user-namespace -l $SHELL"' >> ~/.tmux.conf
+
+END
+      )
+      exit 1
+    end
+  end
+
   # Cleanup the simulator application sandbox, to avoid having old resource files there.
   if ENV['clean']
     sim_apps = File.expand_path("~/Library/Application Support/iPhone Simulator/#{target}/Applications")
