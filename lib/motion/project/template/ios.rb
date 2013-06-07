@@ -59,14 +59,13 @@ task :simulator => ['build:simulator'] do
     unless tmux_default_command.include?("reattach-to-user-namespace")
       App.warn(<<END
 
-    If you use tmux, please run the following operations (using Homebrew)
+    It appears you are using tmux without 'reattach-to-user-namespace', the simulator might not work properly. You can either disable tmux or run the following commands:
 
       $ brew install reattach-to-user-namespace
       $ echo 'set-option -g default-command "reattach-to-user-namespace -l $SHELL"' >> ~/.tmux.conf
 
 END
       )
-      exit 1
     end
   end
 
