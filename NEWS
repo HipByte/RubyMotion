@@ -35,6 +35,10 @@
     and `build:release'.
   * [OSX] Fixed `rake archive' to honor the content of the `app.entitlements'
     project variable when code-signing the binary.
+  * [OSX] Added the `app.embedded_frameworks' Rakefile variable that can
+    include paths to 3rd-party frameworks that should be copied in the app
+    bundle's 'Frameworks' directory. The build system will also fix the install
+    name of the executable. The default value is an empty array.
 
 = RubyMotion 2.0 =
 
