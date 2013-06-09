@@ -1,32 +1,35 @@
 = RubyMotion 2.1 =
 
-  * Fixed a bug in Dispatch.once where it would not be called correctly if it
-    is used in some lines.
-  * Updated require statement in gem template Rakefile. Thanks to Devon Blandin
-    for the patch (pull request #88).
-  * Updated the library path to require in warning message. Thanks to Tom
-    Milewski
-    for the patch (pull request #86).
-  * Fixed a bug in `app.files_dependencies' where it would not allow the path
-    which contains "../" (ex app.files_dependencies 'foo.rb' => '../bar.rb')
+  * Fixed a bug in `Dispatch.once' where it would sometimes not yield the block.
+  * Fixed the require statement in the `gem' template Rakefile. Thanks to
+    Devon Blandin for the patch (pull request #88).
+  * Fixed the `iOS' template warning message to print the right library path.
+    Thanks to Tom Milewski for the patch (pull request #86).
+  * Fixed a bug in `app.files_dependencies' where it would not allow a path
+    containing "../" (ex. app.files_dependencies 'foo.rb' => '../bar.rb').
     Thanks to Jeremy Ruppel for the patch (pull request #90).
-  * Fixed the CONFIGURATION_BUILD_DIR for non-standard vendored Xcode project.
-    Thanks to Jack Chen for the patch (pull request #94).
-  * Fixed a bug where it would not create .gitignore file when it would create
-    a new project.
-  * Added .gitignore file into gem template.
+  * Fixed a bug in `app.vendor_project' to properly set the 
+    CONFIGURATION_BUILD_DIR variable for non-standard Xcode projects. Thanks to
+    Jack Chen for the patch (pull request #94).
+  * Fixed `app.vendor_project' with Xcode projects to rebuild the project in
+    case a file changed. Thanks for Jack Chen for the idea and initial work.
+  * Fixed a bug where the .gitignore file would not be generated anymore when
+    creating a new project.
+  * Added the .gitignore file into the `gem' template.
   * Added the BasicObject#__id__ method for CRuby compatibility.
-  * Fixed a bug in undef and Module#remove_method which it could call undefined
-    method if the method was called before removing.
-  * Fixed a bug where it would hold an object if it would call the #initXXX in
-    the #initialize of a class inherited Objective-C class.
-  * Added a feature which passing the arguments on launching app.
-    (Ex app.sim_args += ["-com.apple.CoreData.SQLDebug", "1"])
+  * Fixed a bug in `undef' and Module#remove_method where it would raise an
+    'undefined method' error if the method was called before being removing.
+  * Fixed a memory bug where an object would be prematurely released if an
+    #initXXX method was called right from within #initialize.
+  * Added the `app.sim_args' Rakefile variable that can be used to set up
+    arguments that will be passed to the app executable when launching.
+    (ex. app.sim_args += ["-com.apple.CoreData.SQLDebug", "1"])
   * Fixed a bug in #respond_to? where WeakRef objects would not be properly
     handled.
   * Fixed a bug in detecting file dependencies where it will not detect file
-    dependencies if the files contain the nested constants.
-  * Added the workaround message for tmux users.
+    dependencies if the files contain nested constants.
+  * [iOS] Fixed `rake simulator' to show a warning message in case the user is
+    running tmux without `reattach-to-user-namespace', which is necessary. 
   * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
     start in case the application name includes a space character.
   * [OSX] Added `rake ctags' task to generate `tags' file.
@@ -40,7 +43,7 @@
     bundle's 'Frameworks' directory (ex. app.embedded_frameworks +=
     ['~/src/MyFramework.framework']). The build system will also fix the
     install name of the executable. The default value is an empty array.
-  * [OSX] Fixed the `archive:distribution' task to properly codesign the app
+  * [OSX] Fixed `rake archive:distribution' to properly codesign the app
     executable twice, necessary for App Store submissions.
   * [OSX] Fixed the Info.plist file generation to include the minimum OS
     requirement key, necessary for App Store submissions.
