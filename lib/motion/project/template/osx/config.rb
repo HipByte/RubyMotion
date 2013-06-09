@@ -109,7 +109,8 @@ module Motion; module Project;
       Motion::PropertyList.to_s({
         'NSHumanReadableCopyright' => copyright,
         'NSPrincipalClass' => 'NSApplication',
-        'CFBundleIconFile' => (icon or '')
+        'CFBundleIconFile' => (icon or ''),
+        'LSMinimumSystemVersion' => deployment_target
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
  
