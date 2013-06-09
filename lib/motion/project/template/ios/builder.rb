@@ -41,6 +41,14 @@ module Motion; module Project
         end
         sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
       end
+
+      # Create manifest file (if needed).
+      manifest_plist = File.join(config.versionized_build_dir('iPhoneOS'), 'manifest.plist')
+      manifest_plist_data = config.manifest_plist_data
+      if manifest_plist_data and (!File.exist?(manifest_plist) or File.mtime(config.project_file) > File.mtime(manifest_plist))
+        App.info 'Create', manifest_plist
+        File.open(manifest_plist, 'w') { |io| io.write(manifest_plist_data) } 
+      end
     end
 
     def codesign(config, platform)
