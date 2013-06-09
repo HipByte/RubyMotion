@@ -31,7 +31,12 @@ module Motion; module Project
       archive = config.archive
       if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
         App.info 'Create', archive
-        sh "/usr/bin/productbuild --quiet --component \"#{app_bundle}\" /Applications \"#{archive}\""
+        codesign = begin
+          if config.distribution_mode
+            "--sign \"" + config.codesign_certificate.sub(/Application/, "Installer") + "\""
+          end
+        end || ""
+        sh "/usr/bin/productbuild --quiet --component \"#{app_bundle}\" /Applications \"#{archive}\" #{codesign}"
       end
     end
 
