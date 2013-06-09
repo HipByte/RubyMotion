@@ -4,6 +4,31 @@
     `args' environment variable, which can be used to provide command-line
     arguments that will be passed to the app executable when launching.
     (ex. rake simulator args="-com.apple.CoreData.SQLDebug 1").
+  * [iOS] Improved `rake archive' to generate a `manifest.plist' file that can
+    be used for Ad-Hoc distribution. Added the `app.manifest_assets' Rakefile
+    variable which can be set to an array of hashes describing the assets to be
+    included in the file. The default is an empty array, and no file is then
+    generated. (ex. app.manifest_assets << { :kind => 'software-package',
+    :url => 'http://hipbyte.com/foo.ipa' }).
+  * [iOS] Fixed `rake simulator' to show a warning message in case the user is
+    running tmux without `reattach-to-user-namespace', which is necessary.
+  * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
+    start in case the application name includes a space character.
+  * [OSX] Added `rake ctags' task to generate `tags' file.
+  * [OSX] Added `rake static' task to create a static .a archive file.
+  * [OSX] Added `rake build' task as a shortcut for both `build:development'
+    and `build:release'.
+  * [OSX] Fixed `rake archive' to honor the content of the `app.entitlements'
+    project variable when code-signing the binary.
+  * [OSX] Added the `app.embedded_frameworks' Rakefile variable that can
+    include paths to 3rd-party frameworks that should be copied in the app
+    bundle's 'Frameworks' directory (ex. app.embedded_frameworks +=
+    ['~/src/MyFramework.framework']). The build system will also fix the
+    install name of the executable. The default value is an empty array.
+  * [OSX] Fixed `rake archive:distribution' to properly codesign the app
+    executable twice, necessary for App Store submissions.
+  * [OSX] Fixed the Info.plist file generation to include the minimum OS
+    requirement key, necessary for App Store submissions.
   * Fixed a bug in `Dispatch.once' where it would sometimes not yield the block.
   * Fixed the require statement in the `gem' template Rakefile. Thanks to
     Devon Blandin for the patch (pull request #88).
@@ -29,25 +54,6 @@
     handled.
   * Fixed a bug in detecting file dependencies where it will not detect file
     dependencies if the files contain nested constants.
-  * [iOS] Fixed `rake simulator' to show a warning message in case the user is
-    running tmux without `reattach-to-user-namespace', which is necessary. 
-  * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
-    start in case the application name includes a space character.
-  * [OSX] Added `rake ctags' task to generate `tags' file.
-  * [OSX] Added `rake static' task to create a static .a archive file.
-  * [OSX] Added `rake build' task as a shortcut for both `build:development'
-    and `build:release'.
-  * [OSX] Fixed `rake archive' to honor the content of the `app.entitlements'
-    project variable when code-signing the binary.
-  * [OSX] Added the `app.embedded_frameworks' Rakefile variable that can
-    include paths to 3rd-party frameworks that should be copied in the app
-    bundle's 'Frameworks' directory (ex. app.embedded_frameworks +=
-    ['~/src/MyFramework.framework']). The build system will also fix the
-    install name of the executable. The default value is an empty array.
-  * [OSX] Fixed `rake archive:distribution' to properly codesign the app
-    executable twice, necessary for App Store submissions.
-  * [OSX] Fixed the Info.plist file generation to include the minimum OS
-    requirement key, necessary for App Store submissions.
 
 = RubyMotion 2.0 =
 
