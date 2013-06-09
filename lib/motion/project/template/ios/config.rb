@@ -29,7 +29,7 @@ module Motion; module Project;
 
     variable :device_family, :interface_orientations, :background_modes,
       :status_bar_style, :icons, :prerendered_icon, :fonts, :seed_id,
-      :provisioning_profile
+      :provisioning_profile, :manifest_assets
 
     def initialize(project_dir, build_mode)
       super
@@ -40,6 +40,7 @@ module Motion; module Project;
       @status_bar_style = :default
       @icons = []
       @prerendered_icon = false
+      @manifest_assets = []
     end
 
     def platforms; ['iPhoneSimulator', 'iPhoneOS']; end
@@ -50,6 +51,11 @@ module Motion; module Project;
       # icons
       if !(icons.is_a?(Array) and icons.all? { |x| x.is_a?(String) })
         App.fail "app.icons should be an array of strings."
+      end
+
+      # manifest_assets
+      if !(manifest_assets.is_a?(Array) and manifest_assets.all? { |x| x.is_a?(Hash) and x.keys.include?(:kind) and x.keys.include?(:url) })
+        App.fail "app.manifest_assets should be an array of hashes with values for the :kind and :url keys"
       end
 
       super
@@ -290,6 +296,21 @@ module Motion; module Project;
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => ios_version_to_build.call(sdk_version)
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
+    end
+
+    def manifest_plist_data
+      return nil if manifest_assets.empty?
+      Motion::PropertyList.to_s({
+        'items' => [
+          { 'assets' => manifest_assets,
+            'metadata' => {
+              'bundle-identifier' => identifier,
+              'bundle-version' => @version,
+              'kind' => 'software',
+              'title' => @name
+            } }
+        ]
+      })
     end
 
     def supported_sdk_versions(versions)
