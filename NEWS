@@ -40,6 +40,8 @@
     bundle's 'Frameworks' directory (ex. app.embedded_frameworks +=
     ['~/src/MyFramework.framework']). The build system will also fix the
     install name of the executable. The default value is an empty array.
+  * [OSX] Fixed a bug where it is not possible to submit a package to Mac App Store
+    which is created by `rake archive:distribution'
 
 = RubyMotion 2.0 =
 
