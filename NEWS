@@ -1,5 +1,9 @@
 = RubyMotion 2.1 =
 
+  * Improved the `rake simulator' (iOS) and `rake run' (OSX) tasks to honor the
+    `args' environment variable, which can be used to provide command-line
+    arguments that will be passed to the app executable when launching.
+    (ex. rake simulator args="-com.apple.CoreData.SQLDebug 1").
   * Fixed a bug in `Dispatch.once' where it would sometimes not yield the block.
   * Fixed the require statement in the `gem' template Rakefile. Thanks to
     Devon Blandin for the patch (pull request #88).
@@ -21,9 +25,6 @@
     'undefined method' error if the method was called before being removing.
   * Fixed a memory bug where an object would be prematurely released if an
     #initXXX method was called right from within #initialize.
-  * Added the `app.sim_args' Rakefile variable that can be used to set up
-    arguments that will be passed to the app executable when launching.
-    (ex. app.sim_args += ["-com.apple.CoreData.SQLDebug", "1"])
   * Fixed a bug in #respond_to? where WeakRef objects would not be properly
     handled.
   * Fixed a bug in detecting file dependencies where it will not detect file
