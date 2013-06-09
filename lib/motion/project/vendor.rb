@@ -145,8 +145,8 @@ EOS
     def build_xcode(platform, opts)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
-        if !File.exist?(build_dir)
-          FileUtils.mkdir build_dir
+        if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
+          FileUtils.mkdir_p build_dir
 
           # Prepare Xcode project settings.
           xcodeproj = opts.delete(:xcodeproj) || begin
@@ -184,17 +184,21 @@ EOS
             lib = File.readlink(lib) if File.symlink?(lib)
             sh "/bin/cp \"#{lib}\" \"#{build_dir}\""
           end
+
+          `/usr/bin/touch \"#{build_dir}\"`
         end
 
         # Generate the bridgesupport file if we need to.
         bs_file = File.expand_path(File.basename(@path) + '.bridgesupport')
         headers_dir = opts.delete(:headers_dir)
-        if !File.exist?(bs_file) and headers_dir
+        if headers_dir
           project_dir = File.expand_path(@config.project_dir)
           headers = Dir.glob(File.join(project_dir, headers_dir, '**/*.h'))
-          bs_cflags = (opts.delete(:bridgesupport_cflags) or '')
-          bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
-          @config.gen_bridge_metadata(headers, bs_file, bs_cflags, bs_exceptions)
+          if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
+            bs_cflags = (opts.delete(:bridgesupport_cflags) or '')
+            bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
+            @config.gen_bridge_metadata(headers, bs_file, bs_cflags, bs_exceptions)
+          end
         end
 
         @bs_files = Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) }
