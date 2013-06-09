@@ -59,7 +59,27 @@ module Motion; module Project;
         vendor_project.build(platform)
         vendor_libs.concat(vendor_project.libs)
         bs_files.concat(vendor_project.bs_files)
-      end 
+      end
+
+      # Validate common build directory.
+      if !File.directory?(Builder.common_build_dir) or !File.writable?(Builder.common_build_dir)
+        $stderr.puts "Cannot write into the `#{Builder.common_build_dir}' directory, please remove or check permissions and try again."
+        exit 1
+      end
+
+      # Prepare embedded frameworks BridgeSupport files (OSX-only).
+      embedded_frameworks = (config.respond_to?(:embedded_frameworks) ? config.embedded_frameworks.map { |x| File.expand_path(x) } : [])
+      unless embedded_frameworks.empty?
+        embedded_frameworks.each do |path|
+          headers = Dir.glob(File.join(path, 'Headers/**/*.h'))
+          bs_file = File.join(Builder.common_build_dir, File.expand_path(path) + '.bridgesupport')
+          if !File.exist?(bs_file) or File.mtime(path) > File.mtime(bs_file)
+            FileUtils.mkdir_p(File.dirname(bs_file))
+            config.gen_bridge_metadata(headers, bs_file, '', [])
+          end
+          bs_files << bs_file
+        end
+      end
 
       # Build object files.
       objs_build_dir = File.join(build_dir, 'objs')
@@ -67,11 +87,6 @@ module Motion; module Project;
       any_obj_file_built = false
       project_files = Dir.glob("**/*.rb").map{ |x| File.expand_path(x) }
       is_default_archs = (archs == config.default_archs[platform])
-
-      if !File.directory?(Builder.common_build_dir) or !File.writable?(Builder.common_build_dir)
-        $stderr.puts "Cannot write into the `#{Builder.common_build_dir}' directory, please remove or check permissions and try again."
-        exit 1
-      end
 
       build_file = Proc.new do |files_build_dir, path|
         rpath = path
@@ -294,8 +309,8 @@ EOS
           or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        framework_search_paths = config.framework_search_paths.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
-        frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
+        framework_search_paths = (config.framework_search_paths + embedded_frameworks.map { |x| File.dirname(x) }).uniq.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
+        frameworks = (config.frameworks_dependencies + embedded_frameworks.map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
           libs << vendor_project.libs.map { |x|
@@ -304,6 +319,18 @@ EOS
         end.join(' ')
         sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
+
+        # Change the install name of embedded frameworks.
+        embedded_frameworks.each do |path|
+          res = `/usr/bin/otool -L \"#{main_exec}\"`.scan(/(.*#{File.basename(path)}.*)\s\(/)
+          if res and res[0] and res[0][0]
+            old_path = res[0][0].strip
+            new_path = "@executable_path/../Frameworks/" + old_path.scan(/#{File.basename(path)}.*/)[0]
+            sh "/usr/bin/install_name_tool -change \"#{old_path}\" \"#{new_path}\" \"#{main_exec}\""
+          else
+            App.warn "Cannot locate and fix install name path of embedded framework `#{path}' in executable `#{main_exec}', application might not start"
+          end
+        end
       end
 
       # Create bundle/Info.plist.
@@ -348,6 +375,19 @@ EOS
               sh "\"#{App.config.xcode_dir}/usr/bin/momc\" \"#{model}\" \"#{momd}\""
             end
           end
+        end
+      end
+
+      # Copy embedded frameworks.
+      unless embedded_frameworks.empty?
+        app_frameworks = File.join(config.app_bundle(platform), 'Frameworks')
+        FileUtils.mkdir_p(app_frameworks)
+        embedded_frameworks.each do |src_path|
+          dest_path = File.join(app_frameworks, File.basename(src_path))
+          if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
+            App.info 'Copy', src_path
+            FileUtils.cp_r(src_path, dest_path)
+          end 
         end
       end
 
