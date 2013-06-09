@@ -145,8 +145,8 @@ EOS
     def build_xcode(platform, opts)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
-        if !File.exist?(build_dir)
-          FileUtils.mkdir build_dir
+        if !File.exist?(build_dir) || opts.delete(:force_rebuild)
+          FileUtils.mkdir_p build_dir
 
           # Prepare Xcode project settings.
           xcodeproj = opts.delete(:xcodeproj) || begin
