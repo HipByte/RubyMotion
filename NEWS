@@ -12,6 +12,7 @@
     :url => 'http://hipbyte.com/foo.ipa' }).
   * [iOS] Fixed `rake simulator' to show a warning message in case the user is
     running tmux without `reattach-to-user-namespace', which is necessary.
+  * [iOS] Fixed compilation issues with 6.0 SDK. 
   * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
     start in case the application name includes a space character.
   * [OSX] Added `rake ctags' task to generate `tags' file.
