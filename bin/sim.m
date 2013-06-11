@@ -965,12 +965,25 @@ gdb_commands_file(void)
 	// Forward ^C to gdb.
 	signal(SIGINT, sigforwarder);
 
-	// Run the gdb process.
+	// Run the debugger process.
 	NSString *gdb_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin"];
-	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
-	    arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"-q",
-	    @"--pid", [pidNumber description], @"-x", gdb_commands_file(),
-	    nil]] retain];
+	NSString *lldb_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/usr/bin/lldb"];
+	if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
+	    gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
+		arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"-q",
+		@"--pid", [pidNumber description], nil]] retain];
+	}
+	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
+	    gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
+		arguments:[NSArray arrayWithObjects:@"-a", @"i386",
+		@"-p", [pidNumber description], @"-x", gdb_commands_file(),
+		nil]] retain];
+	}
+	else {
+	    fprintf(stderr, "can't locate a debugger (gdb `%s' or lldb `%s')\n",
+		    [gdb_path UTF8String], [lldb_path UTF8String]);
+	    exit(1);
+	}
 	[gdb_task waitUntilExit];
 	gdb_task = nil;
 
@@ -1051,7 +1064,7 @@ main(int argc, char **argv)
     // Prepare app environment.
     NSMutableDictionary *appEnvironment = [[[NSProcessInfo processInfo]
 	environment] mutableCopy];
-    if (debug_mode == DEBUG_REPL) {
+    if (debug_mode != DEBUG_NOTHING) {
 	// Prepare repl socket path.
 	NSString *tmpdir = NSTemporaryDirectory();
 	assert(tmpdir != nil);
@@ -1091,7 +1104,17 @@ main(int argc, char **argv)
 	[appEnvironment setObject:replPath forKey:@"REPL_DYLIB_PATH"];
     }
 
-    //[NSDictionary dictionaryWithObjectsAndKeys:@"/usr/lib/libgmalloc.dylib", @"DYLD_INSERT_LIBRARIES", nil]);
+    char *malloc_debug_level = NULL;
+    if ((malloc_debug_level = getenv("malloc_debug")) != NULL) {
+	int level = atoi(malloc_debug_level);
+	if (level >= 1) {
+	    [appEnvironment setObject:@"1" forKey:@"MallocStackLoggingNoCompact"];
+	}
+        if (level >= 2) {
+	    [appEnvironment setObject:@"/usr/lib/libgmalloc.dylib"
+		forKey:@"DYLD_INSERT_LIBRARIES"];
+	}
+    }
 
 #if defined(SIMULATOR_IOS)
     // Create application specifier.
