@@ -1,4 +1,4 @@
-PROJECT_VERSION = '2.1'
+PROJECT_VERSION = '2.2'
 PLATFORMS_DIR = (ENV['PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
@@ -28,8 +28,9 @@ verbose(true)
 def rake(dir, cmd='all')
   Dir.chdir(dir) do
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
+    sdk_beta = ENV['SDK_BETA'] ? 'sdk_beta=1' : ''
     trace = Rake.application.options.trace
-    sh "rake platforms_dir=\"#{PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{cmd} #{trace ? '--trace' : ''}"
+    sh "rake platforms_dir=\"#{PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
   end
 end
 
