@@ -8,7 +8,7 @@ task :default => :all
 task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
 
 task :vm_files do
-  strip = File.join(PLATFORMS_DIR, '../usr/bin/strip')
+  strip = File.join(PLATFORMS_DIR, '../Toolchains/XcodeDefault.xctoolchain/usr/bin/strip')
 
   OSX_SDK_VERSIONS.each do |sdk_version|
     sdk = File.join('osx', sdk_version, 'MacOSX')
@@ -72,7 +72,7 @@ def merge_bridgesupport(base_bridgesupport, merge_brigesupport)
   }
 end
 
-EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit', 'Carbon']
+EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit', 'Carbon', 'Ruby', 'RubyCocoa', 'vecLib']
 task :bridgesupport_files do
   platform_dev_path = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
   OSX_SDK_VERSIONS.each do |sdk_version|
@@ -130,8 +130,6 @@ task :bridgesupport_files do
     Dir.glob('*.bridgesupport').each { |bs| cp bs, "ios/#{sdk_version}/BridgeSupport" }
     Dir.glob('ios/*.bridgesupport').each { |bs| cp bs, "ios/#{sdk_version}/BridgeSupport" }
 
-    next if ENV['SDK_BETA']
-
     Dir.glob(File.join(sdk_frameworks, '*.framework')).each do |framework_path|
       framework = File.basename(framework_path, '.framework')
       next if EXCLUDED_FRAMEWORKS.include?(framework)
@@ -188,7 +186,6 @@ task :bridgesupport_static_stubs do
       framework = File.basename(bs_path).sub(/\.bridgesupport/, '')
 
       case framework
-        when 'Ruby'
         when 'GLKit' # TODO
           next
       end 
@@ -215,7 +212,7 @@ task :bridgesupport_static_stubs do
       cflags = "-isysroot #{platform_dev}/SDKs/MacOSX#{sdk_version}.sdk"
       cflags << " -arch i386 -arch x86_64"
       cflags << " -mmacosx-version-min=#{sdk_version} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
-      sh "/usr/bin/gcc #{cflags} #{code} -c -o #{obj}"
+      sh "/usr/bin/clang #{cflags} #{code} -c -o #{obj}"
     end
   end
 
@@ -252,7 +249,7 @@ task :bridgesupport_static_stubs do
         cflags = "-isysroot #{platform_dev}/SDKs/#{platform}#{sdk_version}.sdk "
         cflags << archs.map { |a| "-arch #{a}" }.join(' ')
         cflags << " -miphoneos-version-min=#{sdk_version} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
-        sh "#{platform_dev}/usr/bin/gcc #{cflags} #{code} -c -o #{obj}"
+        sh "#{PLATFORMS_DIR}/../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{cflags} #{code} -c -o #{obj}"
       end
     end
   end
