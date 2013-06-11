@@ -65,6 +65,9 @@ module Motion; module Project;
       paths = [File.join(platform_dir(platform), 'Developer/usr/bin')]
       paths.unshift File.join(xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin')
 
+      # XXX We temporarily retrieve compilers from Xcode 4 until we completely switch to clang.
+      paths << "/Applications/Xcode.app/Contents/Developer/Platforms/#{platform}.platform/Developer/usr/bin"
+
       execs.each do |exec|
         paths.each do |path|
           cc = File.join(path, exec)
