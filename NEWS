@@ -1,3 +1,13 @@
+= RubyMotion 2.2 =
+
+  * Added iOS 7.0 and OS X 10.9 support. Xcode 5.0 DP must be installed and
+    activated as the default (using `xcode-select'). Xcode 4.x must remain in
+    /Applications/Xcode.app as RubyMotion will still be using it, until we
+    properly migrate to the new compilers. You can revert to Xcode 4.x (using
+    `xcode-select') for stable development. *WARNING* iOS 7.0 and OS X 10.9
+    are Apple confidental and cannot be discussed online. Do not post code
+    using the new APIs online.
+
 = RubyMotion 2.1 =
 
   * Improved the `rake simulator' (iOS) and `rake run' (OSX) tasks to honor the
