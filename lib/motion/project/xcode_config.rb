@@ -82,7 +82,7 @@ EOS
       @xcode_version ||= begin
         txt = `#{locate_binary('xcodebuild')} -version`
         vers = txt.scan(/Xcode\s(.+)/)[0][0]
-        build = txt.scan(/Build version\s(.+)/)[0][0]
+        build = txt.scan(/(BuildVersion:|Build version)\s(.+)/)[0][1]
         [vers, build]
       end
     end
