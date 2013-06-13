@@ -1,15 +1,15 @@
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -54,6 +54,7 @@ task :run => 'build:development' do
   exec = App.config.app_bundle_executable('MacOSX')
   env = ''
   env << 'SIM_SPEC_MODE=1' if App.config.spec_mode
+  env << ' NSZombieEnabled=YES' if ENV['zombie']
   sim = File.join(App.config.bindir, 'osx/sim')
   debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
   target = App.config.sdk_version
