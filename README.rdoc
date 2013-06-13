@@ -30,6 +30,19 @@ Then, simply set the RUBYMOTION_LIB environment variable when using +rake+.
 
   $ cd MyProject
   $ RUBYMOTION_LIB=~/src/RubyMotion/lib rake
+  
+---------------
+
+If you are looking to modify the +motion+ command itself, you'll need to mimick your existing +/usr/bin/motion+
+
+An easy way is to just make a copy somewhere on your $PATH and use that for testing
+
+  $ sudo cp /usr/bin/motion /usr/bin/motionme
+
+Edit +motionme+ and point the $motion_libdir variable at your local git repo.
+  $motion_libdir = '/Absolute/Path/To/Forked/RubyMotion/lib/'
+  
+Now using +motionme+ instead of +motion+ will use the forked RubyMotion
 
 == Contributions
 
