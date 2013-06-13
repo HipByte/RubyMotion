@@ -217,16 +217,19 @@ module Bacon
       #
       # Lastly, the view controller can be presented modally.
       def rootViewController
+        embed_in = @options[:embed_in]
+        return controller unless embed_in
+
         # 1. Content view controller
         root = controller
 
         # 2. Embed in navigation controller, if specified
-        if @options[:navigation]
+        if embed_in[:navigation]
           root = UINavigationController.alloc.initWithRootViewController(root)
         end
 
         # 3. Embed in tab bar controller, if specified
-        if @options[:tab]
+        if embed_in[:tab]
           root = UITabBarController.new.tap do |tabBarController|
             tabBarController.viewControllers = [root]
           end
@@ -235,7 +238,7 @@ module Bacon
         # 4. TODO Embed in split view controller
 
         # Present modally, if specified
-        if @options[:present]
+        if embed_in[:modal]
           root = PresentingViewController.alloc.initWithPresenteeViewController(root)
         end
 
