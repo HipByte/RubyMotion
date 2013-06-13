@@ -224,12 +224,12 @@ module Bacon
         root = controller
 
         # 2. Embed in navigation controller, if specified
-        if embed_in[:navigation]
+        if embed_in.include? :navigation
           root = UINavigationController.alloc.initWithRootViewController(root)
         end
 
         # 3. Embed in tab bar controller, if specified
-        if embed_in[:tab]
+        if embed_in.include? :tab
           root = UITabBarController.new.tap do |tabBarController|
             tabBarController.viewControllers = [root]
           end
@@ -238,7 +238,7 @@ module Bacon
         # 4. TODO Embed in split view controller
 
         # Present modally, if specified
-        if embed_in[:modal]
+        if embed_in.include? :modal
           root = PresentingViewController.alloc.initWithPresenteeViewController(root)
         end
 
