@@ -48,6 +48,13 @@ module Motion; module Project
     def initialize(app_name, template_name)
       @name = @app_name = app_name
       @template_name = template_name.to_s
+      @git_name = extract_repo_name(@template_name)
+
+      if @git_name
+        App.log 'Git', "Cloning #{@git_name} template"
+        clone_template_repository
+        @template_name = @git_name
+      end
 
       @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
@@ -115,5 +122,32 @@ module Motion; module Project
       file_name = file_name.sub("{name}", "#{@name}")
       file_name
     end
+
+    def clone_template_repository
+      path = self.class.all_templates[@git_name]
+      # check if directory exists
+      if path
+        # directory exists just do a pull
+        App.log 'Git', "#{@git_name} already exists, performing a pull"
+        system("GIT_DIR=#{path}/.git git pull origin master")
+      else
+        # no directory exists so clone
+        result = system("git clone #{@template_name} ~/Library/RubyMotion/template/#{@git_name}")
+        unless result
+          App.log 'Git', "Unable to clone #{@template_name}"
+        end
+        # clear @all_templates cache, which should cause the motion command to fail 
+        # without blowing up, regardless of the clone result
+        self.class.instance_variable_set(:@all_templates, nil)
+      end
+    end
+
+    # Extract repo name from HTTP, SSH or Git URLs:
+    def extract_repo_name template
+      http_template = template =~ /\w+:\/\/.+@*[\w\d\.]+\/.+\/(.+).git/i ? $1 : false
+      git_template  = template =~ /git@.+:.+\/(.+)\.git/i ? $1 : false
+      http_template || git_template
+    end
   end
+
 end; end
