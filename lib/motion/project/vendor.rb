@@ -76,11 +76,23 @@ module Motion; module Project;
           unless File.exist?(pch)
             FileUtils.mkdir_p File.dirname(pch)
             File.open(pch, 'w') do |io|
-              io.puts <<EOS
+              case platform
+                when "MacOSX"
+                  header =<<EOS
+#ifdef __OBJC__
+#  import <Cocoa/Cocoa.h>
+#endif
+EOS
+                when /^iPhone/
+                  header =<<EOS
 #ifdef __OBJC__
 #  import <UIKit/UIKit.h>
 #endif
 EOS
+                else
+                  App.fail "Unknown platform : #{platform}"
+              end
+              io.puts header
             end
           end
 
@@ -107,7 +119,9 @@ EOS
         unless headers.empty?
           bs_file = File.basename(@path) + '.bridgesupport'
           if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
-            @config.gen_bridge_metadata(headers, bs_file)
+            bs_cflags = (opts.delete(:bridgesupport_cflags) or '')
+            bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
+            @config.gen_bridge_metadata(headers, bs_file, bs_cflags, bs_exceptions)
           end
           bs_files << bs_file
         end
@@ -131,8 +145,8 @@ EOS
     def build_xcode(platform, opts)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
-        if !File.exist?(build_dir)
-          FileUtils.mkdir build_dir
+        if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
+          FileUtils.mkdir_p build_dir
 
           # Prepare Xcode project settings.
           xcodeproj = opts.delete(:xcodeproj) || begin
@@ -156,12 +170,13 @@ EOS
           # Build project into a build directory. We delete the build directory
           # each time because Xcode is too stupid to be trusted to use the
           # same build directory for different platform builds.
-          rm_rf XcodeBuildDir
+          xcode_build_dir = File.expand_path(XcodeBuildDir)
+          rm_rf xcode_build_dir
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
-          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=#{XcodeBuildDir} IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
-  
+          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=#{xcode_build_dir} IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
           Dir.glob(File.join(XcodeBuildDir, '*.a')).each do |lib|
@@ -169,15 +184,21 @@ EOS
             lib = File.readlink(lib) if File.symlink?(lib)
             sh "/bin/cp \"#{lib}\" \"#{build_dir}\""
           end
+
+          `/usr/bin/touch \"#{build_dir}\"`
         end
 
         # Generate the bridgesupport file if we need to.
         bs_file = File.expand_path(File.basename(@path) + '.bridgesupport')
         headers_dir = opts.delete(:headers_dir)
-        if !File.exist?(bs_file) and headers_dir
+        if headers_dir
           project_dir = File.expand_path(@config.project_dir)
           headers = Dir.glob(File.join(project_dir, headers_dir, '**/*.h'))
-          @config.gen_bridge_metadata(headers, bs_file)
+          if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
+            bs_cflags = (opts.delete(:bridgesupport_cflags) or '')
+            bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
+            @config.gen_bridge_metadata(headers, bs_file, bs_cflags, bs_exceptions)
+          end
         end
 
         @bs_files = Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) }

@@ -21,6 +21,47 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion
-  Version = "2.1"
-end
+require 'motion/project/app'
+require 'motion/project/template'
+
+module Motion; module Project
+  class CreateCommand < Command
+    self.name = 'create'
+    self.help = 'Create a new project'
+ 
+    DefaultTemplate = 'ios'
+ 
+    def run(args)
+      app_name = nil
+      template_name = DefaultTemplate
+      args.each do |a|
+        case a
+          when /--([^=]+)=(.+)/
+            opt_name = $1.to_s.strip
+            opt_val = $2.to_s.strip
+            case opt_name
+              when 'template'
+                template_name = opt_val
+              else
+                die "Incorrect option `#{opt_name}'"
+            end
+          else
+            if app_name
+              app_name = nil
+              break
+            else
+              app_name = a
+            end
+        end
+      end
+  
+      unless app_name
+        $stderr.puts "Usage: motion create [--template=<template_name>] <app-name>"
+        $stderr.puts "Available templates: " + Motion::Project::Template.all_templates.keys.map { |x| x == DefaultTemplate ? "#{x} (default)" : x }.join(', ')
+        exit 1
+      end
+  
+      Motion::Project::App.create(app_name, template_name)
+    end
+  end
+end; end

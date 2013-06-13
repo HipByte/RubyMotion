@@ -25,7 +25,7 @@ require 'thread'
 
 module Motion; module Project;
   class Builder
-    include Rake::DSL if Rake.const_defined?(:DSL)
+    include Rake::DSL if Object.const_defined?(:Rake) && Rake.const_defined?(:DSL)
 
     def build(config, platform, opts)
       datadir = config.datadir
@@ -36,7 +36,7 @@ module Motion; module Project;
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
 
-      if config.spec_mode and config.spec_files.empty?
+      if config.spec_mode and (config.spec_files - config.spec_core_files).empty?
         App.fail "No spec files in `#{config.specs_dir}'"
       end
 
@@ -59,16 +59,42 @@ module Motion; module Project;
         vendor_project.build(platform)
         vendor_libs.concat(vendor_project.libs)
         bs_files.concat(vendor_project.bs_files)
-      end 
+      end
+
+      # Validate common build directory.
+      if !File.directory?(Builder.common_build_dir) or !File.writable?(Builder.common_build_dir)
+        $stderr.puts "Cannot write into the `#{Builder.common_build_dir}' directory, please remove or check permissions and try again."
+        exit 1
+      end
+
+      # Prepare embedded frameworks BridgeSupport files (OSX-only).
+      embedded_frameworks = (config.respond_to?(:embedded_frameworks) ? config.embedded_frameworks.map { |x| File.expand_path(x) } : [])
+      unless embedded_frameworks.empty?
+        embedded_frameworks.each do |path|
+          headers = Dir.glob(File.join(path, 'Headers/**/*.h'))
+          bs_file = File.join(Builder.common_build_dir, File.expand_path(path) + '.bridgesupport')
+          if !File.exist?(bs_file) or File.mtime(path) > File.mtime(bs_file)
+            FileUtils.mkdir_p(File.dirname(bs_file))
+            config.gen_bridge_metadata(headers, bs_file, '', [])
+          end
+          bs_files << bs_file
+        end
+      end
 
       # Build object files.
       objs_build_dir = File.join(build_dir, 'objs')
       FileUtils.mkdir_p(objs_build_dir)
       any_obj_file_built = false
-      build_file = Proc.new do |path|
+      project_files = Dir.glob("**/*.rb").map{ |x| File.expand_path(x) }
+      is_default_archs = (archs == config.default_archs[platform])
+
+      build_file = Proc.new do |files_build_dir, path|
         rpath = path
         path = File.expand_path(path)
-        obj = File.join(objs_build_dir, "#{path}.o")
+        if is_default_archs && !project_files.include?(path)
+          files_build_dir = File.expand_path(File.join(Builder.common_build_dir, files_build_dir))
+        end
+        obj = File.join(files_build_dir, "#{path}.o")
         should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
@@ -86,12 +112,13 @@ module Motion; module Project;
             raise "Can't locate kernel file" unless File.exist?(kernel)
    
             # LLVM bitcode.
-            bc = File.join(objs_build_dir, "#{path}.#{arch}.bc")
+            bc = File.join(files_build_dir, "#{path}.#{arch}.bc")
             bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
-            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
+            arch_cmd = (arch =~ /^arm/) ? "/usr/bin/arch -arch i386" : "/usr/bin/arch -arch #{arch}"
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{arch_cmd} #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
    
             # Assembly.
-            asm = File.join(objs_build_dir, "#{path}.#{arch}.s")
+            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
             llc_arch = case arch
               when 'i386'; 'x86'
               when 'x86_64'; 'x86-64'
@@ -101,7 +128,7 @@ module Motion; module Project;
             sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh -disable-cfi"
    
             # Object.
-            arch_obj = File.join(objs_build_dir, "#{path}.#{arch}.o")
+            arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
             sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
   
             [bc, asm].each { |x| File.unlink(x) }
@@ -132,7 +159,7 @@ module Motion; module Project;
           sleep
           objs = []
           while path = queue.shift
-            objs << build_file.call(path)
+            objs << build_file.call(objs_build_dir, path)
           end
           queue.concat(objs)
         end
@@ -141,8 +168,7 @@ module Motion; module Project;
 
       # Resolve file dependencies
       if config.detect_dependencies == true
-        deps = Dependency.new(config.files).run
-        config.dependencies = deps.merge(config.dependencies)
+        config.dependencies = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
       end
 
       # Feed builders with work.
@@ -175,14 +201,12 @@ module Motion; module Project;
       spec_objs = []
       if config.spec_mode
         # Build spec files too, but sequentially.
-        spec_objs = config.spec_files.map { |path| build_file.call(path) }
+        spec_objs = config.spec_files.map { |path| build_file.call(objs_build_dir, path) }
         objs += spec_objs
       end
 
       # Generate init file.
       init_txt = <<EOS
-#import <UIKit/UIKit.h>
-
 extern "C" {
     void ruby_sysinit(int *, char ***);
     void ruby_init(void);
@@ -214,17 +238,21 @@ RubyMotionInit(int argc, char **argv)
 	    const char *progname = argv[0];
 	    ruby_script(progname);
 	}
+#if !__LP64__
 	try {
+#endif
 	    void *self = rb_vm_top_self();
 EOS
       app_objs.each do |_, init_func|
         init_txt << "#{init_func}(self, 0);\n"
       end
       init_txt << <<EOS
+#if !__LP64__
 	}
 	catch (...) {
 	    rb_rb2oc_exc_handler();
 	}
+#endif
 	initialized = true;
     }
 }
@@ -249,112 +277,7 @@ EOS
       end
 
       # Generate main file.
-      main_txt = <<EOS
-#import <UIKit/UIKit.h>
-
-extern "C" {
-    void rb_define_global_const(const char *, void *);
-    void rb_rb2oc_exc_handler(void);
-    void rb_exit(int);
-    void RubyMotionInit(int argc, char **argv);
-EOS
-      if config.spec_mode
-        spec_objs.each do |_, init_func|
-          main_txt << "void #{init_func}(void *, void *);\n"
-        end
-      end
-      main_txt << <<EOS
-}
-EOS
-
-      if config.spec_mode
-        main_txt << <<EOS
-@interface SpecLauncher : NSObject
-@end
-
-#include <dlfcn.h>
-
-@implementation SpecLauncher
-
-+ (id)launcher
-{
-    [UIApplication sharedApplication];
-
-    // Enable simulator accessibility.
-    // Thanks http://www.stewgleadow.com/blog/2011/10/14/enabling-accessibility-for-ios-applications/
-    NSString *simulatorRoot = [[[NSProcessInfo processInfo] environment] objectForKey:@"IPHONE_SIMULATOR_ROOT"];
-    if (simulatorRoot != nil) {
-        void *appSupportLibrary = dlopen([[simulatorRoot stringByAppendingPathComponent:@"/System/Library/PrivateFrameworks/AppSupport.framework/AppSupport"] fileSystemRepresentation], RTLD_LAZY);
-        CFStringRef (*copySharedResourcesPreferencesDomainForDomain)(CFStringRef domain) = (CFStringRef (*)(CFStringRef)) dlsym(appSupportLibrary, "CPCopySharedResourcesPreferencesDomainForDomain");
-
-        if (copySharedResourcesPreferencesDomainForDomain != NULL) {
-            CFStringRef accessibilityDomain = copySharedResourcesPreferencesDomainForDomain(CFSTR("com.apple.Accessibility"));
-
-            if (accessibilityDomain != NULL) {
-                CFPreferencesSetValue(CFSTR("ApplicationAccessibilityEnabled"), kCFBooleanTrue, accessibilityDomain, kCFPreferencesAnyUser, kCFPreferencesAnyHost);
-                CFRelease(accessibilityDomain);
-            }
-        }
-    }
-
-    // Load the UIAutomation framework.
-    dlopen("/Developer/Library/PrivateFrameworks/UIAutomation.framework/UIAutomation", RTLD_LOCAL);
-
-    SpecLauncher *launcher = [[self alloc] init];
-    [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
-    return launcher; 
-}
-
-- (void)appLaunched:(id)notification
-{
-    // Give a bit of time for the simulator to attach...
-    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
-}
-
-- (void)runSpecs
-{
-EOS
-        spec_objs.each do |_, init_func|
-          main_txt << "#{init_func}(self, 0);\n"
-        end
-        main_txt << "[NSClassFromString(@\"Bacon\") performSelector:@selector(run)];\n"
-        main_txt << <<EOS
-}
-
-@end
-EOS
-      end
-      main_txt << <<EOS
-int
-main(int argc, char **argv)
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    int retval = 0;
-    try {
-EOS
-      main_txt << "[SpecLauncher launcher];\n" if config.spec_mode
-      main_txt << <<EOS
-        RubyMotionInit(argc, argv);
-EOS
-      rubymotion_env =
-        if config.spec_mode
-          'test'
-        else
-          config.development? ? 'development' : 'release'
-        end
-      main_txt << "rb_define_global_const(\"RUBYMOTION_ENV\", @\"#{rubymotion_env}\");\n"
-      main_txt << "rb_define_global_const(\"RUBYMOTION_VERSION\", @\"#{Motion::Version}\");\n"
-      main_txt << <<EOS
-        retval = UIApplicationMain(argc, argv, nil, @"#{config.delegate_class}");
-        rb_exit(retval);
-    }
-    catch (...) {
-	rb_rb2oc_exc_handler();
-    }
-    [pool release];
-    return retval;
-}
-EOS
+      main_txt = config.main_cpp_file_txt(spec_objs)
  
       # Compile main file.
       main = File.join(objs_build_dir, 'main.mm')
@@ -373,6 +296,10 @@ EOS
 
       # Link executable.
       main_exec = config.app_bundle_executable(platform)
+      unless File.exist?(File.dirname(main_exec))
+        App.info 'Create', File.dirname(main_exec)
+        FileUtils.mkdir_p(File.dirname(main_exec))
+      end
       main_exec_created = false
       if !File.exist?(main_exec) \
           or File.mtime(config.project_file) > File.mtime(main_exec) \
@@ -382,16 +309,28 @@ EOS
           or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        framework_search_paths = config.framework_search_paths.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
-        frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
+        framework_search_paths = (config.framework_search_paths + embedded_frameworks.map { |x| File.dirname(x) }).uniq.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
+        frameworks = (config.frameworks_dependencies + embedded_frameworks.map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
           libs << vendor_project.libs.map { |x|
-            (vendor_project.opts[:force_load] ? '-force_load ' : '') + "\"#{x}\""
+            (vendor_project.opts[:force_load] ? '-force_load ' : '-ObjC ') + "\"#{x}\""
           }
         end.join(' ')
         sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
+
+        # Change the install name of embedded frameworks.
+        embedded_frameworks.each do |path|
+          res = `/usr/bin/otool -L \"#{main_exec}\"`.scan(/(.*#{File.basename(path)}.*)\s\(/)
+          if res and res[0] and res[0][0]
+            old_path = res[0][0].strip
+            new_path = "@executable_path/../Frameworks/" + old_path.scan(/#{File.basename(path)}.*/)[0]
+            sh "/usr/bin/install_name_tool -change \"#{old_path}\" \"#{new_path}\" \"#{main_exec}\""
+          else
+            App.warn "Cannot locate and fix install name path of embedded framework `#{path}' in executable `#{main_exec}', application might not start"
+          end
+        end
       end
 
       # Create bundle/Info.plist.
@@ -439,7 +378,22 @@ EOS
         end
       end
 
+      # Copy embedded frameworks.
+      unless embedded_frameworks.empty?
+        app_frameworks = File.join(config.app_bundle(platform), 'Frameworks')
+        FileUtils.mkdir_p(app_frameworks)
+        embedded_frameworks.each do |src_path|
+          dest_path = File.join(app_frameworks, File.basename(src_path))
+          if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
+            App.info 'Copy', src_path
+            FileUtils.cp_r(src_path, dest_path)
+          end 
+        end
+      end
+
       # Copy resources, handle subdirectories.
+      app_resources_dir = config.app_resources_dir(platform)
+      FileUtils.mkdir_p(app_resources_dir)
       reserved_app_bundle_files = [
         '_CodeSignature/CodeResources', 'CodeResources', 'embedded.mobileprovision',
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
@@ -459,7 +413,7 @@ EOS
         if reserved_app_bundle_files.include?(res)
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
-        dest_path = File.join(bundle_path, res)
+        dest_path = File.join(app_resources_dir, res)
         if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
           FileUtils.mkdir_p(File.dirname(dest_path))
           App.info 'Copy', res_path
@@ -469,7 +423,7 @@ EOS
 
       # Delete old resource files.
       resources_files = resources_paths.map { |x| path_on_resources_dirs(config.resources_dirs, x) }
-      Dir.chdir(bundle_path) do
+      Dir.chdir(app_resources_dir) do
         Dir.glob('*').each do |bundle_res|
           bundle_res = convert_filesystem_encoding(bundle_res)
           next if File.directory?(bundle_res)
@@ -512,110 +466,17 @@ EOS
       end
     end
 
-    def codesign(config, platform)
-      bundle_path = config.app_bundle(platform)
-      raise unless File.exist?(bundle_path)
-
-      # Create bundle/ResourceRules.plist.
-      resource_rules_plist = File.join(bundle_path, 'ResourceRules.plist')
-      unless File.exist?(resource_rules_plist)
-        App.info 'Create', resource_rules_plist
-        File.open(resource_rules_plist, 'w') do |io|
-          io.write(<<-PLIST)
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-        <key>rules</key>
-        <dict>
-                <key>.*</key>
-                <true/>
-                <key>Info.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>10</real>
-                </dict>
-                <key>ResourceRules.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>100</real>
-                </dict>
-        </dict>
-</dict>
-</plist>
-PLIST
+    class << self
+      def common_build_dir
+        dir = File.expand_path("~/Library/RubyMotion/build")
+        unless File.exist?(dir)
+          begin
+            FileUtils.mkdir_p dir
+          rescue
+          end
         end
+        dir
       end
-
-      # Copy the provisioning profile.
-      bundle_provision = File.join(bundle_path, "embedded.mobileprovision")
-      if !File.exist?(bundle_provision) or File.mtime(config.provisioning_profile) > File.mtime(bundle_provision)
-        App.info 'Create', bundle_provision
-        FileUtils.cp config.provisioning_profile, bundle_provision
-      end
-
-      # Codesign.
-      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
-      if File.mtime(config.project_file) > File.mtime(bundle_path) \
-          or !system("#{codesign_cmd} --verify \"#{bundle_path}\" >& /dev/null")
-        App.info 'Codesign', bundle_path
-        entitlements = File.join(config.versionized_build_dir(platform), "Entitlements.plist")
-        File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
-        sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
-      end
-    end
-
-    def archive(config)
-      # Create .ipa archive.
-      app_bundle = config.app_bundle('iPhoneOS')
-      archive = config.archive
-      if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
-        App.info 'Create', archive
-        tmp = "/tmp/ipa_root"
-        sh "/bin/rm -rf #{tmp}"
-        sh "/bin/mkdir -p #{tmp}/Payload"
-        sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
-        Dir.chdir(tmp) do
-          sh "/bin/chmod -R 755 Payload"
-          sh "/usr/bin/zip -q -r archive.zip Payload"
-        end
-        sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
-      end
-
-=begin
-      # Create .xcarchive. Only in release mode.
-      if config.release?
-        xcarchive = File.join(File.dirname(app_bundle), config.name + '.xcarchive')
-        if !File.exist?(xcarchive) or File.mtime(app_bundle) > File.mtime(xcarchive)
-          App.info 'Create', xcarchive
-          apps = File.join(xcarchive, 'Products', 'Applications')
-          FileUtils.mkdir_p apps
-          sh "/bin/cp -r \"#{app_bundle}\" \"#{apps}\""
-          dsyms = File.join(xcarchive, 'dSYMs')
-          FileUtils.mkdir_p dsyms
-          sh "/bin/cp -r \"#{config.app_bundle_dsym('iPhoneOS')}\" \"#{dsyms}\""
-          app_path = "Applications/#{config.name}.app"
-          info_plist = {
-            'ApplicationProperties' => {
-              'ApplicationPath' => app_path,
-              'CFBundleIdentifier' => config.identifier,
-              'IconPaths' => config.icons.map { |x| File.join(app_path, x) },
-            },
-            'ArchiveVersion' => 1,
-            'CreationDate' => Time.now,
-            'Name' => config.name,
-            'SchemeName' => config.name
-          }
-          File.open(File.join(xcarchive, 'Info.plist'), 'w') do |io|
-            io.write Motion::PropertyList.to_s(info_plist)
-          end 
-        end
-      end
-=end
     end
   end
 
@@ -629,8 +490,9 @@ PLIST
 
     @file_paths = []
 
-    def initialize(paths)
+    def initialize(paths, dependencies)
       @file_paths = paths.flatten.sort
+      @dependencies = dependencies
     end
 
     def cyclic?(dependencies, def_path, ref_path)
@@ -662,7 +524,7 @@ PLIST
         end
       end
 
-      dependency = {}
+      dependency = @dependencies.dup
       consts_defined.each do |const, def_path|
         if consts_referred[const]
           consts_referred[const].each do |ref_path|
@@ -694,26 +556,79 @@ PLIST
       end
 
       def on_const_ref(args)
-        type, const_name, position = args
-        @defined << const_name
+        args
       end
 
       def on_var_field(args)
-        type, name, position = args
-        if type == :@const
-          @defined << name
-        end
+        args
       end
 
       def on_var_ref(args)
         type, name, position = args
         if type == :@const
           @referred << name
+          return [:referred, name]
         end
       end
 
       def on_const_path_ref(parent, args)
-        on_var_ref(args)
+        type, name, position = args
+        if type == :@const
+          @referred << name
+          if parent && parent[0] == :referred
+            register_referred_constants(parent[1], name)
+          end
+        end
+        args
+      end
+
+      def on_assign(const, *args)
+        type, name, position = const
+        if type == :@const
+          @defined << name
+          return [:defined, name]
+        end
+      end
+
+      def on_module(const, *args)
+        handle_module_class_event(const, args)
+      end
+
+      def on_class(const, *args)
+        handle_module_class_event(const, args)
+      end
+
+      def handle_module_class_event(const, *args)
+        type, name, position = const
+        if type == :@const
+          @defined << name
+          @referred.delete(name)
+          children = args.flatten
+          children.each_with_index do |key, i|
+            if key == :defined
+              register_defined_constants(name, children[i+1])
+            end
+          end
+          return [:defined, name]
+        end
+      end
+
+      def register_defined_constants(parent, child)
+        construct_nest_constants!(@defined, parent, child)
+      end
+
+      def register_referred_constants(parent, child)
+        construct_nest_constants!(@referred, parent, child)
+      end
+
+      def construct_nest_constants!(consts, parent, child)
+        nested = []
+        consts.each do |const|
+          if md = const.match(/^([^:]+)/)
+            nested << "#{parent}::#{const}" if md[0] == child
+          end
+        end
+        consts.concat(nested)
       end
     end
   end

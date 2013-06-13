@@ -21,6 +21,22 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion
-  Version = "2.1"
-end
+module Motion; module Project
+  class RICommand < Command
+    self.name = 'ri'
+    self.help = 'Display API reference'
+  
+    def run(args)
+      if args.size <= 0
+        die "Usage: motion ri <API-name>"
+      end
+ 
+      line = "/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc "
+      if pager = ENV['PAGER']
+        line << "-p #{pager} "
+      end
+      line << "#{args[0]}"
+      system(line)
+    end
+  end
+end; end

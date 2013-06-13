@@ -46,6 +46,7 @@ EOS
           when Hash
             str << indent_line("<dict>", indent)
             plist.each do |key, val|
+              key = key.to_s if key.is_a?(Symbol)
               raise "Hash key must be a string" unless key.is_a?(String)
               str << indent_line("<key>#{key}</key>", indent + 1)
               cat_element(val, str, indent + 1)

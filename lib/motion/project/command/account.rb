@@ -21,6 +21,20 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion
-  Version = "2.1"
-end
+module Motion; module Project
+  class AccountCommand < Command
+    self.name = 'account'
+    self.help = 'Access the software license account'
+  
+    def run(args)
+      unless args.empty?
+        die "Usage: motion account"
+      end
+  
+      license_key = read_license_key
+      email = guess_email_address
+  
+      system("open \"https://secure.rubymotion.com/account?license_key=#{license_key}&email=#{email}\"")
+    end
+  end
+end; end
