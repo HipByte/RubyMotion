@@ -1,3 +1,10 @@
+= RubyMotion 2.3 =
+
+  * Fixed a bug where the `RUBYMOTION_ENV' constant would not be defined before
+    executing the main scope of .rb application files, resulting in a const
+    lookup error in case the constant was trying to be accessed within a file
+    or module scope.
+
 = RubyMotion 2.2 =
 
   * Added iOS 7.0 and OS X 10.9 support. Xcode 5.0 DP must be installed and
