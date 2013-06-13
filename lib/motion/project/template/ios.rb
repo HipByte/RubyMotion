@@ -106,7 +106,7 @@ END
   xcode = App.config.xcode_dir
   env = "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\""
   env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
-  env << ' NSZombieEnabled=YES' if ENV['zombie']
+  env << ' NSZombieEnabled=YES' if ENV['NSZombieEnabled']
   sim = File.join(App.config.bindir, 'ios/sim')
   debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
   app_args = (ENV['args'] or '')
