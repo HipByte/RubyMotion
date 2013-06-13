@@ -186,7 +186,6 @@ main(int argc, char **argv)
     try {
 #endif
         RubyMotionInit(argc, argv);
-        #{define_global_env_txt}
         NSApplication *app = [NSApplication sharedApplication];
         [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
 EOS

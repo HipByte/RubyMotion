@@ -217,6 +217,7 @@ extern "C" {
     void rb_vm_init_jit(void);
     void rb_vm_aot_feature_provide(const char *, void *);
     void *rb_vm_top_self(void);
+    void rb_define_global_const(const char *, void *);
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
 EOS
@@ -243,6 +244,7 @@ RubyMotionInit(int argc, char **argv)
 #endif
 	    void *self = rb_vm_top_self();
 EOS
+      init_txt << config.define_global_env_txt
       app_objs.each do |_, init_func|
         init_txt << "#{init_func}(self, 0);\n"
       end
