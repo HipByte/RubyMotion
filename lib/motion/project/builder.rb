@@ -168,7 +168,7 @@ module Motion; module Project;
 
       # Resolve file dependencies
       if config.detect_dependencies == true
-        config.dependencies = Dependency.new(config.files, config.dependencies).run
+        config.dependencies = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
       end
 
       # Feed builders with work.

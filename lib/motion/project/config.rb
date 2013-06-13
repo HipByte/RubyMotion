@@ -51,7 +51,7 @@ module Motion; module Project
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
-      :template, :detect_dependencies
+      :template, :detect_dependencies, :exclude_from_detect_dependencies
 
     ConfigTemplates = {}
 
@@ -80,6 +80,7 @@ module Motion; module Project
       @specs_dir = File.join(project_dir, 'spec')
       @version = '1.0'
       @detect_dependencies = true
+      @exclude_from_detect_dependencies = []
     end
 
     OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
