@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
 #import <ApplicationServices/ApplicationServices.h>
 
 #import <objc/message.h>
@@ -954,6 +955,16 @@ gdb_commands_file(void)
 	exit(1);
     }
 
+    // Open simulator to the foreground.
+    if (!spec_mode) {
+	NSArray *ary = [NSRunningApplication runningApplicationsWithBundleIdentifier:
+	    @"com.apple.iphonesimulator"];
+	if (ary != nil && [ary count] == 1) {
+	    [[ary objectAtIndex:0] activateWithOptions:
+		NSApplicationActivateIgnoringOtherApps];
+	}
+    }
+
     if (debug_mode == DEBUG_GDB) {
 	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
 		@selector(simulatedApplicationPID));
@@ -1202,11 +1213,6 @@ main(int argc, char **argv)
 	current_session = session;
 	signal(SIGINT, sigterminate);
 	signal(SIGPIPE, sigcleanup);
-    }
-
-    // Open simulator to the foreground.
-    if (!spec_mode) {
-	system("/usr/bin/open -a \"iPhone Simulator\"");
     }
 
     [[NSRunLoop mainRunLoop] run];

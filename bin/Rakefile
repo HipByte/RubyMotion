@@ -27,7 +27,7 @@ task :sim do
     bin = File.join(template, 'sim')
     if !File.exist?(bin) or File.mtime('sim.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
       define = "-DSIMULATOR_#{template.upcase}"
-      sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{define} -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 sim.m -o \"#{bin}\" -framework Foundation -framework ApplicationServices -L. -ledit -Wl,-rpath,/usr/lib -I."
+      sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{define} -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 sim.m -o \"#{bin}\" -framework Foundation -framework ApplicationServices -framework AppKit -L. -ledit -Wl,-rpath,/usr/lib -I."
     sh "#{STRIP} -x \"#{bin}\""
     end
   end
