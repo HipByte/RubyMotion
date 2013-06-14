@@ -5,6 +5,7 @@
     lookup error in case the constant was trying to be accessed within a file
     or module scope.
   * Improve string interpolation performance. 40% faster.
+  * Improve String#delete performance. 5 times faster.
 
 = RubyMotion 2.2 =
 
