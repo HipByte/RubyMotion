@@ -4,6 +4,9 @@
     executing the main scope of .rb application files, resulting in a const
     lookup error in case the constant was trying to be accessed within a file
     or module scope.
+  * [iOS] Fixed a bug where `rake simulator' would open 2 simulator apps at
+    the same time, due to the fact that the application name changed between
+    Xcode 4.x and Xcode 5.
 
 = RubyMotion 2.2 =
 
