@@ -50,7 +50,10 @@ desc "Build everything"
 task :build => ['build:development', 'build:release']
 
 desc "Run the project"
-task :run => 'build:development' do
+task :run do
+  unless ENV["skip_build"]
+    Rake::Task["build:development"].invoke
+  end
   exec = App.config.app_bundle_executable('MacOSX')
   env = ''
   env << 'SIM_SPEC_MODE=1' if App.config.spec_mode
