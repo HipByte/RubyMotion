@@ -48,11 +48,11 @@ module Motion; module Project
     def initialize(app_name, template_name)
       @name = @app_name = app_name
       @template_name = template_name.to_s
-      @repository = Repository.new(@template_name)
+      repository = Repository.new(@template_name)
 
-      if @repository.exist?
-        @repository.clone
-        @template_name = @repository.name
+      if repository.exist?
+        repository.clone
+        @template_name = repository.name
       end
 
       @template_directory = self.class.all_templates[@template_name]
