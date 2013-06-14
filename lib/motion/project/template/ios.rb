@@ -49,13 +49,8 @@ namespace :build do
   end
 end
 
-
-desc "Build and run the simulator"
-task :simulator => ['build:simulator', 'sim'] do
-end
-
 desc "Run the simulator"
-task :sim do
+task :simulator => ['build:simulator'] do
   app = App.config.app_bundle('iPhoneSimulator')
   target = ENV['target'] || App.config.sdk_version
 
