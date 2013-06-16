@@ -11,7 +11,9 @@
   * Improve String#delete performance. 5 times faster.
   * Added git repository support for templates.
     (Ex motion create --template=https://github.com/IconoclastLabs/smart-ios.git test)
-	Thanks to Gant Laborde and Matt Garrison for the patch (pull request #92).
+    Thanks to Gant Laborde and Matt Garrison for the patch (pull request #92).
+  * Fixed the build error with Xcode 3.
+    Thanks to Matt Garriott for the patch (pull request #97).
 
 = RubyMotion 2.2 =
 
