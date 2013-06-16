@@ -10,7 +10,7 @@
   * Improve string interpolation performance. 40% faster.
   * Improve String#delete performance. 5 times faster.
   * Added `output=colorized' in `rake spec'.
-  * Added 'skip_build' option to 'rake simulater' (ios) and 'rake run' (osx) to
+  * Added `skip_build' option to `rake simulater' (ios) and `rake run' (osx) to
     to run simulator without recompiling.
   * Added git repository support for templates.
     (Ex motion create --template=https://github.com/IconoclastLabs/smart-ios.git test)
@@ -19,7 +19,7 @@
     Thanks to Matt Garriott for the patch (pull request #97).
   * Added callback after created controller in spec.
     Thanks to Katsuyoshi Ito for the patch (pull request #96).
-  * Set `spec_mode` before running `setup` block in Rakefile.
+  * Set `spec_mode' before running `setup' block in Rakefile.
     Thanks to Clay Allsopp for the patch (pull request #84).
   * Added `app.exclude_from_detect_dependencies'.
     Thanks to Clay Allsopp for the patch (pull request #81).
