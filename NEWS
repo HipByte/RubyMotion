@@ -18,6 +18,8 @@
     Thanks to Matt Garriott for the patch (pull request #97).
   * Added callback after created controller in spec.
     Thanks to Katsuyoshi Ito for the patch (pull request #96).
+  * Set `spec_mode` before running `setup` block in Rakefile.
+    Thanks to Clay Allsopp for the patch (pull request #84).
 
 = RubyMotion 2.2 =
 
