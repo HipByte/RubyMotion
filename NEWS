@@ -9,6 +9,9 @@
     Xcode 4.x and Xcode 5.
   * Improve string interpolation performance. 40% faster.
   * Improve String#delete performance. 5 times faster.
+  * Added git repository support for templates.
+    (Ex motion create --template=https://github.com/IconoclastLabs/smart-ios.git test)
+	Thanks to Gant Laborde and Matt Garrison for the patch (pull request #92).
 
 = RubyMotion 2.2 =
 
