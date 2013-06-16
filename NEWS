@@ -9,6 +9,7 @@
     Xcode 4.x and Xcode 5.
   * Improve string interpolation performance. 40% faster.
   * Improve String#delete performance. 5 times faster.
+  * Added `output=colorized' in `rake spec'.
   * Added 'skip_build' option to 'rake simulater' (ios) and 'rake run' (osx) to
     to run simulator without recompiling.
   * Added git repository support for templates.
