@@ -7,6 +7,8 @@
   * [iOS] Fixed a bug where `rake simulator' would open 2 simulator apps at
     the same time, due to the fact that the application name changed between
     Xcode 4.x and Xcode 5.
+  * Fixed a bug in defined?(super) where it would return the incorrect value if
+    it uses in included module.
   * Improve string interpolation performance. 40% faster.
   * Improve String#delete performance. 5 times faster.
   * Added `output=colorized' in `rake spec'.
