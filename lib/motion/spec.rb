@@ -52,7 +52,7 @@ module Bacon
         puts "##teamcity[testFailed timestamp = '#{java_time}' message = '#{escape_message(error)}' name = '#{escape_message(@@description)}']\n\n"
       end
       duration = ((Time.now - @@started) * 1000).to_i
-      puts "##teamcity[testFinished timestamp = '#{java_time}' duration = '#{duration}' name = '#{escape_message(@@description)}']\n\n"     
+      puts "##teamcity[testFinished timestamp = '#{java_time}' duration = '#{duration}' name = '#{escape_message(@@description)}']\n\n"
     end
 
     def handle_summary
@@ -91,7 +91,7 @@ module Bacon
       end
 
       copy_of_text
-    end   
+    end
 
     def convert_time_to_java_simple_date(time)
       gmt_offset = time.gmt_offset
@@ -272,8 +272,8 @@ module Bacon
     'test_unit' => TestUnitOutput,
     'tap' => TapOutput,
     'knock' => KnockOutput,
-    'rubymine' => RubyMineOutput
-    'colorized' => ColorizedOutput
+    'rubymine' => RubyMineOutput,
+    'colorized' => ColorizedOutput,
   }
   extend(Outputs[ENV['output']] || SpecDoxOutput)
 
@@ -492,7 +492,7 @@ module Bacon
 
   class Context
     attr_reader :name, :block
-    
+
     def initialize(name, before = nil, after = nil, &block)
       @name = name
       @before, @after = (before ? before.dup : []), (after ? after.dup : [])
@@ -541,7 +541,7 @@ module Bacon
       Counter[:specifications] += 1
       @specifications << Specification.new(self, description, block, @before, @after)
     end
-    
+
     def should(*args, &block)
       if Counter[:depth]==0
         it('should '+args.first,&block)
