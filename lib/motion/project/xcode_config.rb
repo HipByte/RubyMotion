@@ -24,9 +24,8 @@
 module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
-      :weak_frameworks, :framework_search_paths, :libs, :resources_dirs,
-      :identifier, :codesign_certificate, :short_version, :entitlements,
-      :delegate_class
+      :weak_frameworks, :framework_search_paths, :libs, :identifier,
+      :codesign_certificate, :short_version, :entitlements, :delegate_class
 
     def initialize(project_dir, build_mode)
       super

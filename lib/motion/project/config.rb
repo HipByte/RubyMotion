@@ -47,7 +47,8 @@ module Motion; module Project
       end
     end
 
-    variable :name, :files, :build_dir, :specs_dir, :version, :motiondir
+    variable :name, :files, :build_dir, :specs_dir, :resources_dirs, :version,
+      :motiondir
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
