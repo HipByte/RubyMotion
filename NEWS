@@ -11,6 +11,7 @@
     it uses in included module.
   * Improve string interpolation performance. 40% faster.
   * Improve String#delete performance. 5 times faster.
+  * Improve Objective-C methods performance in String object. 50% faster.
   * Added `output=colorized' in `rake spec'.
   * Added `skip_build' option to `rake simulater' (ios) and `rake run' (osx) to
     to run simulator without recompiling.
