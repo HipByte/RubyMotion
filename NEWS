@@ -26,6 +26,8 @@
     Thanks to Clay Allsopp for the patch (pull request #84).
   * Added `app.exclude_from_detect_dependencies'.
     Thanks to Clay Allsopp for the patch (pull request #81).
+  * Fixed where it would remove '.nib' in resouces files even if it does not
+    exist '.xib'. Thanks to Kristian for the patch (pull request #98).
   * Fixed warning message would be displayed when it builds iOS 7 app.
 
 = RubyMotion 2.2 =
