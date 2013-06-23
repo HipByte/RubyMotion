@@ -44,15 +44,9 @@ task :clean do
   rm_rf(App.config.build_dir)
   App.config.vendor_projects.each { |vendor| vendor.clean }
   Dir.glob(App.config.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }).each do |p|
-    if p.include?('nib')
-      if File.exist?(p.gsub('nib', 'xib'))
-        App.info 'Delete', p
-        rm_rf p
-      end
-    else
-      App.info 'Delete', p
-      rm_rf p
-    end
+    next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
+    App.info 'Delete', p
+    rm_rf p
   end
 end
 
