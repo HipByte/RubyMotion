@@ -26,6 +26,7 @@
     Thanks to Clay Allsopp for the patch (pull request #84).
   * Added `app.exclude_from_detect_dependencies'.
     Thanks to Clay Allsopp for the patch (pull request #81).
+  * Fixed warning message would be displayed when it builds iOS 7 app.
 
 = RubyMotion 2.2 =
 
