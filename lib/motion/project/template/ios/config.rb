@@ -150,7 +150,7 @@ module Motion; module Project;
     end
 
     def cflags(platform, cplusplus)
-      super + " -fobjc-legacy-dispatch -fobjc-abi-version=2"
+      super + " -g -fobjc-legacy-dispatch -fobjc-abi-version=2"
     end
 
     def ldflags(platform)
