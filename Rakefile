@@ -84,19 +84,22 @@ task :install do
   data = ['./NEWS']
   data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH))
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
-  [['ios', IOS_SDK_VERSIONS]].each do |name, sdk_versions|
+  [['ios', IOS_SDK_VERSIONS + ['7.0']]].each do |name, sdk_versions|
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*"))
     end
   end
-  [['osx', OSX_SDK_VERSIONS]].each do |name, sdk_versions|
+  [['osx', OSX_SDK_VERSIONS + ['10.9']]].each do |name, sdk_versions|
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*"))
     end
   end
+
+  # Android support is not ready yet.
+  data.delete_if { |x| x.match(/^.\/lib\/motion\/project\/template\/android/) }
 
 =begin
   # === 6.0 support (beta) ===
