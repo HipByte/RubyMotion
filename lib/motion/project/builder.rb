@@ -319,7 +319,13 @@ EOS
             (vendor_project.opts[:force_load] ? '-force_load ' : '-ObjC ') + "\"#{x}\""
           }
         end.join(' ')
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        linker_option = begin
+          m = config.deployment_target.match(/(\d+)/)
+          if m[0].to_i < 7
+            "-stdlib=libstdc++"
+          end
+        end || ""
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
 
         # Change the install name of embedded frameworks.
