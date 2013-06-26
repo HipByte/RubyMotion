@@ -69,3 +69,7 @@ task :ctags do
     sh "#{ctags} --options=\"#{config}\" #{bs_files.map { |x| '"' + x + '"' }.join(' ')}"
   end
 end
+
+def spec_mode?
+  Rake.application.top_level_tasks.include? 'spec'
+end
