@@ -3,6 +3,9 @@
   * [iOS] fix a bug in `rake device' where it could not build app using Xcode
     5.0 DP 2 which has deployment target to less than iOS 7.0.
   * Fixed memory leaks in NSMutableArray#insert.
+  * Fixed memory leaks where it would parse bridgesupport file in compile time.
+  * [iOS] Reduced file size in Default-568h@2x.png.
+    Thanks to Gant Laborde for the patch (pull request #100).
 
 = RubyMotion 2.3 =
 
