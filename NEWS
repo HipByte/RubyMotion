@@ -6,8 +6,8 @@
   * Fixed memory leaks where it would parse bridgesupport file in compile time.
   * [iOS] Reduced file size in Default-568h@2x.png.
     Thanks to Gant Laborde for the patch (pull request #100).
-  * Fixed a bug where it would cause `not precompiled' error when it access to
-    property which was declared as BOOL type.
+  * Fixed a bug where it would cause `not precompiled' error when it call the
+    method which has the BOOL type argument.
 
 = RubyMotion 2.3 =
 
