@@ -175,18 +175,41 @@ module Motion; module Project;
         when :ipad, 2
           "iPad"
       end
-      case retina
-        when 'true'
-          device + ((family == 1 and target >= '6.0') ? ' (Retina 4-inch)' : ' (Retina)')
-        when '3.5'
-          device + ' (Retina 3.5-inch)'
-        when '4'
-          device + ' (Retina 4-inch)'
-        else
-          device
+
+      ver = xcode_version[0].match(/(\d+)/)
+      if ver[0].to_i < 5
+        device + device_retina_xcode4_string(family, target, retina)
+      else
+        device + device_retina_xcode5_string(family, target, retina)
       end
     end
 
+    def device_retina_xcode4_string(family, target, retina)
+      case retina
+      when 'true'
+        (family == 1 and target >= '6.0') ? ' (Retina 4-inch)' : ' (Retina)'
+      when '3.5'
+        ' (Retina 3.5-inch)'
+      when '4'
+        ' (Retina 4-inch)'
+      else
+        ''
+      end
+    end
+
+    def device_retina_xcode5_string(family, target, retina)
+      case retina
+      when 'true'
+        (family == 1 and target >= '6.0') ? ' Retina (4-inch)' : ' Retina'
+      when '3.5'
+        ' Retina (3.5-inch)'
+      when '4'
+        ' Retina (4-inch)'
+      else
+        ''
+      end
+    end
+    
     def device_family_ints
       ary = @device_family.is_a?(Array) ? @device_family : [@device_family]
       ary.map { |family| device_family_int(family) }
