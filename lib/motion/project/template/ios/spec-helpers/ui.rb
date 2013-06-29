@@ -167,8 +167,8 @@ module Bacon
     # TODO
     # * :navigation => true
     # * :tab => true
-    def tests(controller_class, options = {})
-      @controller_class, @options = controller_class, options
+    def tests(controller_class, options = {}, &block)
+      @controller_class, @options, @after_created_block = controller_class, options, block
       extend Bacon::Functional::API
       extend Bacon::Functional::ContextExt
     end
@@ -220,7 +220,11 @@ module Bacon
           else
             c = @controller_class.alloc.init
           end
-          send(@options[:after_created], c) if @options[:after_created]
+          if @after_created_block
+            @after_created_block.call(c)
+          else
+            send(@options[:after_created], c) if @options[:after_created]
+          end
           c
         end
       end
