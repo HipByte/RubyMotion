@@ -200,7 +200,7 @@ module Motion; module Project;
     def device_retina_xcode5_string(family, target, retina)
       case retina
       when 'true'
-        (family == 1) ? ' Retina (4-inch)' : ' Retina'
+        (family == 1 and target >= '6.0') ? ' Retina (4-inch)' : ' Retina'
       when '3.5'
         ' Retina (3.5-inch)'
       when '4'
