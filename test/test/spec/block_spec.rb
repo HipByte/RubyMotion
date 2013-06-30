@@ -60,3 +60,16 @@ describe "An object accepting block in constructor" do
     $test_dealloc.should == true
   end
 end
+
+# http://hipbyte.myjetbrains.com/youtrack/issue/RM-118
+describe "C-level blocks created inside GCD" do
+  it "are not prematurely released" do
+    autorelease_pool do
+      Dispatch::Queue.main.async do
+        [1,2,3].enumerateObjectsUsingBlock(lambda do |obj, idx, stop_ptr|
+        end)
+      end
+    end
+    true.should == true # no crash
+  end
+end
