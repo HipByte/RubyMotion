@@ -9,6 +9,8 @@
   * [iOS] Fixed where `rake retina=3.5' does not work with Xcode 5 DP-2.
   * Fixed a bug where it would cause `not precompiled' error when it call the
     method which has the BOOL type argument.
+  * Added the block to setup controller in spec.
+    Thanks to Katsuyoshi Ito for the patch (pull request #104).
 
 = RubyMotion 2.3 =
 
