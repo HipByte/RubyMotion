@@ -5,8 +5,8 @@
   * Fixed memory leaks in NSMutableArray#insert.
   * Fixed memory leaks where it would parse bridgesupport file in compile time.
   * Fixed a bug in NSMutableDictionary#delete where it will cause a crash if it
-    invoke removeObjectForKey for the object which was created by
-    NSJSONReadingMutableContainers.
+    would use the result of NSMutableDictionary#delete on the receiver object
+    which was created by NSJSONReadingMutableContainers.
   * [iOS] Reduced file size in Default-568h@2x.png.
     Thanks to Gant Laborde for the patch (pull request #100).
   * [iOS] Fixed where `rake retina=3.5' does not work with Xcode 5 DP-2.
