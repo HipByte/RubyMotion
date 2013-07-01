@@ -8,10 +8,31 @@ describe "block dvars" do
     test_block_dvars_proc.call.should == '123456' 
   end
 
-  it "change the store of related lvars" do
+  it "change the store of related lvars following the block definition" do
     x = '123'
-    Proc.new { x += '456' }.call
+    lambda { x += '456' }.call
     x.should == '123456'
+  end
+
+  it "change the store of related lvars following the block definition even if it's enclosed in another block" do
+    x = '123'
+    if Object.new # should not optimize
+      lambda { x += '456' }.call
+    end
+    x.should == '123456'
+  end
+
+  it "change the store of related lvars before the block definition" do
+    x = 1
+    again = true
+    while true
+      x += 1
+      1.times { x += 1 }
+      should_loop = again
+      again = false
+      break unless should_loop
+    end
+    x.should == 5
   end
 
   it "are released after the parent block is dispatched" do
@@ -40,6 +61,34 @@ describe "block dvars" do
       Proc.new { o.inspect }
     end
     $test_dealloc.should == true
+  end
+
+  it "can be nested" do
+    x = 1
+    1.times do
+      x += 1
+      x.should == 2
+      1.times do
+        x += 1
+        x.should == 3
+        1.times do
+          x += 1
+          x.should == 4
+          1.times do
+            x += 1
+            x.should == 5
+            x += 1
+          end
+          x.should == 6
+          x += 1
+        end
+        x.should == 7
+        x += 1
+      end
+      x.should == 8
+      x += 1
+    end 
+    x.should == 9
   end
 end
 
