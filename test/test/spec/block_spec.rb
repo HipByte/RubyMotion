@@ -63,7 +63,18 @@ describe "block dvars" do
     $test_dealloc.should == true
   end
 
-  it "can be nested" do
+  it "can be nested (1)" do
+    ary = []
+    2.times do |i|
+      ary += [i.to_s]
+      2.times do |j|
+        ary += [j.to_s]
+      end
+    end
+    ary.should == ["0", "0", "1", "1", "0", "1"]
+  end
+
+  it "can be nested (2)" do
     x = 1
     1.times do
       x += 1
@@ -89,6 +100,19 @@ describe "block dvars" do
       x += 1
     end 
     x.should == 9
+  end
+
+  def schedule_on_main(*args, &blk)
+    cb = proc do
+      blk.call(*args)
+    end
+    ::Dispatch::Queue.main.async &cb
+  end
+  it "are retained by Dispatch::Queue#async" do
+    schedule_on_main(42) do |n|
+      n.should == 42
+    end
+    sleep 0.5
   end
 end
 
@@ -120,5 +144,38 @@ describe "C-level blocks created inside GCD" do
       end
     end
     true.should == true # no crash
+  end
+end
+
+describe "self" do
+  class TestSelfRetained
+    def test
+      lambda { self }
+    end
+    def test2
+      1.times { self }
+    end
+    def dealloc
+      $test_dealloc = true
+      super
+    end
+  end
+
+  it "is retained by the block created within its context" do
+    $test_dealloc = false
+    autorelease_pool do
+      @b = nil
+      autorelease_pool { @b = TestSelfRetained.new.test }
+      $test_dealloc.should == false
+      @b.call.class.should == TestSelfRetained
+      @b = nil
+    end
+    $test_dealloc.should == true
+  end
+
+  it "is released when the block is reclaimed" do
+    $test_dealloc = false
+    autorelease_pool { TestSelfRetained.new.test2 }
+    $test_dealloc.should == true
   end
 end
