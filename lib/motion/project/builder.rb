@@ -131,7 +131,7 @@ module Motion; module Project;
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
             sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
   
-            [bc, asm].each { |x| File.unlink(x) }
+            [bc, asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
           end
    
