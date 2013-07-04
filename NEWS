@@ -16,6 +16,9 @@
     method which has the BOOL type argument.
   * Added the block to setup controller in spec.
     Thanks to Katsuyoshi Ito for the patch (pull request #104).
+  * Fixed the `rake build' task to honor the `keep_temps' environment variable.
+    If set, temporary files (such as LLVM bitcode and assembly) will not be
+    removed from the build directory. To be used for debugging only.
 
 = RubyMotion 2.3 =
 
