@@ -9,6 +9,8 @@
     which was created by NSJSONReadingMutableContainers.
   * Fixed a bug where it could not build the 3rd-party library if file path of
     app contains the spaces.
+  * fix a bug in Kernel#Array() where it would return incorrected value if it
+    passed NSArray as argument.
   * [iOS] Reduced file size in Default-568h@2x.png.
     Thanks to Gant Laborde for the patch (pull request #100).
   * [iOS] Fixed where `rake retina=3.5' does not work with Xcode 5 DP-2.
