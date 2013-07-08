@@ -35,6 +35,16 @@ describe "block dvars" do
     x.should == 5
   end
 
+  def test_lvar_dvar_reassignment
+    value = nil
+    callbacks = lambda do |value|; value; end
+    value = *(callbacks.call('42'))
+  end
+  it "can be re-assigned a new value after the block definition" do
+    obj = test_lvar_dvar_reassignment
+    obj.should == ['42']
+  end
+
   it "are released after the parent block is dispatched" do
     $test_dealloc = false
     autorelease_pool do
@@ -109,10 +119,18 @@ describe "block dvars" do
     ::Dispatch::Queue.main.async &cb
   end
   it "are retained by Dispatch::Queue#async" do
-    schedule_on_main(42) do |n|
-      n.should == 42
+    schedule_on_main(42) {}
+    42.should == 42 # no crash
+  end
+
+  class TestDefineMethod
+    def self.create_foo(o)
+      define_method :foo { o }
     end
-    sleep 0.5
+  end
+  it "are retained when the block is transformed into a Method object" do
+    autorelease_pool { TestDefineMethod.create_foo('12345') }
+    TestDefineMethod.new.foo.should == '12345'
   end
 end
 
@@ -143,6 +161,7 @@ describe "C-level blocks created inside GCD" do
         end)
       end
     end
+    sleep 1
     true.should == true # no crash
   end
 end
