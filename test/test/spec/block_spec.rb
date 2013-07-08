@@ -41,8 +41,22 @@ describe "block dvars" do
     value = *(callbacks.call('42'))
   end
   it "can be re-assigned a new value after the block definition" do
-    obj = test_lvar_dvar_reassignment
-    obj.should == ['42']
+    autorelease_pool do
+      obj = test_lvar_dvar_reassignment
+      obj.should == ['42']
+    end
+  end
+
+  def test_lvar_dvar_masign_reassignment
+    value = nil
+    callbacks = lambda do |value|; value; end
+    value, rest = *(callbacks.call('42'))
+  end
+  it "can be re-assigned a new value with a multiple-assignment instruction after the block definition" do
+    autorelease_pool do
+      obj = test_lvar_dvar_masign_reassignment
+      obj.should == ['42']
+    end
   end
 
   it "are released after the parent block is dispatched" do
