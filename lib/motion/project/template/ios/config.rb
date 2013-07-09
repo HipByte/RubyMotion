@@ -206,7 +206,11 @@ module Motion; module Project;
       when '4'
         ' Retina (4-inch)'
       else
-        ''
+        if target < '7.0'
+          ''
+        else
+          (family == 1) ? ' Retina (4-inch)' : ' Retina'
+        end
       end
     end
     
