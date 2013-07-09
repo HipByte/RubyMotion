@@ -14,6 +14,8 @@
   * [iOS] Reduced file size in Default-568h@2x.png.
     Thanks to Gant Laborde for the patch (pull request #100).
   * [iOS] Fixed where `rake retina=3.5' does not work with Xcode 5 DP-2.
+  * [iOS] Fixed a bug where `rake' command would re-launch an iOS 7 simulator
+    with Xcode 5 DP-2 every time.
   * Fixed a bug where it would cause `not precompiled' error when it call the
     method which has the BOOL type argument.
   * Added the block to setup controller in spec.
