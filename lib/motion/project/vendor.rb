@@ -121,7 +121,7 @@ EOS
           if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
             bs_cflags = (opts.delete(:bridgesupport_cflags) or '')
             bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
-            @config.gen_bridge_metadata(headers, bs_file, bs_cflags, bs_exceptions)
+            @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
           end
           bs_files << bs_file
         end
@@ -197,7 +197,7 @@ EOS
           if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
             bs_cflags = (opts.delete(:bridgesupport_cflags) or '')
             bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
-            @config.gen_bridge_metadata(headers, bs_file, bs_cflags, bs_exceptions)
+            @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
           end
         end
 
