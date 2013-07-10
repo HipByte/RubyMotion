@@ -75,7 +75,7 @@ module Motion; module Project;
           bs_file = File.join(Builder.common_build_dir, File.expand_path(path) + '.bridgesupport')
           if !File.exist?(bs_file) or File.mtime(path) > File.mtime(bs_file)
             FileUtils.mkdir_p(File.dirname(bs_file))
-            config.gen_bridge_metadata(headers, bs_file, '', [])
+            config.gen_bridge_metadata(platform, headers, bs_file, '', [])
           end
           bs_files << bs_file
         end
