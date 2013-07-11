@@ -153,7 +153,7 @@ describe "references" do
     o.retainCount.should == 1
     @tmpref = o
     o.retainCount.should == 2
-    @tmpref = nil
+    autorelease_pool { @tmpref = nil }
     o.retainCount.should == 1
   end
 
