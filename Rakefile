@@ -117,7 +117,7 @@ task :install do
   #data.concat(Dir.glob('./sample/**/*').reject { |path| path =~ /build/ })
   data.reject! { |path|
     case File.basename(path)
-    when ".", "..", ".DS_Store"
+    when ".", "..", ".DS_Store", /\..*swp/
       true
     else
       false
