@@ -1,27 +1,36 @@
 = RubyMotion 2.4 =
 
-  * [iOS] fix a bug in `rake device' where it could not build app using Xcode
-    5.0 DP 2 which has deployment target to less than iOS 7.0.
+  * Added support for iOS 7.0 Beta 3 and Xcode 5.0 DP 3.
+  * Fixed a long-standing set of memory-related bugs related to lambdas.
+    Dynamic variables (shared by lambdas and calling scope) are now allocated
+    as heap memory inside the Proc data structure. Local variables are properly
+    synchronized. Proc objects are properly reclaimed by the system once they
+    are no longer used. Changes have been added to both the compiler and the
+    runtime.
+  * [iOS] Fixed a bug in `rake device' where it could not build an app using
+    Xcode 5.x with a deployment target less than iOS 7.0.
+  * [iOS] Reduced the size of the Default-568h@2x.png file. Thanks to Gant
+    Laborde for the patch (pull request #100).
+  * [iOS] Fixed a bug where `rake retina=3.5' would not work with Xcode 5.x.
+  * [iOS] Fixed a bug where `rake simulator' would re-launch an iOS 7 simulator
+    with Xcode 5.x every time.
+  * [OSX] Fixed a bug in the build system where APIs of 3rd-party libraries
+    would not be properly handled in 64-bit mode.
+  * Fixed a memory crasher when trying to use the old value of an instance
+    variable slot as a local variable.
   * Fixed memory leaks in NSMutableArray#insert.
-  * Fixed memory leaks where it would parse bridgesupport file in compile time.
+  * Fixed memory leaks when parsing bridgesupport file during compilation.
   * Fixed a bug in NSMutableDictionary#delete where it will cause a crash if it
     would use the result of NSMutableDictionary#delete on the receiver object
     which was created by NSJSONReadingMutableContainers.
-  * Fixed a bug where it could not build the 3rd-party library if file path of
-    app contains the spaces.
-  * fix a bug in Kernel#Array() where it would return incorrected value if it
-    passed NSArray as argument.
-  * [iOS] Reduced file size in Default-568h@2x.png.
-    Thanks to Gant Laborde for the patch (pull request #100).
-  * [iOS] Fixed where `rake retina=3.5' does not work with Xcode 5 DP-2.
-  * [iOS] Fixed a bug where `rake' command would re-launch an iOS 7 simulator
-    with Xcode 5 DP-2 every time.
-  * [OSX] Fixed where it does not generate 64bit type into brigesupport in
-    3rd-party library on MacOSX platform.
-  * Fixed a bug where it would cause `not precompiled' error when it call the
-    method which has the BOOL type argument.
-  * Added the block to setup controller in spec.
-    Thanks to Katsuyoshi Ito for the patch (pull request #104).
+  * Fixed a bug where 3rd-party libraries would fail to build if the file path
+    of the app contained space characters.
+  * Fixed a bug in Kernel#Array() where it would return an incorrected value
+    if an NSArray object was passed as argument.
+  * Fixed a compiler bug where `not precompiled' errors would sometimes happen
+    at runtime when using APIs dealing with BOOL types.
+  * Added a block to setup controller in the spec API. Thanks to Katsuyoshi Ito
+    for the patch (pull request #104).
   * Fixed the `rake build' task to honor the `keep_temps' environment variable.
     If set, temporary files (such as LLVM bitcode and assembly) will not be
     removed from the build directory. To be used for debugging only.
