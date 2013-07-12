@@ -104,7 +104,7 @@ EOS
       end
 
       # deployment_target
-      if deployment_target > sdk_version
+      if deployment_target.to_f > sdk_version.to_f
         App.fail "Deployment target `#{deployment_target}' must be equal or lesser than SDK version `#{sdk_version}'"
       end
       unless File.exist?(datadir)
