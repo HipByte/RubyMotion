@@ -258,3 +258,47 @@ describe "NSDate" do
     1.should == 1
   end
 end
+
+describe "NSMutableArray" do
+  class NSArray
+    alias old_dealloc dealloc
+
+    def dealloc
+      $nsarray_dealloc = true
+      old_dealloc
+    end
+  end
+
+  before do
+    @ary = NSMutableArray.arrayWithArray([1, 2, 3, 4, 5])
+    $nsarray_dealloc = false
+  end
+
+  it "#first(n) should return autoreleased object" do
+    autorelease_pool do
+      ret = @ary.first(2)
+    end
+    $nsarray_dealloc.should == true
+  end
+
+  it "#last(n) should return autoreleased object" do
+    autorelease_pool do
+      ret = @ary.last(2)
+    end
+    $nsarray_dealloc.should == true
+  end
+
+  it "#pop(n) should return autoreleased object" do
+    autorelease_pool do
+      ret = @ary.pop(2)
+    end
+    $nsarray_dealloc.should == true
+  end
+
+  it "#shift(n) should return autoreleased object" do
+    autorelease_pool do
+      ret = @ary.shift(2)
+    end
+    $nsarray_dealloc.should == true
+  end
+end
