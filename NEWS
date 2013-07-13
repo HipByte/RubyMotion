@@ -1,3 +1,11 @@
+= RubyMotion 2.5 =
+
+  * [iOS] Fixed a warning message from the linker that would be displayed when
+    use Xcode 5.
+  * Fixed a bug in build system where app.deployment_target and app.sdk_version
+    were compared as String. Thanks to Andrew Babichev for the patch (pull
+    request #108).
+
 = RubyMotion 2.4 =
 
   * Added support for iOS 7.0 Beta 3 and Xcode 5.0 DP 3.

@@ -138,8 +138,8 @@ module Motion; module Project;
     def common_flags(platform)
       simulator_version = begin
         if platform == "iPhoneSimulator"
-          m = deployment_target.match(/(\d+)/)
-          if m[0].to_i >= 7
+          ver = xcode_version[0].match(/(\d+)/)
+          if ver[0].to_i >= 5
             " -mios-simulator-version-min=#{deployment_target}"
           else
             " -miphoneos-version-min=#{deployment_target}"
