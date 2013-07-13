@@ -1,4 +1,4 @@
-= RubyMotion 2.4 =
+= RubyMotion 2.5 =
 
   * Fixed a bug in build system where app.deployment_target and app.sdk_version
     were compared as String. Thanks to Andrew Babichev for the patch (pull
