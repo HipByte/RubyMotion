@@ -212,3 +212,20 @@ describe "self" do
     $test_dealloc.should == true
   end
 end
+
+describe "Hash.new {}" do
+  class TestObjectDealloc
+    def dealloc
+      $test_dealloc = true
+      super
+    end
+  end
+  it "does not leak memory" do
+    $test_dealloc = false
+    autorelease_pool do
+      h = Hash.new { |h, k| h[k] = [] }
+      h['1'] << TestObjectDealloc.new
+    end
+    $test_dealloc.should == true
+  end
+end
