@@ -5,6 +5,7 @@
   * Fixed a bug in build system where app.deployment_target and app.sdk_version
     were compared as String. Thanks to Andrew Babichev for the patch (pull
     request #108).
+  * Fixed memory leaks in NSMutableArray#{first(n), last(n), pop(n), shift(n)}.
 
 = RubyMotion 2.4 =
 
