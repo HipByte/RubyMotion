@@ -1,5 +1,11 @@
 = RubyMotion 2.4 =
 
+  * Fixed a bug in build system where app.deployment_target and app.sdk_version
+    were compared as String. Thanks to Andrew Babichev for the patch (pull
+    request #108).
+
+= RubyMotion 2.4 =
+
   * Added support for iOS 7.0 Beta 3 and Xcode 5.0 DP 3.
   * Fixed a long-standing set of memory-related bugs related to lambdas.
     Dynamic variables (shared by lambdas and calling scope) are now allocated
