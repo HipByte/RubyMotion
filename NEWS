@@ -8,6 +8,8 @@
   * Fixed memory leaks in NSMutableArray#{first(n), last(n), pop(n), shift(n)}.
   * Fixed a bug where nested block variables would not be properly synchronized
     if the block terminated early with the `break' or the `return' construct.
+  * Fixed Dispatch::*.{sync,async} methods to not catch exceptions inside the
+    given blocks, and now simply let the process crash naturally.
 
 = RubyMotion 2.4 =
 
