@@ -137,6 +137,19 @@ describe "block dvars" do
     foo.should == '2'
   end
 
+  def test_dvar_assigned_back_to_stack(items)
+    batch_start = 0
+    while batch_start < items.count
+      values = []
+      1.times { values }
+      batch_start += 1
+    end
+  end
+  it "'s slot is assigned back to the stack in case the first assignment happens in a loop" do
+    autorelease_pool { test_dvar_assigned_back_to_stack(['1', '2', '3']) }
+    42.should == 42 # no crash
+  end
+
   def schedule_on_main(*args, &blk)
     cb = proc do
       blk.call(*args)
