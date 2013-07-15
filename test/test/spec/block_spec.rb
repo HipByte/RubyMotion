@@ -126,6 +126,17 @@ describe "block dvars" do
     x.should == 9
   end
 
+  # http://hipbyte.myjetbrains.com/youtrack/issue/RM-213
+  it "are synchronized when a block breaks" do
+    foo = '1'
+    1.times do |i|
+      1.times { |j| }
+      foo = '2'
+      break
+    end
+    foo.should == '2'
+  end
+
   def schedule_on_main(*args, &blk)
     cb = proc do
       blk.call(*args)
