@@ -8,6 +8,10 @@
   * Fixed memory leaks in NSMutableArray#{first(n), last(n), pop(n), shift(n)}.
   * Fixed a bug where nested block variables would not be properly synchronized
     if the block terminated early with the `break' or the `return' construct.
+    Thanks to Greg Fodor for the report.
+  * Fixed a bug where local variables created inside a loop (ex. `while') and
+    used inside a nested block would cause the previous value to be released
+    twice during the next iteration. Thanks to Daniel Dickison for the report.
   * Fixed Dispatch::*.{sync,async} methods to not catch exceptions inside the
     given blocks, and now simply let the process crash naturally.
 
