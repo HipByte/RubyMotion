@@ -6,6 +6,8 @@
     were compared as String. Thanks to Andrew Babichev for the patch (pull
     request #108).
   * Fixed memory leaks in NSMutableArray#{first(n), last(n), pop(n), shift(n)}.
+  * Fixed a bug where nested block variables would not be properly synchronized
+    if the block terminated early with the `break' or the `return' construct.
 
 = RubyMotion 2.4 =
 
