@@ -190,9 +190,9 @@ describe "An object accepting block in constructor" do
   end
 end
 
-# http://hipbyte.myjetbrains.com/youtrack/issue/RM-118
-describe "C-level blocks created inside GCD" do
-  it "are not prematurely released" do
+describe "C-level blocks" do
+  # http://hipbyte.myjetbrains.com/youtrack/issue/RM-118
+  it "created inside GCD are not prematurely released" do
     autorelease_pool do
       Dispatch::Queue.main.async do
         [1,2,3].enumerateObjectsUsingBlock(lambda do |obj, idx, stop_ptr|
@@ -201,6 +201,42 @@ describe "C-level blocks created inside GCD" do
     end
     sleep 1
     true.should == true # no crash
+  end
+
+  class TestCBlockLambda
+    def test
+      [1,2,3].enumerateObjectsUsingBlock(lambda do |obj, idx, stop_ptr|
+      end)
+      nil
+    end
+    def test2
+      @obs = NSNotificationCenter.defaultCenter.addObserverForName('Foo', object:nil, queue:nil, usingBlock:lambda do |x|
+      end)
+    end
+    def test3
+      NSNotificationCenter.defaultCenter.removeObserver(@obs)
+      @obs = nil
+    end
+    def dealloc
+      $test_dealloc = true
+      super
+    end
+  end
+  it "properly release the given lambda object when passed synchronously" do
+    $test_dealloc = false
+    autorelease_pool { TestCBlockLambda.new.test }
+    $test_dealloc.should == true
+  end
+
+  it "properly release the given lambda object when passed asynchronously" do
+    $test_dealloc = false
+    autorelease_pool do
+      o = TestCBlockLambda.new
+      o.test2
+      NSNotificationCenter.defaultCenter.postNotificationName('Foo', object:nil)
+      o.test3
+    end
+    $test_dealloc.should == true
   end
 end
 
