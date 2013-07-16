@@ -13,9 +13,12 @@
     used inside a nested block would cause the previous value to be released
     twice during the next iteration. Thanks to Daniel Dickison for the report.
   * Fixed Dispatch::*.{sync,async} methods to not catch exceptions inside the
-    given blocks, and now simply let the process crash naturally.
+    given blocks, and simply let the process crash naturally.
   * Fixed a bug where C-level blocks allocated by the compiler would never be
-    released at runtime, as well as the Proc object linked to it.
+    released at runtime, as well as the Proc object linked to it. C-level
+    blocks are now allocated on the stack, keep a weak-reference to the
+    Proc object, and properly implement the Blocks ABI copy/dispose handlers
+    to retain/release the associated Proc object when required.
 
 = RubyMotion 2.4 =
 
