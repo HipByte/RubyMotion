@@ -19,6 +19,8 @@
     blocks are now allocated on the stack, keep a weak-reference to the
     Proc object, and properly implement the Blocks ABI copy/dispose handlers
     to retain/release the associated Proc object when required.
+  * Fixed a bug where block variables passed to Dispatch::Queue#async could
+    be released twice, leading to a crash.
 
 = RubyMotion 2.4 =
 
