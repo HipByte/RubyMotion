@@ -1,10 +1,13 @@
 = RubyMotion 2.5 =
 
-  * [iOS] Fixed a warning message from the linker that would be displayed when
-    use Xcode 5.
-  * Fixed a bug in build system where app.deployment_target and app.sdk_version
-    were compared as String. Thanks to Andrew Babichev for the patch (pull
-    request #108).
+  * The runtime is now able to detect and break basic circular references
+    (when two objects point to themselves). Only objects created from Ruby
+    classes (including Objective-C subclasses) are scanned. Cycle detection
+    happens when draining the nearest autorelease pool and has a limited number
+    of depth iterations, to preserve acceptable runtime performance. To disable
+    the cycle detector, set the ARR_CYCLES_DISABLE environment variable to any
+    value. To enable debug logging, set the ARR_CYCLES_DEBUG environment
+    variable to any value. Many thanks to Joe Noon for pre-testing this feature.
   * Fixed memory leaks in NSMutableArray#{first(n), last(n), pop(n), shift(n)}.
   * Fixed a bug where nested block variables would not be properly synchronized
     if the block terminated early with the `break' or the `return' construct.
@@ -21,6 +24,11 @@
     to retain/release the associated Proc object when required.
   * Fixed a bug where block variables passed to Dispatch::Queue#async could
     be released twice, leading to a crash.
+  * Fixed a bug in build system where app.deployment_target and app.sdk_version
+    were compared as String. Thanks to Andrew Babichev for the patch (pull
+    request #108).
+  * [iOS] Fixed a warning message from the linker that would be displayed when
+    use Xcode 5.
 
 = RubyMotion 2.4 =
 
