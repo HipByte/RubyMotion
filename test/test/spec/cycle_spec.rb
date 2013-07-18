@@ -14,6 +14,10 @@ describe "cycles" do
       @h = {}
       @h[42] = self
     end
+    def test_hash_ifnone_retain
+      @h = Hash.new do |h,k| h[k] = [] end
+      @h[42] << 42
+    end
     def dealloc
       $test_dealloc = true
       super
@@ -39,10 +43,7 @@ describe "cycles" do
 
   it "created by Hash->ifnone are solved" do
     $test_dealloc = false
-    autorelease_pool do
-      h = Hash.new { |h, k| h[k] = [] }
-      h['1'] << TestObjectCycle.new
-    end
+    autorelease_pool { TestObjectCycle.new.test_hash_ifnone_retain }
     $test_dealloc.should == true
   end
 
@@ -66,5 +67,40 @@ describe "cycles" do
     end
     $test_dealloc[obj1id].should == true
     $test_dealloc[obj2id].should == true
+  end
+
+  class TestDeallocViewController < UIViewController
+    attr_accessor :mode
+    def viewDidLoad
+      super
+      foo {}
+    end
+    def foo(&b)
+      @b = b
+    end
+    def dealloc
+      $test_dealloc = true
+      super
+    end
+  end
+  it "created on a view controller by a Proc are solved" do
+    $test_dealloc = false
+    autorelease_pool do
+      x = TestDeallocViewController.alloc.init
+      x.view
+    end
+    $test_dealloc.should == true
+  end
+
+  def test_cycle 
+    autorelease_pool do
+      10.times { TestObjectCycle.new }
+    end
+  end
+  it "can be resolved in multiple threads" do
+    8.times do
+      Thread.new { test_cycle }
+    end
+    42.should == 42 # nocrash
   end
 end
