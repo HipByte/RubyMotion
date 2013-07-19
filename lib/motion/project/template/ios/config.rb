@@ -439,19 +439,14 @@ main(int argc, char **argv)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int retval = 0;
-    try {
 EOS
-      main_txt << "[SpecLauncher launcher];\n" if spec_mode
-      main_txt << <<EOS
-        RubyMotionInit(argc, argv);
+    main_txt << "[SpecLauncher launcher];\n" if spec_mode
+    main_txt << <<EOS
+    RubyMotionInit(argc, argv);
 EOS
-      main_txt << <<EOS
-        retval = UIApplicationMain(argc, argv, nil, @"#{delegate_class}");
-        rb_exit(retval);
-    }
-    catch (...) {
-	rb_rb2oc_exc_handler();
-    }
+    main_txt << <<EOS
+    retval = UIApplicationMain(argc, argv, nil, @"#{delegate_class}");
+    rb_exit(retval);
     [pool release];
     return retval;
 }
