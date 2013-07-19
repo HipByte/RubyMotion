@@ -182,27 +182,18 @@ int
 main(int argc, char **argv)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#if !__LP64__
-    try {
-#endif
-        RubyMotionInit(argc, argv);
-        NSApplication *app = [NSApplication sharedApplication];
-        [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
+    RubyMotionInit(argc, argv);
+    NSApplication *app = [NSApplication sharedApplication];
+    [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
 EOS
-      if spec_mode
-        main_txt << "SpecLauncher *specLauncher = [[SpecLauncher alloc] init];\n"
-        main_txt << "[[NSNotificationCenter defaultCenter] addObserver:specLauncher selector:@selector(appLaunched:) name:NSApplicationDidFinishLaunchingNotification object:nil];\n"
-      end
-      main_txt << <<EOS
-        NSApplicationMain(argc, (const char **)argv);
-        rb_exit(0);
-#if !__LP64__
-    }
-    catch (...) {
-	rb_rb2oc_exc_handler();
-    }
-#endif
+    if spec_mode
+      main_txt << "SpecLauncher *specLauncher = [[SpecLauncher alloc] init];\n"
+      main_txt << "[[NSNotificationCenter defaultCenter] addObserver:specLauncher selector:@selector(appLaunched:) name:NSApplicationDidFinishLaunchingNotification object:nil];\n"
+    end
+    main_txt << <<EOS
+    NSApplicationMain(argc, (const char **)argv);
     [pool release];
+    rb_exit(0);
     return 0;
 }
 EOS
