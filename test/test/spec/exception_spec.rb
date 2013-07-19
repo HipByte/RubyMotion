@@ -6,11 +6,9 @@ describe "NSExceptions" do
     begin
       NSException.exceptionWithName(exc_name, reason:exc_reason, userInfo:exc_userInfo).raise
     rescue => e
-      nse = e.nsexception
-      nse.should != nil
-      nse.name.should == exc_name
-      nse.reason.should == exc_reason
-      nse.userInfo.should == exc_userInfo
+      e.name.should == exc_name
+      e.reason.should == exc_reason
+      e.userInfo.should == exc_userInfo
     end
   end
 end
