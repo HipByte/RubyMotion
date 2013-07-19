@@ -29,6 +29,8 @@
     request #108).
   * [iOS] Fixed a warning message from the linker that would be displayed when
     use Xcode 5.
+  * [iOS] Fixed a bug in debugger where built-in debug commands are not working
+    with simulator.
 
 = RubyMotion 2.4 =
 

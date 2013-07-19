@@ -982,7 +982,7 @@ gdb_commands_file(void)
 	if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
 	    gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
 		arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"-q",
-		@"--pid", [pidNumber description], nil]] retain];
+		@"--pid", [pidNumber description], @"-x", gdb_commands_file(), nil]] retain];
 	}
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
 	    gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
