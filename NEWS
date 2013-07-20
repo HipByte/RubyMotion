@@ -31,6 +31,7 @@
     use Xcode 5.
   * [iOS] Fixed a bug in debugger where built-in debug commands are not working
     with simulator.
+  * [iOS] Fixed a bug in build system where app does not work on iOS5 device.
 
 = RubyMotion 2.4 =
 
