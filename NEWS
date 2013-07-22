@@ -8,6 +8,10 @@
     the cycle detector, set the ARR_CYCLES_DISABLE environment variable to any
     value. To enable debug logging, set the ARR_CYCLES_DEBUG environment
     variable to any value. Many thanks to Joe Noon for pre-testing this feature.
+  * The Exception class is now rewritten on top of the NSException class,
+    and properly implements its primitive methods. Exceptions are no longer
+    being converted. Exception handlers written in Ruby will still catch
+    NSException objects by default.
   * Fixed memory leaks in NSMutableArray#{first(n), last(n), pop(n), shift(n)}.
   * Fixed a bug where nested block variables would not be properly synchronized
     if the block terminated early with the `break' or the `return' construct.
@@ -17,6 +21,8 @@
     twice during the next iteration. Thanks to Daniel Dickison for the report.
   * Fixed Dispatch::*.{sync,async} methods to not catch exceptions inside the
     given blocks, and simply let the process crash naturally.
+  * Fixed the build system to not compile default exception handlers in the
+    main() entry-point function, as we want the process to crash naturally.
   * Fixed a bug where C-level blocks allocated by the compiler would never be
     released at runtime, as well as the Proc object linked to it. C-level
     blocks are now allocated on the stack, keep a weak-reference to the
