@@ -107,7 +107,7 @@ static void
 sigterminate(int sig)
 {
     terminate_session();
-    exit(1);
+    exit(0);
 }
 
 static void
@@ -138,7 +138,10 @@ sigint_osx(int sig)
     if (osx_task != nil) {
 	kill([osx_task processIdentifier], sig);
     }
-    sigcleanup(sig);
+    if (debug_mode == DEBUG_REPL) {
+	save_repl_history();
+    }
+    exit(0);
 }
 
 #endif
