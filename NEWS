@@ -32,6 +32,7 @@
   * [iOS] Fixed a bug in debugger where built-in debug commands are not working
     with simulator.
   * [iOS] Fixed a bug in build system where app does not work on iOS5 device.
+  * [iOS] Fixed a bug where it could not use NSUIntegerMax constant in iOS 7.
 
 = RubyMotion 2.4 =
 
