@@ -90,9 +90,3 @@ desc "Create a .a static library"
 task :static do
   App.build('MacOSX', :static => true)
 end
-
-desc "Show a last crash log"
-task :crashlog do
-  logs = Dir.glob(File.join(File.expand_path("~/Library/Logs/DiagnosticReports/"), "#{App.config.name}_*"))
-  sh "open -a Console #{logs.last}"
-end

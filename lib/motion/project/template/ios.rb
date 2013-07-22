@@ -166,9 +166,3 @@ task :static do
   App.info 'Create', fat_lib
   sh "/usr/bin/lipo -create #{libs.join(' ')} -output \"#{fat_lib}\""
 end
-
-desc "Show a last crash log"
-task :crashlog do
-  logs = Dir.glob(File.join(File.expand_path("~/Library/Logs/DiagnosticReports/"), "#{App.config.name}_*"))
-  sh "open -a Console #{logs.last}"
-end
