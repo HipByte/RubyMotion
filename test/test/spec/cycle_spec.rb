@@ -10,7 +10,11 @@ describe "cycles" do
       @a = []
       @a << self
     end
-    def test_hash_retain
+    def test_hash_key_retain
+      @h = {}
+      @h[self] = 42
+    end
+    def test_hash_value_retain
       @h = {}
       @h[42] = self
     end
@@ -35,9 +39,15 @@ describe "cycles" do
     $test_dealloc.should == true
   end
 
-  it "created by Hash are solved" do
+  it "created by Hash keys are solved" do
     $test_dealloc = false
-    autorelease_pool { TestObjectCycle.new.test_hash_retain }
+    autorelease_pool { TestObjectCycle.new.test_hash_key_retain }
+    $test_dealloc.should == true
+  end
+
+  it "created by Hash values are solved" do
+    $test_dealloc = false
+    autorelease_pool { TestObjectCycle.new.test_hash_value_retain }
     $test_dealloc.should == true
   end
 
@@ -54,7 +64,7 @@ describe "cycles" do
       super
     end
   end
-  it "created by 2 objects are solved" do
+ it "created by 2 objects are solved when they are the only thing retaining each other" do
     $test_dealloc = {}
     obj1id = obj2id = nil
     autorelease_pool do
@@ -68,6 +78,48 @@ describe "cycles" do
     $test_dealloc[obj1id].should == true
     $test_dealloc[obj2id].should == true
   end
+
+  it "created by 2 objects are not solved if retained by something other than each other" do
+    $test_dealloc = {}
+    obj1id = obj2id = nil
+    autorelease_pool do; autorelease_pool do
+      @obj1 = TestObjectCircle.new
+      obj2 = TestObjectCircle.new
+      obj1id = @obj1.object_id
+      obj2id = obj2.object_id
+      @obj1.ref = obj2
+      obj2.ref = @obj1
+    end; end
+    # obj1 is retained by the spec context. obj2 is retained by obj1
+    $test_dealloc[obj1id].should == nil
+    $test_dealloc[obj2id].should == nil
+    @obj1.inspect.should != nil # no crash
+  end
+
+=begin
+  # XXX at this point the cycle detector doesn't work outside the autorelease pool where
+  # the objects were created, so this spec fails.
+
+  it "created by 2 objects are not solved if retained by something other than each other, but then later that other retain is broken" do
+    $test_dealloc = {}
+    obj1id = obj2id = nil
+    autorelease_pool do
+      @obj1 = TestObjectCircle.new
+      obj2 = TestObjectCircle.new
+      obj1id = @obj1.object_id
+      obj2id = obj2.object_id
+      @obj1.ref = obj2
+      obj2.ref = @obj1
+      end
+    # obj1 is retained by the spec context. obj2 is retained by obj1
+    autorelease_pool do
+      @obj1 = nil
+    end
+    # obj1 is release, now the whole object graph is orphaned and should be cleaned up
+    $test_dealloc[obj1id].should == true
+    $test_dealloc[obj2id].should == true
+  end
+=end
 
   class TestDeallocViewController < UIViewController
     attr_accessor :mode
@@ -101,6 +153,7 @@ describe "cycles" do
     8.times do
       Thread.new { test_cycle }
     end
+    sleep 1
     42.should == 42 # nocrash
   end
 end
