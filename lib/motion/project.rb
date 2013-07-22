@@ -69,3 +69,9 @@ task :ctags do
     sh "#{ctags} --options=\"#{config}\" #{bs_files.map { |x| '"' + x + '"' }.join(' ')}"
   end
 end
+
+desc "Show a last crash log"
+task :crashlog do
+  logs = Dir.glob(File.join(File.expand_path("~/Library/Logs/DiagnosticReports/"), "#{App.config.name}_*"))
+  sh "open -a Console #{logs.last}"
+end
