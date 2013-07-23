@@ -23,6 +23,12 @@ if OSX_SDK_VERSIONS.empty?
   exit 1
 end
 
+if false
+  # DEBUG
+  IOS_SDK_VERSIONS.clear; IOS_SDK_VERSIONS << '6.1'
+  OSX_SDK_VERSIONS.clear; OSX_SDK_VERSIONS << '10.8'
+end
+
 verbose(true)
 
 def rake(dir, cmd='all')
