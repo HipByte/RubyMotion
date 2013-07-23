@@ -13,6 +13,12 @@ class TestArchiver
   end
 end
 
+class TestArchiver2 < TestArchiver
+  def initialize(name = '')
+    @name = name
+  end
+end
+
 describe "NSKeyedArchiver" do
   it "works" do
     m = TestArchiver.new
@@ -20,6 +26,14 @@ describe "NSKeyedArchiver" do
 
     m2 = NSKeyedUnarchiver.unarchiveObjectWithData(NSKeyedArchiver.archivedDataWithRootObject(m))
     m2.class.should == TestArchiver
+    m2.name.should == m.name
+  end
+
+  it "works with object has initialize(arg)" do
+    m = TestArchiver2.new("test")
+
+    m2 = NSKeyedUnarchiver.unarchiveObjectWithData(NSKeyedArchiver.archivedDataWithRootObject(m))
+    m2.class.should == TestArchiver2
     m2.name.should == m.name
   end
 end
