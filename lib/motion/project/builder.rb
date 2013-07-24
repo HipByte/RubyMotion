@@ -144,56 +144,15 @@ module Motion; module Project;
         [obj, init_func]
       end
 
-      # Create builders.
-      builders_count =
-        if jobs = ENV['jobs']
-          jobs.to_i
-        else
-          `/usr/sbin/sysctl -n machdep.cpu.thread_count`.strip.to_i
-        end
-      builders_count = 1 if builders_count < 1 
-      builders = []
-      builders_count.times do
-        queue = []
-        th = Thread.new do
-          sleep
-          objs = []
-          while path = queue.shift
-            objs << build_file.call(objs_build_dir, path)
-          end
-          queue.concat(objs)
-        end
-        builders << [queue, th]
-      end
-
       # Resolve file dependencies
       if config.detect_dependencies == true
         config.dependencies = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
       end
 
-      # Feed builders with work.
-      builder_i = 0
-      config.ordered_build_files.each do |path|
-        builders[builder_i][0] << path
-        builder_i += 1
-        builder_i = 0 if builder_i == builders_count
-      end
- 
-      # Start build.
-      builders.each do |queue, th|
-        sleep 0.01 while th.status != 'sleep'
-        th.wakeup
-      end
-      builders.each { |queue, th| th.join }
-
-      # Merge the result (based on build order).
-      objs = []
-      builder_i = 0
-      config.ordered_build_files.each do |path|
-        objs << builders[builder_i][0].shift
-        builder_i += 1
-        builder_i = 0 if builder_i == builders_count
-      end
+      parallel = ParallelBuilder.new(objs_build_dir, build_file)
+      parallel.files = config.ordered_build_files
+      parallel.run
+      objs = parallel.objects
 
       FileUtils.touch(objs_build_dir) if any_obj_file_built
 
@@ -201,7 +160,10 @@ module Motion; module Project;
       spec_objs = []
       if config.spec_mode
         # Build spec files too, but sequentially.
-        spec_objs = config.spec_files.map { |path| build_file.call(objs_build_dir, path) }
+        parallel = ParallelBuilder.new(objs_build_dir, build_file)
+        parallel.files = config.spec_files
+        parallel.run
+        spec_objs = parallel.objects
         objs += spec_objs
       end
 
@@ -485,6 +447,63 @@ EOS
         end
         dir
       end
+    end
+  end
+
+  class ParallelBuilder
+    attr_accessor :files
+
+    def initialize(objs_build_dir, builder)
+      @builders_count = begin
+        if jobs = ENV['jobs']
+          jobs.to_i
+        else
+          `/usr/sbin/sysctl -n machdep.cpu.thread_count`.strip.to_i
+        end
+      end
+      @builders_count = 1 if @builders_count < 1
+
+      @builders = []
+      @builders_count.times do
+        queue = []
+        th = Thread.new do
+          sleep
+          objs = []
+          while path = queue.shift
+            objs << builder.call(objs_build_dir, path)
+          end
+          queue.concat(objs)
+        end
+        @builders << [queue, th]
+      end
+    end
+
+    def run
+      builder_i = 0
+      @files.each do |path|
+        @builders[builder_i][0] << path
+        builder_i += 1
+        builder_i = 0 if builder_i == @builders_count
+      end
+ 
+      # Start build.
+      @builders.each do |queue, th|
+        sleep 0.01 while th.status != 'sleep'
+        th.wakeup
+      end
+      @builders.each { |queue, th| th.join }
+      @builders
+    end
+
+    def objects
+      objs = []
+      builder_i = 0
+      @files.each do |path|
+        objs << @builders[builder_i][0].shift
+        builder_i += 1
+        builder_i = 0 if builder_i == @builders_count
+      end
+      objs
     end
   end
 
