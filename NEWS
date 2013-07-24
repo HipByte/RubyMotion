@@ -1,3 +1,7 @@
+= RubyMotion 2.6 =
+
+  * Improved the build system in order to compile spec files with parallel.
+
 = RubyMotion 2.5 =
 
   * The runtime is now able to detect and break basic circular references
