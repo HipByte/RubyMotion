@@ -1,8 +1,10 @@
 = RubyMotion 2.6 =
 
-  * Improved the build system in order to compile spec files with parallel.
-  * Fixed a bug where `rake crashlog' cannot work if app.name has the spaces.
-    Thanks to Clay Allsopp for the patch (pull request #112).
+  * Improved the build system so that spec files are also compiled in parallel.
+  * Fixed a bug in the cycle detector where it would tru scanning objects that
+    have already been released, resulting in a crash.
+  * Fixed a bug in `rake crashlog' with application names containing space
+    characters. Thanks to Clay Allsopp for the patch (pull request #112).
 
 = RubyMotion 2.5 =
 
