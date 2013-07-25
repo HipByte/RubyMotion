@@ -1,8 +1,10 @@
 = RubyMotion 2.6 =
 
   * Improved the build system so that spec files are also compiled in parallel.
-  * Fixed a bug in the cycle detector where it would tru scanning objects that
-    have already been released, resulting in a crash.
+  * Fixed a bug in the cycle detector where it would try scanning objects that
+    have already been released. Thanks to Nick Quaranto for the help.
+  * Fixed a bug in the cycle detector where instance variables on scanned
+    objects would disappear, because of a problem in the WeakRef class.
   * Fixed a bug in `rake crashlog' with application names containing space
     characters. Thanks to Clay Allsopp for the patch (pull request #112).
 
