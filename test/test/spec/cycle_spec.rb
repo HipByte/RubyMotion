@@ -31,6 +31,11 @@ describe "cycles" do
     $test_dealloc = false
     autorelease_pool { TestObjectCycle.new.test_block_retain }
     $test_dealloc.should == true
+
+    # not use autorelease_pool{}
+    $test_dealloc = false
+    TestObjectCycle.new.test_block_retain
+    wait(0.1) { $test_dealloc.should == true }
   end
 
   it "created by Array are solved" do
