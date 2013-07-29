@@ -109,6 +109,7 @@ END
   app_args = (ENV['args'] or '')
   App.info 'Simulate', app
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
+  Signal.trap(:INT) { } if ENV['debug']
   system "#{env} #{sim} #{debug} #{family_int} #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
   if $?.exitstatus != 0
     $stderr.puts '=' * 80
@@ -163,6 +164,7 @@ task :device => :archive do
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
   deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
+  Signal.trap(:INT) { } if ENV['debug']
   sh "#{env} #{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
 end
 
