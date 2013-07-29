@@ -7,6 +7,8 @@
     objects would disappear, because of a problem in the WeakRef class.
   * Fixed a bug in `rake crashlog' with application names containing space
     characters. Thanks to Clay Allsopp for the patch (pull request #112).
+  * Fixed a bug in debugger where debugging process would be terminated if
+    press CTRL + C while app is running.
 
 = RubyMotion 2.5 =
 
