@@ -13,6 +13,8 @@
   * Fixed a bug in the spec framework where a spec that raises a pure
     NSException would cause a runtime error as it would try to send the
     #backtrace message to the object.
+  * [iOS] Fixed a bug in the REPL (iOS 7 only) where local variables would not
+    be preserved.
 
 = RubyMotion 2.5 =
 
