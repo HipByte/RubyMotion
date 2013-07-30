@@ -440,12 +440,17 @@ module Bacon
       rescue Object => e
         @exception_occurred = true
 
-        ErrorLog << "#{e.class}: #{e.message}\n"
-        lines = $DEBUG ? e.backtrace : e.backtrace.find_all { |line| line !~ /bin\/macbacon|\/mac_bacon\.rb:\d+/ }
-        lines.each_with_index { |line, i|
-          ErrorLog << "\t#{line}#{i==0 ? ": #{@context.name} - #{@description}" : ""}\n"
-        }
-        ErrorLog << "\n"
+        if e.is_a?(Exception)
+          ErrorLog << "#{e.class}: #{e.message}\n"
+          lines = $DEBUG ? e.backtrace : e.backtrace.find_all { |line| line !~ /bin\/macbacon|\/mac_bacon\.rb:\d+/ }
+          lines.each_with_index { |line, i|
+            ErrorLog << "\t#{line}#{i==0 ? ": #{@context.name} - #{@description}" : ""}\n"
+          }
+          ErrorLog << "\n"
+        else
+          # Pure NSException.
+          ErrorLog << "#{e.name}: #{e.reason}\n"
+        end
 
         @error = if e.kind_of? Error
           Counter[e.count_as] += 1
