@@ -29,12 +29,13 @@ module Motion; module Project;
   class OSXConfig < XcodeConfig
     register :osx
 
-    variable :icon, :copyright, :embedded_frameworks
+    variable :icon, :copyright, :app_store_category, :embedded_frameworks
 
     def initialize(project_dir, build_mode)
       super
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @icon = ''
+      @app_store_category = ''
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
     end
@@ -110,10 +111,18 @@ module Motion; module Project;
         'NSHumanReadableCopyright' => copyright,
         'NSPrincipalClass' => 'NSApplication',
         'CFBundleIconFile' => (icon or ''),
-        'LSMinimumSystemVersion' => deployment_target
+        'LSMinimumSystemVersion' => deployment_target,
+        'LSApplicationCategoryType' => store_category
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
- 
+
+    def store_category
+      # For valid values:
+      # http://developer.apple.com/library/ios/#documentation/general/Reference/InfoPlistKeyReference/Articles/LaunchServicesKeys.html
+      return @app_store_category if @app_store_category.include?("public.app-category") || @app_store_category == ''
+      "public.app-category.#{@app_store_category}"
+    end
+
     def supported_sdk_versions(versions)
       osx_version = `sw_vers -productVersion`.strip
       versions.reverse.find { |vers|
