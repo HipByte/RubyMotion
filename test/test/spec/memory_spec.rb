@@ -302,3 +302,22 @@ describe "NSMutableArray" do
     $nsarray_dealloc.should == true
   end
 end
+
+class Range
+  def dealloc
+    $dealloc_test = true
+    super
+  end
+end
+describe "Range" do
+  before do
+    $dealloc_test = false
+  end
+
+  it "#new should work without malloc error" do
+    autorelease_pool do
+      Range.new(10, 20)
+    end
+    $dealloc_test.should == true
+  end
+end
