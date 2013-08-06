@@ -922,6 +922,34 @@ gdb_commands_file(void)
     return save_debugger_command(cmds);
 }
 
+static NSString *
+lldb_commands_file(int pid)
+{
+    NSString *cmds = [NSString stringWithFormat:@""\
+		     "process attach -p %d\n"\
+		     "command script import /Library/RubyMotion/lldb/lldb.py\n"\
+		     "breakpoint set --name rb_exc_raise\n"\
+		     "breakpoint set --name malloc_error_break\n",
+		     pid];
+    NSString *user_cmds = [NSString stringWithContentsOfFile:
+	@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
+    if (user_cmds != nil) {
+	cmds = [cmds stringByAppendingString:user_cmds];
+	cmds = [cmds stringByAppendingString:@"\n"];
+    }
+    if (getenv("no_continue") == NULL) {
+	cmds = [cmds stringByAppendingString:
+#if defined(SIMULATOR_IOS)
+	    @"continue\n"
+#else
+	    @"run\n"
+#endif
+	    ];
+    }
+
+    return save_debugger_command(cmds);
+}
+
 #if defined(SIMULATOR_IOS)
 - (void)session:(id)session didEndWithError:(NSError *)error
 {
@@ -998,8 +1026,7 @@ gdb_commands_file(void)
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
 	    gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
 		arguments:[NSArray arrayWithObjects:@"-a", @"i386",
-		@"-p", [pidNumber description], @"-x", gdb_commands_file(),
-		nil]] retain];
+		@"-s", lldb_commands_file([pidNumber intValue]), nil]] retain];
 	}
 	else {
 	    fprintf(stderr, "can't locate a debugger (gdb `%s' or lldb `%s')\n",
