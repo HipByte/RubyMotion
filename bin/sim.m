@@ -872,7 +872,7 @@ again:
 }
 
 static NSString *
-gdb_commands_file(void)
+save_debugger_command(NSString *cmds)
 {
 #if defined(SIMULATOR_IOS)
 # define SIMGDBCMDS_BASE	@"_simgdbcmds_ios"
@@ -882,6 +882,22 @@ gdb_commands_file(void)
     NSString *cmds_path = [NSString pathWithComponents:
 	[NSArray arrayWithObjects:NSTemporaryDirectory(), SIMGDBCMDS_BASE,
 	nil]];
+
+    NSError *error = nil;
+    if (![cmds writeToFile:cmds_path atomically:YES
+	    encoding:NSASCIIStringEncoding error:&error]) {
+	fprintf(stderr,
+		"can't write gdb commands file into path %s: %s\n",
+		[cmds_path UTF8String],
+		[[error description] UTF8String]);
+	exit(1);
+    }
+    return cmds_path;
+}
+
+static NSString *
+gdb_commands_file(void)
+{
     NSString *cmds = @""\
 		     "set breakpoint pending on\n"\
 		     "break rb_exc_raise\n"\
@@ -902,16 +918,8 @@ gdb_commands_file(void)
 #endif
 	    ];
     }
-    NSError *error = nil;
-    if (![cmds writeToFile:cmds_path atomically:YES
-	    encoding:NSASCIIStringEncoding error:&error]) {
-	fprintf(stderr,
-		"can't write gdb commands file into path %s: %s\n",
-		[cmds_path UTF8String],
-		[[error description] UTF8String]);
-	exit(1);
-    }
-    return cmds_path;
+
+    return save_debugger_command(cmds);
 }
 
 #if defined(SIMULATOR_IOS)
