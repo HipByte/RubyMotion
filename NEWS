@@ -1,5 +1,6 @@
 = RubyMotion 2.7 =
 
+  * fix a bug in Range.new where it would cause malloc_error_break error.
   * [iOS] Fixed a bug in debugger where built-in debugger command does not
     work with lldb in iOS 7 simulator.
 
