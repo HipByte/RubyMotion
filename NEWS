@@ -1,3 +1,8 @@
+= RubyMotion 2.7 =
+
+  * [iOS] Fixed a bug in debugger where built-in debugger command does not
+    work with lldb in iOS 7 simulator.
+
 = RubyMotion 2.6 =
 
   * Added support for iOS 7.0 Beta 4 and Xcode 5.0 DP 4.
