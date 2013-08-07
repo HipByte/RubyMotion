@@ -31,7 +31,8 @@ module Motion; module Project
         die "Usage: motion changelog"
       end
 
-      system("more /Library/RubyMotion/NEWS")
+      pager = (ENV['PAGER'] or '/usr/bin/less')
+      system("#{pager} /Library/RubyMotion/NEWS")
     end
   end
 end; end
