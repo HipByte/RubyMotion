@@ -111,15 +111,9 @@ module Motion; module Project;
         'NSHumanReadableCopyright' => copyright,
         'NSPrincipalClass' => 'NSApplication',
         'CFBundleIconFile' => (icon or ''),
-        'LSMinimumSystemVersion' => deployment_target
-      }.merge(category_info_plist).merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
-    end
-
-    def category_info_plist
-      # For valid values:
-      # http://developer.apple.com/library/ios/#documentation/general/Reference/InfoPlistKeyReference/Articles/LaunchServicesKeys.html
-      cat = "public.app-category.#{@category}" unless @category.include?("public.app-category")
-      {'LSApplicationCategoryType' => cat}
+        'LSMinimumSystemVersion' => deployment_target,
+        'LSMinimumSystemVersion' => (@category.start_with?('public.app-category') ? @category : 'public.app-category.' + @category)
+      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
 
     def supported_sdk_versions(versions)
