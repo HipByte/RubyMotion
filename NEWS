@@ -1,3 +1,11 @@
+= RubyMotion 2.7 =
+
+  * fix a bug in Range.new where it would cause malloc_error_break error.
+  * [iOS] Added `:light_content' as new status bar style for UIStatusBarStyle
+    property. Thanks to Chris Radford for the patch (pull request #116).
+  * [iOS] Fixed a bug in debugger where built-in debugger command does not
+    work with lldb in iOS 7 simulator.
+
 = RubyMotion 2.6 =
 
   * Added support for iOS 7.0 Beta 4 and Xcode 5.0 DP 4.

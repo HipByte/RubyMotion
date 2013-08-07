@@ -872,7 +872,7 @@ again:
 }
 
 static NSString *
-gdb_commands_file(void)
+save_debugger_command(NSString *cmds)
 {
 #if defined(SIMULATOR_IOS)
 # define SIMGDBCMDS_BASE	@"_simgdbcmds_ios"
@@ -882,6 +882,22 @@ gdb_commands_file(void)
     NSString *cmds_path = [NSString pathWithComponents:
 	[NSArray arrayWithObjects:NSTemporaryDirectory(), SIMGDBCMDS_BASE,
 	nil]];
+
+    NSError *error = nil;
+    if (![cmds writeToFile:cmds_path atomically:YES
+	    encoding:NSASCIIStringEncoding error:&error]) {
+	fprintf(stderr,
+		"can't write gdb commands file into path %s: %s\n",
+		[cmds_path UTF8String],
+		[[error description] UTF8String]);
+	exit(1);
+    }
+    return cmds_path;
+}
+
+static NSString *
+gdb_commands_file(void)
+{
     NSString *cmds = @""\
 		     "set breakpoint pending on\n"\
 		     "break rb_exc_raise\n"\
@@ -902,16 +918,36 @@ gdb_commands_file(void)
 #endif
 	    ];
     }
-    NSError *error = nil;
-    if (![cmds writeToFile:cmds_path atomically:YES
-	    encoding:NSASCIIStringEncoding error:&error]) {
-	fprintf(stderr,
-		"can't write gdb commands file into path %s: %s\n",
-		[cmds_path UTF8String],
-		[[error description] UTF8String]);
-	exit(1);
+
+    return save_debugger_command(cmds);
+}
+
+static NSString *
+lldb_commands_file(int pid)
+{
+    NSString *cmds = [NSString stringWithFormat:@""\
+		     "process attach -p %d\n"\
+		     "command script import /Library/RubyMotion/lldb/lldb.py\n"\
+		     "breakpoint set --name rb_exc_raise\n"\
+		     "breakpoint set --name malloc_error_break\n",
+		     pid];
+    NSString *user_cmds = [NSString stringWithContentsOfFile:
+	@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
+    if (user_cmds != nil) {
+	cmds = [cmds stringByAppendingString:user_cmds];
+	cmds = [cmds stringByAppendingString:@"\n"];
     }
-    return cmds_path;
+    if (getenv("no_continue") == NULL) {
+	cmds = [cmds stringByAppendingString:
+#if defined(SIMULATOR_IOS)
+	    @"continue\n"
+#else
+	    @"run\n"
+#endif
+	    ];
+    }
+
+    return save_debugger_command(cmds);
 }
 
 #if defined(SIMULATOR_IOS)
@@ -990,8 +1026,7 @@ gdb_commands_file(void)
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
 	    gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
 		arguments:[NSArray arrayWithObjects:@"-a", @"i386",
-		@"-p", [pidNumber description], @"-x", gdb_commands_file(),
-		nil]] retain];
+		@"-s", lldb_commands_file([pidNumber intValue]), nil]] retain];
 	}
 	else {
 	    fprintf(stderr, "can't locate a debugger (gdb `%s' or lldb `%s')\n",
