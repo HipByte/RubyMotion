@@ -4,6 +4,8 @@
   * Fixed a bug in `rake crashlog' where it would fail with a missing
     Shellwords constant, and also when it was not able to locate any crash
     report file.
+  * Fixed the wording of the message printed when an application terminates
+    with a non-zero status code.
   * [iOS] Added `:light_content' as new status bar style for UIStatusBarStyle
     property. Thanks to Chris Radford for the patch (pull request #116).
   * [iOS] Fixed a bug in debugger where built-in debugger command does not
