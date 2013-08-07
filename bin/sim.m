@@ -1279,6 +1279,8 @@ main(int argc, char **argv)
 
 	start_capture(delegate);
 	[osx_task waitUntilExit];
+	int status = [osx_task terminationStatus];
+	exit(status);
     }
     else {
 	// Run the gdb process.
