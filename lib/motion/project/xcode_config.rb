@@ -36,7 +36,7 @@ module Motion; module Project;
       @framework_search_paths = []
       @libs = []
       @bundle_signature = '????'
-      @short_version = '1'
+      @short_version = nil
       @vendor_projects = []
       @entitlements = {}
       @delegate_class = 'AppDelegate'
@@ -269,7 +269,7 @@ EOS
         'CFBundleExecutable' => @name, 
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
-        'CFBundleShortVersionString' => @short_version,
+        'CFBundleShortVersionString' => (@short_version || @version),
         'CFBundleSignature' => @bundle_signature,
         'CFBundleVersion' => @version
       }
