@@ -2,16 +2,16 @@
 #
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,12 +29,13 @@ module Motion; module Project;
   class OSXConfig < XcodeConfig
     register :osx
 
-    variable :icon, :copyright, :embedded_frameworks
+    variable :icon, :copyright, :category, :embedded_frameworks
 
     def initialize(project_dir, build_mode)
       super
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @icon = ''
+      @category = 'utilities'
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
     end
@@ -46,7 +47,7 @@ module Motion; module Project;
     def validate
       # Embedded frameworks.
       if !(embedded_frameworks.is_a?(Array) and embedded_frameworks.all? { |x| File.exist?(x) and File.extname(x) == '.framework' })
-        App.fail "app.embedded_frameworks should be an array of framework paths" 
+        App.fail "app.embedded_frameworks should be an array of framework paths"
       end
 
       super
@@ -54,11 +55,11 @@ module Motion; module Project;
 
     def archs
       archs = super
-      if development? 
+      if development?
         # We only build for the native architecture in development mode, to speed up builds.
         native_arch = `/usr/bin/uname -m`.strip
         if archs['MacOSX'].include?(native_arch)
-          archs['MacOSX'] = [native_arch] 
+          archs['MacOSX'] = [native_arch]
         end
       end
       archs
@@ -110,10 +111,11 @@ module Motion; module Project;
         'NSHumanReadableCopyright' => copyright,
         'NSPrincipalClass' => 'NSApplication',
         'CFBundleIconFile' => (icon or ''),
-        'LSMinimumSystemVersion' => deployment_target
+        'LSMinimumSystemVersion' => deployment_target,
+        'LSApplicationCategoryType' => (@category.start_with?('public.app-category') ? @category : 'public.app-category.' + @category)
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
- 
+
     def supported_sdk_versions(versions)
       osx_version = `sw_vers -productVersion`.strip
       versions.reverse.find { |vers|
@@ -197,6 +199,6 @@ EOS
     return 0;
 }
 EOS
-    end 
+    end
   end
 end; end
