@@ -1,6 +1,9 @@
 = RubyMotion 2.7 =
 
-  * fix a bug in Range.new where it would cause malloc_error_break error.
+  * Fixed a memory crasher in Range.new.
+  * Fixed a bug in `rake crashlog' where it would fail with a missing
+    Shellwords constant, and also when it was not able to locate any crash
+    report file.
   * [iOS] Added `:light_content' as new status bar style for UIStatusBarStyle
     property. Thanks to Chris Radford for the patch (pull request #116).
   * [iOS] Fixed a bug in debugger where built-in debugger command does not
