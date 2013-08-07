@@ -73,5 +73,9 @@ end
 desc "Open the latest crash report generated for the app"
 task :crashlog do
   logs = Dir.glob(File.join(File.expand_path("~/Library/Logs/DiagnosticReports/"), "#{App.config.name}_*"))
-  sh "open -a Console #{Shellwords.escape(logs.last)}"
+  if logs.empty?
+    $stderr.puts "Crash log not found"
+  else
+    sh "open -a Console \"#{logs.last}\""
+  end
 end
