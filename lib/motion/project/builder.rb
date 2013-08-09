@@ -414,7 +414,7 @@ EOS
       # Strip all symbols. Only in distribution mode.
       if main_exec_created and config.distribution_mode
         App.info "Strip", main_exec
-        sh "#{config.locate_binary('strip')} \"#{main_exec}\""
+        sh "#{config.locate_binary('strip')} #{config.strip_args} \"#{main_exec}\""
       end
     end
 

@@ -287,6 +287,10 @@ module Motion; module Project
       File.join(motiondir, 'data', template.to_s, target)
     end
 
+    def strip_args
+      ''
+    end
+
     def print_crash_message
       $stderr.puts ''
       $stderr.puts '=' * 80
