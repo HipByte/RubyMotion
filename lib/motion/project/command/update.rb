@@ -38,7 +38,7 @@ module Motion; module Project
 
     def run(args)
       check_mode = false
-      wanted_software_version = ''
+      wanted_software_version = nil
       args.each do |a|
         case a
           when '--check'
