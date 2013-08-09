@@ -11,12 +11,16 @@
     app.version. Thanks to Justin Campbell for the patch (pull request #62).
   * Added command line shortcut to view changelog. Thanks to Dan Loewenherz
     for the patch (pull request #107).
+  * Improved the `Boxed#to_a' to recursively send the `#to_a' message on fields
+    of the Boxed class (ex: CGRectMake(1, 2, 3, 4).to_a #=> [[1, 2], [3, 4]]).
   * [iOS] Added `:light_content' as new status bar style for UIStatusBarStyle
     property. Thanks to Chris Radford for the patch (pull request #116).
   * [iOS] Fixed a bug in debugger where built-in debugger command does not
     work with lldb in iOS 7 simulator.
   * [OSX] Added to support app_store_category config var for OSX apps. Thanks
     to Mark Rickert for the patch (pull request #115).
+  * [OSX] Fixed a bug in Dispatch.once where only the first occurence of the
+    call in the code would work as expected.
 
 = RubyMotion 2.6 =
 
