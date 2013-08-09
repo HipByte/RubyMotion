@@ -104,7 +104,7 @@ module Motion; module Project
         end
         $stderr.puts line
       end
-      $stderr.puts "(See the `/Library/RubyMotion/NEWS' file for all changes.)"
+      $stderr.puts "(Run `motion changelog` to view all changes.)"
   
       FileUtils.rm_rf Motion::Project::Builder.common_build_dir
     end
