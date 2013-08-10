@@ -117,8 +117,7 @@ module Motion; module Project;
     end
 
     def strip_args
-      # We only strip x86_64 symbols, because attempting to strip i386 symbols results in a 'symbols referenced by indirect symbol table entries that can't be stripped' error.
-      '-arch x86_64'
+      ''
     end
 
     def supported_sdk_versions(versions)
