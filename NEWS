@@ -13,6 +13,8 @@
     for the patch (pull request #107).
   * Improved the `Boxed#to_a' to recursively send the `#to_a' message on fields
     of the Boxed class (ex: CGRectMake(1, 2, 3, 4).to_a #=> [[1, 2], [3, 4]]).
+  * Fixed a minor bug in the cycle detector where it would scan the instance
+    variable slots of a pure-Ruby object that have not been initialize yet.
   * [iOS] Added `:light_content' as new status bar style for UIStatusBarStyle
     property. Thanks to Chris Radford for the patch (pull request #116).
   * [iOS] Fixed a bug in debugger where built-in debugger command does not
