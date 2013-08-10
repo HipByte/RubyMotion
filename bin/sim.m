@@ -922,6 +922,7 @@ gdb_commands_file(void)
     return save_debugger_command(cmds);
 }
 
+#if defined(SIMULATOR_IOS)
 static NSString *
 lldb_commands_file(int pid)
 {
@@ -949,6 +950,7 @@ lldb_commands_file(int pid)
 
     return save_debugger_command(cmds);
 }
+#endif
 
 #if defined(SIMULATOR_IOS)
 - (void)session:(id)session didEndWithError:(NSError *)error
