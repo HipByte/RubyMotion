@@ -17,6 +17,8 @@
     variable slots of a pure-Ruby object that have not been initialize yet.
   * Fixed a memory crasher in the REPL that would happen when attempting to
     set the libedit prompt from another thread, leading to a race condition.
+  * [OSX] Fixed the REPL/mouse-over functionality to be able to select views in
+    the key window, if the application has multiple windows opened.
   * [iOS] Added `:light_content' as new status bar style for UIStatusBarStyle
     property. Thanks to Chris Radford for the patch (pull request #116).
   * [iOS] Fixed a bug in debugger where built-in debugger command does not
