@@ -37,12 +37,14 @@ namespace :build do
   desc "Build the project for development"
   task :development do
     App.build('MacOSX')
+    App.codesign('MacOSX') if App.config_without_setup.codesign_for_development
   end
 
   desc "Build the project for release"
   task :release do
     App.config_without_setup.build_mode = :release
     App.build('MacOSX')
+    App.codesign('MacOSX')
   end
 end
 
@@ -77,7 +79,6 @@ end
 
 desc "Create a .pkg archive"
 task :archive => 'build:release' do
-  App.codesign('MacOSX')
   App.archive
 end
 
