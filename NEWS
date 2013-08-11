@@ -30,6 +30,9 @@
     to Mark Rickert for the patch (pull request #115).
   * [OSX] Fixed a bug in Dispatch.once where only the first occurence of the
     call in the code would work as expected.
+  * [OSX] Added the `app.codesign_for_development' variable that can be set to
+    true to enable codesigning for development builds. The default value for
+    this variable is false, and only release builds are codesigned by default.
 
 = RubyMotion 2.6 =
 
