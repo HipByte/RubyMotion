@@ -17,6 +17,9 @@
     variable slots of a pure-Ruby object that have not been initialize yet.
   * Fixed a memory crasher in the REPL that would happen when attempting to
     set the libedit prompt from another thread, leading to a race condition.
+  * Added the `String#to_fourcharcode' method which converts the receiver into
+    a FourCharCode type (used when doing Carbon/AppleEvent programming). The
+    receiver must have exactly 4 characters.
   * [OSX] Fixed the REPL/mouse-over functionality to be able to select views in
     the key window, if the application has multiple windows opened.
   * [iOS] Added `:light_content' as new status bar style for UIStatusBarStyle
