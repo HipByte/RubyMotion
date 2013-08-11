@@ -29,7 +29,8 @@ module Motion; module Project;
   class OSXConfig < XcodeConfig
     register :osx
 
-    variable :icon, :copyright, :category, :embedded_frameworks
+    variable :icon, :copyright, :category, :embedded_frameworks,
+        :codesign_for_development
 
     def initialize(project_dir, build_mode)
       super
@@ -38,6 +39,7 @@ module Motion; module Project;
       @category = 'utilities'
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
+      @codesign_for_development = false
     end
 
     def platforms; ['MacOSX']; end
