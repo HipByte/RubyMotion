@@ -14,7 +14,7 @@
   * Improved the `Boxed#to_a' to recursively send the `#to_a' message on fields
     of the Boxed class (ex: CGRectMake(1, 2, 3, 4).to_a #=> [[1, 2], [3, 4]]).
   * Fixed a minor bug in the cycle detector where it would scan the instance
-    variable slots of a pure-Ruby object that have not been initialize yet.
+    variable slots of a pure-Ruby object that have not been initialized yet.
   * Fixed a memory crasher in the REPL that would happen when attempting to
     set the libedit prompt from another thread, leading to a race condition.
   * Added the `String#to_fourcharcode' method which converts the receiver into
@@ -36,6 +36,9 @@
   * Fixed a bug, apparently caused by a change in the Objective-C runtime in
     Xcode 5, that would make certain methods (ex. MKAnnotationView#image) not
     returning a proper type at runtime but a pointer to a structure instead.
+  * [iOS] Added support for the compilation of SpriteKit texture atlas files.
+    The build system will now compile directories with the `.atlas' extension
+    into one large file inside the app bundle, similar to how Xcode does it.
 
 = RubyMotion 2.6 =
 
