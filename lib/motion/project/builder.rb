@@ -333,7 +333,7 @@ EOS
         end
       end
 
-      # Compile CoreData Model resources.
+      # Compile CoreData Model resources and SpriteKit atlas files.
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
           Dir.glob(File.join(dir, '*.xcdatamodeld')).each do |model|
@@ -343,6 +343,14 @@ EOS
               model = File.expand_path(model) # momc wants absolute paths.
               momd = File.expand_path(momd)
               sh "\"#{App.config.xcode_dir}/usr/bin/momc\" \"#{model}\" \"#{momd}\""
+            end
+          end
+          if cmd = config.spritekit_texture_atlas_compiler
+            Dir.glob(File.join(dir, '*.atlas')).each do |atlas|
+              if File.directory?(atlas)
+                App.info 'Compile', atlas
+                sh "\"#{cmd}\" \"#{atlas}\" \"#{bundle_path}\""
+              end
             end
           end
         end
@@ -373,7 +381,7 @@ EOS
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
           resources_paths << Dir.chdir(dir) do
-            Dir.glob('**{,/*/**}/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj'].include?(File.extname(x)) }.map { |file| File.join(dir, file) }
+            Dir.glob('**{,/*/**}/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj', '.atlas'].include?(File.extname(x)) }.map { |file| File.join(dir, file) }
           end
         end
       end
