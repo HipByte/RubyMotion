@@ -27,7 +27,7 @@ module Motion; module Project
   class UpdateCommand < Command
     self.name = 'update'
     self.help = 'Update the software'
-  
+
     def curl(cmd)
       resp = `/usr/bin/curl --connect-timeout 60 #{cmd}`
       if $?.exitstatus != 0
@@ -35,21 +35,24 @@ module Motion; module Project
       end
       resp
     end
-  
+
     def run(args)
       check_mode = false
-      wanted_software_version = ''
+      wanted_software_version = nil
       args.each do |a|
         case a
           when '--check'
             check_mode = true
-          when /--force-version=(.+)/
+          when /--cache-version=(.+)/
+            die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version") if File.exist?('/Library/RubyMotion.old')
             wanted_software_version = $1.to_s
+          when /--force-version=(.+)/
+            die "–-force-version has been removed in favor of –-cache-version"
           else
-            die "Usage: motion update [--force-version=X]"
+            die "Usage: motion update [--cache-version=X]"
         end
       end
-  
+
       license_key = read_license_key
       product_version = Motion::Version
 
@@ -75,38 +78,53 @@ module Motion; module Project
         end
         exit 1
       end
-  
+
       need_root
-  
+
       $stderr.puts "Connecting to the server..."
       resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"wanted_software_version=#{wanted_software_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
       unless resp.match(/^http:/)
         die resp
       end
-  
-      $stderr.puts "Downloading software update..."
+
+      $stderr.puts 'Downloading software update...'
       url = resp
       tmp_dest = '/tmp/_rubymotion_su.pkg'
       curl("-# \"#{url}\" -o #{tmp_dest}")
-  
+
+      if wanted_software_version
+        $stderr.puts 'Saving current RubyMotion version...'
+        FileUtils.mv '/Library/RubyMotion', '/Library/RubyMotion.old'
+      end
+
       $stderr.puts "Installing software update..."
       installer = "/usr/sbin/installer -pkg \"#{tmp_dest}\" -target / >& /tmp/installer.stderr"
       unless system(installer)
         die "An error happened when installing the software update: #{File.read('/tmp/installer.stderr')}"
       end
       FileUtils.rm_f tmp_dest
-  
-      $stderr.puts "Software update installed.\n\n"
-      news = File.read('/Library/RubyMotion/NEWS')
-      news.lines.each do |line|
-        if md = line.match(/^=\s+RubyMotion\s+(.+)\s+=$/)
-          break if md[1] <= product_version
+
+      if wanted_software_version
+        FileUtils.mv '/Library/RubyMotion', "/Library/RubyMotion#{wanted_software_version}"
+        $stderr.puts 'Restoring current RubyMotion version...' # done in ensure
+        $stderr.puts "RubyMotion #{wanted_software_version} installed as /Library/RubyMotion#{wanted_software_version}, change the Rakefile to /Library/RubyMotion#{wanted_software_version}/lib to use it. Keep /Library/RubyMotion/lib to live on the edge."
+      else
+        $stderr.puts "Software update installed.\n\n"
+        news = File.read('/Library/RubyMotion/NEWS')
+        news.lines.each do |line|
+          if md = line.match(/^=\s+RubyMotion\s+(.+)\s+=$/)
+            break if md[1] <= product_version
+          end
+          $stderr.puts line
         end
-        $stderr.puts line
+        $stderr.puts '(Run `motion changelog` to view all changes.)'
       end
-      $stderr.puts "(Run `motion changelog` to view all changes.)"
-  
+
       FileUtils.rm_rf Motion::Project::Builder.common_build_dir
+    ensure
+      if wanted_software_version && File.exist?('/Library/RubyMotion.old')
+        FileUtils.mv '/Library/RubyMotion.old', '/Library/RubyMotion'
+      end
     end
   end
 end; end
