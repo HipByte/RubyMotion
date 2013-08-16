@@ -33,6 +33,9 @@
   * [OSX] Added the `app.codesign_for_development' variable that can be set to
     true to enable codesigning for development builds. The default value for
     this variable is false, and only release builds are codesigned by default.
+  * Fixed a bug, apparently caused by a change in the Objective-C runtime in
+    Xcode 5, that would make certain methods (ex. MKAnnotationView#image) not
+    returning a proper type at runtime but a pointer to a structure instead.
 
 = RubyMotion 2.6 =
 
