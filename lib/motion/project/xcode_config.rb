@@ -318,5 +318,10 @@ EOS
         end
       "rb_define_global_const(\"RUBYMOTION_ENV\", @\"#{rubymotion_env}\");\nrb_define_global_const(\"RUBYMOTION_VERSION\", @\"#{Motion::Version}\");\n"
     end
+
+    def spritekit_texture_atlas_compiler
+      path = File.join(xcode_dir, 'usr/bin/TextureAtlas')
+      File.exist?(path) ? path : nil
+    end
   end
 end; end
