@@ -44,6 +44,7 @@ module Motion; module Project
           when '--check'
             check_mode = true
           when /--cache-version=(.+)/
+            die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version") if File.exist?('/Library/RubyMotion.old')
             wanted_software_version = $1.to_s
           when /--force-version=(.+)/
             die "–-force-version has been removed in favor of –-cache-version"
@@ -121,7 +122,7 @@ module Motion; module Project
 
       FileUtils.rm_rf Motion::Project::Builder.common_build_dir
     ensure
-      if File.exist?('/Library/RubyMotion.old')
+      if wanted_software_version && File.exist?('/Library/RubyMotion.old')
         FileUtils.mv '/Library/RubyMotion.old', '/Library/RubyMotion'
       end
     end
