@@ -45,6 +45,7 @@
     patch (pull request #116).
   * [iOS] Fixed a bug in `rake debug=1' with Xcode 5 where builtin commands
     (ex. `pro') where not available. We ported the commands from gdb to lldb.
+  * [iOS] Fixed a bug where Accelerate.framework methods are not available.
   * [OSX] Added the `app.category' variable which can be used to specify the
     AppStore category. The default value is `utilities'. Thanks to Mark Rickert
     for the patch (pull request #115).
