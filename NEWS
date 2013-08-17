@@ -1,5 +1,6 @@
 = RubyMotion 2.7 =
 
+  * Added support for iOS 7.0 Beta 5 and Xcode 5.0 DP 5.
   * Fixed a memory crasher in Range.new.
   * Fixed a bug in `rake crashlog' where it would fail with a missing
     Shellwords constant, and also when it was not able to locate any crash
