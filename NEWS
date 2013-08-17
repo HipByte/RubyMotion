@@ -45,7 +45,10 @@
     patch (pull request #116).
   * [iOS] Fixed a bug in `rake debug=1' with Xcode 5 where builtin commands
     (ex. `pro') where not available. We ported the commands from gdb to lldb.
-  * [iOS] Fixed a bug where Accelerate.framework methods are not available.
+  * [iOS] Fixed a bug where the Accelerate framework was not covered by the
+    compiler. Note that the framework is C-only, might be tough to use from
+    RubyMotion, and should probably be called in vendored-C code for better
+    performance results.
   * [OSX] Added the `app.category' variable which can be used to specify the
     AppStore category. The default value is `utilities'. Thanks to Mark Rickert
     for the patch (pull request #115).
