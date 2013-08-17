@@ -1,5 +1,10 @@
 = RubyMotion 2.7 =
 
+  * Added the feature to install the multiple RubyMotion versions. This feature
+    introduced the `--cache-version' option in `motion update' to install the
+    old version and `--force-version' option is deprecated. You could specify
+    the old RubyMotion in your Rakefile.
+    (ex. $:.unshift("/Library/RubyMotion2.6/lib"))
   * Added support for iOS 7.0 Beta 5 and Xcode 5.0 DP 5.
   * Bundler is now integrated in new iOS and OS X projects. A default Gemfile
     will be created and the Rakefile file will require and initialize the
