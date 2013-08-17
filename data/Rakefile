@@ -67,7 +67,11 @@ def merge_bridgesupport(base_bridgesupport, merge_brigesupport)
   base = File.read(base_bridgesupport)
   merge = File.read(merge_brigesupport)
   File.open(base_bridgesupport, "w") { |io|
-    io.print base.lines.to_a[0..-2].join  # skip last "</signatures>" in base
+    lines = base.lines.to_a
+    io.print lines[0..-2].join  # skip last "</signatures>" in base
+    if lines.last.strip != "</signatures>"
+      io.puts "<signatures version='1.0'>"
+    end
     io.print merge.lines.to_a[2..-1].join # skip first "<?xml version='1.0'?>\n<signatures version='1.0'>" in merge
   }
 end
