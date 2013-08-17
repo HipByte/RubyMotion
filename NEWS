@@ -1,15 +1,16 @@
 = RubyMotion 2.7 =
 
-  * Added the feature to install the multiple RubyMotion versions. This feature
-    introduced the `--cache-version' option in `motion update' to install the
-    old version and `--force-version' option is deprecated. You could specify
-    the old RubyMotion in your Rakefile.
-    (ex. $:.unshift("/Library/RubyMotion2.6/lib"))
   * Added support for iOS 7.0 Beta 5 and Xcode 5.0 DP 5.
   * Bundler is now integrated in new iOS and OS X projects. A default Gemfile
     will be created and the Rakefile file will require and initialize the
     bundler gem. In case Bundler is not to be found in the Ruby distribution
     that is being used, the build system keeps working as usual.
+  * Added the `--cache-version' flag to the `motion update' command which lets
+    you keep multiple versions of RubyMotion in your computer. Cached versions
+    are installed as `/Library/RubyMotion<XXX>' (where XXX is the version
+    number). A project can use an older version of RubyMotion by changing its
+    Rakefile to point to `/Library/RubyMotion<XXX>/lib'. The `--force-version'
+    flag previously available in `motion update' has been removed.
   * Added the `motion changelog' command to open the NEWS file in the terminal.
     Thanks to Dan Loewenherz for the patch (pull request #107).
   * Added the `String#to_fourcharcode' method which converts the receiver into
