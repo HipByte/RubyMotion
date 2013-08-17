@@ -26,6 +26,7 @@
     property. Thanks to Chris Radford for the patch (pull request #116).
   * [iOS] Fixed a bug in debugger where built-in debugger command does not
     work with lldb in iOS 7 simulator.
+  * [iOS] Fixed a bug where Accelerate.framework methods are not available.
   * [OSX] Added to support app_store_category config var for OSX apps. Thanks
     to Mark Rickert for the patch (pull request #115).
   * [OSX] Fixed a bug in Dispatch.once where only the first occurence of the
