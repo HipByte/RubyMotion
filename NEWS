@@ -16,6 +16,7 @@
   * Added the `String#to_fourcharcode' method which converts the receiver into
     a FourCharCode type (used when doing Carbon/AppleEvent programming). The
     receiver must have exactly 4 characters.
+  * Added `*.gem' into .gitignore in gem template.
   * Removed calls from the String/Encoding/Regexp classes to ICU functions that
     Apple has marked as non-public API. As a result, certain operations on
     UTF-32 encodings are not possible anymore, until we figure out a solution.
