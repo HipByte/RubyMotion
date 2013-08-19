@@ -11,6 +11,7 @@ nbproject
 #*#
 *~
 *.sw[po]
+*.gem
 .eprj
 .sass-cache
 .idea
