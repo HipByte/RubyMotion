@@ -6,6 +6,7 @@ require './lib/<%= name %>'
 begin
   require 'bundler'
   require 'motion/project/template/gem/gem_tasks'
+  Bundler.require
 rescue LoadError
 end
 
