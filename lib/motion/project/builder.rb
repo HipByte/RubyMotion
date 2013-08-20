@@ -87,6 +87,7 @@ module Motion; module Project;
       any_obj_file_built = false
       project_files = Dir.glob("**/*.rb").map{ |x| File.expand_path(x) }
       is_default_archs = (archs == config.default_archs[platform])
+      rubyc_bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
 
       build_file = Proc.new do |files_build_dir, path|
         rpath = path
@@ -113,9 +114,8 @@ module Motion; module Project;
    
             # LLVM bitcode.
             bc = File.join(files_build_dir, "#{path}.#{arch}.bc")
-            bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
             arch_cmd = (arch =~ /^arm/) ? "/usr/bin/arch -arch i386" : "/usr/bin/arch -arch #{arch}"
-            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{arch_cmd} #{ruby} #{bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{arch_cmd} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
    
             # Assembly.
             asm = File.join(files_build_dir, "#{path}.#{arch}.s")
@@ -144,7 +144,7 @@ module Motion; module Project;
         [obj, init_func]
       end
 
-      # Resolve file dependencies
+      # Resolve file dependencies.
       if config.detect_dependencies == true
         config.dependencies = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
       end
