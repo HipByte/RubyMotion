@@ -37,7 +37,6 @@ module Motion; module Project;
       @libs = []
       @bundle_signature = '????'
       @short_version = nil
-      @vendor_projects = []
       @entitlements = {}
       @delegate_class = 'AppDelegate'
       @spec_mode = false

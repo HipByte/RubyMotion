@@ -82,6 +82,7 @@ module Motion; module Project
       @version = '1.0'
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
+      @vendor_projects = []
     end
 
     OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
