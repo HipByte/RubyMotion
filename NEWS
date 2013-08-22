@@ -1,6 +1,6 @@
 = RubyMotion 2.7 =
 
-  * Added support for iOS 7.0 Beta 5 and Xcode 5.0 DP 5.
+  * Added support for iOS 7.0 Beta 6 and Xcode 5.0 DP 6.
   * Bundler is now integrated in new iOS and OS X projects. A default Gemfile
     will be created and the Rakefile file will require and initialize the
     bundler gem. In case Bundler is not to be found in the Ruby distribution
@@ -31,6 +31,10 @@
     app.version. Thanks to Justin Campbell for the patch (pull request #62).
   * Improved the `Boxed#to_a' to recursively send the `#to_a' message on fields
     of the Boxed class (ex: CGRectMake(1, 2, 3, 4).to_a #=> [[1, 2], [3, 4]]).
+  * Improved Time class implementation in order to follow Ruby 1.9, so far it
+    was based on a Ruby 1.8. This would handle a time that exceeds the value of
+    the 32 bit. Added Time#{round, subsec, to_r} methods and changed Time#{new,
+    localtime, getlocal} methods to allow the variable arguments.
   * Fixed a minor bug in the cycle detector where it would scan the instance
     variable slots of a pure-Ruby object that have not been initialized yet.
   * Fixed a memory crasher in the REPL that would happen when attempting to
