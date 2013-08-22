@@ -320,8 +320,107 @@ sigforwarder(int sig)
     }
 }
 
+#define WITH_DEBUG 1
+
+static char
+tohex(int x)
+{
+    assert(x >= 0 && x <= 16);
+    static char *hexchars = "0123456789ABCDEF";
+    return hexchars[x];
+}
+
 static void
-start_debugger(am_device_t dev)
+gdb_send_str(const char *buf)
+{
+    send(gdb_fd, buf, strlen(buf), 0);
+}
+
+static NSData *
+gdb_recv_pkt()
+{
+    NSMutableData *data = [NSMutableData data];
+    while (true) {
+	char buf[100];
+	ssize_t len = recv(gdb_fd, buf, sizeof buf, 0);
+	if (len <= 0) {
+	    break;
+	}
+	assert(len <= sizeof buf);
+	[data appendBytes:buf length:len];
+    }
+    if ([data length] > 0) {
+	gdb_send_str("+");
+    }
+    return data;
+}
+
+static void 
+gdb_send_pkt(const char *buf)
+{
+    char *buf2 = (char *)malloc(32*1024);
+    assert(buf2 != NULL);
+    memset(buf2, 0, 32*1024);
+
+    long cnt = strlen(buf);
+    unsigned char csum = 0;
+    char *p = buf2;
+    *p++ = '$';
+    for (int i = 0; i < cnt; i++) {
+	csum += buf[i];
+	*p++ = buf[i];
+    }
+    *p++ = '#';
+    *p++ = tohex((csum >> 4) & 0xf);
+    *p++ = tohex(csum & 0xf);
+    *p = '\0';
+
+    gdb_send_str(buf2);
+    gdb_recv_pkt();
+    free(buf2);
+}
+
+static void
+gdb_start_app(NSString *app_path)
+{
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 500000;
+    setsockopt(gdb_fd, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&tv,
+	    sizeof(struct timeval));
+
+    char *cmds[] = {
+        "XXX", // Will be replaced by the app path.
+        "Hc0",
+        "c",
+        NULL,
+    };
+
+    const char *apppath = [app_path UTF8String];
+    cmds[0] = malloc(2000);
+    assert(cmds[0] != NULL);
+    char *p = cmds[0];
+    sprintf(p, "A%ld,0,", strlen(apppath) * 2);
+    p += strlen(p);
+    const char* q = apppath;
+    while (*q) {
+        *p++ = tohex(*q >> 4);
+        *p++ = tohex(*q & 0xf);
+        q++;
+    }
+    *p = '\0';
+
+    char **cmd = cmds;
+    while (*cmd != NULL) {
+	gdb_send_pkt(*cmd);
+	cmd++;
+	gdb_recv_pkt();
+	gdb_recv_pkt();
+    }
+}
+
+static void
+start_debug_server(am_device_t dev)
 {
     // We need .app and .dSYM bundles nearby.
 
@@ -405,7 +504,104 @@ start_debugger(am_device_t dev)
     /*int result =*/ _AMDeviceMountImage(dev, (CFStringRef)image_path,
 	    (CFDictionaryRef)options, mount_cb, 0);
 
-    // Start debug server and connect it to a UNIX socket file.
+    // Start debug server.
+
+    gdb_fd = 0;
+    PERFORM("starting debug server service", _AMDeviceStartService(dev,
+		CFSTR("com.apple.debugserver"), &gdb_fd, NULL));
+    assert(gdb_fd > 0);
+
+    // Locate app path on device.
+
+    NSDictionary *info_plist = [NSDictionary dictionaryWithContentsOfFile:
+	[app_path stringByAppendingPathComponent:@"Info.plist"]];
+    assert(info_plist != nil);
+    NSString *app_identifier = [info_plist objectForKey:@"CFBundleIdentifier"];
+    assert(app_identifier != nil);
+    NSString *app_name = [info_plist objectForKey:@"CFBundleName"];
+    assert(app_name != nil);
+
+    NSDictionary *apps = nil;
+    const int res = _AMDeviceLookupApplications(dev, 0, (void **)&apps);
+    assert(res == 0);
+    NSDictionary *app = [apps objectForKey:app_identifier];
+    assert(app != nil);
+    NSString *app_remote_path = [app objectForKey:@"Path"];
+
+    // Do we need to attach a debugger? If not, we simply run the app.
+
+    if (getenv("debug") == NULL) {
+	NSDate *app_launch_date = [NSDate date];
+	gdb_start_app(app_remote_path);
+
+	// Start the syslog service.
+	int syslog_fd = 0;
+	PERFORM("starting syslog relay service", _AMDeviceStartService(dev,
+		    CFSTR("com.apple.syslog_relay"), &syslog_fd, NULL));
+	assert(syslog_fd > 0);
+
+	// Connect and read the output.
+	NSMutableString *data = [NSMutableString string];
+	NSString *syslog_match = [app_name stringByAppendingString:@"["];
+	bool logs_since_app_launch_date = false;
+	while (true) {
+	    char buf[100];
+	    ssize_t len = recv(syslog_fd, buf, sizeof buf, 0);
+	    if (len == -1) {
+		fprintf(stderr, "error when reading syslog: %s",
+			strerror(errno));
+		break;
+	    }
+	    assert(len <= sizeof buf);
+	    buf[len] = '\0';
+
+	    // Split the output into lines.
+	    char *p = strrchr(buf, '\n');
+	    if (p == NULL) {
+		[data appendString:[[[NSString alloc] initWithCString:buf
+		    encoding:NSUTF8StringEncoding] autorelease]];
+	    }
+	    else {
+		[data appendString:[[[NSString alloc] initWithBytes:buf
+		    length:p-buf encoding:NSUTF8StringEncoding] autorelease]];
+
+		// Parse lines.
+		NSArray *lines = [data componentsSeparatedByString:@"\n"];
+		for (NSString *line in lines) {
+		    // Filter by app name.
+		    if ([line rangeOfString:syslog_match].location
+			    == NSNotFound) {
+			continue;
+		    }
+		    // Filter by date.
+		    if (!logs_since_app_launch_date) {
+			NSArray *words = [line componentsSeparatedByString:
+			    @" "];
+			NSString *str = [NSString stringWithFormat:
+			    @"%@ %@ %@", [words objectAtIndex:0],
+			    [words objectAtIndex:1], [words objectAtIndex:2]];
+			NSDate *date = [NSDate dateWithNaturalLanguageString:
+			    str];
+			if ([date compare:app_launch_date]
+				== NSOrderedDescending) {
+			    logs_since_app_launch_date = true;
+			}
+			else {
+			    continue;
+			}
+		    }
+		    // Yeepee, we can print that one!
+		    printf("%s\n", [line UTF8String]);
+		}
+		data = [[[NSMutableString alloc] initWithCString:p+1
+		    encoding:NSUTF8StringEncoding] autorelease];
+	    }
+	}
+	CFRunLoopRun();
+	return;
+    }
+
+    // Connect the debug server socket to a UNIX socket file.
 
     NSString *tmpdir = NSTemporaryDirectory();
     assert(tmpdir != nil);
@@ -414,11 +610,6 @@ start_debugger(am_device_t dev)
 	    "%s/rubymotion-remote-gdb-XXXXXX",
 	    [tmpdir fileSystemRepresentation]);
     assert(mktemp(gdb_unix_socket_path) != NULL);
-
-    gdb_fd = 0;
-    PERFORM("starting installer proxy service", _AMDeviceStartService(dev,
-		CFSTR("com.apple.debugserver"), &gdb_fd, NULL));
-    assert(gdb_fd > 0);
 
     CFSocketRef fdvendor = CFSocketCreate(NULL, AF_UNIX, 0, 0,
 	    kCFSocketAcceptCallBack, &fdvendor_callback, NULL);
@@ -432,23 +623,17 @@ start_debugger(am_device_t dev)
     address.sun_family = AF_UNIX;
     strcpy(address.sun_path, gdb_unix_socket_path);
     address.sun_len = SUN_LEN(&address);
+
     CFDataRef address_data = CFDataCreate(NULL, (const UInt8 *)&address,
 	    sizeof(address));
 
-    // Locate app path on device.
+    unlink(gdb_unix_socket_path);
 
-    NSDictionary *info_plist = [NSDictionary dictionaryWithContentsOfFile:
-	[app_path stringByAppendingPathComponent:@"Info.plist"]];
-    assert(info_plist != nil);
-    NSString *app_identifier = [info_plist objectForKey:@"CFBundleIdentifier"];
-    assert(app_identifier);
-
-    NSDictionary *apps = nil;
-    const int res = _AMDeviceLookupApplications(dev, 0, (void **)&apps);
-    assert(res == 0);
-    NSDictionary *app = [apps objectForKey:app_identifier];
-    assert(app != nil);
-    NSString *app_remote_path = [app objectForKey:@"Path"];
+    CFSocketSetAddress(fdvendor, address_data);
+    CFRelease(address_data);
+    CFRunLoopAddSource(CFRunLoopGetMain(),
+	    CFSocketCreateRunLoopSource(NULL, fdvendor, 0),
+	    kCFRunLoopCommonModes);
 
     // If we need to attach an external debugger, we can stop here.
 
@@ -461,70 +646,132 @@ start_debugger(am_device_t dev)
 	pause();
     }
 
-    unlink(gdb_unix_socket_path);
-
-    CFSocketSetAddress(fdvendor, address_data);
-    CFRelease(address_data);
-    CFRunLoopAddSource(CFRunLoopGetMain(),
-	    CFSocketCreateRunLoopSource(NULL, fdvendor, 0),
-	    kCFRunLoopCommonModes);
-
-    // Prepare gdb commands file.
-
-    NSString *cmds_path = [NSString pathWithComponents:
-	[NSArray arrayWithObjects:NSTemporaryDirectory(), @"_deploygdbcmds",
-	nil]];
-    NSString *cmds = [NSString stringWithFormat:@""\
-        "set shlib-path-substitutions /usr \"%@/Symbols/usr\" /System \"%@/Symbols/System\" /Developer \"%@/Symbols/Developer\" \"%@\" \"%@\"\n"\
-	"set remote max-packet-size 1024\n"\
-	"set inferior-auto-start-dyld 0\n"\
-	"set remote executable-directory %@\n"\
-	"set remote noack-mode 1\n"\
-	"set sharedlibrary load-rules \\\".*\\\" \\\".*\\\" container\n"\
-	"set minimal-signal-handling 1\n"\
-	"set mi-show-protections off\n"\
-	"target remote-mobile %s\n"\
-	"file \"%@\"\n"\
-	"add-dsym \"%@\"\n"\
-	"run\n"\
-	"set minimal-signal-handling 0\n"\
-	"set inferior-auto-start-dyld 1\n"\
-	"set inferior-auto-start-cfm off\n"\
-	"set sharedLibrary load-rules dyld \".*libobjc.*\" all dyld \".*CoreFoundation.*\" all dyld \".*Foundation.*\" all dyld \".*libSystem.*\" all dyld \".*AppKit.*\" all dyld \".*PBGDBIntrospectionSupport.*\" all dyld \".*/usr/lib/dyld.*\" all dyld \".*CarbonDataFormatters.*\" all dyld \".*libauto.*\" all dyld \".*CFDataFormatters.*\" all dyld \"/System/Library/Frameworks\\\\\\\\|/System/Library/PrivateFrameworks\\\\\\\\|/usr/lib\" extern dyld \".*\" all exec \".*\" all\n"\
-	"sharedlibrary apply-load-rules all\n",
-	device_support_path, device_support_path, device_support_path,
-	[[app_remote_path stringByDeletingLastPathComponent]
-	    stringByReplacingOccurrencesOfString:@"/private/var"
-	    withString:@"/var"], [app_path stringByDeletingLastPathComponent],
-	app_remote_path, gdb_unix_socket_path, app_path, dsym_path];
-    cmds = [cmds stringByAppendingFormat:@"%s\n", BUILTIN_DEBUGGER_CMDS];
-    NSString *user_cmds = [NSString stringWithContentsOfFile:
-	@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
-    if (user_cmds != nil) {
-	cmds = [cmds stringByAppendingString:user_cmds];
-	cmds = [cmds stringByAppendingString:@"\n"];
-    }
-    if (getenv("no_continue") == NULL) {
-	cmds = [cmds stringByAppendingString:@"continue\n"];
-    }
-    assert([cmds writeToFile:cmds_path atomically:YES
-	    encoding:NSUTF8StringEncoding error:nil]);
-
-    // Start gdb.
+    // Attach the debugger: gdb or lldb.
 
     NSString *gdb_path = [[NSString stringWithUTF8String:xcode_dir]
 	stringByAppendingPathComponent:
 	@"Platforms/iPhoneOS.platform/Developer/usr/libexec/gdb/gdb-arm-apple-darwin"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
+	// Prepare gdb commands file.
+	NSString *cmds_path = [NSString pathWithComponents:
+	    [NSArray arrayWithObjects:NSTemporaryDirectory(), @"_deploygdbcmds",
+	    nil]];
+	NSString *cmds = [NSString stringWithFormat:@""\
+	 "set shlib-path-substitutions /usr \"%@/Symbols/usr\" /System \"%@/Symbols/System\" /Developer \"%@/Symbols/Developer\" \"%@\" \"%@\"\n"\
+	 "set remote max-packet-size 1024\n"\
+	 "set inferior-auto-start-dyld 0\n"\
+	 "set remote executable-directory %@\n"\
+	 "set remote noack-mode 1\n"\
+	 "set sharedlibrary load-rules \\\".*\\\" \\\".*\\\" container\n"\
+	 "set minimal-signal-handling 1\n"\
+	 "set mi-show-protections off\n"\
+	 "target remote-mobile %s\n"\
+	 "file \"%@\"\n"\
+	 "add-dsym \"%@\"\n"\
+	 "run\n"\
+	 "set minimal-signal-handling 0\n"\
+	 "set inferior-auto-start-dyld 1\n"\
+	 "set inferior-auto-start-cfm off\n"\
+	 "set sharedLibrary load-rules dyld \".*libobjc.*\" all dyld \".*CoreFoundation.*\" all dyld \".*Foundation.*\" all dyld \".*libSystem.*\" all dyld \".*AppKit.*\" all dyld \".*PBGDBIntrospectionSupport.*\" all dyld \".*/usr/lib/dyld.*\" all dyld \".*CarbonDataFormatters.*\" all dyld \".*libauto.*\" all dyld \".*CFDataFormatters.*\" all dyld \"/System/Library/Frameworks\\\\\\\\|/System/Library/PrivateFrameworks\\\\\\\\|/usr/lib\" extern dyld \".*\" all exec \".*\" all\n"\
+	 "sharedlibrary apply-load-rules all\n",
+		 device_support_path, device_support_path, device_support_path,
+		 [[app_remote_path stringByDeletingLastPathComponent]
+		     stringByReplacingOccurrencesOfString:@"/private/var"
+		     withString:@"/var"], [app_path stringByDeletingLastPathComponent],
+		 app_remote_path, gdb_unix_socket_path, app_path, dsym_path];
+	cmds = [cmds stringByAppendingFormat:@"%s\n", BUILTIN_DEBUGGER_CMDS];
+	NSString *user_cmds = [NSString stringWithContentsOfFile:
+	    @"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
+	if (user_cmds != nil) {
+	    cmds = [cmds stringByAppendingString:user_cmds];
+	    cmds = [cmds stringByAppendingString:@"\n"];
+	}
+	if (getenv("no_continue") == NULL) {
+	    cmds = [cmds stringByAppendingString:@"continue\n"];
+	}
+	assert([cmds writeToFile:cmds_path atomically:YES
+		encoding:NSUTF8StringEncoding error:nil]);
 
-    float product_version_f = [product_version floatValue];
-    NSString *remote_arch = product_version_f < 5.0 ? @"armv6" : @"armv7";
+	// Start gdb.
+	float product_version_f = [product_version floatValue];
+	NSString *remote_arch = product_version_f < 5.0 ? @"armv6" : @"armv7";
 
-    // Forward ^C to gdb.
-    signal(SIGINT, sigforwarder);
+	// Forward ^C to gdb.
+	signal(SIGINT, sigforwarder);
 
-    gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
-	arguments:[NSArray arrayWithObjects:@"--arch", remote_arch, @"-q",
-	@"-x", cmds_path, nil]] retain];
+	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
+	    arguments:[NSArray arrayWithObjects:@"--arch", remote_arch, @"-q",
+	    @"-x", cmds_path, nil]] retain];
+    }
+    else {
+	NSString *lldb_path = [[NSString stringWithUTF8String:xcode_dir]
+	    stringByAppendingPathComponent:@"usr/bin/lldb"];
+	if (![[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
+	    fprintf(stderr, "Can't locate either gdb or lldb within Xcode");
+	    exit(1);
+	}
+
+	// Work in progress..
+	fprintf(stderr, "lldb device debugging is not supported yet\n");
+	exit(1);
+
+	// Prepare lldb commands file.
+       NSString *py_cmds = [NSString stringWithFormat:@""\
+   	"import socket\n"\
+   	"import sys\n"\
+   	"import lldb\n"\
+   	"debugger = lldb.debugger\n"\
+        "error = lldb.SBError()\n"\
+   	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", True, error)\n"\
+   	"print target\nprint error\n"\
+   	"debugger.SetCurrentPlatformSDKRoot(\"%@\")\n"
+   	"module = target.FindModule(target.GetExecutable())\n"\
+   	"filespec = lldb.SBFileSpec(\"%@\", False)\n"\
+   	"print module.SetPlatformFileSpec(filespec)\n"\
+   	"print \"open socket...\"\n"\
+   	"unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)\n"\
+   	"unix_socket.connect(\"%s\")\n"\
+   	"print unix_socket.fileno()\n"\
+        "error = lldb.SBError()\n"\
+   	"process = target.ConnectRemote(debugger.GetListener(), \"fd://%%d\" %% unix_socket.fileno(), \"gdb-remote\", error)\n"\
+   	"print error\n"\
+   	"while True:\n"\
+        "  print \"waiting...\"\n"\
+   	"  print process\n"\
+        "  event = lldb.SBEvent()\n"\
+   	"  if debugger.GetListener().WaitForEvent(1, event):\n"\
+   	"    if process.GetStateFromEvent(event) == lldb.eStateConnected:\n"\
+   	"      print \"connected!\"\n"\
+   	"      break\n"\
+        "  else:\n"\
+   	"    break\n"\
+   	"print process\n"\
+   	"print \"launching...\"\n"\
+        "error = lldb.SBError()\n"\
+   	"ok = process.RemoteLaunch(None, None, None, None, None, \"%@\", 0, False, error)\n"\
+   	"print debugger\nprint target\nprint process\nprint ok\nprint error\n",
+   	     app_path, device_support_path, app_remote_path, gdb_unix_socket_path,
+   	     [[app_remote_path stringByDeletingLastPathComponent]
+   		 stringByReplacingOccurrencesOfString:@"/private/var"
+   		 withString:@"/var"]];
+	NSString *py_cmds_path = [NSString pathWithComponents:
+	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
+	    @"_deploylldbcmds.py", nil]];
+	assert([py_cmds writeToFile:py_cmds_path atomically:YES
+		encoding:NSUTF8StringEncoding error:nil]);
+
+	NSString *cmds = [NSString stringWithFormat:
+	    @"command script import %@", py_cmds_path];
+	NSString *cmds_path = [NSString pathWithComponents:
+	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
+	    @"_deploylldbcmds", nil]];
+	assert([cmds writeToFile:cmds_path atomically:YES
+		encoding:NSUTF8StringEncoding error:nil]);
+
+	gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
+	    arguments:[NSArray arrayWithObjects:@"-s", cmds_path, nil]] retain];
+    }
+
     [gdb_task waitUntilExit];
 }
 
@@ -532,8 +779,8 @@ static void
 device_go(am_device_t dev)
 {
     install_application(dev);
-    if (getenv("debug") != NULL) {
-	start_debugger(dev);
+    if (getenv("install_only") == NULL) {
+	start_debug_server(dev);
     }
 }
 
