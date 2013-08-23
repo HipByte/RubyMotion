@@ -46,7 +46,9 @@
   * Fixed a bug, apparently caused by a change in the Objective-C runtime in
     Xcode 5, that would make certain methods (ex. MKAnnotationView#image) not
     returning a proper type at runtime but a pointer to a structure instead.
-  * FIxed a bug where ARR_CYCLES_DISABLE are disabled with distributed app.
+  * Fixed the build system to make the content of the ARR_CYCLES_DISABLE 
+    environment variable persistent when distributing an app.
+  * [iOS] Added experimental support for remote debugging with lldb (Xcode 5).
   * [iOS] Added support for the compilation of SpriteKit texture atlas files.
     The build system will now compile directories with the `.atlas' extension
     into one large file inside the app bundle, similar to how Xcode does it.
