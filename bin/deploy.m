@@ -725,9 +725,9 @@ start_debug_server(am_device_t dev)
    	"import sys\n"\
    	"import lldb\n"\
    	"debugger = lldb.debugger\n"\
+	/*"debugger.EnableLog(\"lldb\", [\"all\"])\n"*/\
         "error = lldb.SBError()\n"\
-   	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", True, error)\n"\
-   	"debugger.SetCurrentPlatformSDKRoot(\"%@\")\n"
+   	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", False, error)\n"\
    	"module = target.FindModule(target.GetExecutable())\n"\
    	"filespec = lldb.SBFileSpec(\"%@\", False)\n"\
    	"module.SetPlatformFileSpec(filespec)\n"\
@@ -744,7 +744,7 @@ start_debug_server(am_device_t dev)
         "      break\n"\
    	"print \"Launching...\"\n"\
         "error = lldb.SBError()\n"\
-   	"ok = process.RemoteLaunch(None, None, None, None, None, \"%@\", 0, False, error)\n"\
+   	"ok = process.RemoteLaunch(None, None, None, None, None, None, 0, False, error)\n"\
    	"while True:\n"\
         "  event = lldb.SBEvent()\n"\
    	"  if listener.WaitForEvent(1, event):\n"\
@@ -754,11 +754,7 @@ start_debug_server(am_device_t dev)
         "      print \"Running...\"\n"\
 	"      process.Continue()\n"\
 	"broadcaster.RemoveListener(listener)\n",
-   	     app_path,
-	     device_support_path, app_remote_path, lldb_socket_path,
-   	     [[app_remote_path stringByDeletingLastPathComponent]
-   		 stringByReplacingOccurrencesOfString:@"/private/var"
-   		 withString:@"/var"]];
+   	     app_path, app_remote_path, lldb_socket_path];
 	NSString *py_cmds_path = [NSString pathWithComponents:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
 	    @"_deploylldbcmds.py", nil]];
