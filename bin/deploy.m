@@ -602,6 +602,7 @@ start_debug_server(am_device_t dev)
     }
 
     // Connect the debug server socket to a UNIX socket file.
+    // gdb-only, but since RubyMine also uses it, we keep it around.
 
     NSString *tmpdir = NSTemporaryDirectory();
     assert(tmpdir != nil);
@@ -611,12 +612,10 @@ start_debug_server(am_device_t dev)
 	    [tmpdir fileSystemRepresentation]);
     assert(mktemp(gdb_unix_socket_path) != NULL);
 
+    unlink(gdb_unix_socket_path);
+
     CFSocketRef fdvendor = CFSocketCreate(NULL, AF_UNIX, 0, 0,
 	    kCFSocketAcceptCallBack, &fdvendor_callback, NULL);
-
-    int yes = 1;
-    setsockopt(CFSocketGetNative(fdvendor), SOL_SOCKET, SO_REUSEADDR, &yes,
-	    sizeof(yes));
 
     struct sockaddr_un address;
     memset(&address, 0, sizeof(address));
@@ -627,7 +626,9 @@ start_debug_server(am_device_t dev)
     CFDataRef address_data = CFDataCreate(NULL, (const UInt8 *)&address,
 	    sizeof(address));
 
-    unlink(gdb_unix_socket_path);
+    int yes = 1;
+    setsockopt(CFSocketGetNative(fdvendor), SOL_SOCKET, SO_REUSEADDR, &yes,
+	    sizeof(yes));
 
     CFSocketSetAddress(fdvendor, address_data);
     CFRelease(address_data);
@@ -711,46 +712,50 @@ start_debug_server(am_device_t dev)
 	    exit(1);
 	}
 
-	// Work in progress..
-	fprintf(stderr, "lldb device debugging is not supported yet\n");
-	exit(1);
+	NSString *tmpdir = NSTemporaryDirectory();
+	assert(tmpdir != nil);
+	char lldb_socket_path[PATH_MAX];
+	snprintf(lldb_socket_path, sizeof lldb_socket_path,
+		"%s/rubymotion-lldb-XXXXXX",
+		[NSTemporaryDirectory() fileSystemRepresentation]);
+	assert(mktemp(lldb_socket_path) != NULL);
 
 	// Prepare lldb commands file.
        NSString *py_cmds = [NSString stringWithFormat:@""\
-   	"import socket\n"\
    	"import sys\n"\
    	"import lldb\n"\
    	"debugger = lldb.debugger\n"\
         "error = lldb.SBError()\n"\
    	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", True, error)\n"\
-   	"print target\nprint error\n"\
    	"debugger.SetCurrentPlatformSDKRoot(\"%@\")\n"
    	"module = target.FindModule(target.GetExecutable())\n"\
    	"filespec = lldb.SBFileSpec(\"%@\", False)\n"\
-   	"print module.SetPlatformFileSpec(filespec)\n"\
-   	"print \"open socket...\"\n"\
-   	"unix_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)\n"\
-   	"unix_socket.connect(\"%s\")\n"\
-   	"print unix_socket.fileno()\n"\
+   	"module.SetPlatformFileSpec(filespec)\n"\
         "error = lldb.SBError()\n"\
-   	"process = target.ConnectRemote(debugger.GetListener(), \"fd://%%d\" %% unix_socket.fileno(), \"gdb-remote\", error)\n"\
-   	"print error\n"\
+	"listener = lldb.SBListener(\"my-listener\")\n"\
+   	"process = target.ConnectRemote(listener, \"unix-accept://%s\", None, error)\n"\
+	"broadcaster = process.GetBroadcaster()\n"\
+	"broadcaster.AddListener(listener, lldb.SBProcess.eBroadcastBitStateChanged)\n"\
    	"while True:\n"\
-        "  print \"waiting...\"\n"\
-   	"  print process\n"\
+        "  print \"Connecting...\"\n"\
         "  event = lldb.SBEvent()\n"\
-   	"  if debugger.GetListener().WaitForEvent(1, event):\n"\
-   	"    if process.GetStateFromEvent(event) == lldb.eStateConnected:\n"\
-   	"      print \"connected!\"\n"\
-   	"      break\n"\
-        "  else:\n"\
-   	"    break\n"\
-   	"print process\n"\
-   	"print \"launching...\"\n"\
+   	"  if listener.WaitForEvent(1, event):\n"\
+        "    if process.GetStateFromEvent(event) == lldb.eStateConnected:\n"\
+        "      break\n"\
+   	"print \"Launching...\"\n"\
         "error = lldb.SBError()\n"\
    	"ok = process.RemoteLaunch(None, None, None, None, None, \"%@\", 0, False, error)\n"\
-   	"print debugger\nprint target\nprint process\nprint ok\nprint error\n",
-   	     app_path, device_support_path, app_remote_path, gdb_unix_socket_path,
+   	"while True:\n"\
+        "  event = lldb.SBEvent()\n"\
+   	"  if listener.WaitForEvent(1, event):\n"\
+        "    if process.GetStateFromEvent(event) == lldb.eStateRunning:\n"\
+        "      break\n"\
+        "    if process.GetStateFromEvent(event) == lldb.eStateStopped:\n"\
+        "      print \"Running...\"\n"\
+	"      process.Continue()\n"\
+	"broadcaster.RemoveListener(listener)\n",
+   	     app_path,
+	     device_support_path, app_remote_path, lldb_socket_path,
    	     [[app_remote_path stringByDeletingLastPathComponent]
    		 stringByReplacingOccurrencesOfString:@"/private/var"
    		 withString:@"/var"]];
@@ -768,8 +773,74 @@ start_debug_server(am_device_t dev)
 	assert([cmds writeToFile:cmds_path atomically:YES
 		encoding:NSUTF8StringEncoding error:nil]);
 
+	// Forward ^C to lldb.
+	signal(SIGINT, sigforwarder);
+
+	// Run lldb.
 	gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
 	    arguments:[NSArray arrayWithObjects:@"-s", cmds_path, nil]] retain];
+
+	// Connect to the lldb UNIX socket.
+	const int lldb_socket = socket(PF_LOCAL, SOCK_STREAM, 0);
+	if (lldb_socket == -1) {
+	    perror("socket()");
+	    return;
+	}
+
+	fcntl(lldb_socket, F_SETFL, O_NONBLOCK);
+	fcntl(gdb_fd, F_SETFL, O_NONBLOCK);
+
+	struct sockaddr_un name;
+	name.sun_family = PF_LOCAL;
+	strncpy(name.sun_path, lldb_socket_path,
+		sizeof(name.sun_path));
+
+	while (true) {
+	    if (connect(lldb_socket, (struct sockaddr *)&name, SUN_LEN(&name))
+		    == -1) {
+		if (errno != ENOENT) {
+		    perror("connect()");
+		    return;
+		}
+	    }
+	    else {
+		break;
+	    }
+	    usleep(200000);
+	}
+
+	// We are connected, start redirecting input to/from the debug server.
+	char buf[1024];
+	ssize_t len;
+	while (true) {
+	    fd_set read_fds;
+	    FD_ZERO(&read_fds);
+	    FD_SET(gdb_fd, &read_fds);
+	    FD_SET(lldb_socket, &read_fds);
+
+	    struct timeval tv;
+	    tv.tv_sec = 0;
+	    tv.tv_usec = 10000;
+	    int n = select(lldb_socket + 1, &read_fds, NULL, NULL, &tv);
+	    if (n == -1) {
+		perror("select()");
+		break;
+	    }
+	    if (n > 0) {
+		if (FD_ISSET(lldb_socket, &read_fds)) {
+		    len = read(lldb_socket, buf, sizeof buf);
+		    if (len > 0) {
+			write(gdb_fd, buf, len);
+		    }
+		}
+		if (FD_ISSET(gdb_fd, &read_fds)) {
+		    len = read(gdb_fd, buf, sizeof buf);
+		    if (len > 0) {
+			write(lldb_socket, buf, len);
+		    }
+		}
+	    }
+	}
     }
 
     [gdb_task waitUntilExit];
