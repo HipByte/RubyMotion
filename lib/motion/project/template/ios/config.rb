@@ -441,6 +441,11 @@ main(int argc, char **argv)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int retval = 0;
 EOS
+    if ENV['ARR_CYCLES_DISABLE']
+      main_txt << <<EOS
+    setenv("ARR_CYCLES_DISABLE", "1", true);
+EOS
+    end
     main_txt << "[SpecLauncher launcher];\n" if spec_mode
     main_txt << <<EOS
     RubyMotionInit(argc, argv);

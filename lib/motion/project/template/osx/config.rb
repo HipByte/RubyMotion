@@ -190,6 +190,13 @@ int
 main(int argc, char **argv)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+EOS
+    if ENV['ARR_CYCLES_DISABLE']
+      main_txt << <<EOS
+    setenv("ARR_CYCLES_DISABLE", "1", true);
+EOS
+    end
+    main_txt << <<EOS
     RubyMotionInit(argc, argv);
     NSApplication *app = [NSApplication sharedApplication];
     [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
