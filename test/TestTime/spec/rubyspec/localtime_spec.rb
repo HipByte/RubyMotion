@@ -83,10 +83,12 @@ describe "Time#localtime" do
       lambda { t.localtime("3600") }.should.raise?(ArgumentError)
     end
 
-    it "raises ArgumentError if the String argument is not in an ASCII-compatible encoding" do
-      t = Time.now
-      lambda { t.localtime("-01:00".encode("UTF-16LE")) }.should.raise?(ArgumentError)
-    end
+    # INFO: The following spec causes an error by removed calls to ucnv_ APIs
+    # https://github.com/lrz/RubyMotionVM/commit/5ca06c5716c81a5667e9089a4a5dcccda1ebe5ad
+    # it "raises ArgumentError if the String argument is not in an ASCII-compatible encoding" do
+    #   t = Time.now
+    #   lambda { t.localtime("-01:00".encode("UTF-16LE")) }.should.raise?(ArgumentError)
+    # end
 
     it "raises ArgumentError if the argument represents a value less than or equal to -86400 seconds" do
       t = Time.new
