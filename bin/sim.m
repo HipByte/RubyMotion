@@ -296,6 +296,15 @@ locate_app_windows_bounds(void)
 	if ([name rangeOfString:@"iPad"].location != NSNotFound) {
 	    device_family = DEVICE_FAMILY_IPAD;
 	}
+
+	static bool displayed_mouse_over_message = false;
+	if (simulator_retina_type && !displayed_mouse_over_message) {
+	    printf("--------------------------------------------------------------------------------\n");
+	    printf("For Retina, we need 50 %% window scale for mouse over feature.\n");
+	    printf("Please press command + 3 in iOS simulator.\n");
+	    printf("--------------------------------------------------------------------------------\n");
+	    displayed_mouse_over_message = true;
+	}
 #else // !SIMULATOR_IOS
 	int window_pid = [[dict objectForKey:@"kCGWindowOwnerPID"] intValue];
         if (window_pid != [osx_task processIdentifier]) {
@@ -435,12 +444,6 @@ CONCURRENT_BEGIN
 	// Inset the mouse location.
 	mouseLocation.x -= bounds.origin.x;
 	mouseLocation.y -= bounds.origin.y;
-#if defined(SIMULATOR_IOS)
-	if (simulator_retina_type) {
-	    mouseLocation.x /= 2.0f;
-	    mouseLocation.y /= 2.0f;
-	}
-#endif
 
 	// Send coordinate to the repl.
 	previousHighlight = true;
