@@ -5,10 +5,6 @@
     will be created and the Rakefile file will require and initialize the
     bundler gem. In case Bundler is not to be found in the Ruby distribution
     that is being used, the build system keeps working as usual.
-  * The `rake device' task will now start the application (without the need to
-    attach a debugger). Logs emitted by the app will be redirected in the
-    terminal. ^C quits the app. In order to just install the app, the
-    `install_only' option can be given (ex. `rake device install_only=1').
   * Added the `--cache-version' flag to the `motion update' command which lets
     you keep multiple versions of RubyMotion in your computer. Cached versions
     are installed as `/Library/RubyMotion<XXX>' (where XXX is the version
@@ -48,6 +44,12 @@
     returning a proper type at runtime but a pointer to a structure instead.
   * Fixed the build system to make the content of the ARR_CYCLES_DISABLE 
     environment variable persistent when distributing an app.
+  * [iOS] The `rake device' task will now start the application (without the
+    need to attach a debugger). Logs emitted by the app will be redirected in
+    the terminal. ^C quits the app. In order to just install the app, the
+    `install_only' option can be given (ex. `rake device install_only=1').
+  * [iOS] Fixed the REPL/mouse-over functionality when using the simulator in
+    retina mode (which is the default when targetting iOS 7).
   * [iOS] Added experimental support for remote debugging with lldb (Xcode 5).
   * [iOS] Added support for the compilation of SpriteKit texture atlas files.
     The build system will now compile directories with the `.atlas' extension
@@ -61,8 +63,6 @@
     compiler. Note that the framework is C-only, might be tough to use from
     RubyMotion, and should probably be called in vendored-C code for better
     performance results.
-  * [iOS] Fixed the REPL/mouse-over functionality where it would not work in the
-    iOS 7 simulator.
   * [OSX] Added the `app.category' variable which can be used to specify the
     AppStore category. The default value is `utilities'. Thanks to Mark Rickert
     for the patch (pull request #115).
