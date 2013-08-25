@@ -65,7 +65,7 @@ save_repl_history(void)
     NSError *error = nil;
     if (![data writeToFile:HISTORY_FILE atomically:YES
 	encoding:NSUTF8StringEncoding error:&error]) {
-	fprintf(stderr, "Cannot save REPL history file to `%s': %s\n",
+	fprintf(stderr, "*** Cannot save REPL history file to `%s': %s\n",
 		[HISTORY_FILE UTF8String], [[error description] UTF8String]);
     }
 }
@@ -299,10 +299,9 @@ locate_app_windows_bounds(void)
 
 	static bool displayed_mouse_over_message = false;
 	if (simulator_retina_type && !displayed_mouse_over_message) {
-	    printf("--------------------------------------------------------------------------------\n");
-	    printf("For Retina, we need 50 %% window scale for mouse over feature.\n");
-	    printf("Please press command + 3 in iOS simulator.\n");
-	    printf("--------------------------------------------------------------------------------\n");
+	    fprintf(stderr,
+		    "\n*** In retina mode, mouse-over requires 50%% window scale to work"\
+		    "\n*** (use command+3 in the iOS simulator)\n");
 	    displayed_mouse_over_message = true;
 	}
 #else // !SIMULATOR_IOS
@@ -388,7 +387,7 @@ locate_app_windows_bounds(void)
 	static bool error_printed = false;
 	if (!error_printed) {
 	    fprintf(stderr,
-		    "Cannot locate the Simulator app, mouse over disabled\n");
+		    "*** Cannot locate the Simulator app, mouse-over disabled\n");
 	    error_printed = true;
 	}
 #endif
@@ -895,7 +894,7 @@ save_debugger_command(NSString *cmds)
     if (![cmds writeToFile:cmds_path atomically:YES
 	    encoding:NSASCIIStringEncoding error:&error]) {
 	fprintf(stderr,
-		"can't write gdb commands file into path %s: %s\n",
+		"*** Cannot write gdb commands file into path %s: %s\n",
 		[cmds_path UTF8String],
 		[[error description] UTF8String]);
 	exit(1);
@@ -990,7 +989,7 @@ lldb_commands_file(int pid)
 	exit(status);
     }
     else {
-	fprintf(stderr, "*** simulator session ended with error: %s\n",
+	fprintf(stderr, "*** Simulator session ended with error: %s\n",
 		[[error description] UTF8String]);
 	exit(1);
     }
@@ -999,7 +998,7 @@ lldb_commands_file(int pid)
 - (void)session:(id)session didStart:(BOOL)flag withError:(NSError *)error
 {
     if (!flag || error != nil) {
-	fprintf(stderr, "*** simulator session started with error: %s\n",
+	fprintf(stderr, "*** Simulator session started with error: %s\n",
 		[[error description] UTF8String]);
 	exit(1);
     }
@@ -1018,7 +1017,7 @@ lldb_commands_file(int pid)
 	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
 		@selector(simulatedApplicationPID));
 	if (pidNumber == nil || ![pidNumber isKindOfClass:[NSNumber class]]) {
-	    fprintf(stderr, "can't get simulated application PID\n");
+	    fprintf(stderr, "*** Cannot get simulated application PID\n");
 	    exit(1);
 	}
 
@@ -1039,7 +1038,8 @@ lldb_commands_file(int pid)
 		@"-s", lldb_commands_file([pidNumber intValue]), nil]] retain];
 	}
 	else {
-	    fprintf(stderr, "can't locate a debugger (gdb `%s' or lldb `%s')\n",
+	    fprintf(stderr,
+		    "*** Cannot locate a debugger (either gdb `%s' or lldb `%s')\n",
 		    [gdb_path UTF8String], [lldb_path UTF8String]);
 	    exit(1);
 	}
@@ -1185,7 +1185,7 @@ main(int argc, char **argv)
     id system_root = ((id (*)(id, SEL, id))objc_msgSend)(SystemRoot,
 	    @selector(rootWithSDKVersion:), sdk_version);
     if (system_root == nil) {
-	fprintf(stderr, "iOS simulator for %s SDK not found.\n\n",
+	fprintf(stderr, "*** iOS simulator for %s SDK not found.\n\n",
 		[sdk_version UTF8String]);
 	exit(1);
     }
@@ -1251,7 +1251,7 @@ main(int argc, char **argv)
     if (!((BOOL (*)(id, SEL, id, double, id *))objc_msgSend)(session,
 		@selector(requestStartWithConfig:timeout:error:), config, 0.0,
 		&error)) {
-	fprintf(stderr, "*** can't start simulator: %s\n",
+	fprintf(stderr, "*** Cannot start simulator: %s\n",
 		[[error description] UTF8String]);
 	exit(1);
     }
