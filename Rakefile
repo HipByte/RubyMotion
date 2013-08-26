@@ -88,7 +88,7 @@ task :install do
     './bin/osx/sim', './bin/llc', './bin/ruby', './bin/ctags',
     'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri', './lldb/lldb.py'])
   data = ['./NEWS']
-  data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH))
+  data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH) - ['./lib/Rakefile'])
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
   [['ios', IOS_SDK_VERSIONS + ['7.0']]].each do |name, sdk_versions|
     sdk_versions.each do |sdk_version|
