@@ -60,7 +60,7 @@ module Motion; module Project
       $stderr.puts ''
       $stderr.puts 'Commands:'
       Commands.each do |command|
-        $stderr.puts "  #{command.name}".ljust(15) + command.help
+        $stderr.puts "  #{command.name}".ljust(20) + command.help
       end
       exit 1
     end
