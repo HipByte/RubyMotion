@@ -107,7 +107,7 @@ module Motion; module Project
       if wanted_software_version
         FileUtils.mv '/Library/RubyMotion', "/Library/RubyMotion#{wanted_software_version}"
         $stderr.puts 'Restoring current RubyMotion version...' # done in ensure
-        $stderr.puts "RubyMotion #{wanted_software_version} installed as /Library/RubyMotion#{wanted_software_version}, change the Rakefile to /Library/RubyMotion#{wanted_software_version}/lib to use it. Keep /Library/RubyMotion/lib to live on the edge."
+        $stderr.puts "RubyMotion #{wanted_software_version} installed as /Library/RubyMotion#{wanted_software_version}. To use it in a project, edit the Rakefile to point to /Library/RubyMotion#{wanted_software_version}/lib instead of /Library/RubyMotion/lib."
       else
         $stderr.puts "Software update installed.\n\n"
         news = File.read('/Library/RubyMotion/NEWS')
