@@ -533,6 +533,8 @@ start_debug_server(am_device_t dev)
     if (getenv("debug") == NULL) {
 	NSDate *app_launch_date = [NSDate date];
 	gdb_start_app(app_remote_path);
+	fprintf(stderr,
+		"*** Application is running on the device, use ^C to quit.\n");
 
 	// Start the syslog service.
 	int syslog_fd = 0;
