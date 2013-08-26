@@ -98,6 +98,7 @@ init_private_funcs(void)
 
 static bool debug_mode = false;
 static bool discovery_mode = false;
+static bool console_mode = false;
 
 #define LOG(fmt, ...) \
     do { \
@@ -181,11 +182,17 @@ static NSString *app_package_path = nil;
 static NSData *app_package_data = nil;
 
 static void
-install_application(am_device_t dev)
+setup_device_connection(am_device_t dev)
 {
     PERFORM("connecting to device", _AMDeviceConnect(dev));
     PERFORM("pairing device", _AMDeviceValidatePairing(dev));
     PERFORM("creating lockdown session", _AMDeviceStartSession(dev));
+}
+
+static void
+install_application(am_device_t dev)
+{
+    setup_device_connection(dev);
 
     int afc_fd = 0;
     PERFORM("starting file copy service", _AMDeviceStartService(dev,
@@ -416,6 +423,29 @@ gdb_start_app(NSString *app_path)
 	cmd++;
 	gdb_recv_pkt();
 	gdb_recv_pkt();
+    }
+}
+
+static void
+open_console(am_device_t dev)
+{
+    setup_device_connection(dev);
+
+    int syslog_fd = 0;
+    PERFORM("starting syslog relay service", _AMDeviceStartService(dev,
+		CFSTR("com.apple.syslog_relay"), &syslog_fd, NULL));
+    assert(syslog_fd > 0);
+
+    while (true) {
+	char buf[100];
+	ssize_t len = recv(syslog_fd, buf, sizeof buf, 0);
+	if (len == -1) {
+	    fprintf(stderr, "error when reading syslog: %s",
+		    strerror(errno));
+	    break;
+	}
+	buf[len] = '\0';
+	printf("%s", buf);
     }
 }
 
@@ -863,6 +893,10 @@ device_subscribe_cb(am_device_notif_context_t ctx)
 	    printf("%s\n", [(id)name UTF8String]);
 	    exit(0);
 	}
+	else if (console_mode) {
+	    open_console(dev);
+	    exit(0);
+	}
 	else if ([(id)name isEqualToString:device_id]) {
 	    LOG("found usb mobile device %s", [(id)name UTF8String]);
 	    device_go(dev);
@@ -891,6 +925,9 @@ main(int argc, char **argv)
 	else if (strcmp(argv[i], "-D") == 0) {
 	    discovery_mode = true;
 	}
+	else if (strcmp(argv[i], "-c") == 0) {
+	    console_mode = true;
+	}
 	else {
 	    if (device_id == nil) {
 		device_id = [[NSString stringWithUTF8String:argv[i]] retain];
@@ -905,7 +942,7 @@ main(int argc, char **argv)
 	} 
     }
 
-    if (!discovery_mode) {
+    if (!discovery_mode && !console_mode) {
 	if (device_id == nil || app_package_path == nil) {
 	    usage();
 	}
