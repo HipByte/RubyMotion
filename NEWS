@@ -11,6 +11,9 @@
     number). A project can use an older version of RubyMotion by changing its
     Rakefile to point to `/Library/RubyMotion<XXX>/lib'. The `--force-version'
     flag previously available in `motion update' has been removed.
+  * Added the `motion device:console' command to print the logs of the USB
+    connected device. New messages will be printed in real-time. Use ^C to
+    disconnect from the device.
   * Added the `motion changelog' command to open the NEWS file in the terminal.
     Thanks to Dan Loewenherz for the patch (pull request #107).
   * Added the `String#to_fourcharcode' method which converts the receiver into
