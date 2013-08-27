@@ -47,7 +47,7 @@ module Motion; module Project
             die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version") if File.exist?('/Library/RubyMotion.old')
             wanted_software_version = $1.to_s
           when /--force-version=(.+)/
-            die "–-force-version has been removed in favor of –-cache-version"
+            die "--force-version has been removed in favor of --cache-version"
           else
             die "Usage: motion update [--cache-version=X]"
         end
