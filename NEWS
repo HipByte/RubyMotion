@@ -1,5 +1,7 @@
 = RubyMotion 2.8 =
 
+  * Fixed a build error which it causes in where non ASCII character is used.
+    Thanks to Clay Allsopp for the patch (pull request #125).
 
 = RubyMotion 2.7 =
 
