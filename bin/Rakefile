@@ -1,7 +1,7 @@
 verbose(true)
 
 task :default => :all
-task :all => [:files, :deploy, :sim]
+task :all => [:files, :deploy, :sim, :nfd]
 
 STRIP = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip"
 
@@ -33,6 +33,15 @@ task :sim do
   end
 end
 
+task :nfd do
+  bin = 'nfd'
+  if !File.exist?(bin) or File.mtime('nfd.m') > File.mtime(bin)
+    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 nfd.m -o \"#{bin}\" -framework Foundation -I."
+    sh "#{STRIP} -x \"#{bin}\""
+  end
+end
+
+
 task :clean do
-  %w{ruby llc ios/deploy ios/sim osx/sim}.each { |path| rm_rf(path) }
+  %w{ruby llc ios/deploy ios/sim osx/sim ndf}.each { |path| rm_rf(path) }
 end
