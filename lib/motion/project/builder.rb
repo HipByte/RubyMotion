@@ -35,6 +35,7 @@ module Motion; module Project;
 
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
+      @nfd = File.join(config.bindir, 'nfd')
 
       if config.spec_mode and (config.spec_files - config.spec_core_files).empty?
         App.fail "No spec files in `#{config.specs_dir}'"
@@ -375,7 +376,7 @@ EOS
       reserved_app_bundle_files = [
         '_CodeSignature/CodeResources', 'CodeResources', 'embedded.mobileprovision',
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
-        config.name
+        convert_filesystem_encoding(config.name)
       ]
       resources_paths = []
       config.resources_dirs.each do |dir|
@@ -403,7 +404,6 @@ EOS
       resources_files = resources_paths.map { |x| path_on_resources_dirs(config.resources_dirs, x) }
       Dir.chdir(app_resources_dir) do
         Dir.glob('*').each do |bundle_res|
-          bundle_res = convert_filesystem_encoding(bundle_res)
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
@@ -435,13 +435,7 @@ EOS
     end
 
     def convert_filesystem_encoding(string)
-      begin
-        string.encode("UTF-8", "UTF8-MAC")
-      rescue
-        # for Ruby 1.8
-        require 'iconv'
-        Iconv.conv("UTF-8", "UTF8-MAC", string)
-      end
+      eval `#{@nfd} "#{string}"`
     end
 
     class << self
