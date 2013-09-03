@@ -266,7 +266,7 @@ module Motion; module Project
         helpers = Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
         # Project specs.
         specs = Dir.glob(File.join(specs_dir, '**', '*.rb')) - helpers
-        if files_filter = ENV['files']
+        if files_filter = (ENV['files'] || ENV['TEST'] || ENV['SPEC'])
           # Filter specs we want to run. A filter can be either the basename of a spec file or its path.
           files_filter = files_filter.split(',')
           files_filter.map! { |x| File.exist?(x) ? File.expand_path(x) : x }
