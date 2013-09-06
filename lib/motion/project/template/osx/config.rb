@@ -108,7 +108,7 @@ module Motion; module Project;
       File.join(app_bundle(platform), 'Resources')
     end
 
-    def info_plist_data
+    def info_plist_data(platform)
       Motion::PropertyList.to_s({
         'NSHumanReadableCopyright' => copyright,
         'NSPrincipalClass' => 'NSApplication',
