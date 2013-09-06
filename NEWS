@@ -10,6 +10,9 @@
     `iphoneos' even if app runs in simulator. When it runs an app in simulater,
     now, `iphonesimulator' is used in Info.plist like Xcode.
     Thanks to Hwee-Boon Yar for the patch (pull request #129).
+  * Fixed a bug where template working trees would not be updated upon git pull
+    with `motion create [AppName] -template=[git repository path]'.
+    Thanks to Jamon Holmgren for the patch (pull request #128).
 
 = RubyMotion 2.7 =
 
