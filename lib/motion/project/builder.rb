@@ -307,7 +307,7 @@ EOS
       bundle_info_plist = File.join(bundle_path, 'Info.plist')
       if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
         App.info 'Create', bundle_info_plist
-        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data) }
+        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
         sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
       end
 

@@ -295,7 +295,7 @@ module Motion; module Project;
       end
     end
 
-    def info_plist_data
+    def info_plist_data(platform)
       ios_version_to_build = lambda do |vers|
         # XXX we should retrieve these values programmatically.
         case vers
@@ -330,9 +330,9 @@ module Motion; module Project;
           end
         end,
         'DTXcodeBuild' => xcode_version[1],
-        'DTSDKName' => "iphoneos#{sdk_version}",
+        'DTSDKName' => "#{platform.downcase}#{sdk_version}",
         'DTSDKBuild' => ios_version_to_build.call(sdk_version),
-        'DTPlatformName' => 'iphoneos',
+        'DTPlatformName' => platform.downcase,
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => ios_version_to_build.call(sdk_version)
