@@ -4,6 +4,8 @@
     name.
   * Fixed a build error which it causes in where non ASCII character is used.
     Thanks to Clay Allsopp for the patch (pull request #125).
+  * [iOS] Fixed a bug where malloc_error_break is caused when NSDate object is
+    retrieved with ABRecordCopyValue().
   * [iOS] Fixed a bug where ABPersonViewController, ABNewPersonViewController
     and ABUnknownPersonViewController methods cause a crash in iOS 7.
   * [iOS] Fixed a bug where platform/SDK name in Info.plist would indicates
