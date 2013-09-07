@@ -4,6 +4,8 @@
     name.
   * Fixed a build error which it causes in where non ASCII character is used.
     Thanks to Clay Allsopp for the patch (pull request #125).
+  * Fixed the compiler to emit debugging (DWARF) annotations for expressions
+    that weren't covered before (ex. variables assignments).
   * [iOS] Fixed a bug where malloc_error_break is caused when NSDate object is
     retrieved with ABRecordCopyValue().
   * [iOS] Fixed a bug where ABPersonViewController, ABNewPersonViewController
