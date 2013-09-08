@@ -113,26 +113,16 @@ module Motion; module Project;
             kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
             raise "Can't locate kernel file" unless File.exist?(kernel)
    
-            # LLVM bitcode.
-            bc = File.join(files_build_dir, "#{path}.#{arch}.bc")
-            arch_cmd = (arch =~ /^arm/) ? "/usr/bin/arch -arch i386" : "/usr/bin/arch -arch #{arch}"
-            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{arch_cmd} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{bc}\" #{init_func} \"#{path}\""
-   
             # Assembly.
             asm = File.join(files_build_dir, "#{path}.#{arch}.s")
-            llc_arch = case arch
-              when 'i386'; 'x86'
-              when 'x86_64'; 'x86-64'
-              when /^arm/; 'arm'
-              else; arch
-            end
-            sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -disable-cfi"
+            arch_cmd = (arch =~ /^arm/) ? "/usr/bin/arch -arch i386" : "/usr/bin/arch -arch #{arch}"
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{arch_cmd} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
    
             # Object.
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
             sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
   
-            [bc, asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
+            [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
           end
    
