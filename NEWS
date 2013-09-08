@@ -7,6 +7,8 @@
     Thanks to Clay Allsopp for the patch (pull request #125).
   * Fixed the compiler to emit debugging (DWARF) annotations for expressions
     that weren't covered before (ex. variables assignments).
+  * Fixed a bug where Time#{==, eql?} would return wrong value with duplicated
+    object using #copy.
   * [iOS] Fixed a bug where malloc_error_break is caused when NSDate object is
     retrieved with ABRecordCopyValue().
   * [iOS] Fixed a bug where ABPersonViewController, ABNewPersonViewController
