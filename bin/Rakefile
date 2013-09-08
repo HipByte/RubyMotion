@@ -7,9 +7,7 @@ STRIP = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xcto
 
 task :files do
   install '../vm/miniruby', 'ruby'
-  install '/usr/local/bin/llc', 'llc'  
   sh "#{STRIP} -x ruby"
-  sh "#{STRIP} -x llc"
 end
 
 task :deploy do
