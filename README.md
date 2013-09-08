@@ -2,18 +2,11 @@
 ### Set up LLVM
 
 ```
-$ curl -O http://llvm.org/releases/2.9/llvm-2.9.tgz
-$ tar xvzf llvm-2.9.tgz
-$ cd llvm-2.9
+$ svn checkout https://llvm.org/svn/llvm-project/llvm/branches/release_33 llvm-3.3
+$ cd llvm-3.3 
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ ./configure --enable-bindings=none --enable-optimized --with-llvmgccdir=/tmp
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make
 $ sudo env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make install
-```
-
-Then,
-
-```
-$ cp /Library/RubyMotion/bin/llc /usr/local/bin/
 ```
 
 ### Set up RubyMotion
