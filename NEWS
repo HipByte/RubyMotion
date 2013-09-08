@@ -1,5 +1,6 @@
 = RubyMotion 2.8 =
 
+  * Upgraded the toolchain to LLVM 3.3 and to use clang compilers by default.
   * Fixed a bug in build system where it cannot build app using Korean as app
     name.
   * Fixed a build error which it causes in where non ASCII character is used.
