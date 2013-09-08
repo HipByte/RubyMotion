@@ -45,7 +45,7 @@ module Motion; module Project;
 
       # Locate SDK and compilers.
       sdk = config.sdk(platform)
-      cc = config.locate_compiler(platform, 'llvm-gcc')
+      cc = config.locate_compiler(platform, 'clang')
       cxx = config.locate_compiler(platform, 'clang++')
     
       build_dir = File.join(config.versionized_build_dir(platform))
@@ -126,7 +126,7 @@ module Motion; module Project;
               when /^arm/; 'arm'
               else; arch
             end
-            sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -jit-enable-eh -disable-cfi"
+            sh "#{llc} \"#{bc}\" -o=\"#{asm}\" -march=#{llc_arch} -relocation-model=pic -disable-fp-elim -disable-cfi"
    
             # Object.
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
