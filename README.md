@@ -4,6 +4,7 @@
 ```
 $ svn checkout https://llvm.org/svn/llvm-project/llvm/branches/release_33 llvm-3.3
 $ cd llvm-3.3 
+$ patch -p0 < /path/to/RubyMotionRepository/llvm.diff
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ ./configure --enable-bindings=none --enable-optimized --with-llvmgccdir=/tmp
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make
 $ sudo env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make install
