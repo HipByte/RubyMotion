@@ -1,0 +1,13 @@
+Index: lib/Target/ARM/InstPrinter/ARMInstPrinter.cpp
+===================================================================
+--- lib/Target/ARM/InstPrinter/ARMInstPrinter.cpp	(revision 190250)
++++ lib/Target/ARM/InstPrinter/ARMInstPrinter.cpp	(working copy)
+@@ -630,7 +630,7 @@
+   O << markup("<mem:") << "[";
+   printRegName(O, MO1.getReg());
+   if (MO2.getImm()) {
+-    O << ":" << (MO2.getImm() << 3);
++    O << ", :" << (MO2.getImm() << 3);
+   }
+   O << "]" << markup(">");
+ }
