@@ -115,13 +115,31 @@ module Motion; module Project;
    
             # Assembly.
             asm = File.join(files_build_dir, "#{path}.#{arch}.s")
-            arch_cmd = (arch =~ /^arm/) ? "/usr/bin/arch -arch i386" : "/usr/bin/arch -arch #{arch}"
-            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" #{arch_cmd} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
-   
-            # Object.
+            arm64 = false
+            compiler_exec_arch = case arch
+              when /^arm/
+                (arm64 = (arch == 'arm64')) ? 'x86_64' : 'i386'
+              else
+                arch
+            end
+            sh "/usr/bin/env VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
+
+            # Object 
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
-  
+            if arm64
+              # At the time of this writing Apple hasn't yet contributed the source code of the LLVM backend for the "arm64" architecture, so the RubyMotion compiler can't emit proper assembly yet. We work around this limitation by generating bitcode instead and giving it to the linker. Ugly but should be temporary (right?).
+              @dummy_object_file ||= begin
+                src_path = '/tmp/__dummy_object_file__.c'
+                obj_path = '/tmp/__dummy_object_file__.o'
+                File.open(src_path, 'w') { |io| io.puts "static int foo(void) { return 42; }" }
+                sh "#{cc} -c #{src_path} -o #{obj_path} -arch arm64 -miphoneos-version-min=7.0"
+                obj_path
+              end
+              sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\"" 
+            else
+              sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+            end
+
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
           end
