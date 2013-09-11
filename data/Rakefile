@@ -262,6 +262,8 @@ task :bridgesupport_static_stubs do
       device_archs =
         if sdk_version < '5.0'
           ['armv6', 'armv7']
+        elsif sdk_version >= '7.0'
+          ['armv7', 'armv7s', 'arm64']
         elsif sdk_version >= '6.0'
           ['armv7', 'armv7s']
         else
