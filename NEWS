@@ -1,22 +1,28 @@
 = RubyMotion 2.8 =
 
+  * Added support for iOS 7.0 GM and Xcode 5.0 GM.
+  * Added support for the ARM64 architecture (experimental).
+  * Improved the compiler to emit assembly instead of LLVM bitcode, which
+    results in a significant performance improvement (~3x faster builds).
   * Upgraded the toolchain to LLVM 3.3 and to use clang compilers by default.
-  * Fixed a bug in build system where it cannot build app using Korean as app
-    name.
-  * Fixed a build error which it causes in where non ASCII character is used.
-    Thanks to Clay Allsopp for the patch (pull request #125).
+  * Fixed a bug in build system where it could not build an app that was using
+    Korean characters in the name.
+  * Fixed a bug in the `motion update' command where a non-ASCII character was
+    wrongly used in the source code, causing the process to fail in certain
+    versions of Ruby. Thanks to Clay Allsopp for the patch (pull request #125).
   * Fixed the compiler to emit debugging (DWARF) annotations for expressions
     that weren't covered before (ex. variables assignments).
-  * Fixed a bug where Time#{==, eql?} would return wrong value with duplicated
-    object using #copy.
-  * [iOS] Fixed a bug where malloc_error_break is caused when NSDate object is
-    retrieved with ABRecordCopyValue().
-  * [iOS] Fixed a bug where ABPersonViewController, ABNewPersonViewController
-    and ABUnknownPersonViewController methods cause a crash in iOS 7.
-  * [iOS] Fixed a bug where platform/SDK name in Info.plist would indicates
-    `iphoneos' even if app runs in simulator. When it runs an app in simulater,
-    now, `iphonesimulator' is used in Info.plist like Xcode.
-    Thanks to Hwee-Boon Yar for the patch (pull request #129).
+  * Fixed a bug where Time#{==, eql?} would return the wrong value when using
+    duplicated object from #copy.
+  * [iOS] Fixed a malloc error bug when retrieving a NSDate object from the
+    ABRecordCopyValue() function.
+  * [iOS] Fixed a bug where methods of the ABPersonViewController,
+    ABNewPersonViewController and ABUnknownPersonViewController would cause
+    crashes in iOS 7.
+  * [iOS] Fixed a bug where the platform/SDK key in Info.plist would indicate
+    `iphoneos' even for simulator builds. It has now been changed to
+    `iphonesimulator', like Xcode. Thanks to Hwee-Boon Yar for the patch
+    (pull request #129).
   * Fixed a bug where template working trees would not be updated upon git pull
     with `motion create [AppName] -template=[git repository path]'.
     Thanks to Jamon Holmgren for the patch (pull request #128).
