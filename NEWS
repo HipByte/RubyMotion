@@ -21,6 +21,8 @@
     that weren't covered before (ex. variables assignments).
   * Fixed a bug where Time#{==, eql?} would return the wrong value when using
     duplicated object from #copy.
+  * [iOS] Development builds for the device will now compile for the lowest
+    architecture possible, in order to create faster builds.
   * [iOS] Fixed a malloc error bug when retrieving a NSDate object from the
     ABRecordCopyValue() function.
   * [iOS] Fixed a bug where methods of the ABPersonViewController,
