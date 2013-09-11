@@ -47,6 +47,20 @@ module Motion; module Project;
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
 
+    def archs
+      archs = super
+      if development?
+        # We only build for i386/armv6-7 in development mode, to speed up builds.
+        archs['iPhoneSimulator'] = ['i386']
+        if archs['iPhoneOS'].include?('armv6')
+          archs['iPhoneOS'] = ['armv6']
+        elsif archs['iPhoneOS'].include?('armv7')
+          archs['iPhoneOS'] = ['armv7']
+        end 
+      end
+      archs
+    end
+
     def validate
       # icons
       if !(icons.is_a?(Array) and icons.all? { |x| x.is_a?(String) })
