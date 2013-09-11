@@ -1,10 +1,17 @@
 = RubyMotion 2.8 =
 
   * Added support for iOS 7.0 GM and Xcode 5.0 GM.
-  * Added support for the ARM64 architecture (experimental).
+  * Added support for building 64-bit iOS apps for iPhone 5S (experimental).
+    The toolchain is now able to create x86_64 apps for the simulator and
+    arm64 apps for the device. Given the fact that 64-bit iOS has just been
+    announced and that many 3rd-party projects have not yet been updated, the
+    support is disabled by default. To enable, you can edit your Rakefile and
+    set the following lines: app.archs['iPhoneOS'] << 'arm64';
+    app.archs['iPhoneSimulator'] << 'x86_64'
   * Improved the compiler to emit assembly instead of LLVM bitcode, which
     results in a significant performance improvement (~3x faster builds).
   * Upgraded the toolchain to LLVM 3.3 and to use clang compilers by default.
+    Xcode 4 (llvm-gcc) is no longer required to exist in the file system.
   * Fixed a bug in build system where it could not build an app that was using
     Korean characters in the name.
   * Fixed a bug in the `motion update' command where a non-ASCII character was
