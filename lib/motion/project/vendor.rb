@@ -38,7 +38,7 @@ module Motion; module Project;
 
     def build(platform)
       App.info 'Build', @path
-      send gen_method('build'), platform, @opts
+      send gen_method('build'), platform, @opts.dup
       if @libs.empty?
         App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
       end
