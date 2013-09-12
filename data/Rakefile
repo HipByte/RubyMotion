@@ -145,7 +145,8 @@ task :bridgesupport_files do
       unless File.exist?(dest)
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
         sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
-        sh "/usr/bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework}\" --framework #{framework_path} > #{dest}"
+        extra_flags = (sdk_version >= '7.0') ? '--64-bit' : '--no-64-bit'
+        sh "/usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework}\" --framework #{framework_path} > #{dest}"
         apply_bridgesupport_fixes(dest)
 
         if framework == 'Foundation' and sdk_version >= '7.0'
