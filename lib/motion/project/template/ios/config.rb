@@ -48,17 +48,19 @@ module Motion; module Project;
     def deploy_platform; 'iPhoneOS'; end
 
     def archs
-      archs = super
-      if development?
-        # We only build for i386/armv6-7 in development mode, to speed up builds.
-        archs['iPhoneSimulator'] = ['i386']
-        if archs['iPhoneOS'].include?('armv6')
-          archs['iPhoneOS'] = ['armv6']
-        elsif archs['iPhoneOS'].include?('armv7')
-          archs['iPhoneOS'] = ['armv7']
-        end 
+      @archs ||= begin
+        archs = super
+        if development?
+          # We only build for i386/armv6-7 in development mode, to speed up builds.
+          archs['iPhoneSimulator'] = ['i386']
+          if archs['iPhoneOS'].include?('armv6')
+            archs['iPhoneOS'] = ['armv6']
+          elsif archs['iPhoneOS'].include?('armv7')
+            archs['iPhoneOS'] = ['armv7']
+          end 
+        end
+        archs
       end
-      archs
     end
 
     def validate
