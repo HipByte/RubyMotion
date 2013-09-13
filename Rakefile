@@ -1,4 +1,4 @@
-PROJECT_VERSION = '2.8'
+PROJECT_VERSION = '2.9'
 PLATFORMS_DIR = (ENV['PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
 sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
@@ -25,7 +25,7 @@ end
 
 if false
   # DEBUG
-  IOS_SDK_VERSIONS.clear; IOS_SDK_VERSIONS << '6.1'
+  IOS_SDK_VERSIONS.clear; IOS_SDK_VERSIONS << '7.0'
   OSX_SDK_VERSIONS.clear; OSX_SDK_VERSIONS << '10.8'
 end
 
