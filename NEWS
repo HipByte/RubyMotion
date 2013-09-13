@@ -1,3 +1,12 @@
+= RubyMotion 2.9 =
+
+  * Work around what is very likely a bug in the App Store verification
+    process which would reject RubyMotion apps based on the fact that certain
+    __builtin__xxx_chk() functions of the C runtime are marked as private API.
+    These functions are called by the compiler in certain scenarios in order
+    to detect overflows. So far we know Apple rejects __strlcpy_chk() and
+    __strlcat_chk() calls, so we removed them from the RubyMotion runtime.
+
 = RubyMotion 2.8 =
 
   * Added support for iOS 7.0 GM and Xcode 5.0 GM.
