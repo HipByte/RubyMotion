@@ -14,22 +14,19 @@ The +lib+ directory contains the project Rakefile library and the build system.
 These files are installed as +/Library/RubyMotion/lib+.
 
 In order to use the GitHub version of these files in your RubyMotion project,
-you can modify the project Rakefile like this.
+you can run the following commands.
 
-  $:.unshift(ENV['RUBYMOTION_LIB'] || '/Library/RubyMotion/lib')
+  $ git clone https://github.com/HipByte/RubyMotion.git
+  $ cd RubyMotion
+  $ rake install
 
-You must also set +motiondir+, so the +data+ and +bin+ directories can be found.
++/Library/RubyMotion/lib+ is replaced with +lib+ of git repository,
+then you can use this in your RubyMotion app.
 
-  Motion::Project::App.setup do |app|
-    app.name = '...'
-    app.motiondir = '/Library/RubyMotion'
-    # ...
-  end
+When you would like to go back to original installation,
+you can run +rake uninstall+ within directory of git repository.
 
-Then, simply set the RUBYMOTION_LIB environment variable when using +rake+.
-
-  $ cd MyProject
-  $ RUBYMOTION_LIB=~/src/RubyMotion/lib rake
+  $ rake uninstall
   
 ---------------
 
