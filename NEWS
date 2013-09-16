@@ -1,3 +1,8 @@
+= RubyMotion 2.10 =
+
+  * [iOS] Fixed a bug where `rake device' would cause an Assertion Failed when
+    `app.name' contains non-ascii characters.
+
 = RubyMotion 2.9 =
 
   * Work around what is very likely a bug in the App Store verification
