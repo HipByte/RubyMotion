@@ -411,7 +411,7 @@ gdb_start_app(NSString *app_path)
     p += strlen(p);
     const char* q = apppath;
     while (*q) {
-        *p++ = tohex(*q >> 4);
+        *p++ = tohex((*q >> 4) & 0xf);
         *p++ = tohex(*q & 0xf);
         q++;
     }
