@@ -1,6 +1,8 @@
 = RubyMotion 2.10 =
 
   * Fixed a bug where `motion changelog' does not work.
+  * Fixed a regression introduced in 2.9 that could lead to a compiler crash
+    when using the GLKit framework.
   * [iOS] Fixed a bug where `rake device' would cause an Assertion Failed when
     `app.name' contains non-ascii characters.
 
