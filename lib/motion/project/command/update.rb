@@ -36,6 +36,12 @@ module Motion; module Project
       resp
     end
 
+    def latest_version?(product, latest)
+      product = product.split(".")
+      latest  = latest.split(".")
+      (product[0].to_i >= latest[0].to_i) && (product[1].to_i >= latest[1].to_i)
+    end
+
     def run(args)
       check_mode = false
       wanted_software_version = nil
@@ -66,7 +72,7 @@ module Motion; module Project
 
         latest_version, message = File.read(update_check_file).split('|', 2)
         message ||= ''
-        if latest_version > product_version
+        unless latest_version?(product_version, latest_version)
           message = "A new version of RubyMotion is available. Run `sudo motion update' to upgrade.\n" + message
         end
         message.strip!
