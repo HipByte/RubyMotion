@@ -22,7 +22,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion; module Project
-  class ChangelogCommand < Command
+  class DeviceConsoleCommand < Command
     self.name = 'device:console'
     self.help = 'Print the device console logs'
 
