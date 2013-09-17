@@ -42,6 +42,10 @@ desc "Clear build objects"
 task :clean do
   App.info 'Delete', App.config.build_dir
   rm_rf(App.config.build_dir)
+  
+  App.info 'Delete', Motion::Project::Builder.common_build_dir
+  rm_rf Motion::Project::Builder.common_build_dir
+  
   App.config.vendor_projects.each { |vendor| vendor.clean }
   Dir.glob(App.config.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }).each do |p|
     next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
