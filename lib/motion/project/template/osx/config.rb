@@ -30,7 +30,7 @@ module Motion; module Project;
     register :osx
 
     variable :icon, :copyright, :category, :embedded_frameworks,
-        :codesign_for_development
+        :codesign_for_development, :environment_variables
 
     def initialize(project_dir, build_mode)
       super
@@ -40,6 +40,7 @@ module Motion; module Project;
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
       @codesign_for_development = false
+      @environment_variables = {}
     end
 
     def platforms; ['MacOSX']; end
@@ -191,7 +192,7 @@ main(int argc, char **argv)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 EOS
-    if ENV['ARR_CYCLES_DISABLE']
+    if(ENV['ARR_CYCLES_DISABLE'] || environment_variables['ARR_CYCLES_DISABLE'])
       main_txt << <<EOS
     setenv("ARR_CYCLES_DISABLE", "1", true);
 EOS

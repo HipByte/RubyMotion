@@ -29,7 +29,7 @@ module Motion; module Project;
 
     variable :device_family, :interface_orientations, :background_modes,
       :status_bar_style, :icons, :prerendered_icon, :fonts, :seed_id,
-      :provisioning_profile, :manifest_assets
+      :provisioning_profile, :manifest_assets, :environment_variables
 
     def initialize(project_dir, build_mode)
       super
@@ -41,6 +41,7 @@ module Motion; module Project;
       @icons = []
       @prerendered_icon = false
       @manifest_assets = []
+      @environment_variables = {}
     end
 
     def platforms; ['iPhoneSimulator', 'iPhoneOS']; end
@@ -454,7 +455,7 @@ main(int argc, char **argv)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int retval = 0;
 EOS
-    if ENV['ARR_CYCLES_DISABLE']
+    if(ENV['ARR_CYCLES_DISABLE'] || environment_variables['ARR_CYCLES_DISABLE'])
       main_txt << <<EOS
     setenv("ARR_CYCLES_DISABLE", "1", true);
 EOS
