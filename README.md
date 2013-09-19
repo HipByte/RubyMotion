@@ -16,6 +16,7 @@ $ git clone git@github.com:lrz/RubyMotion.git
 $ cd RubyMotion
 $ git submodule init
 $ git submodule update
+$ cd vm; git checkout master; cd ..
 $ bundle install
 ```
 
