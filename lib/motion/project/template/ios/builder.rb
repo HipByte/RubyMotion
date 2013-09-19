@@ -92,10 +92,8 @@ PLIST
 
       # Copy the provisioning profile.
       bundle_provision = File.join(bundle_path, "embedded.mobileprovision")
-      if !File.exist?(bundle_provision) or File.mtime(config.provisioning_profile) > File.mtime(bundle_provision)
-        App.info 'Create', bundle_provision
-        FileUtils.cp config.provisioning_profile, bundle_provision
-      end
+      App.info 'Create', bundle_provision
+      FileUtils.cp config.provisioning_profile, bundle_provision
 
       # Codesign.
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
