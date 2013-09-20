@@ -1,5 +1,10 @@
 = RubyMotion 2.10 =
 
+  * Fixed a critical regression in the compiler where DWARF metadata would not
+    be generated, causing .dSYM bundles to miss debugging symbols for Ruby
+    code. The regression was introduced in 2.8. If you submitted apps built
+    with 2.8 or 2.9 to Apple and need to symbolicate crash reports, you can
+    rebuild them with 2.10 and use the new .dSYM bundle.
   * Fixed a bug where `motion changelog' does not work.
   * Fixed a regression introduced in 2.9 that could lead to a compiler crash
     when using the GLKit framework.
