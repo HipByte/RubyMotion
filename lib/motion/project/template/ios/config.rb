@@ -223,6 +223,7 @@ module Motion; module Project;
           ''
         else
           (family == 1) ? ' Retina (4-inch)' : ' Retina'
+          (family == 1) ? ' Retina (4-inch)' : ''
         end
       end
     end
