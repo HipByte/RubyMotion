@@ -590,12 +590,20 @@ start_debug_server(am_device_t dev)
 	    // Split the output into lines.
 	    char *p = strrchr(buf, '\n');
 	    if (p == NULL) {
-		[data appendString:[[[NSString alloc] initWithCString:buf
-		    encoding:NSUTF8StringEncoding] autorelease]];
+		NSString *tmp = [[NSString alloc] initWithCString:buf
+		    encoding:NSUTF8StringEncoding];
+		if (tmp != nil) {
+		    [data appendString:tmp];
+		    [tmp release];
+		}
 	    }
 	    else {
-		[data appendString:[[[NSString alloc] initWithBytes:buf
-		    length:p-buf encoding:NSUTF8StringEncoding] autorelease]];
+		NSString *tmp = [[NSString alloc] initWithBytes:buf
+		    length:p-buf encoding:NSUTF8StringEncoding];
+		if (tmp != nil) {
+		    [data appendString:tmp];
+		    [tmp release];
+		}
 
 		// Parse lines.
 		NSArray *lines = [data componentsSeparatedByString:@"\n"];
