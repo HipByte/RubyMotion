@@ -224,7 +224,7 @@ module Motion; module Project;
         if target < '7.0'
           ''
         else
-          (family == 1) ? retina4_string : ' Retina'
+          (family == 1) ? retina4_string : ''
         end
       end
     end
