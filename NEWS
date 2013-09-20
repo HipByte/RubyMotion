@@ -5,6 +5,9 @@
     when using the GLKit framework.
   * Fixed a bug in `rake device' where it could sometimes crashes when
     retrieving console logs.
+  * Fixed a bug in the build system where the build would fail when generating
+    BridgeSupport metadata if the Xcode path contained a space character.
+    Thanks to Michal Jirku for the detective work.
   * [iOS] Fixed a bug where `rake device' would cause an Assertion Failed when
     `app.name' contains non-ascii characters.
 
