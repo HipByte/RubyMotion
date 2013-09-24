@@ -13,6 +13,8 @@
   * Fixed a bug in the build system where the build would fail when generating
     BridgeSupport metadata if the Xcode path contained a space character.
     Thanks to Michal Jirku for the detective work.
+  * Fixed a warning in the build system when creating a universal static
+    archive for a vendored project.
   * [iOS] Fixed a regression where exceptions could be not rescued in GCD
     blocks on device, apparently due to an underlying change in iOS 7.
     Thanks to Mark Frawley for the detective work.
