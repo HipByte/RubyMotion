@@ -49,16 +49,10 @@ module Motion; module Project;
 
     def archs
       @archs ||= begin
+        # By default, do not build with 64-bit, as it's still experimental.
         archs = super
-        if development?
-          # We only build for i386/armv6-7 in development mode, to speed up builds.
-          archs['iPhoneSimulator'] = ['i386']
-          if archs['iPhoneOS'].include?('armv6')
-            archs['iPhoneOS'] = ['armv6']
-          elsif archs['iPhoneOS'].include?('armv7')
-            archs['iPhoneOS'] = ['armv7']
-          end 
-        end
+        archs['iPhoneSimulator'].delete('x86_64')
+        archs['iPhoneOS'].delete('arm64')
         archs
       end
     end
