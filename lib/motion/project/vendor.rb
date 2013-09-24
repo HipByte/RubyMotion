@@ -107,7 +107,8 @@ EOS
             objs = Dir.glob('**/*.o')
             FileUtils.rm_rf libname
             unless objs.empty?
-              sh "#{@config.locate_binary('ar')} -rcs #{libname} #{objs.join(' ')}"
+              sh "#{@config.locate_binary('ar')} -rc \"#{libname}\" #{objs.join(' ')}"
+              sh "/usr/bin/ranlib \"#{libname}\""
             end
           end
           libpath = File.join(build_dir, libname)
