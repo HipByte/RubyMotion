@@ -47,7 +47,7 @@ class AppDelegate
     fontMenu = createMenu('Font') do
       addItemWithTitle('Show Fonts', action: 'orderFrontFontPanel:', keyEquivalent: 't')
       addItemWithTitle('Bold', action: 'addFontTrait:', keyEquivalent: 'b')
-      addItemWithTitle('Italic', action: 'addFontTrait:', keyEquivalent: 'b')
+      addItemWithTitle('Italic', action: 'addFontTrait:', keyEquivalent: 'i')
       addItemWithTitle('Underline', action: 'underline:', keyEquivalent: 'u')
       addItem(NSMenuItem.separatorItem)
       addItemWithTitle('Bigger', action: 'modifyFont:', keyEquivalent: '+')
@@ -61,8 +61,10 @@ class AppDelegate
       addItemWithTitle('Align Right', action: 'alignRight:', keyEquivalent: '}')
       addItem(NSMenuItem.separatorItem)
       addItemWithTitle('Show Ruler', action: 'toggleRuler:', keyEquivalent: '')
-      addItemWithTitle('Copy Ruler', action: 'copyRuler:', keyEquivalent: 'c')
-      addItemWithTitle('Paste Ruler', action: 'pasteRuler:', keyEquivalent: 'v')
+      item = addItemWithTitle('Copy Ruler', action: 'copyRuler:', keyEquivalent: 'c')
+      item.keyEquivalentModifierMask = NSCommandKeyMask|NSControlKeyMask
+      item = addItemWithTitle('Paste Ruler', action: 'pasteRuler:', keyEquivalent: 'v')
+      item.keyEquivalentModifierMask = NSCommandKeyMask|NSControlKeyMask
     end
 
     addMenu('Format') do
