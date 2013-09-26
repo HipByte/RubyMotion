@@ -1,5 +1,7 @@
 = RubyMotion 2.11 =
 
+  * Improve the build system to always copy embedded.mobileprovision. Thanks to
+    Jan Brauer for the patch (pull request #121).
 
 = RubyMotion 2.10 =
 
