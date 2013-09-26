@@ -2,6 +2,8 @@
 
   * Improve the build system to always copy embedded.mobileprovision. Thanks to
     Jan Brauer for the patch (pull request #121).
+  * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
+    Kazuhiro NISHIYAMA for the detective work.
 
 = RubyMotion 2.10 =
 
