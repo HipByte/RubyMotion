@@ -22,22 +22,15 @@ $ bundle install
 
 
 ## How to debug on RubyMotion app
-First, comment out `[ios, sim].map ...` (line 31) in `data/Rakefile` as following:
 
-```ruby
- 29     # remove debug symbols
- 30     strip = File.join(PLATFORMS_DIR, '../usr/bin/strip')
- 31     # [ios, sim].map { |x| Dir.glob(x + '/*.{a,dylib}') }.flatten.each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
-```
-
-Then, build RubyMotion
+Build RubyMotion as following (enable `DEBUG` environment variable)
 
 ```
-$ rake optz_level=0
+$ DEBUG=true rake
 $ sudo rake install
 ```
 
-At last, debug on RubyMotion app
+Debug on RubyMotion app
 
 ```
 $ rake debug=1 no_continue=1

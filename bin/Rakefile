@@ -1,4 +1,5 @@
 verbose(true)
+NEED_STRIP = !ENV['DEBUG']
 
 task :default => :all
 task :all => [:files, :deploy, :sim, :nfd]
@@ -6,8 +7,9 @@ task :all => [:files, :deploy, :sim, :nfd]
 STRIP = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip"
 
 task :files do
+  bin = 'ruby'
   install '../vm/miniruby', 'ruby'
-  sh "#{STRIP} -x ruby"
+  sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
 end
 
 task :deploy do
@@ -15,7 +17,7 @@ task :deploy do
   bin = 'ios/deploy'
   if !File.exist?(bin) or File.mtime('deploy.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
     sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 deploy.m -o \"#{bin}\" -framework Foundation -I."
-    sh "#{STRIP} -x \"#{bin}\""
+    sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
   end
 end
 
@@ -26,7 +28,7 @@ task :sim do
     if !File.exist?(bin) or File.mtime('sim.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
       define = "-DSIMULATOR_#{template.upcase}"
       sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{define} -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 sim.m -o \"#{bin}\" -framework Foundation -framework ApplicationServices -framework AppKit -L. -ledit -Wl,-rpath,/usr/lib -I."
-    sh "#{STRIP} -x \"#{bin}\""
+      sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
     end
   end
 end
@@ -35,7 +37,7 @@ task :nfd do
   bin = 'nfd'
   if !File.exist?(bin) or File.mtime('nfd.m') > File.mtime(bin)
     sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -mmacosx-version-min=10.6 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk -I./src -std=c99 -Wall -O3 nfd.m -o \"#{bin}\" -framework Foundation -I."
-    sh "#{STRIP} -x \"#{bin}\""
+    sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
   end
 end
 

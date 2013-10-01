@@ -3,6 +3,7 @@ IOS_SDK_VERSIONS = ENV['ios_sdk_versions'].split(',')
 OSX_SDK_VERSIONS = ENV['osx_sdk_versions'].split(',')
 
 verbose(true)
+NEED_STRIP = !ENV['DEBUG']
 
 task :default => :all
 task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
@@ -22,7 +23,9 @@ task :vm_files do
     install File.join(objs, 'libmacruby-repl.dylib'), sdk
 
     # remove debug symbols
-    Dir.glob(sdk + '/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+    if NEED_STRIP
+      Dir.glob(sdk + '/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+    end
   end
 
   IOS_SDK_VERSIONS.each do |sdk_version|
@@ -45,7 +48,9 @@ task :vm_files do
     install File.join(objs, 'libmacruby-repl.dylib'), sim
 
     # remove debug symbols
-    [ios, sim].map { |x| Dir.glob(x + '/*.{a,dylib}') }.flatten.each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+    if NEED_STRIP
+      [ios, sim].map { |x| Dir.glob(x + '/*.{a,dylib}') }.flatten.each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+    end
   end
 end
 
