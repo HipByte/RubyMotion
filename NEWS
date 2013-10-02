@@ -1,5 +1,7 @@
 = RubyMotion 2.11 =
 
+  * Fixed a long standing limitation in the compiler where overriding in Ruby
+    an Objective-C method that accepts a C-level block was not possible.
   * Improve the build system to always copy embedded.mobileprovision. Thanks to
     Jan Brauer for the patch (pull request #121).
   * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
