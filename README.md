@@ -2,13 +2,17 @@
 
 ### SDKs
 
-Xcode 5 does not include the OS X 10.7 SDK. Be sure to first
-[download Xcode 4.3.3](https://developer.apple.com/downloads/index.action)
-and copy the SDK to Xcode 5. E.g.
+Xcode 5 does not include the OS X 10.7 SDK, nor the full iOS 6.1 SDK.
 
-```
-$ cp -R /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
-```
+* To install the OS X 10.7 SDK, [download Xcode 4.3.3](https://developer.apple.com/downloads/index.action)
+  and copy the SDK to Xcode 5. E.g.:
+
+     $ [sudo] cp -R /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+
+* To install the iOS 6.1 SDK, [download Xcode 4.6.3](https://developer.apple.com/downloads/index.action)
+  and copy the SDK to Xcode 5. E.g.:
+
+     $ [sudo] cp -R /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs
 
 ### Clone RubyMotion source
 
