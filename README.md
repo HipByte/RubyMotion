@@ -2,17 +2,19 @@
 
 ### SDKs
 
-Xcode 5 does not include the OS X 10.7 SDK, nor the full iOS 6.1 SDK.
+The latest Xcode version does not contain all the SDKs that RubyMotion supports.
+These are generally not required for development anyways, but if you do need
+them, you can download them all from [here](#TODO) and install them like so:
 
-* To install the OS X 10.7 SDK, [download Xcode 4.3.3](https://developer.apple.com/downloads/index.action)
-  and copy the SDK to Xcode 5. E.g.:
+* To install, for instance, the OS X 10.7 SDK:
 
-     $ [sudo] cp -R /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+     $ [sudo] cp -R /path/to/SDKs-Archive/MacOSX10.7.sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
 
-* To install the iOS 6.1 SDK, [download Xcode 4.6.3](https://developer.apple.com/downloads/index.action)
-  and copy the SDK to Xcode 5. E.g.:
+* To install, for instance, the iOS 6.1 SDK:
 
-     $ [sudo] cp -R /Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs
+     $ [sudo] cp -R /path/to/SDKs-Archive/iPhoneSimulator6.1.sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs
+     $ [sudo] cp -R /path/to/SDKs-Archive/iPhoneOS6.1.sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs
+
 
 ### Clone RubyMotion source
 
@@ -48,7 +50,7 @@ $ bundle install
 Build RubyMotion as following (enable `DEBUG` environment variable)
 
 ```
-$ DEBUG=true rake
+$ env DEBUG=true rake
 $ sudo rake install
 ```
 
