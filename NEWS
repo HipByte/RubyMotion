@@ -4,6 +4,8 @@
     an Objective-C method that accepts a C-level block was not possible.
   * Improve the build system to always copy embedded.mobileprovision. Thanks to
     Jan Brauer for the patch (pull request #121).
+  * [iOS] Fixed a bug where device log is wrong filtered with `rake device' 
+    when performed day is 1-9.
   * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
     Kazuhiro NISHIYAMA for the detective work.
 
