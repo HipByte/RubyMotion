@@ -617,9 +617,16 @@ start_debug_server(am_device_t dev)
 		    if (!logs_since_app_launch_date) {
 			NSArray *words = [line componentsSeparatedByString:
 			    @" "];
+			int index_month = 0;
+			int index_day   = 1;
+			int index_time  = 2;
+			if ([[words objectAtIndex:index_day] isEqualToString:@""]) {
+			    index_day++;
+			    index_time++;
+			}
 			NSString *str = [NSString stringWithFormat:
-			    @"%@ %@ %@", [words objectAtIndex:0],
-			    [words objectAtIndex:1], [words objectAtIndex:2]];
+			    @"%@ %@ %@", [words objectAtIndex:index_month],
+			    [words objectAtIndex:index_day], [words objectAtIndex:index_time]];
 			NSDate *date = [NSDate dateWithNaturalLanguageString:
 			    str];
 			if ([date compare:app_launch_date]
