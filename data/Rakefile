@@ -346,6 +346,19 @@ namespace :UIAutomation do
     IOS_SDK_VERSIONS.each do |sdk_version|
       framework_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk/Developer/Library/PrivateFrameworks/UIAutomation.framework"
       sh "class-dump -H -o UIAutomation/#{sdk_version} '#{framework_path}'"
+      Dir.glob("UIAutomation/#{sdk_version}/*.h").each do |header|
+        content = File.read(header)
+        if File.basename(header) == 'CDStructures.h'
+          # Remove definitions of structs such as `CGRect`.
+          content.sub!(/#pragma mark Named Structures.+?#pragma/m, '#pragma')
+        else
+          # Use definitions such as `CGRect` from canonical headers.
+          content = "#import <CoreGraphics/CGGeometry.h>\n" << content
+          # Replace `struct CGRect` with just `CGRect`.
+          content.gsub!(/struct (CGAffineTransform|CGPoint|CGSize|CGRect)/) { $1 }
+        end
+        File.open(header, 'w') { |f| f << content }
+      end
     end
   end
 
