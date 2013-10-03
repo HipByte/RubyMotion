@@ -335,6 +335,21 @@ task :bridgesupport_static_stubs do
   end
 end
 
+namespace :UIAutomation do
+  desc 'Dump the headers of the private iOS UIAutomation frameworks'
+  task :dump_headers do
+    if `which class-dump`.empty?
+      $stderr.puts "[!] This requires the `class-dump` tool. Install it with: $ brew install class-dump."
+      exit 1
+    end
+
+    IOS_SDK_VERSIONS.each do |sdk_version|
+      framework_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk/Developer/Library/PrivateFrameworks/UIAutomation.framework"
+      sh "class-dump -H -o UIAutomation/#{sdk_version} '#{framework_path}'"
+    end
+  end
+end
+
 task :clean do
   IOS_SDK_VERSIONS.each { |path| rm_rf('ios/' + path) }
   OSX_SDK_VERSIONS.each { |path| rm_rf('osx/' + path) }
