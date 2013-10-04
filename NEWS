@@ -8,6 +8,8 @@
     when performed day is 1-9.
   * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
     Kazuhiro NISHIYAMA for the detective work.
+  * [iOS] Fixed a bug where a boxed struct would incorrectly be interpreted as
+    a object type, leading to the dispatcher not recognizing a signature.
 
 = RubyMotion 2.10 =
 
