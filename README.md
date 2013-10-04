@@ -16,6 +16,21 @@ them, you can download them all from [here](#TODO) and install them like so:
      $ [sudo] cp -R /path/to/SDKs-Archive/iPhoneOS6.1.sdk /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs
 
 
+### Compilers
+
+You need to have Xcode 5 installed as `/Applications/Xcode.app`.
+
+You also need to have Xcode 4 installed as `/Applications/Xcode4.app`. Xcode 4 is only required to build the REPL module.
+
+You also need to have installed the latest version of the command-line tools. `/usr/bin/clang -v` should report the following:
+
+```
+Apple LLVM version 5.0 (clang-500.2.75) (based on LLVM 3.3svn)
+Target: x86_64-apple-darwin12.4.1
+Thread model: posix
+```
+
+
 ### Clone RubyMotion source
 
 ```
