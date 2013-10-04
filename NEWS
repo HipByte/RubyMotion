@@ -2,6 +2,7 @@
 
   * Fixed a long standing limitation in the compiler where overriding in Ruby
     an Objective-C method that accepts a C-level block was not possible.
+  * Fixed a regression where `return' from a block would terminate the app.
   * Improve the build system to always copy embedded.mobileprovision. Thanks to
     Jan Brauer for the patch (pull request #121).
   * [iOS] Fixed a bug where device log is wrong filtered with `rake device' 
