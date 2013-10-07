@@ -205,9 +205,17 @@ module Motion; module Project;
     end
 
     def device_retina_xcode5_string(family, target, retina)
+      retina4_string = begin
+        if (target >= '7.0' && App.config.archs['iPhoneSimulator'].include?("x86_64")) 
+          " Retina (4-inch 64-bit)"
+        else
+          " Retina (4-inch)"
+        end
+      end
+
       case retina
       when 'true'
-        (family == 1 and target >= '6.0') ? ' Retina (4-inch)' : ' Retina'
+        (family == 1 and target >= '6.0') ? retina4_string : ' Retina'
       when '3.5'
         ' Retina (3.5-inch)'
       when '4'
@@ -216,7 +224,7 @@ module Motion; module Project;
         if target < '7.0'
           ''
         else
-          (family == 1) ? ' Retina (4-inch)' : ' Retina'
+          (family == 1) ? retina4_string : ' Retina'
         end
       end
     end
