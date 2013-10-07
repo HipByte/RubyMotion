@@ -16,6 +16,11 @@
     object type, leading to the dispatcher not recognizing a signature.
   * Fixed a bug where compiled object files of a vendored project were not
     actually being cleaned when running `rake clean`.
+  * Fixed a bug where defining a singleton method on an object inside a method
+    with named parameters (Objective-C-style selector) would result in that
+    method being defined in the runtime with a wrong selector.
+  * Fixed a bug where Range objects created with non-literal begin/end points
+    would never be released, and therefore leaking memory.
 
 = RubyMotion 2.10 =
 
