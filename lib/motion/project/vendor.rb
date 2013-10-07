@@ -25,6 +25,8 @@ module Motion; module Project;
   class Vendor
     include Rake::DSL if Rake.const_defined?(:DSL)
 
+    XcodeBuildDir = '.build'
+
     def initialize(path, type, config, opts)
       @path = path.to_s
       @type = type
@@ -45,7 +47,13 @@ module Motion; module Project;
     end
 
     def clean
-      send gen_method('clean')
+      [XcodeBuildDir, 'build', 'build-iPhoneSimulator', 'build-iPhoneOS'].each do |build_dir|
+        build_dir = File.join(@path, build_dir)
+        if File.exist?(build_dir)
+          App.info 'Delete', build_dir
+          FileUtils.rm_rf build_dir
+        end
+      end
     end
 
     def build_static(platform, opts)
@@ -132,17 +140,6 @@ EOS
       end
     end
 
-    def clean_static
-      ['iPhoneSimulator', 'iPhoneOS'].each do |platform|
-        build_dir = File.join(@path, "build-#{platform}")
-        if File.exist?(build_dir)
-          App.info 'Delete', build_dir
-          FileUtils.rm_rf build_dir
-        end
-      end
-    end
-
-    XcodeBuildDir = '.build'
     def build_xcode(platform, opts)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
@@ -204,12 +201,6 @@ EOS
 
         @bs_files = Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) }
         @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
-      end
-    end
-
-    def clean_xcode
-      Dir.chdir(@path) do
-        [XcodeBuildDir, 'build-iPhoneOS', 'build-iPhoneSimulator'].each { |x| rm_rf x }
       end
     end
 
