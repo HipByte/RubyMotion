@@ -96,8 +96,9 @@ END
   simulate_device = App.config.device_family_string(family_int, target, retina)
   default_simulator = `/usr/bin/defaults read com.apple.iphonesimulator "SimulateDevice"`.strip
   if default_simulator != simulate_device && default_simulator != "'#{simulate_device}'"
+    simulate_device = "'#{simulate_device}'" if simulate_device.include?(" ")
     system("/usr/bin/killall \"iPhone Simulator\" >& /dev/null")
-    system("/usr/bin/defaults write com.apple.iphonesimulator \"SimulateDevice\" \"'#{simulate_device}'\"")
+    system("/usr/bin/defaults write com.apple.iphonesimulator \"SimulateDevice\" \"#{simulate_device}\"")
   end
 
   # Launch the simulator.
