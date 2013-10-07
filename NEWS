@@ -14,6 +14,8 @@
     Kazuhiro NISHIYAMA for the detective work.
   * Fixed a bug where a boxed struct would incorrectly be interpreted as a
     object type, leading to the dispatcher not recognizing a signature.
+  * Fixed a bug where compiled object files of a vendored project were not
+    actually being cleaned when running `rake clean.
 
 = RubyMotion 2.10 =
 
