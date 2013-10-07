@@ -8,6 +8,8 @@
   * [iOS] Fixed a bug where device log is wrong filtered with `rake device' 
     when performed day is 1-9.
   * [iOS] Added support to launch the app as 64-bit in simulator.
+  * [iOS] Fixed where non-retina iPad simulator does not launch as default.
+    Thanks to Fabio Kuhn for the patch (pull request #133).
   * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
     Kazuhiro NISHIYAMA for the detective work.
   * Fixed a bug where a boxed struct would incorrectly be interpreted as a
