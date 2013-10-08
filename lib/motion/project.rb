@@ -38,7 +38,7 @@ end
 motion_bin_path = File.join(File.dirname(__FILE__), '../../bin/motion')
 system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
 
-desc "Clear build objects"
+desc "Clear local build objects"
 task :clean do
   App.info 'Delete', App.config.build_dir
   rm_rf(App.config.build_dir)
@@ -47,6 +47,18 @@ task :clean do
     next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
     App.info 'Delete', p
     rm_rf p
+  end
+end
+
+namespace :clean do
+  desc "Clean all build objects"
+  task :all do
+    Rake::Task["clean"].invoke
+    path = Motion::Project::Builder.common_build_dir
+    if File.exist?(path)
+      App.info 'Delete', path
+      rm_rf path
+    end
   end
 end
 
