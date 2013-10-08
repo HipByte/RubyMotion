@@ -10,6 +10,8 @@
   * [iOS] Added support to launch the app as 64-bit in simulator.
   * [iOS] Fixed where non-retina iPad simulator does not launch as default.
     Thanks to Fabio Kuhn for the patch (pull request #133).
+  * [iOS] Fixed a regression where certain GameKit class properties could not
+    be used (ex. GKMatchRequest#minPlayers).
   * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
     Kazuhiro NISHIYAMA for the detective work.
   * Fixed a bug where a boxed struct would incorrectly be interpreted as a
