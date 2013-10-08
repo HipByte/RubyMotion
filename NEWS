@@ -1,5 +1,8 @@
 = RubyMotion 2.11 =
 
+  * Added the `rake clean:all' task which deletes all build object files
+    (ex. those in ~/Library/RubyMotion/build). We recommend using that task
+    before building an App Store submission.
   * Fixed a long standing limitation in the compiler where overriding in Ruby
     an Objective-C method that accepts a C-level block was not possible.
   * Fixed a regression where `return' from a block would terminate the app.
