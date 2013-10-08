@@ -314,10 +314,17 @@ describe "Range" do
     $dealloc_test = false
   end
 
-  it "#new should work without malloc error" do
+  it "#new should return autoreleased objects" do
     autorelease_pool do
       Range.new(10, 20)
     end
+    $dealloc_test.should == true
+  end
+
+  it "with dot syntax returns autoreleased objects" do
+    autorelease_pool do
+      (1..2)
+    end 
     $dealloc_test.should == true
   end
 end
