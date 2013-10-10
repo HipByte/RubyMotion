@@ -38,7 +38,6 @@ module Motion; module Project;
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @background_modes = []
       @status_bar_style = :default
-      @icons = []
       @prerendered_icon = false
       @manifest_assets = []
     end
@@ -55,6 +54,38 @@ module Motion; module Project;
         archs['iPhoneOS'].delete('arm64')
         archs
       end
+    end
+
+    def icons
+      @icons ||= app_icons_from_xcassets.map(&:last)
+    end
+
+    def app_icons_from_xcassets
+      unless @app_icons_from_xcassets
+        @app_icons_from_xcassets = []
+        app_icon_sets = xcassets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
+        if app_icon_sets.size > 1
+          # TODO should we just App.fail here?
+          $stderr.puts '[!] More than one AppIcon set was found across all xcasset bundles. Only the first one (alphabetically) will be used.'
+        end
+        if app_icon_set = app_icon_sets.sort.first
+          app_icon_filename = File.basename(app_icon_set, File.extname(app_icon_set))
+          # TODO need to think how to solve this on stock OS X Ruby 1.8.7, which
+          # doesn’t come with JSON.
+          require 'json'
+          images = JSON.parse(File.read(File.join(app_icon_set, 'Contents.json')))['images']
+          images.each do |image|
+            if image_src = image['filename']
+              image_src = File.join(app_icon_set, image_src)
+              if File.exist?(image_src)
+                image_filename = "#{app_icon_filename}#{image['size']}@#{image['scale']}.png"
+                @app_icons_from_xcassets << [image_src, image_filename]
+              end
+            end
+          end
+        end
+      end
+      @app_icons_from_xcassets
     end
 
     def validate
