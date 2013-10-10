@@ -353,7 +353,7 @@ EOS
            "--notices --warnings --platform #{config.deploy_platform.downcase} " \
            "--minimum-deployment-target #{config.deployment_target} " \
            "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-           "--compress-pngs --compile \"#{bundle_path}\" \"#{xcassets.join('" "')}\""
+           "--compress-pngs --compile \"#{File.expand_path(bundle_path)}\" \"#{xcassets.join('" "')}\""
       end
 
       # Compile CoreData Model resources and SpriteKit atlas files.
