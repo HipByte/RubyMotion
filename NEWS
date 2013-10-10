@@ -28,6 +28,8 @@
     would never be released, and therefore leaking memory.
   * Added `context` method as `describe` alias in spec.  Thanks to Ryo Katsuma
     for the patch (pull request #134).
+  * Fixed a small internal memory leak in the dispatcher when sending the
+    #method_missing message.
 
 = RubyMotion 2.10 =
 
