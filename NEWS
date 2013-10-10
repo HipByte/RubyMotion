@@ -26,6 +26,8 @@
     method being defined in the runtime with a wrong selector.
   * Fixed a bug where Range objects created with non-literal begin/end points
     would never be released, and therefore leaking memory.
+  * Added `context` method as `describe` alias in spec.  Thanks to Ryo Katsuma
+    for the patch (pull request #134).
 
 = RubyMotion 2.10 =
 
