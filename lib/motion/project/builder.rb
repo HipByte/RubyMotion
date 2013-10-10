@@ -342,6 +342,20 @@ EOS
         end
       end
 
+      # Compile Asset Catalog bundles.
+      xcassets = []
+      config.resources_dirs.each do |dir|
+        xcassets.concat(Dir.glob(File.join(dir, '*.xcassets'))) if File.exist?(dir)
+      end
+      unless xcassets.empty?
+        xcassets.map! { |f| File.expand_path(f) }
+        sh "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
+           "--notices --warnings --platform #{config.deploy_platform.downcase} " \
+           "--minimum-deployment-target #{config.deployment_target} " \
+           "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
+           "--compress-pngs --compile \"#{bundle_path}\" \"#{xcassets.join('" "')}\""
+      end
+
       # Compile CoreData Model resources and SpriteKit atlas files.
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
