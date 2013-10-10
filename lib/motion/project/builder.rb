@@ -343,17 +343,20 @@ EOS
       end
 
       # Compile Asset Catalog bundles.
-      xcassets = []
-      config.resources_dirs.each do |dir|
-        xcassets.concat(Dir.glob(File.join(dir, '*.xcassets'))) if File.exist?(dir)
-      end
+      xcassets = config.xcassets_bundles
       unless xcassets.empty?
-        xcassets.map! { |f| File.expand_path(f) }
         sh "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
            "--notices --warnings --platform #{config.deploy_platform.downcase} " \
            "--minimum-deployment-target #{config.deployment_target} " \
            "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
            "--compress-pngs --compile \"#{File.expand_path(bundle_path)}\" \"#{xcassets.join('" "')}\""
+        # App icons still need to be handled as always, so we need to copy those
+        # into the app bundle.
+        if icons = config.app_icons_from_xcassets
+          icons.each do |image_src, image_dest_filename|
+            copy_resource(image_src, File.join(bundle_path, image_dest_filename))
+          end
+        end
       end
 
       # Compile CoreData Model resources and SpriteKit atlas files.
@@ -420,12 +423,7 @@ EOS
         if reserved_app_bundle_files.include?(res)
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
-        dest_path = File.join(app_resources_dir, res)
-        if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
-          FileUtils.mkdir_p(File.dirname(dest_path))
-          App.info 'Copy', res_path
-          FileUtils.cp_r(res_path, dest_path)
-        end
+        copy_resource(res_path, File.join(app_resources_dir, res))
       end
 
       # Delete old resource files.
@@ -435,6 +433,7 @@ EOS
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
+          next if config.icons.include?(File.basename(bundle_res))
           App.warn "File `#{bundle_res}' found in app bundle but not in resource directories, removing"
           FileUtils.rm_rf(bundle_res)
         end
@@ -464,6 +463,14 @@ EOS
 
     def convert_filesystem_encoding(string)
       eval `#{@nfd} "#{string}"`
+    end
+
+    def copy_resource(res_path, dest_path)
+      if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+        FileUtils.mkdir_p(File.dirname(dest_path))
+        App.info 'Copy', res_path
+        FileUtils.cp_r(res_path, dest_path)
+      end
     end
 
     class << self

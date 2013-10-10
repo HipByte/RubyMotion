@@ -67,6 +67,10 @@ module Motion; module Project;
       archs
     end
 
+    # TODO no-op for now
+    def app_icons_from_xcassets
+    end
+
     def locate_compiler(platform, *execs)
       execs.each do |exec|
         cc = File.join('/usr/bin', exec)

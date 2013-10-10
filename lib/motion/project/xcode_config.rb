@@ -322,5 +322,15 @@ EOS
       path = File.join(xcode_dir, 'usr/bin/TextureAtlas')
       File.exist?(path) ? path : nil
     end
+
+    def xcassets_bundles
+      xcassets_bundles = []
+      resources_dirs.each do |dir|
+        if File.exist?(dir)
+          xcassets_bundles.concat(Dir.glob(File.join(dir, '*.xcassets')))
+        end
+      end
+      xcassets_bundles
+    end
   end
 end; end
