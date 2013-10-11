@@ -8,15 +8,6 @@
   * Fixed a regression where `return' from a block would terminate the app.
   * Improve the build system to always copy embedded.mobileprovision. Thanks to
     Jan Brauer for the patch (pull request #121).
-  * [iOS] Fixed a bug where device log is wrong filtered with `rake device' 
-    when performed day is 1-9.
-  * [iOS] Added support to launch the app as 64-bit in simulator.
-  * [iOS] Fixed where non-retina iPad simulator does not launch as default.
-    Thanks to Fabio Kuhn for the patch (pull request #133).
-  * [iOS] Fixed a regression where certain GameKit class properties could not
-    be used (ex. GKMatchRequest#minPlayers).
-  * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
-    Kazuhiro NISHIYAMA for the detective work.
   * Fixed a bug where a boxed struct would incorrectly be interpreted as a
     object type, leading to the dispatcher not recognizing a signature.
   * Fixed a bug where compiled object files of a vendored project were not
@@ -30,6 +21,15 @@
     for the patch (pull request #134).
   * Fixed a small internal memory leak in the dispatcher when sending the
     #method_missing message.
+  * [iOS] Fixed a bug where device log is wrong filtered with `rake device' 
+    when performed day is 1-9.
+  * [iOS] Added support to launch the app as 64-bit in simulator.
+  * [iOS] Fixed where non-retina iPad simulator does not launch as default.
+    Thanks to Fabio Kuhn for the patch (pull request #133).
+  * [iOS] Fixed a regression where certain GameKit class properties could not
+    be used (ex. GKMatchRequest#minPlayers).
+  * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
+    Kazuhiro NISHIYAMA for the detective work.
 
 = RubyMotion 2.10 =
 
