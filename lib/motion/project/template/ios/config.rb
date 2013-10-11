@@ -38,6 +38,7 @@ module Motion; module Project;
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @background_modes = []
       @status_bar_style = :default
+      @icons = []
       @prerendered_icon = false
       @manifest_assets = []
     end
@@ -54,39 +55,6 @@ module Motion; module Project;
         archs['iPhoneOS'].delete('arm64')
         archs
       end
-    end
-
-    def icons
-      @icons ||= app_icons_from_asset_bundle
-    end
-
-    def app_icons_from_asset_bundle
-      unless @app_icons_from_asset_bundle
-        @app_icons_from_asset_bundle = []
-
-        if app_icon_set = app_icons_asset_bundle
-          begin
-            require 'rubygems'
-            require 'json'
-          rescue LoadError
-            App.fail "Using application icons from Xcode asset catalogs " \
-                     "requires the `json' gem to be installed. You can do " \
-                     "so by typing `[sudo] gem install json' in your " \
-                     "terminal or by adding `gem \"json\"' to your Gemfile."
-          end
-          app_icon_filename = File.basename(app_icon_set, File.extname(app_icon_set))
-          images = JSON.parse(File.read(File.join(app_icon_set, 'Contents.json')))['images']
-          images.each do |image|
-            if image_src = image['filename']
-              image_src = File.join(app_icon_set, image_src)
-              if File.exist?(image_src)
-                @app_icons_from_asset_bundle << "#{app_icon_filename}#{image['size']}@#{image['scale']}.png"
-              end
-            end
-          end
-        end
-      end
-      @app_icons_from_asset_bundle
     end
 
     def validate
