@@ -57,21 +57,14 @@ module Motion; module Project;
     end
 
     def icons
-      @icons ||= app_icons_from_xcassets.map(&:last)
+      @icons ||= app_icons_from_asset_bundle.map(&:last)
     end
 
-    def app_icons_from_xcassets
-      unless @app_icons_from_xcassets
-        @app_icons_from_xcassets = []
+    def app_icons_from_asset_bundle
+      unless @app_icons_from_asset_bundle
+        @app_icons_from_asset_bundle = []
 
-        app_icon_sets = xcassets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
-        if app_icon_sets.size > 1
-          App.warn "Found #{app_icon_sets.size} AppIcon sets across all " \
-                   "xcasset bundles. Only the first one (alphabetically) " \
-                   "will be used."
-        end
-
-        if app_icon_set = app_icon_sets.sort.first
+        if app_icon_set = app_icons_asset_bundle
           begin
             require 'rubygems'
             require 'json'
@@ -88,13 +81,13 @@ module Motion; module Project;
               image_src = File.join(app_icon_set, image_src)
               if File.exist?(image_src)
                 image_filename = "#{app_icon_filename}#{image['size']}@#{image['scale']}.png"
-                @app_icons_from_xcassets << [image_src, image_filename]
+                @app_icons_from_asset_bundle << [image_src, image_filename]
               end
             end
           end
         end
       end
-      @app_icons_from_xcassets
+      @app_icons_from_asset_bundle
     end
 
     def validate

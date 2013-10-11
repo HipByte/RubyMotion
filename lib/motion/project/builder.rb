@@ -343,19 +343,36 @@ EOS
       end
 
       # Compile Asset Catalog bundles.
+      app_icons = nil
       xcassets = config.xcassets_bundles
       unless xcassets.empty?
+        if config.deploy_platform == 'MacOSX' && config.app_icons_asset_bundle
+          app_icon_name = File.basename(config.icon, '.icns')
+          actool_for_mac_options = "--output-partial-info-plist /dev/null --app-icon #{app_icon_name}"
+        end
+        app_resources_dir = File.expand_path(config.app_resources_dir(platform))
+        FileUtils.mkdir_p(app_resources_dir)
         sh "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
            "--notices --warnings --platform #{config.deploy_platform.downcase} " \
            "--minimum-deployment-target #{config.deployment_target} " \
            "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-           "--compress-pngs --compile \"#{File.expand_path(bundle_path)}\" \"#{xcassets.join('" "')}\""
-        # App icons still need to be handled as always, so we need to copy those
-        # into the app bundle.
-        if icons = config.app_icons_from_xcassets
-          icons.each do |image_src, image_dest_filename|
-            copy_resource(image_src, File.join(bundle_path, image_dest_filename))
+           "#{actool_for_mac_options} " \
+           "--compress-pngs --compile \"#{app_resources_dir}\" \"#{xcassets.join('" "')}\""
+
+        # TODO this should really move to the iOS and OS X specific builders,
+        # but they do not have the notion of overriding single steps of the
+        # build process yet.
+        case config.deploy_platform
+        # iOS App icons still need to be handled as always, so we need to copy
+        # those into the app bundle.
+        when 'iPhoneOS'
+          if app_icons = config.app_icons_from_asset_bundle
+            app_icons.each do |image_src, image_dest_filename|
+              copy_resource(image_src, File.join(bundle_path, image_dest_filename))
+            end
           end
+        when 'MacOSX'
+          app_icons = [config.icon] if config.app_icons_asset_bundle
         end
       end
 
@@ -433,7 +450,7 @@ EOS
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
-          next if config.icons.include?(File.basename(bundle_res))
+          next if app_icons.include?(File.basename(bundle_res))
           App.warn "File `#{bundle_res}' found in app bundle but not in resource directories, removing"
           FileUtils.rm_rf(bundle_res)
         end
