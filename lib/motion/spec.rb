@@ -134,6 +134,51 @@ module Bacon
     end
   end
 
+  module ColoredSpecDoxOutput
+    GREEN = "\033[0;32m"
+    RED   = "\033[0;31m"
+    RESET = "\033[00m"
+
+    @saved_description = nil
+    
+    def handle_specification_begin(name)
+      puts spaces + name
+    end
+
+    def handle_specification_end
+      puts if Counter[:context_depth] == 1
+    end
+
+    def handle_requirement_begin(description)
+      @saved_description = description
+    end
+
+    def handle_requirement_end(error)
+      color = error.empty? ? GREEN : RED
+      print "#{color}#{spaces}  - #{@saved_description}#{RESET}"
+      puts error.empty? ? "" : " [#{color}#{error}#{RESET}]"
+    end
+
+    def handle_summary
+      print ErrorLog  if Backtraces
+
+      duration = "%0.2f" % (Time.now - @timer)
+      puts "", "Finished in #{duration} seconds."
+
+      color = GREEN
+      if Counter[:errors] > 0 || Counter[:failed] > 0
+        color = RED
+      end
+      
+      puts "#{color}%d specifications (%d requirements), %d failures, %d errors#{RESET}" %
+        Counter.values_at(:specifications, :requirements, :failed, :errors)
+    end
+
+    def spaces
+      "  " * (Counter[:context_depth] - 1)
+    end
+  end
+
   module TestUnitOutput
     def handle_specification_begin(name); end
     def handle_specification_end        ; end
@@ -268,6 +313,7 @@ module Bacon
 
   Outputs = {
     'spec_dox' => SpecDoxOutput,
+    'colored_spec_dox' => ColoredSpecDoxOutput,
     'fast' => FastOutput,
     'test_unit' => TestUnitOutput,
     'tap' => TapOutput,
