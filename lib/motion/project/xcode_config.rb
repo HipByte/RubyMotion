@@ -332,5 +332,15 @@ EOS
       end
       xcassets_bundles
     end
+
+    def app_icons_asset_bundle
+      app_icons_asset_bundles = xcassets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
+      if app_icons_asset_bundles.size > 1
+        App.warn "Found #{app_icons_asset_bundles.size} AppIcon sets across all " \
+                 "xcasset bundles. Only the first one (alphabetically) " \
+                 "will be used."
+      end
+      app_icons_asset_bundles.sort.first
+    end
   end
 end; end

@@ -35,7 +35,6 @@ module Motion; module Project;
     def initialize(project_dir, build_mode)
       super
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
-      @icon = ''
       @category = 'utilities'
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
@@ -45,6 +44,7 @@ module Motion; module Project;
     def platforms; ['MacOSX']; end
     def local_platform; 'MacOSX'; end
     def deploy_platform; 'MacOSX'; end
+    def device_family; 'mac'; end
 
     def validate
       # Embedded frameworks.
@@ -67,8 +67,14 @@ module Motion; module Project;
       archs
     end
 
-    # TODO no-op for now
-    def app_icons_from_xcassets
+    def icon
+      @icon ||= begin
+        if app_icon_set = app_icons_asset_bundle
+          File.basename(app_icon_set, File.extname(app_icon_set)) << '.icns'
+        else
+          ''
+        end
+      end
     end
 
     def locate_compiler(platform, *execs)
