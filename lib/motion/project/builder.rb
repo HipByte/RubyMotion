@@ -364,20 +364,35 @@ EOS
 
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
-        sh "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
-           "--notices --warnings --platform #{config.deploy_platform.downcase} " \
-           "--minimum-deployment-target #{config.deployment_target} " \
-           "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-           "#{app_icons_options} " \
-           "--compress-pngs --compile \"#{app_resources_dir}\" \"#{xcassets_bundles.join('" "')}\""
+        cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
+              "--notices --warnings --platform #{config.deploy_platform.downcase} " \
+              "--minimum-deployment-target #{config.deployment_target} " \
+              "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
+              "#{app_icons_options} " \
+              "--compress-pngs --compile \"#{app_resources_dir}\" \"#{xcassets_bundles.join('" "')}\""
+        # TODO should be quiet normally
+        puts cmd
+        actool_output = `#{cmd}`.strip
+        puts actool_output
+        actool_compiled_files = nil
+        actool_output.each_line do |line|
+          line = line.strip
+          if actool_compiled_files
+            actool_compiled_files << File.basename(line)
+          elsif line == '/* com.apple.actool.compilation-results */'
+            actool_compiled_files = []
+          end
+        end
+        unless actool_compiled_files
+          App.fail 'TODO'
+        end
+        actool_compiled_files.pop
+        preserve_resources.concat(actool_compiled_files)
 
         # Extract the app icon file(s) name(s) and assign it to the config.
         if app_icons_asset_bundle
           if ios
             app_icons_info_plist_content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{app_icons_info_plist}"`.strip
-            if app_icons_info_plist_content.include?('Does Not Exist')
-              App.fail 'TODO'
-            end
             lines = app_icons_info_plist_content.split("\n")
             if lines.size < 2
               App.fail 'TODO'
