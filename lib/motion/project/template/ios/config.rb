@@ -63,15 +63,25 @@ module Motion; module Project;
     def app_icons_from_xcassets
       unless @app_icons_from_xcassets
         @app_icons_from_xcassets = []
+
         app_icon_sets = xcassets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
         if app_icon_sets.size > 1
-          App.warn "Found #{app_icon_sets.size} AppIcon sets across all xcasset bundles. Only the first one (alphabetically) will be used."
+          App.warn "Found #{app_icon_sets.size} AppIcon sets across all " \
+                   "xcasset bundles. Only the first one (alphabetically) " \
+                   "will be used."
         end
+
         if app_icon_set = app_icon_sets.sort.first
+          begin
+            require 'rubygems'
+            require 'json'
+          rescue LoadError
+            App.fail "Using application icons from Xcode asset catalogs " \
+                     "requires the `json' gem to be installed. You can do " \
+                     "so by typing `[sudo] gem install json' in your " \
+                     "terminal or by adding `gem \"json\"' to your Gemfile."
+          end
           app_icon_filename = File.basename(app_icon_set, File.extname(app_icon_set))
-          # TODO need to think how to solve this on stock OS X Ruby 1.8.7, which
-          # doesn’t come with JSON.
-          require 'json'
           images = JSON.parse(File.read(File.join(app_icon_set, 'Contents.json')))['images']
           images.each do |image|
             if image_src = image['filename']
