@@ -344,11 +344,15 @@ EOS
 
       # Compile Asset Catalog bundles.
       app_icons = []
-      xcassets = config.xcassets_bundles
+      xcassets = config.xcassets_bundles.map { |f| File.expand_path(f) }
       unless xcassets.empty?
-        if config.deploy_platform == 'MacOSX' && config.app_icons_asset_bundle
-          app_icon_name = File.basename(config.icon, '.icns')
-          actool_for_mac_options = "--output-partial-info-plist /dev/null --app-icon #{app_icon_name}"
+        if app_icons_asset_bundle = config.app_icons_asset_bundle
+          app_icons = config.deploy_platform == 'iPhoneOS' ? config.icons : [config.icon]
+          app_icons_name = File.basename(app_icons_asset_bundle, '.appiconset')
+          # TODO We can potentially use the plist output to identify the icon
+          #      names for the config, instead of parsing the JSON. This also
+          #      guards against the Contents.json format changing.
+          app_icons_options = "--output-partial-info-plist /dev/null --app-icon \"#{app_icons_name}\""
         end
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
@@ -356,25 +360,8 @@ EOS
            "--notices --warnings --platform #{config.deploy_platform.downcase} " \
            "--minimum-deployment-target #{config.deployment_target} " \
            "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-           "#{actool_for_mac_options} " \
+           "#{app_icons_options} " \
            "--compress-pngs --compile \"#{app_resources_dir}\" \"#{xcassets.join('" "')}\""
-
-        # TODO this should really move to the iOS and OS X specific builders,
-        # but they do not have the notion of overriding single steps of the
-        # build process yet.
-        case config.deploy_platform
-        # iOS App icons still need to be handled as always, so we need to copy
-        # those into the app bundle.
-        when 'iPhoneOS'
-          if app_icons_from_asset_bundle = config.app_icons_from_asset_bundle
-            app_icons_from_asset_bundle.each do |image_src, image_dest_filename|
-              copy_resource(image_src, File.join(bundle_path, image_dest_filename))
-            end
-            app_icons = config.icons
-          end
-        when 'MacOSX'
-          app_icons = [config.icon] if config.app_icons_asset_bundle
-        end
       end
 
       # Compile CoreData Model resources and SpriteKit atlas files.

@@ -57,7 +57,7 @@ module Motion; module Project;
     end
 
     def icons
-      @icons ||= app_icons_from_asset_bundle.map(&:last)
+      @icons ||= app_icons_from_asset_bundle
     end
 
     def app_icons_from_asset_bundle
@@ -80,8 +80,7 @@ module Motion; module Project;
             if image_src = image['filename']
               image_src = File.join(app_icon_set, image_src)
               if File.exist?(image_src)
-                image_filename = "#{app_icon_filename}#{image['size']}@#{image['scale']}.png"
-                @app_icons_from_asset_bundle << [image_src, image_filename]
+                @app_icons_from_asset_bundle << "#{app_icon_filename}#{image['size']}@#{image['scale']}.png"
               end
             end
           end
