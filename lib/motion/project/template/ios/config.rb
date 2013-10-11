@@ -65,8 +65,7 @@ module Motion; module Project;
         @app_icons_from_xcassets = []
         app_icon_sets = xcassets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
         if app_icon_sets.size > 1
-          # TODO Should we just App.fail here?
-          $stderr.puts '[!] More than one AppIcon set was found across all xcasset bundles. Only the first one (alphabetically) will be used.'
+          App.warn "Found #{app_icon_sets.size} AppIcon sets across all xcasset bundles. Only the first one (alphabetically) will be used."
         end
         if app_icon_set = app_icon_sets.sort.first
           app_icon_filename = File.basename(app_icon_set, File.extname(app_icon_set))
