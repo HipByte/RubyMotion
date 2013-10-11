@@ -34,6 +34,7 @@ module Motion; module Project;
 
     def initialize(project_dir, build_mode)
       super
+      @icon = ''
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @category = 'utilities'
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
@@ -65,16 +66,6 @@ module Motion; module Project;
         end
       end
       archs
-    end
-
-    def icon
-      @icon ||= begin
-        if app_icon_set = app_icons_asset_bundle
-          File.basename(app_icon_set, File.extname(app_icon_set)) << '.icns'
-        else
-          ''
-        end
-      end
     end
 
     def locate_compiler(platform, *execs)

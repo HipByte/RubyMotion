@@ -312,14 +312,6 @@ EOS
         end
       end
 
-      # Create bundle/Info.plist.
-      bundle_info_plist = File.join(bundle_path, 'Info.plist')
-      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
-        App.info 'Create', bundle_info_plist
-        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
-        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
-      end
-
       # Create bundle/PkgInfo.
       bundle_pkginfo = File.join(bundle_path, 'PkgInfo')
       if !File.exist?(bundle_pkginfo) or File.mtime(config.project_file) > File.mtime(bundle_pkginfo)
@@ -342,18 +334,34 @@ EOS
         end
       end
 
+      preserve_resources = []
+
       # Compile Asset Catalog bundles.
-      app_icons = []
-      xcassets = config.xcassets_bundles.map { |f| File.expand_path(f) }
-      unless xcassets.empty?
-        if app_icons_asset_bundle = config.app_icons_asset_bundle
-          app_icons = config.deploy_platform == 'iPhoneOS' ? config.icons : [config.icon]
-          app_icons_name = File.basename(app_icons_asset_bundle, '.appiconset')
+      xcassets_bundles = []
+      config.resources_dirs.each do |dir|
+        if File.exist?(dir)
+          xcassets_bundles.concat(Dir.glob(File.expand_path(File.join(dir, '*.xcassets'))))
+        end
+      end
+      unless xcassets_bundles.empty?
+        ios = config.deploy_platform == 'iPhoneOS'
+
+        app_icons_asset_bundles = xcassets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
+        if app_icons_asset_bundles.size > 1
+          App.warn "Found #{app_icons_asset_bundles.size} app icon sets across all " \
+                   "xcasset bundles. Only the first one (alphabetically) " \
+                   "will be used."
+        end
+        if app_icons_asset_bundle = app_icons_asset_bundles.sort.first
+          preserve_resources = ios ? config.icons : [config.icon]
+          app_icon_name = File.basename(app_icons_asset_bundle, '.appiconset')
           # TODO We can potentially use the plist output to identify the icon
           #      names for the config, instead of parsing the JSON. This also
           #      guards against the Contents.json format changing.
-          app_icons_options = "--output-partial-info-plist /dev/null --app-icon \"#{app_icons_name}\""
+          app_icons_info_plist = ios ? File.expand_path(File.join(build_dir, 'AppIcon.plist')) : '/dev/null'
+          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist}\" --app-icon \"#{app_icon_name}\""
         end
+
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
         sh "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
@@ -361,7 +369,25 @@ EOS
            "--minimum-deployment-target #{config.deployment_target} " \
            "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
            "#{app_icons_options} " \
-           "--compress-pngs --compile \"#{app_resources_dir}\" \"#{xcassets.join('" "')}\""
+           "--compress-pngs --compile \"#{app_resources_dir}\" \"#{xcassets_bundles.join('" "')}\""
+
+        # Extract the app icon file(s) name(s) and assign it to the config.
+        if app_icons_asset_bundle
+          if ios
+            app_icons_info_plist_content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{app_icons_info_plist}"`.strip
+            if app_icons_info_plist_content.include?('Does Not Exist')
+              App.fail 'TODO'
+            end
+            lines = app_icons_info_plist_content.split("\n")
+            if lines.size < 2
+              App.fail 'TODO'
+            end
+            config.icons = lines[1..-2]
+          else
+            # On Mac there is only ever one icns file.
+            config.icon = app_icon_name
+          end
+        end
       end
 
       # Compile CoreData Model resources and SpriteKit atlas files.
@@ -398,6 +424,14 @@ EOS
             FileUtils.cp_r(src_path, dest_path)
           end 
         end
+      end
+
+      # Create bundle/Info.plist.
+      bundle_info_plist = File.join(bundle_path, 'Info.plist')
+      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
+        App.info 'Create', bundle_info_plist
+        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
+        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
       end
 
       # Copy resources, handle subdirectories.
@@ -438,7 +472,7 @@ EOS
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
-          next if app_icons.include?(File.basename(bundle_res))
+          next if preserve_resources.include?(File.basename(bundle_res))
           App.warn "File `#{bundle_res}' found in app bundle but not in resource directories, removing"
           FileUtils.rm_rf(bundle_res)
         end
