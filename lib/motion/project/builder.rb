@@ -343,7 +343,7 @@ EOS
       end
 
       # Compile Asset Catalog bundles.
-      app_icons = nil
+      app_icons = []
       xcassets = config.xcassets_bundles
       unless xcassets.empty?
         if config.deploy_platform == 'MacOSX' && config.app_icons_asset_bundle
@@ -366,10 +366,11 @@ EOS
         # iOS App icons still need to be handled as always, so we need to copy
         # those into the app bundle.
         when 'iPhoneOS'
-          if app_icons = config.app_icons_from_asset_bundle
-            app_icons.each do |image_src, image_dest_filename|
+          if app_icons_from_asset_bundle = config.app_icons_from_asset_bundle
+            app_icons_from_asset_bundle.each do |image_src, image_dest_filename|
               copy_resource(image_src, File.join(bundle_path, image_dest_filename))
             end
+            app_icons = config.icons
           end
         when 'MacOSX'
           app_icons = [config.icon] if config.app_icons_asset_bundle
