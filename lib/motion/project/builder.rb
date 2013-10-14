@@ -312,14 +312,6 @@ EOS
         end
       end
 
-      # Create bundle/Info.plist.
-      bundle_info_plist = File.join(bundle_path, 'Info.plist')
-      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
-        App.info 'Create', bundle_info_plist
-        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
-        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
-      end
-
       # Create bundle/PkgInfo.
       bundle_pkginfo = File.join(bundle_path, 'PkgInfo')
       if !File.exist?(bundle_pkginfo) or File.mtime(config.project_file) > File.mtime(bundle_pkginfo)
@@ -340,6 +332,46 @@ EOS
             end
           end
         end
+      end
+
+      preserve_resources = []
+
+      # Compile Asset Catalog bundles.
+      assets_bundles = config.assets_bundles
+      unless assets_bundles.empty?
+        app_icons_asset_bundle = config.app_icons_asset_bundle
+        if app_icons_asset_bundle
+          app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
+          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
+                              "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
+        end
+
+        App.info 'Compile', assets_bundles.join(", ")
+        app_resources_dir = File.expand_path(config.app_resources_dir(platform))
+        FileUtils.mkdir_p(app_resources_dir)
+        cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
+              "--notices --warnings --platform #{config.deploy_platform.downcase} " \
+              "--minimum-deployment-target #{config.deployment_target} " \
+              "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
+              "#{app_icons_options} --compress-pngs --compile \"#{app_resources_dir}\" " \
+              "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
+        $stderr.puts(cmd) if App::VERBOSE
+        actool_output = `#{cmd} 2>&1`
+        $stderr.puts(actool_output) if App::VERBOSE
+
+        # Split output in warnings and compiled files
+        actool_output, actool_compilation_results = actool_output.split('/* com.apple.actool.compilation-results */')
+        actool_compiled_files = actool_compilation_results.strip.split("\n")
+        if actool_document_warnings = actool_output.split('/* com.apple.actool.document.warnings */').last
+          # Propagate warnings to the user.
+          actool_document_warnings.strip.split("\n").each { |w| App.warn(w) }
+        end
+
+        # Remove the partial Info.plist line and preserve all other assets.
+        actool_compiled_files.delete(app_icons_info_plist_path) if app_icons_asset_bundle
+        preserve_resources.concat(actool_compiled_files.map { |f| File.basename(f) })
+
+        config.configure_app_icons_from_asset_bundle(platform) if app_icons_asset_bundle
       end
 
       # Compile CoreData Model resources and SpriteKit atlas files.
@@ -378,6 +410,14 @@ EOS
         end
       end
 
+      # Create bundle/Info.plist.
+      bundle_info_plist = File.join(bundle_path, 'Info.plist')
+      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
+        App.info 'Create', bundle_info_plist
+        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
+        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
+      end
+
       # Copy resources, handle subdirectories.
       app_resources_dir = config.app_resources_dir(platform)
       FileUtils.mkdir_p(app_resources_dir)
@@ -386,11 +426,17 @@ EOS
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
         convert_filesystem_encoding(config.name)
       ]
+      resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld', '.lproj', '.atlas', '.xcassets']
       resources_paths = []
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
           resources_paths << Dir.chdir(dir) do
-            Dir.glob('**{,/*/**}/*').reject { |x| ['.xib', '.storyboard', '.xcdatamodeld', '.lproj', '.atlas'].include?(File.extname(x)) }.map { |file| File.join(dir, file) }
+            Dir.glob('**{,/*/**}/*').reject do |x|
+              # Find files with extnames to exclude or files inside bundles to
+              # exclude (e.g. xcassets).
+              resources_exclude_extnames.include?(File.extname(x)) ||
+                resources_exclude_extnames.include?(File.extname(x.split('/').first))
+            end.map { |file| File.join(dir, file) }
           end
         end
       end
@@ -400,12 +446,7 @@ EOS
         if reserved_app_bundle_files.include?(res)
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
-        dest_path = File.join(app_resources_dir, res)
-        if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
-          FileUtils.mkdir_p(File.dirname(dest_path))
-          App.info 'Copy', res_path
-          FileUtils.cp_r(res_path, dest_path)
-        end
+        copy_resource(res_path, File.join(app_resources_dir, res))
       end
 
       # Delete old resource files.
@@ -415,6 +456,7 @@ EOS
           next if File.directory?(bundle_res)
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
+          next if preserve_resources.include?(File.basename(bundle_res))
           App.warn "File `#{bundle_res}' found in app bundle but not in resource directories, removing"
           FileUtils.rm_rf(bundle_res)
         end
@@ -444,6 +486,14 @@ EOS
 
     def convert_filesystem_encoding(string)
       eval `#{@nfd} "#{string}"`
+    end
+
+    def copy_resource(res_path, dest_path)
+      if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+        FileUtils.mkdir_p(File.dirname(dest_path))
+        App.info 'Copy', res_path
+        FileUtils.cp_r(res_path, dest_path)
+      end
     end
 
     class << self

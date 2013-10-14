@@ -322,5 +322,29 @@ EOS
       path = File.join(xcode_dir, 'usr/bin/TextureAtlas')
       File.exist?(path) ? path : nil
     end
+
+    def assets_bundles
+      xcassets_bundles = []
+      resources_dirs.each do |dir|
+        if File.exist?(dir)
+          xcassets_bundles.concat(Dir.glob(File.join(dir, '*.xcassets')))
+        end
+      end
+      xcassets_bundles
+    end
+
+    def app_icons_asset_bundle
+      app_icons_asset_bundles = assets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
+      if app_icons_asset_bundles.size > 1
+        App.warn "Found #{app_icons_asset_bundles.size} app icon sets across all " \
+                 "xcasset bundles. Only the first one (alphabetically) " \
+                 "will be used."
+      end
+      app_icons_asset_bundles.sort.first
+    end
+
+    def app_icon_name_from_asset_bundle
+      File.basename(app_icons_asset_bundle, '.appiconset')
+    end
   end
 end; end

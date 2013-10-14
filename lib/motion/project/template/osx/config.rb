@@ -34,8 +34,8 @@ module Motion; module Project;
 
     def initialize(project_dir, build_mode)
       super
-      @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @icon = ''
+      @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @category = 'utilities'
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
@@ -45,6 +45,7 @@ module Motion; module Project;
     def platforms; ['MacOSX']; end
     def local_platform; 'MacOSX'; end
     def deploy_platform; 'MacOSX'; end
+    def device_family; 'mac'; end
 
     def validate
       # Embedded frameworks.
@@ -65,6 +66,15 @@ module Motion; module Project;
         end
       end
       archs
+    end
+
+    def app_icons_info_plist_path(platform)
+      '/dev/null'
+    end
+
+    # On OS X only one file is ever created. E.g. NAME.icns
+    def configure_app_icons_from_asset_bundle(platform)
+      self.icon = app_icon_name_from_asset_bundle
     end
 
     def locate_compiler(platform, *execs)

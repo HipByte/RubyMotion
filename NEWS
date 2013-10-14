@@ -3,6 +3,10 @@
   * Added the `rake clean:all' task which deletes all build object files
     (ex. those in ~/Library/RubyMotion/build). We recommend using that task
     before building an App Store submission.
+  * Added support for Xcode asset catalogs. This can be used to manage all your
+    image assets in a visual way, including your application’s icons. You can
+    create and edit a new catalog like so:
+    $ mkdir resources/Images.xcassets && open -a Xcode resources/Image.xcassets
   * Fixed a long standing limitation in the compiler where overriding in Ruby
     an Objective-C method that accepts a C-level block was not possible.
   * Fixed a regression where `return' from a block would terminate the app.
