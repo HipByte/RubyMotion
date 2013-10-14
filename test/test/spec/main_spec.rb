@@ -56,7 +56,7 @@ end
 describe 'A method accepting a block' do
   it "can be called (1)" do
     TestMethod.testMethodCallingBlock(lambda { 42 }).should == 42
-    TestMethod.testMethodCallingBlock(nil).should == nil
+    TestMethod.testMethodCallingBlock(nil).should == 42
   end
 
   it "can be called (2)" do

@@ -61,7 +61,7 @@
     if (block != nil) {
 	return block();
     }
-    return nil;
+    return [NSNumber numberWithInt:42];
 }
 
 + (BOOL)testValueForKey:(id)obj expected:(id)expected
