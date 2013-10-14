@@ -346,14 +346,15 @@ EOS
                               "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
         end
 
+        App.info 'Compile', assets_bundles.join(", ")
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
         cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
               "--notices --warnings --platform #{config.deploy_platform.downcase} " \
               "--minimum-deployment-target #{config.deployment_target} " \
               "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-              "#{app_icons_options} " \
-              "--compress-pngs --compile \"#{app_resources_dir}\" \"#{assets_bundles.join('" "')}\""
+              "#{app_icons_options} --compress-pngs --compile \"#{app_resources_dir}\" " \
+              "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
         $stderr.puts(cmd) if App::VERBOSE
         actool_output = `#{cmd} 2>&1`
         $stderr.puts(actool_output) if App::VERBOSE

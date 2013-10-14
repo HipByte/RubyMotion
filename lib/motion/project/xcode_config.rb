@@ -327,7 +327,7 @@ EOS
       xcassets_bundles = []
       resources_dirs.each do |dir|
         if File.exist?(dir)
-          xcassets_bundles.concat(Dir.glob(File.expand_path(File.join(dir, '*.xcassets'))))
+          xcassets_bundles.concat(Dir.glob(File.join(dir, '*.xcassets')))
         end
       end
       xcassets_bundles
