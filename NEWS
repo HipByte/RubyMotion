@@ -35,6 +35,8 @@
     Thanks to Fabio Kuhn for the patch (pull request #133).
   * [iOS] Fixed a regression where certain GameKit class properties could not
     be used (ex. GKMatchRequest#minPlayers).
+  * [iOS] Fixed a link error where "ld: framework not found IOKit" is caused
+    with iOS 7 SDK when it will run `rake device'.
   * [OSX] Fixed the wrong default settings of short cut key in menu. Thanks to
     Kazuhiro NISHIYAMA for the detective work.
 
