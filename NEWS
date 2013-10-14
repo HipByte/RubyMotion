@@ -21,6 +21,9 @@
     for the patch (pull request #134).
   * Fixed a small internal memory leak in the dispatcher when sending the
     #method_missing message.
+  * Fixed a bug in the compiler where providing nil as the value of a C-level
+    block argument would not actually pass NULL but an empty Block structure
+    instead. Thanks to Ruben Fonseca for the detective work.
   * [iOS] Fixed a bug where device log is wrong filtered with `rake device' 
     when performed day is 1-9.
   * [iOS] Added support to launch the app as 64-bit in simulator.
