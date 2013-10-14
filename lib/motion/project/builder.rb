@@ -337,29 +337,12 @@ EOS
       preserve_resources = []
 
       # Compile Asset Catalog bundles.
-      xcassets_bundles = []
-      config.resources_dirs.each do |dir|
-        if File.exist?(dir)
-          xcassets_bundles.concat(Dir.glob(File.expand_path(File.join(dir, '*.xcassets'))))
-        end
-      end
-      unless xcassets_bundles.empty?
-        ios = config.deploy_platform == 'iPhoneOS'
-
-        app_icons_asset_bundles = xcassets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
-        if app_icons_asset_bundles.size > 1
-          App.warn "Found #{app_icons_asset_bundles.size} app icon sets across all " \
-                   "xcasset bundles. Only the first one (alphabetically) " \
-                   "will be used."
-        end
-        if app_icons_asset_bundle = app_icons_asset_bundles.sort.first
-          preserve_resources = ios ? config.icons : [config.icon]
-          app_icon_name = File.basename(app_icons_asset_bundle, '.appiconset')
-          # TODO We can potentially use the plist output to identify the icon
-          #      names for the config, instead of parsing the JSON. This also
-          #      guards against the Contents.json format changing.
-          app_icons_info_plist = ios ? File.expand_path(File.join(build_dir, 'AppIcon.plist')) : '/dev/null'
-          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist}\" --app-icon \"#{app_icon_name}\""
+      assets_bundles = config.assets_bundles
+      unless assets_bundles.empty?
+        app_icons_asset_bundle = config.app_icons_asset_bundle
+        if app_icons_asset_bundle
+          app_icons_options = "--output-partial-info-plist \"#{config.app_icons_info_plist_path(platform)}\" " \
+                              "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
         end
 
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
@@ -369,7 +352,7 @@ EOS
               "--minimum-deployment-target #{config.deployment_target} " \
               "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
               "#{app_icons_options} " \
-              "--compress-pngs --compile \"#{app_resources_dir}\" \"#{xcassets_bundles.join('" "')}\""
+              "--compress-pngs --compile \"#{app_resources_dir}\" \"#{assets_bundles.join('" "')}\""
         # TODO should be quiet normally
         puts cmd
         actool_output = `#{cmd}`.strip
@@ -386,23 +369,11 @@ EOS
         unless actool_compiled_files
           App.fail 'TODO'
         end
-        actool_compiled_files.pop
+        # Remove the partial Info.plist line.
+        actool_compiled_files.pop if app_icons_asset_bundle
         preserve_resources.concat(actool_compiled_files)
 
-        # Extract the app icon file(s) name(s) and assign it to the config.
-        if app_icons_asset_bundle
-          if ios
-            app_icons_info_plist_content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{app_icons_info_plist}"`.strip
-            lines = app_icons_info_plist_content.split("\n")
-            if lines.size < 2
-              App.fail 'TODO'
-            end
-            config.icons = lines[1..-2]
-          else
-            # On Mac there is only ever one icns file.
-            config.icon = app_icon_name
-          end
-        end
+        config.configure_app_icons_from_asset_bundle(platform) if app_icons_asset_bundle
       end
 
       # Compile CoreData Model resources and SpriteKit atlas files.
