@@ -341,7 +341,8 @@ EOS
       unless assets_bundles.empty?
         app_icons_asset_bundle = config.app_icons_asset_bundle
         if app_icons_asset_bundle
-          app_icons_options = "--output-partial-info-plist \"#{config.app_icons_info_plist_path(platform)}\" " \
+          app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
+          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
                               "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
         end
 
@@ -353,25 +354,14 @@ EOS
               "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
               "#{app_icons_options} " \
               "--compress-pngs --compile \"#{app_resources_dir}\" \"#{assets_bundles.join('" "')}\""
-        # TODO should be quiet normally
-        puts cmd
-        actool_output = `#{cmd}`.strip
-        puts actool_output
-        actool_compiled_files = nil
-        actool_output.each_line do |line|
-          line = line.strip
-          if actool_compiled_files
-            actool_compiled_files << File.basename(line)
-          elsif line == '/* com.apple.actool.compilation-results */'
-            actool_compiled_files = []
-          end
-        end
-        unless actool_compiled_files
-          App.fail 'TODO'
-        end
+        $stderr.puts(cmd) if App::VERBOSE
+        actool_output = `#{cmd}`
+        $stderr.puts(actool_output) if App::VERBOSE
+
+        actool_compiled_files = actool_output.split('/* com.apple.actool.compilation-results */').last.strip.split("\n")
         # Remove the partial Info.plist line.
-        actool_compiled_files.pop if app_icons_asset_bundle
-        preserve_resources.concat(actool_compiled_files)
+        actool_compiled_files.delete(app_icons_info_plist_path) if app_icons_asset_bundle
+        preserve_resources.concat(actool_compiled_files.map { |f| File.basename(f) })
 
         config.configure_app_icons_from_asset_bundle(platform) if app_icons_asset_bundle
       end
