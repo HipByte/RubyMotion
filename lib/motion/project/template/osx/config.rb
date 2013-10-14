@@ -72,7 +72,7 @@ module Motion; module Project;
       '/dev/null'
     end
 
-    # On OS X only one file is output. E.g. NAME.icns
+    # On OS X only one file is ever created. E.g. NAME.icns
     def configure_app_icons_from_asset_bundle(platform)
       self.icon = app_icon_name_from_asset_bundle
     end
