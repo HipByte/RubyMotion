@@ -355,11 +355,18 @@ EOS
               "#{app_icons_options} " \
               "--compress-pngs --compile \"#{app_resources_dir}\" \"#{assets_bundles.join('" "')}\""
         $stderr.puts(cmd) if App::VERBOSE
-        actool_output = `#{cmd}`
+        actool_output = `#{cmd} 2>&1`
         $stderr.puts(actool_output) if App::VERBOSE
 
-        actool_compiled_files = actool_output.split('/* com.apple.actool.compilation-results */').last.strip.split("\n")
-        # Remove the partial Info.plist line.
+        # Split output in warnings and compiled files
+        actool_output, actool_compilation_results = actool_output.split('/* com.apple.actool.compilation-results */')
+        actool_compiled_files = actool_compilation_results.strip.split("\n")
+        if actool_document_warnings = actool_output.split('/* com.apple.actool.document.warnings */').last
+          # Propagate warnings to the user.
+          actool_document_warnings.strip.split("\n").each { |w| App.warn(w) }
+        end
+
+        # Remove the partial Info.plist line and preserve all other assets.
         actool_compiled_files.delete(app_icons_info_plist_path) if app_icons_asset_bundle
         preserve_resources.concat(actool_compiled_files.map { |f| File.basename(f) })
 
