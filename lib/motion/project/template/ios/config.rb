@@ -57,6 +57,18 @@ module Motion; module Project;
       end
     end
 
+    def app_icons_info_plist_path(platform)
+      File.expand_path(File.join(versionized_build_dir(platform), 'AppIcon.plist'))
+    end
+
+    def configure_app_icons_from_asset_bundle(platform)
+      path = app_icons_info_plist_path(platform)
+      if File.exist?(path)
+        content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{path}"`.strip
+        self.icons = content.split("\n")[1..-2]
+      end
+    end
+
     def validate
       # icons
       if !(icons.is_a?(Array) and icons.all? { |x| x.is_a?(String) })

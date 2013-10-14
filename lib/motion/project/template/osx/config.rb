@@ -68,6 +68,15 @@ module Motion; module Project;
       archs
     end
 
+    def app_icons_info_plist_path(platform)
+      '/dev/null'
+    end
+
+    # On OS X only one file is output. E.g. NAME.icns
+    def configure_app_icons_from_asset_bundle(platform)
+      self.icon = app_icon_name_from_asset_bundle
+    end
+
     def locate_compiler(platform, *execs)
       execs.each do |exec|
         cc = File.join('/usr/bin', exec)
