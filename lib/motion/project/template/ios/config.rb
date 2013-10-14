@@ -65,7 +65,7 @@ module Motion; module Project;
       path = app_icons_info_plist_path(platform)
       if File.exist?(path)
         content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{path}"`.strip
-        self.icons = content.split("\n")[1..-2]
+        self.icons = content.split("\n")[1..-2].map(&:strip)
       end
     end
 
