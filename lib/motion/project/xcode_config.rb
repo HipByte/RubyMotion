@@ -158,8 +158,10 @@ EOS
             `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
               # Only care about public, non-umbrella frameworks (for now).
               if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(Versions\/.\/)?(.+)$/) and md[1] == md[3]
-                deps << md[1]
-                deps.uniq!
+                if File.exist?(File.join(datadir, 'BridgeSupport', md[1] + '.bridgesupport'))
+                  deps << md[1]
+                  deps.uniq!
+                end
               end
             end
           end
