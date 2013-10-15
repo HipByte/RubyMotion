@@ -426,7 +426,7 @@ EOS
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
         convert_filesystem_encoding(config.name)
       ]
-      resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld', '.lproj', '.atlas', '.xcassets']
+      resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld', '.atlas', '.xcassets']
       resources_paths = []
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
@@ -434,8 +434,9 @@ EOS
             Dir.glob('**{,/*/**}/*').reject do |x|
               # Find files with extnames to exclude or files inside bundles to
               # exclude (e.g. xcassets).
-              resources_exclude_extnames.include?(File.extname(x)) ||
-                resources_exclude_extnames.include?(File.extname(x.split('/').first))
+              File.extname(x) == '.lproj' ||
+                resources_exclude_extnames.include?(File.extname(x)) ||
+                  resources_exclude_extnames.include?(File.extname(x.split('/').first))
             end.map { |file| File.join(dir, file) }
           end
         end
