@@ -1,3 +1,7 @@
+= RubyMotion 2.12 =
+
+  * Fixed a internal memory leak in the Enumerator object.
+
 = RubyMotion 2.11 =
 
   * Added the `rake clean:all' task which deletes all build object files
