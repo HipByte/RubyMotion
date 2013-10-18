@@ -224,7 +224,7 @@ EOS
     end
 
     def cflags(platform, cplusplus)
-      "#{common_flags(platform)} -fexceptions -fblocks" + (cplusplus ? '' : ' -std=c99')
+      "#{common_flags(platform)} -fexceptions -fblocks" + (cplusplus ? '' : ' -std=c99') + (xcode_version[0] < '5.0' ? '' : ' -fmodules')
     end
 
     def ldflags(platform)
