@@ -3,6 +3,10 @@
   * Fixed a internal memory leak in the Enumerator object.
   * Added support to compile the Objective-C source codes which uses Modules
     syntax in `app.vendor_project'.
+  * Added a custom `gen_bridge_metadata' which enables recursive function
+    pointer parsing to support Objective-C blocks that block yield blocks.
+  * Added support for functions/methods that return Objective-C blocks by
+    wrapping those as Proc's.
 
 = RubyMotion 2.11 =
 
