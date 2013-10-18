@@ -1,0 +1,104 @@
+#!/usr/bin/ruby
+
+# Monkey-patch gen_bridge_metadata
+
+load '/usr/bin/gen_bridge_metadata'
+
+# Because this is not a method, in the original implementation, we need to copy it verbatim.
+if __FILE__ == $0
+  g = BridgeSupportGenerator.new
+  OptionParser.new do |opts|
+    opts.banner = "Usage: #{File.basename(__FILE__)} [options] <headers...>"
+    opts.separator ''
+    opts.separator 'Options:'
+
+    opts.on('-f', '--framework FRAMEWORK', 'Generate metadata for the given framework.') do |opt|
+      g.frameworks << opt
+    end
+
+    opts.on('-p', '--private', 'Support private frameworks headers.') do
+      g.private = true
+    end
+
+    formats = BridgeSupportGenerator::FORMATS
+    opts.on('-F', '--format FORMAT', formats, {}, "Select metadata format.") do |opt|
+      g.generate_format = opt
+    end
+
+    opts.on('-e', '--exception EXCEPTION', 'Use the given exception file.') do |opt|
+      g.exception_paths << opt
+    end
+
+    enable_64 = true # both 32 & 64 bit is now the default
+    opts.on(nil, '--64-bit', 'Write 64-bit annotations (now the default).') do
+      enable_64 = true
+    end
+    opts.on(nil, '--no-64-bit', 'Do not write 64-bit annotations.') do
+      enable_64 = false
+    end
+
+    opts.on('-c', '--cflags FLAGS', 'Specify custom compiler flags.') do |flags|
+      g.compiler_flags ||= ''
+      g.compiler_flags << ' ' + flags + ' '
+    end
+
+    compiler_flags_64 = nil
+    opts.on('-C', '--cflags-64 FLAGS', 'Specify custom 64-bit compiler flags.') do |flags|
+      compiler_flags_64 ||= ''
+      compiler_flags_64 << ' ' + flags + ' '
+    end
+
+    opts.on('-o', '--output FILE', 'Write output to the given file.') do |opt|
+      die 'Output file can\'t be specified more than once' if @out_file
+      g.out_file = opt
+    end
+
+    help_msg = "Use the `-h' flag or consult gen_bridge_metadata(1) for help."
+    opts.on('-h', '--help', 'Show this message.') do
+      puts opts, help_msg
+      exit
+    end
+
+    opts.on('-d', '--debug', 'Turn on debugging messages.') do
+      $DEBUG = true
+    end
+
+    opts.on('-v', '--version', 'Show version.') do
+      puts BridgeSupportGenerator::VERSION
+      exit
+    end
+
+    opts.separator ''
+
+    if ARGV.empty?
+      die opts.banner
+    else
+      begin
+        opts.parse!(ARGV)
+        ARGV.each { |header| g.add_header(header) }
+        g.parse(enable_64, compiler_flags_64)
+  #    g.collect
+  #    if enable_64
+  #        g2 = g.duplicate
+  #        g2.enable_64 = true
+  #        if compiler_flags_64 != g.compiler_flags
+  #      g2.compiler_flags = compiler_flags_64
+  #        end
+  #        g2.collect
+  #        g.merge_64_metadata(g2)
+  #    end
+      g.write
+  #    g.cleanup
+      rescue => e
+        msg = e.message
+        msg = 'Internal error' if msg.empty?
+        $DEBUG = true #DEBUG
+        if $DEBUG
+            $stderr.puts "Received exception: #{e}:"
+            $stderr.puts e.backtrace.join("\n")
+        end
+        die msg, opts.banner, help_msg
+      end
+    end
+  end
+end
