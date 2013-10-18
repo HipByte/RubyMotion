@@ -307,7 +307,7 @@ EOS
           (OSX_VERSION >= 10.7 && sdk_version < '7.0') ? '--no-64-bit' : ''
         end
       end
-      sh "RUBYOPT='' /usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \" #{c_flags} -isysroot \"#{sdk_path}\" -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\" #{ "-e #{exceptions}" if exceptions.length != 0}"
+      sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' --format complete #{extra_flags} --cflags \" #{c_flags} -isysroot \"#{sdk_path}\" -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\" #{ "-e #{exceptions}" if exceptions.length != 0}"
     end
 
     def define_global_env_txt
