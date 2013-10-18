@@ -4,6 +4,28 @@
 
 load '/usr/bin/gen_bridge_metadata'
 
+module Bridgesupportparser
+  class Parser
+    # From /System/Library/BridgeSupport/ruby-1.8/bridgesupportparser.rb
+    def recursivefuncptr(f)
+      return nil if f.nil?
+      func, rettype, retenc, retattrs, retfunc, fattrs, variadic, inline = f.info
+      ret = Bridgesupportparser::RetvalPtrInfo.new(self, nil, rettype, retenc, retattrs, recursivefuncptr(retfunc))
+      args = Bridgesupportparser::MergingSequence.new('recursivefuncptr')
+      f.each_argument do |name, type, enc, attrs, funcptr|
+        # RubyMotion change:
+        #
+        # In the original implementation the last argument is always nil,
+        # but we need to enable recursive parsing.
+        #
+        # Related to: http://hipbyte.myjetbrains.com/youtrack/issue/RM-288
+        args << Bridgesupportparser::ArgInfo.new(self, name, type, enc, attrs, recursivefuncptr(funcptr))
+      end
+      Bridgesupportparser::FuncInfo.new(self, func, ret, args, fattrs, variadic, inline)
+    end
+  end
+end
+
 # Because this is not a method, in the original implementation, we need to copy it verbatim.
 if __FILE__ == $0
   g = BridgeSupportGenerator.new
