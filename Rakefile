@@ -83,7 +83,7 @@ end
 
 desc "Install"
 task :install do
-  public_binaries = ['./bin/motion']
+  public_binaries = ['./bin/motion', './bin/gen_bridge_metadata']
   binaries = public_binaries.dup.concat(['./bin/ios/deploy', './bin/ios/sim',
     './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd',
     'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri', './lldb/lldb.py'])
