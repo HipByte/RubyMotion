@@ -1,6 +1,8 @@
 = RubyMotion 2.12 =
 
   * Fixed a internal memory leak in the Enumerator object.
+  * Added support to compile the Objective-C source codes which uses Modules
+    syntax in `app.vendor_project'.
 
 = RubyMotion 2.11 =
 
