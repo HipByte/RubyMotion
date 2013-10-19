@@ -83,9 +83,9 @@ end
 
 desc "Install"
 task :install do
-  public_binaries = ['./bin/motion', './bin/gen_bridge_metadata']
+  public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/ios/deploy', './bin/ios/sim',
-    './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd',
+    './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd', './bin/gen_bridge_metadata',
     'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri', './lldb/lldb.py'])
   data = ['./NEWS']
   data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH) - ['./lib/Rakefile'])
