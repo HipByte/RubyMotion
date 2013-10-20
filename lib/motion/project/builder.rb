@@ -29,6 +29,10 @@ module Motion; module Project;
 
     def build(config, platform, opts)
       datadir = config.datadir
+      unless File.exist?(File.join(datadir, platform))
+        $stderr.puts "This version of RubyMotion does not support `#{platform}'"
+        exit 1
+      end
       archs = config.archs[platform]
 
       static_library = opts.delete(:static)
