@@ -1,3 +1,4 @@
+=begin
 describe "CoreMidi" do
   it "can list devices" do
     n = MIDIGetNumberOfDevices()
@@ -8,3 +9,4 @@ describe "CoreMidi" do
     end
   end
 end
+=end
