@@ -94,13 +94,15 @@ task :install do
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
-      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*"))
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*")) unless ENV['EVALUATION']
     end
   end
-  [['osx', OSX_SDK_VERSIONS + ['10.9']]].each do |name, sdk_versions|
-    sdk_versions.each do |sdk_version|
-      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
-      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*"))
+  unless ENV['EVALUATION']
+    [['osx', OSX_SDK_VERSIONS + ['10.9']]].each do |name, sdk_versions|
+      sdk_versions.each do |sdk_version|
+        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
+        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*"))
+      end
     end
   end
 
