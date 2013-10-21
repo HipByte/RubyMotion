@@ -454,6 +454,14 @@ EOS
         copy_resource(res_path, File.join(app_resources_dir, res))
       end
 
+      # Optional support for #eval (OSX-only).
+      if config.respond_to?(:eval_support) and config.eval_support
+        repl_dylib_path = File.join(datadir, platform, 'libmacruby-repl.dylib')
+        dest_path = File.join(app_resources_dir, File.basename(repl_dylib_path))
+        copy_resource(repl_dylib_path, dest_path)
+        preserve_resources << File.basename(repl_dylib_path)
+      end
+
       # Delete old resource files.
       resources_files = resources_paths.map { |x| path_on_resources_dirs(config.resources_dirs, x) }
       Dir.chdir(app_resources_dir) do
