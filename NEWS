@@ -13,6 +13,7 @@
     set the `app.eval_support' variable to true (default is false). Support
     is currently experimental and will increase your application bundle size
     by about 28MB.
+  * [iOS] Fixed a crash when using certain NSIndexPath objects (64-bit only).
 
 = RubyMotion 2.11 =
 
