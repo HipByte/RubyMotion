@@ -7,6 +7,8 @@
     pointer parsing to support Objective-C blocks that block yield blocks.
   * Added support for functions/methods that return Objective-C blocks by
     wrapping those as Proc's.
+  * Fixed a memory leak when ObjC #initXXX methods will return internal class
+    object (ex NSMutableData#initWithLength, NSArray#initWithArray).
   * [OSX] Added optional support for the #eval method. To enable it, you can
     set the `app.eval_support' variable to true (default is false). Support
     is currently experimental and will increase your application bundle size
