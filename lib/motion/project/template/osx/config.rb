@@ -30,7 +30,7 @@ module Motion; module Project;
     register :osx
 
     variable :icon, :copyright, :category, :embedded_frameworks,
-        :codesign_for_development
+        :codesign_for_development, :eval_support
 
     def initialize(project_dir, build_mode)
       super
@@ -40,6 +40,7 @@ module Motion; module Project;
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
       @codesign_for_development = false
+      @eval_support = false
     end
 
     def platforms; ['MacOSX']; end
