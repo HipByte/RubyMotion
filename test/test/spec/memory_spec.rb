@@ -328,3 +328,23 @@ describe "Range" do
     $dealloc_test.should == true
   end
 end
+
+# RM-290
+describe "NSMutableData" do
+  class NSMutableData
+    alias old_dealloc dealloc
+
+    def dealloc
+      $nsmutabledata_dealloc = true
+      old_dealloc
+    end
+  end
+
+  it "#initWithLength return autoreleased objects" do
+    $nsmutabledata_dealloc = false
+    autorelease_pool do
+      data = NSMutableData.alloc.initWithLength(100)
+    end
+    $nsmutabledata_dealloc.should == true
+  end
+end
