@@ -9,6 +9,8 @@
     wrapping those as Proc's.
   * Fixed a memory leak when ObjC #initXXX methods will return internal class
     object (ex NSMutableData#initWithLength, NSArray#initWithArray).
+  * Fixed where #new method doesn't work for GLKKit structure.
+    (ex GLKMatrix2.new, GLKVector2.new). 
   * [OSX] Added optional support for the #eval method. To enable it, you can
     set the `app.eval_support' variable to true (default is false). Support
     is currently experimental and will increase your application bundle size
