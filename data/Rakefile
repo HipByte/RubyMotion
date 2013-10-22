@@ -156,7 +156,7 @@ task :bridgesupport_files do
 
         if framework == 'Foundation' and sdk_version >= '7.0'
           # In iOS 7.0, NSObject is defined in /usr/include/objc/NSObject.h
-          sh "../bin/gen_bridge_metadata --format complete --no-64-bit --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework} -I#{sdk_path}/usr/include \" objc/NSObject.h objc/NSObjCRuntime.h > /tmp/NSObject.bridgesupport"
+          sh "../bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework} -I#{sdk_path}/usr/include \" objc/NSObject.h objc/NSObjCRuntime.h > /tmp/NSObject.bridgesupport"
           merge_bridgesupport dest, '/tmp/NSObject.bridgesupport'
         end
 
