@@ -18,6 +18,7 @@
     is currently experimental and will increase your application bundle size
     by about 28MB.
   * [iOS] Fixed a crash when using certain NSIndexPath objects (64-bit only).
+  * [iOS] Fixed `rake debug=1` on OS X 10.9 not working.
 
 = RubyMotion 2.11 =
 
