@@ -275,7 +275,6 @@ module Bacon
     'rubymine' => RubyMineOutput,
     'colorized' => ColorizedOutput,
   }
-  extend(Outputs[ENV['output']] || SpecDoxOutput)
 
   class Error < RuntimeError
     attr_accessor :count_as
@@ -476,6 +475,10 @@ module Bacon
   end
 
   def self.run
+    unless respond_to?(:handle_specification_begin)
+      extend(Outputs[ENV['output']] || SpecDoxOutput)
+    end
+
     @timer ||= Time.now
     Counter[:context_depth] += 1
     handle_specification_begin(current_context.name)
@@ -513,6 +516,7 @@ module Bacon
     def run
       # TODO
       #return  unless name =~ RestrictContext
+
       if spec = current_specification
         spec.performSelector("run", withObject:nil, afterDelay:0)
       else
