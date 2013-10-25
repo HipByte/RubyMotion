@@ -1,6 +1,5 @@
-=begin
 describe "CoreMidi" do
-  it "can list devices" do
+  xit "can list devices" do
     n = MIDIGetNumberOfDevices()
     n.should > 0
     n.times do |i|
@@ -9,4 +8,3 @@ describe "CoreMidi" do
     end
   end
 end
-=end

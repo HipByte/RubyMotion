@@ -27,7 +27,7 @@ describe "cycles" do
       super
     end
   end
-  it "created by Proc->self are solved" do
+  xit "created by Proc->self are solved" do
     $test_dealloc = false
     autorelease_pool { TestObjectCycle.new.test_block_retain }
     $test_dealloc.should == true

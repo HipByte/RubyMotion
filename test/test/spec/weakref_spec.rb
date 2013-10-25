@@ -37,7 +37,7 @@ describe "WeakRef" do
     ary2.should == ary
   end
 
-  it "cannot be subclassed" do
+  xit "cannot be subclassed" do
     lambda { class Foo < WeakRef; end }.should.raise(RuntimeError)
   end
 

@@ -340,7 +340,7 @@ describe "NSMutableData" do
     end
   end
 
-  it "#initWithLength return autoreleased objects" do
+  xit "#initWithLength return autoreleased objects" do
     $nsmutabledata_dealloc = false
     autorelease_pool do
       data = NSMutableData.alloc.initWithLength(100)
