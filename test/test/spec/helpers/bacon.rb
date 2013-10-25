@@ -22,8 +22,14 @@ module Bacon
     # Add support for disabled specs
     #
     def xit(description, &block)
-      Counter[:disabled] += 1
-      it(description) {}
+      if ENV['run-disabled']
+        it(description, &block)
+      else
+        Counter[:disabled] += 1
+        #Bacon.handle_requirement_begin(description, true)
+        #Bacon.handle_requirement_end(nil)
+        it(description) { Bacon.running_disabled_spec = true; true.should == true }
+      end
     end
   end
 
@@ -49,9 +55,13 @@ module Bacon
       puts if @specs_depth.zero?
     end
 
-    def handle_requirement_begin(description, disabled = false)
+    attr_accessor :running_disabled_spec
+
+    #def handle_requirement_begin(description, disabled = false)
+    def handle_requirement_begin(description)
+      self.running_disabled_spec = false
       @start_time = Time.now.to_f
-      @description, @disabled = description, disabled
+      @description = description
     end
 
     def handle_requirement_end(error)
@@ -59,7 +69,8 @@ module Bacon
 
       if !error.empty?
         puts PrettyBacon.color(:red, "#{spaces}- #{@description} [FAILED]")
-      elsif @disabled
+      #elsif @disabled
+      elsif Bacon.running_disabled_spec
         puts PrettyBacon.color(:yellow, "#{spaces}- #{@description} [DISABLED]")
       else
         time_color = case elapsed_time
