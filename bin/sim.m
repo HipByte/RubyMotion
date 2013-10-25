@@ -27,6 +27,74 @@
 - (NSString *)replEval:(NSString *)expression;
 @end
 
+@interface RMTask : NSObject
+@property (strong) NSDictionary *environment;
+@property (strong) NSArray *arguments;
+@property (strong) NSString *launchPath;
+@property (assign) pid_t pid;
+@property (assign) int terminationStatus;
+@end
+
+@implementation RMTask
+
++ (instancetype)launchedTaskWithLaunchPath:(NSString *)path arguments:(NSArray *)arguments;
+{
+    RMTask *task = [self new];
+    task.launchPath = path;
+    task.arguments = arguments;
+    [task launch];
+    return [task autorelease];
+}
+
+- (void)launch;
+{
+    // NSLog(@"LAUNCH: %@ - %@ - %@", self.launchPath, self.arguments, self.environment);
+    NSParameterAssert(self.launchPath);
+    NSDictionary *env = self.environment;
+    const char *cpath = [self.launchPath UTF8String];
+    const char *cargs[self.arguments.count + 1];
+    size_t i = 0;
+    for (NSString *arg in self.arguments) {
+	cargs[i++] = [arg UTF8String];
+    }
+    cargs[i] = NULL;
+    pid_t pid = fork();
+    if (pid == -1) {
+	assert(false && "failed to spawn process");
+    }
+    else if (pid == 0) {
+	for (NSString *name in env) {
+	    setenv([name UTF8String], [env[name] UTF8String], 1);
+	}
+	execvp(cpath, (char **)cargs);
+	assert(false && "failed to exec process");
+    }
+    else {
+	self.pid = pid;
+    }
+}
+
+- (void)terminate;
+{
+    kill(self.pid, SIGTERM);
+}
+
+- (void)waitUntilExit;
+{
+    pid_t result = 0;
+    while (result >= 0 && errno != EINTR) {
+	result = waitpid(self.pid, NULL, 0);
+    }
+    self.terminationStatus = (int)result;
+}
+
+- (int)processIdentifier;
+{
+    return (int)self.pid;
+}
+
+@end
+
 static bool spec_mode = false;
 static int debug_mode = -1;
 #define DEBUG_GDB 1
@@ -36,7 +104,7 @@ static int debug_mode = -1;
 static Delegate *delegate = nil;
 static NSMutableArray *app_windows_bounds = nil;
 #if defined(SIMULATOR_IOS)
-static NSTask *gdb_task = nil;
+static RMTask *gdb_task = nil;
 static id current_session = nil;
 static BOOL debugger_killed_session = NO;
 static NSString *xcode_path = nil;
@@ -130,7 +198,7 @@ sigcleanup(int sig)
 
 #if defined(SIMULATOR_OSX)
 
-static NSTask *osx_task = nil;
+static RMTask *osx_task = nil;
 
 static void
 sigint_osx(int sig)
@@ -1028,12 +1096,12 @@ lldb_commands_file(int pid)
 	NSString *gdb_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/usr/libexec/gdb/gdb-i386-apple-darwin"];
 	NSString *lldb_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/usr/bin/lldb"];
 	if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
-	    gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
+            gdb_task = [[RMTask launchedTaskWithLaunchPath:gdb_path
 		arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"-q",
 		@"--pid", [pidNumber description], @"-x", gdb_commands_file(), nil]] retain];
 	}
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
-	    gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
+	    gdb_task = [[RMTask launchedTaskWithLaunchPath:lldb_path
 		arguments:[NSArray arrayWithObjects:@"-a", @"i386",
 		@"-s", lldb_commands_file([pidNumber intValue]), nil]] retain];
 	}
@@ -1275,7 +1343,7 @@ main(int argc, char **argv)
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
 	    toTarget:delegate withObject:nil];
 
-	osx_task = [[NSTask alloc] init];
+	osx_task = [[RMTask alloc] init];
 	[osx_task setEnvironment:appEnvironment];
 	[osx_task setLaunchPath:app_path];
 	[osx_task setArguments:app_args];
