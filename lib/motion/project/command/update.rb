@@ -117,6 +117,11 @@ module Motion; module Project
       else
         $stderr.puts "Software update installed.\n\n"
         news = File.read('/Library/RubyMotion/NEWS')
+        begin
+          news.force_encoding('UTF-8')
+        rescue
+        end
+
         news.lines.each do |line|
           if md = line.match(/^=\s+RubyMotion\s+(.+)\s+=$/)
             break if md[1] <= product_version
