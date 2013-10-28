@@ -46,6 +46,14 @@
     return [task autorelease];
 }
 
+- (void)dealloc;
+{
+    [_environment release]; _environment = nil;
+    [_arguments release]; _arguments = nil;
+    [_launchPath release]; _launchPath = nil;
+    [super dealloc];
+}
+
 - (void)launch;
 {
     // NSLog(@"LAUNCH: %@ - %@ - %@", self.launchPath, self.arguments, self.environment);
