@@ -171,3 +171,29 @@ task :static do
   App.info 'Create', fat_lib
   sh "/usr/bin/lipo -create #{libs.join(' ')} -output \"#{fat_lib}\""
 end
+
+desc "Run profiler"
+task :profile do
+  unless template = ENV['template']
+    App.fail "Specify the path to a template with the `template' environment variable. For a list of templates, use: $ xcrun instruments -s"
+  end
+  sim_home = File.expand_path('~/Library/Application Support/iPhone Simulator')
+  app_name = App.config.bundle_name + '.app'
+  processes = `ps -x -o 'pid,command'`.split("\n")
+  if pid_line = processes.find { |line| line.include?(sim_home) && line.include?(app_name) }
+    pid, path = pid_line.match(/^(\d+)\s(.+)$/)[1..2]
+    App.info 'Profile', path
+    doc_name = "Beers-#{File.basename(template, File.extname(template))}"
+    doc_path = File.join(App.config.versionized_build_dir('iPhoneSimulator'), doc_name)
+    sh "xcrun instruments -p #{pid} -t '#{template}' -D '#{doc_path}'"
+    if pid_line = processes.find { |line| line.include?('Instruments.app') }
+      pid = pid_line.match(/^(\d+)\s/)[1]
+      open_files = `lsof -a -p #{pid} | grep '#{doc_path}'`
+      unless open_files.empty?
+        App.warn "Please close and re-open the `#{doc_name}' trace document in Instruments for the new data to show up."
+      end
+    end
+  else
+    App.fail 'Unable to determine process ID. Is the application running?'
+  end
+end
