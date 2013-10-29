@@ -50,13 +50,21 @@ if __FILE__ == $0
     opts.on('-e', '--exception EXCEPTION', 'Use the given exception file.') do |opt|
       g.exception_paths << opt
     end
-
-    enable_64 = true # both 32 & 64 bit is now the default
+        
+    # both 32 & 64 bit is now the default
+    enable_32 = true
+    enable_64 = true
     opts.on(nil, '--64-bit', 'Write 64-bit annotations (now the default).') do
       enable_64 = true
     end
     opts.on(nil, '--no-64-bit', 'Do not write 64-bit annotations.') do
       enable_64 = false
+    end
+    no_32bit_support = `/usr/bin/sw_vers -productVersion`.strip >= '10.9'
+    if no_32bit_support
+      opts.on(nil, '--no-32-bit', 'Do not write 32-bit annotations.') do
+        enable_32 = false
+      end
     end
 
     opts.on('-c', '--cflags FLAGS', 'Specify custom compiler flags.') do |flags|
@@ -98,7 +106,11 @@ if __FILE__ == $0
       begin
         opts.parse!(ARGV)
         ARGV.each { |header| g.add_header(header) }
-        g.parse(enable_64, compiler_flags_64)
+        if no_32bit_support
+          g.parse(enable_32, enable_64, compiler_flags_64)
+        else
+          g.parse(enable_64, compiler_flags_64)
+        end
   #    g.collect
   #    if enable_64
   #        g2 = g.duplicate
