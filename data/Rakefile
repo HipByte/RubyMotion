@@ -181,30 +181,48 @@ end
 def generate_bs_static_stub(file, includes)
   require 'rubygems'
   require 'nokogiri'
-
   text = ''
   includes.each { |inc| text << "#import <#{inc}>\n" }
+
+  gen_func_code = Proc.new do |node, declared_type_attribute|
+    name = node['name'].to_s
+    retval = node.xpath('./retval')[0][declared_type_attribute].to_s
+    args = node.xpath('./arg').map { |node| node[declared_type_attribute].to_s }
+    if retval.strip.empty?
+      nil
+    else
+      proto = "#{retval} __concrete__#{name}("
+      proto << (0...args.size).to_a.map { |i| "#{args[i]} arg#{i}" }.join(', ')
+      proto << ")"
+
+      func = ''
+      func << proto
+      func << "\n{\n  "
+      func << "  return " if retval != 'void'
+      func << name << '('
+      func << (0...args.size).to_a.map { |i| "arg#{i}" }.join(', ')
+      func << ");\n}\n\n"
+      func
+    end
+  end
 
   doc = Nokogiri::XML(File.read(file))
   did_something = false
   doc.xpath("/signatures/function[@inline=\"true\"]").each do |node|
-    name = node['name'].to_s
-    retval = node.xpath('./retval')[0]['declared_type'].to_s
-    args = node.xpath('./arg').map { |node| node['declared_type'].to_s }
+    code64 = gen_func_code.call(node, 'declared_type64')
+    code32 = gen_func_code.call(node, 'declared_type')
 
-    proto = "#{retval} __concrete__#{name}("
-    proto << (0...args.size).to_a.map { |i| "#{args[i]} arg#{i}" }.join(', ')
-    proto << ")"
+    if code64
+      text << "\n#if defined(__LP64__)\n"
+      text << code64
+      text << "\n#endif\n"
+    end
 
-    func = ''
-    func << proto
-    func << "\n{\n  "
-    func << "  return " if retval != 'void'
-    func << name << '('
-    func << (0...args.size).to_a.map { |i| "arg#{i}" }.join(', ')
-    func << ");\n}\n\n"
-
-    text << func
+    if code32
+      text << "\n#if !defined(__LP64__)\n"
+      text << code32
+      text << "\n#endif\n"
+    end
 
     did_something = true
   end
