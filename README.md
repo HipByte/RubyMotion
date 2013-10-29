@@ -31,6 +31,11 @@ Thread model: posix
 ```
 
 
+### Special hacks
+
+Mavericks only: the /usr/lib/system/libdnsinfo.dylib file has to exist in order to build the REPL module. The file can be found in the MacOSX 10.8 SDK (or earlier version) and can simply be copied in /usr/lib/system. Apparently there is no runtime dependency, so the file can be removed from the system and the RubyMotion REPL will still get to work as expected.
+
+
 ### Clone RubyMotion source
 
 ```
