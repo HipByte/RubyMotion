@@ -1005,16 +1005,24 @@ gdb_commands_file(void)
     return save_debugger_command(cmds);
 }
 
-#if defined(SIMULATOR_IOS)
 static NSString *
-lldb_commands_file(int pid)
+lldb_commands_file(int pid, NSString *app_path)
 {
-    NSString *cmds = [NSString stringWithFormat:@""\
-		     "process attach -p %d\n"\
-		     "command script import /Library/RubyMotion/lldb/lldb.py\n"\
-		     "breakpoint set --name rb_exc_raise\n"\
-		     "breakpoint set --name malloc_error_break\n",
-		     pid];
+    NSString *cmds = @"";
+    if (pid >= 0) {
+	cmds = [cmds stringByAppendingFormat:@"process attach -p %d\n", pid];
+    }
+    else if (app_path != nil) {
+	cmds = [cmds stringByAppendingFormat:@"target create \"%@\"\n",
+	     app_path];
+    }
+    else {
+	abort();
+    }
+    cmds = [cmds stringByAppendingString:@""\
+	   "command script import /Library/RubyMotion/lldb/lldb.py\n"\
+	   "breakpoint set --name rb_exc_raise\n"\
+	   "breakpoint set --name malloc_error_break\n"];
     NSString *user_cmds = [NSString stringWithContentsOfFile:
 	@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
     if (user_cmds != nil) {
@@ -1033,7 +1041,6 @@ lldb_commands_file(int pid)
 
     return save_debugger_command(cmds);
 }
-#endif
 
 #if defined(SIMULATOR_IOS)
 - (void)session:(id)session didEndWithError:(NSError *)error
@@ -1111,7 +1118,8 @@ lldb_commands_file(int pid)
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
 	    gdb_task = [[RMTask launchedTaskWithLaunchPath:lldb_path
 		arguments:[NSArray arrayWithObjects:@"-a", @"i386",
-		@"-s", lldb_commands_file([pidNumber intValue]), nil]] retain];
+		@"-s", lldb_commands_file([pidNumber intValue], nil), nil]]
+		    retain];
 	}
 	else {
 	    fprintf(stderr,
@@ -1373,12 +1381,14 @@ main(int argc, char **argv)
 	// XXX using system(3) as NSTask isn't working well (termios issue).
 	NSString *gdb_path = @"/usr/bin/gdb";
 	NSString *lldb_path = @"/usr/bin/lldb";
-	NSString *debugger_path = nil;
+	NSString *line = nil;
 	if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
-	    debugger_path = gdb_path;
+	    line = [NSString stringWithFormat:@"%@ -x \"%@\" \"%@\"",
+		 gdb_path, gdb_commands_file(), app_path];
 	}
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
-	    debugger_path = lldb_path;
+	    line = [NSString stringWithFormat:@"%@ -s \"%@\"",
+		 lldb_path, lldb_commands_file(-1, app_path)];
 	}
 	else {
 	    fprintf(stderr,
@@ -1386,13 +1396,7 @@ main(int argc, char **argv)
 		    [gdb_path UTF8String], [lldb_path UTF8String]);
 	    exit(1);
 	}
-
-	char line[1014];
-	snprintf(line, sizeof line, "%s -x \"%s\" \"%s\"",
-		[debugger_path fileSystemRepresentation],
-		[gdb_commands_file() fileSystemRepresentation],
-		[app_path UTF8String]);
-	system(line);
+	system([line UTF8String]);
     }
 
 #endif
