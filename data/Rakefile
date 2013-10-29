@@ -102,8 +102,8 @@ task :bridgesupport_files do
       dest = "osx/#{sdk_version}/BridgeSupport/child/#{framework}.bridgesupport" if is_handle_nested
       unless File.exist?(dest)
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
-        sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
-        sh "../bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -mmacosx-version-min=#{sdk_version} -DTARGET_OS_MAC -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -D__STRICT_ANSI__ -framework #{framework}\" --framework #{framework_path} > #{dest}"
+        sdk_version_headers = ((a[0].to_i * 100) + (a[1].to_i * 10)).to_s
+        sh "../bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -mmacosx-version-min=#{sdk_version} -DTARGET_OS_MAC -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -D__STRICT_ANSI__ -F#{File.dirname(framework_path)} -framework #{framework}\" --framework #{framework_path} > #{dest}"
         apply_bridgesupport_fixes(dest)
         return dest
       end
