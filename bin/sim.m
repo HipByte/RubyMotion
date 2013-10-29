@@ -1371,24 +1371,28 @@ main(int argc, char **argv)
     else {
 	// Run the gdb process.
 	// XXX using system(3) as NSTask isn't working well (termios issue).
+	NSString *gdb_path = @"/usr/bin/gdb";
+	NSString *lldb_path = @"/usr/bin/lldb";
+	NSString *debugger_path = nil;
+	if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
+	    debugger_path = gdb_path;
+	}
+	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
+	    debugger_path = lldb_path;
+	}
+	else {
+	    fprintf(stderr,
+		    "*** Cannot locate a debugger (either gdb `%s' or lldb `%s')\n",
+		    [gdb_path UTF8String], [lldb_path UTF8String]);
+	    exit(1);
+	}
+
 	char line[1014];
-	snprintf(line, sizeof line, "/usr/bin/gdb -x \"%s\" \"%s\"",
+	snprintf(line, sizeof line, "%s -x \"%s\" \"%s\"",
+		[debugger_path fileSystemRepresentation],
 		[gdb_commands_file() fileSystemRepresentation],
 		[app_path UTF8String]);
 	system(line);
-#if 0
-	// Forward ^C to gdb.
-	signal(SIGINT, sigforwarder);
-
-	gdb_task = [[NSTask alloc] init];
-	[gdb_task setEnvironment:appEnvironment];
-	[gdb_task setLaunchPath:@"/usr/bin/gdb"];
-	[gdb_task setArguments:[NSArray arrayWithObjects:@"-x",
-	    gdb_commands_file(), app_path, nil]];
-	[gdb_task launch];
-	[gdb_task waitUntilExit];
-	gdb_task = nil;
-#endif
     }
 
 #endif
