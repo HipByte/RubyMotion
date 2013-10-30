@@ -11,6 +11,7 @@ task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
 task :vm_files do
   strip = File.join(PLATFORMS_DIR, '../Toolchains/XcodeDefault.xctoolchain/usr/bin/strip')
 
+  first = true
   OSX_SDK_VERSIONS.each do |sdk_version|
     sdk = File.join('osx', sdk_version, 'MacOSX')
     mkdir_p sdk
@@ -19,15 +20,15 @@ task :vm_files do
       install path, sdk
     end
     install File.join(objs, 'libmacruby-static.a'), sdk
-    objs = "../vm/MacOSX#{sdk_version}-repl.objs"
-    install File.join(objs, 'libmacruby-repl.dylib'), sdk
 
-    # remove debug symbols
-    if NEED_STRIP
-      Dir.glob(sdk + '/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+    if first
+      objs = "../vm/MacOSX#{sdk_version}-repl.objs"
+      install File.join(objs, 'libmacruby-repl.dylib'), 'osx'
+      first = false
     end
   end
 
+  first = true
   IOS_SDK_VERSIONS.each do |sdk_version|
     ios = File.join('ios', sdk_version, 'iPhoneOS')
     mkdir_p ios
@@ -44,13 +45,17 @@ task :vm_files do
       install path, sim
     end
     install File.join(objs, 'libmacruby-static.a'), sim
-    objs = "../vm/iPhoneSimulator#{sdk_version}-repl.objs"
-    install File.join(objs, 'libmacruby-repl.dylib'), sim
 
-    # remove debug symbols
-    if NEED_STRIP
-      [ios, sim].map { |x| Dir.glob(x + '/*.{a,dylib}') }.flatten.each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+    if first
+      objs = "../vm/iPhoneSimulator#{sdk_version}-repl.objs"
+      install File.join(objs, 'libmacruby-repl.dylib'), 'ios'
+      first = false
     end
+  end
+
+  # remove debug symbols
+  if NEED_STRIP
+    Dir.glob('{osx,ios}/**/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
   end
 end
 

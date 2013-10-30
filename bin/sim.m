@@ -1237,12 +1237,6 @@ main(int argc, char **argv)
 #else
 	replPath = [replPath stringByAppendingPathComponent:@"osx"];
 #endif
-	replPath = [replPath stringByAppendingPathComponent:sdk_version];
-#if defined(SIMULATOR_IOS)
-	replPath = [replPath stringByAppendingPathComponent:@"iPhoneSimulator"];
-#else
-	replPath = [replPath stringByAppendingPathComponent:@"MacOSX"];
-#endif
 	replPath = [replPath stringByAppendingPathComponent:@"libmacruby-repl.dylib"];
 	[appEnvironment setObject:replPath forKey:@"REPL_DYLIB_PATH"];
     }
