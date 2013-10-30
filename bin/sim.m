@@ -206,7 +206,7 @@ sigcleanup(int sig)
 
 #if defined(SIMULATOR_OSX)
 
-static RMTask *osx_task = nil;
+static NSTask *osx_task = nil;
 
 static void
 sigint_osx(int sig)
@@ -1359,7 +1359,7 @@ main(int argc, char **argv)
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
 	    toTarget:delegate withObject:nil];
 
-	osx_task = [[RMTask alloc] init];
+	osx_task = [[NSTask alloc] init];
 	[osx_task setEnvironment:appEnvironment];
 	[osx_task setLaunchPath:app_path];
 	[osx_task setArguments:app_args];
