@@ -9,6 +9,7 @@ bin/nfd
 bin/ios/deploy
 bin/ios/sim
 bin/osx/sim
+bin/instruments
 
 data/ios
 data/osx

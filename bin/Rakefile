@@ -2,9 +2,10 @@ verbose(true)
 NEED_STRIP = !ENV['DEBUG']
 
 task :default => :all
-task :all => [:files, :deploy, :sim, :nfd]
+task :all => [:files, :deploy, :sim, :nfd, :instruments]
 
 STRIP = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip"
+CLANG = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
 
 task :files do
   bin = 'ruby'
@@ -16,7 +17,7 @@ task :deploy do
   mkdir_p 'ios'
   bin = 'ios/deploy'
   if !File.exist?(bin) or File.mtime('deploy.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
-    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -mmacosx-version-min=10.6 -I./src -std=c99 -Wall -O3 deploy.m -o \"#{bin}\" -framework Foundation -I."
+    sh "#{CLANG} -mmacosx-version-min=10.6 -I./src -std=c99 -Wall -O3 deploy.m -o \"#{bin}\" -framework Foundation -I."
     sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
   end
 end
@@ -27,7 +28,7 @@ task :sim do
     bin = File.join(template, 'sim')
     if !File.exist?(bin) or File.mtime('sim.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
       define = "-DSIMULATOR_#{template.upcase}"
-      sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{define} -mmacosx-version-min=10.6 -I./src -std=c99 -Wall -O3 sim.m -o \"#{bin}\" -framework Foundation -framework ApplicationServices -framework AppKit -L. -ledit -Wl,-rpath,/usr/lib -I."
+      sh "#{CLANG} #{define} -mmacosx-version-min=10.6 -I./src -std=c99 -Wall -O3 sim.m -o \"#{bin}\" -framework Foundation -framework ApplicationServices -framework AppKit -L. -ledit -Wl,-rpath,/usr/lib -I."
       sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
     end
   end
@@ -36,12 +37,20 @@ end
 task :nfd do
   bin = 'nfd'
   if !File.exist?(bin) or File.mtime('nfd.m') > File.mtime(bin)
-    sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -mmacosx-version-min=10.6 -I./src -std=c99 -Wall -O3 nfd.m -o \"#{bin}\" -framework Foundation -I."
+    sh "#{CLANG} -mmacosx-version-min=10.6 -I./src -std=c99 -Wall -O3 nfd.m -o \"#{bin}\" -framework Foundation -I."
     sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
+  end
+end
+
+task :instruments do
+  bin = 'instruments'
+  src = bin + '.c'
+  if !File.exist?(bin) or File.mtime(src) > File.mtime(bin)
+    sh "#{CLANG} -mmacosx-version-min=10.6 -std=c99 -Wall -O3 #{src} -o \"#{bin}\" -framework CoreFoundation -framework ApplicationServices"
   end
 end
 
 
 task :clean do
-  %w{ruby llc ios/deploy ios/sim osx/sim ndf}.each { |path| rm_rf(path) }
+  %w{ruby llc ios/deploy ios/sim osx/sim ndf instruments}.each { |path| rm_rf(path) }
 end
