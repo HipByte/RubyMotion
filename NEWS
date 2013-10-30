@@ -15,6 +15,8 @@
     a value greater than self length was passed into argument.
   * Fixed a bug where `motion update' might cause an error when it displays the
     changelog on OSX 10.9.
+  * Fixed a compiler bug where it causes a crash with `rake device' when it 
+    overrides the method which has structure as argument.
   * [OSX] Added optional support for the #eval method. To enable it, you can
     set the `app.eval_support' variable to true (default is false). Support
     is currently experimental and will increase your application bundle size
