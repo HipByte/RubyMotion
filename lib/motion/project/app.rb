@@ -84,6 +84,10 @@ module Motion; module Project
         builder.codesign(config, platform)
       end
 
+      def profile(platform, config_plist)
+        builder.profile(config, platform, config_plist)
+      end
+
       def create(app_name, template_name=:ios)
         Motion::Project::Template.new(app_name, template_name).generate
       end

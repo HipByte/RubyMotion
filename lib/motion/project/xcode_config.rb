@@ -277,6 +277,32 @@ EOS
       }
     end
 
+    # TODO
+    # * add launch args and env vars from user
+    # * add optional Instruments template to use?
+    def profiler_config_plist(platform)
+      working_dir = File.expand_path(versionized_build_dir(platform))
+      {
+        'CFBundleIdentifier' => identifier,
+        'absolutePathOfLaunchable' => File.expand_path(app_bundle_executable(platform)),
+        'argumentEntries' => '',
+        'workingDirectory' => working_dir,
+        'workspacePath' => '', # Normally: /path/to/Project.xcodeproj/project.xcworkspace
+        'environmentEntries' => {
+          'DYLD_FRAMEWORK_PATH' => working_dir,
+          'DYLD_LIBRARY_PATH' => working_dir,
+          '__XCODE_BUILT_PRODUCTS_DIR_PATHS' => working_dir,
+          '__XPC_DYLD_FRAMEWORK_PATH' => working_dir,
+          '__XPC_DYLD_LIBRARY_PATH' => working_dir,
+        },
+        'optionalData' => {
+          'launchOptions' => {
+            'architectureType' => 1,
+          },
+        },
+      }
+    end
+
     def pkginfo_data
       "AAPL#{@bundle_signature}"
     end

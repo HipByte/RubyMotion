@@ -509,6 +509,17 @@ EOS
       end
     end
 
+    def profile(config, platform, config_plist)
+      plist_path = File.join(config.versionized_build_dir(platform), 'pbxperfconfig.plist')
+      App.info('Create', plist_path)
+      plist_path = File.expand_path(plist_path)
+      File.open(plist_path, 'w') { |f| f << Motion::PropertyList.to_s(config_plist) }
+
+      instruments_app = File.expand_path('../Applications/Instruments.app', config.xcode_dir)
+      App.info('Profile', config.app_bundle(platform))
+      sh "'#{File.join(config.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
+    end
+
     class << self
       def common_build_dir
         dir = File.expand_path("~/Library/RubyMotion/build")
