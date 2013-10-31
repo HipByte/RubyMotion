@@ -278,23 +278,27 @@ EOS
     end
 
     # TODO
-    # * add env vars from user
-    # * add optional Instruments template to use?
-    def profiler_config_plist(platform, args)
+    # * Add env vars from user.
+    # * Add optional Instruments template to use.
+    def profiler_config_plist(platform, args, set_build_env = true)
       working_dir = File.expand_path(versionized_build_dir(platform))
+      env = ENV.to_hash
+      if set_build_env
+        env.merge!({
+          'DYLD_FRAMEWORK_PATH' => working_dir,
+          'DYLD_LIBRARY_PATH' => working_dir,
+          '__XCODE_BUILT_PRODUCTS_DIR_PATHS' => working_dir,
+          '__XPC_DYLD_FRAMEWORK_PATH' => working_dir,
+          '__XPC_DYLD_LIBRARY_PATH' => working_dir,
+        })
+      end
       {
         'CFBundleIdentifier' => identifier,
         'absolutePathOfLaunchable' => File.expand_path(app_bundle_executable(platform)),
         'argumentEntries' => (args or ''),
         'workingDirectory' => working_dir,
         'workspacePath' => '', # Normally: /path/to/Project.xcodeproj/project.xcworkspace
-        'environmentEntries' => {
-          'DYLD_FRAMEWORK_PATH' => working_dir,
-          'DYLD_LIBRARY_PATH' => working_dir,
-          '__XCODE_BUILT_PRODUCTS_DIR_PATHS' => working_dir,
-          '__XPC_DYLD_FRAMEWORK_PATH' => working_dir,
-          '__XPC_DYLD_LIBRARY_PATH' => working_dir,
-        },
+        'environmentEntries' => env,
         'optionalData' => {
           'launchOptions' => {
             'architectureType' => 1,

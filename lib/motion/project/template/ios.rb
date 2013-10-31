@@ -204,10 +204,9 @@ namespace :profile do
       App.fail 'Unable to determine remote app path'
     end
 
-    plist = App.config.profiler_config_plist('iPhoneOS', ENV['args'])
+    plist = App.config.profiler_config_plist('iPhoneOS', ENV['args'], false)
     plist['absolutePathOfLaunchable'] = File.join($deployed_app_path, App.config.bundle_name)
     plist['deviceIdentifier'] = (ENV['id'] or App.config.device_id)
-    plist['environmentEntries'] = {}
     App.profile('iPhoneOS', plist)
   end
 end
