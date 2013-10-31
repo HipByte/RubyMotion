@@ -278,14 +278,14 @@ EOS
     end
 
     # TODO
-    # * add launch args and env vars from user
+    # * add env vars from user
     # * add optional Instruments template to use?
-    def profiler_config_plist(platform)
+    def profiler_config_plist(platform, args)
       working_dir = File.expand_path(versionized_build_dir(platform))
       {
         'CFBundleIdentifier' => identifier,
         'absolutePathOfLaunchable' => File.expand_path(app_bundle_executable(platform)),
-        'argumentEntries' => '',
+        'argumentEntries' => (args or ''),
         'workingDirectory' => working_dir,
         'workspacePath' => '', # Normally: /path/to/Project.xcodeproj/project.xcworkspace
         'environmentEntries' => {
