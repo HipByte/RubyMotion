@@ -94,15 +94,16 @@ task :install do
     data.concat(Dir.glob("./data/#{name}/*.dylib"))
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
-      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*").reject { |x| x.include?("libmacruby-repl.dylib") })
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*")) unless ENV['EVALUATION']
     end
   end
   unless ENV['EVALUATION']
     [['osx', OSX_SDK_VERSIONS + ['10.9']]].each do |name, sdk_versions|
+      data.concat(Dir.glob("./data/#{name}/*.dylib"))
       sdk_versions.each do |sdk_version|
         data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
-        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*"))
+        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*").reject { |x| x.include?("libmacruby-repl.dylib") })
       end
     end
   end
