@@ -206,7 +206,7 @@ sigcleanup(int sig)
 
 #if defined(SIMULATOR_OSX)
 
-static RMTask *osx_task = nil;
+static NSTask *osx_task = nil;
 
 static void
 sigint_osx(int sig)
@@ -1005,16 +1005,24 @@ gdb_commands_file(void)
     return save_debugger_command(cmds);
 }
 
-#if defined(SIMULATOR_IOS)
 static NSString *
-lldb_commands_file(int pid)
+lldb_commands_file(int pid, NSString *app_path)
 {
-    NSString *cmds = [NSString stringWithFormat:@""\
-		     "process attach -p %d\n"\
-		     "command script import /Library/RubyMotion/lldb/lldb.py\n"\
-		     "breakpoint set --name rb_exc_raise\n"\
-		     "breakpoint set --name malloc_error_break\n",
-		     pid];
+    NSString *cmds = @"";
+    if (pid >= 0) {
+	cmds = [cmds stringByAppendingFormat:@"process attach -p %d\n", pid];
+    }
+    else if (app_path != nil) {
+	cmds = [cmds stringByAppendingFormat:@"target create \"%@\"\n",
+	     app_path];
+    }
+    else {
+	abort();
+    }
+    cmds = [cmds stringByAppendingString:@""\
+	   "command script import /Library/RubyMotion/lldb/lldb.py\n"\
+	   "breakpoint set --name rb_exc_raise\n"\
+	   "breakpoint set --name malloc_error_break\n"];
     NSString *user_cmds = [NSString stringWithContentsOfFile:
 	@"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
     if (user_cmds != nil) {
@@ -1033,7 +1041,6 @@ lldb_commands_file(int pid)
 
     return save_debugger_command(cmds);
 }
-#endif
 
 #if defined(SIMULATOR_IOS)
 - (void)session:(id)session didEndWithError:(NSError *)error
@@ -1111,7 +1118,8 @@ lldb_commands_file(int pid)
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
 	    gdb_task = [[RMTask launchedTaskWithLaunchPath:lldb_path
 		arguments:[NSArray arrayWithObjects:@"-a", @"i386",
-		@"-s", lldb_commands_file([pidNumber intValue]), nil]] retain];
+		@"-s", lldb_commands_file([pidNumber intValue], nil), nil]]
+		    retain];
 	}
 	else {
 	    fprintf(stderr,
@@ -1229,12 +1237,6 @@ main(int argc, char **argv)
 #else
 	replPath = [replPath stringByAppendingPathComponent:@"osx"];
 #endif
-	replPath = [replPath stringByAppendingPathComponent:sdk_version];
-#if defined(SIMULATOR_IOS)
-	replPath = [replPath stringByAppendingPathComponent:@"iPhoneSimulator"];
-#else
-	replPath = [replPath stringByAppendingPathComponent:@"MacOSX"];
-#endif
 	replPath = [replPath stringByAppendingPathComponent:@"libmacruby-repl.dylib"];
 	[appEnvironment setObject:replPath forKey:@"REPL_DYLIB_PATH"];
     }
@@ -1351,7 +1353,7 @@ main(int argc, char **argv)
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
 	    toTarget:delegate withObject:nil];
 
-	osx_task = [[RMTask alloc] init];
+	osx_task = [[NSTask alloc] init];
 	[osx_task setEnvironment:appEnvironment];
 	[osx_task setLaunchPath:app_path];
 	[osx_task setArguments:app_args];
@@ -1371,24 +1373,24 @@ main(int argc, char **argv)
     else {
 	// Run the gdb process.
 	// XXX using system(3) as NSTask isn't working well (termios issue).
-	char line[1014];
-	snprintf(line, sizeof line, "/usr/bin/gdb -x \"%s\" \"%s\"",
-		[gdb_commands_file() fileSystemRepresentation],
-		[app_path UTF8String]);
-	system(line);
-#if 0
-	// Forward ^C to gdb.
-	signal(SIGINT, sigforwarder);
-
-	gdb_task = [[NSTask alloc] init];
-	[gdb_task setEnvironment:appEnvironment];
-	[gdb_task setLaunchPath:@"/usr/bin/gdb"];
-	[gdb_task setArguments:[NSArray arrayWithObjects:@"-x",
-	    gdb_commands_file(), app_path, nil]];
-	[gdb_task launch];
-	[gdb_task waitUntilExit];
-	gdb_task = nil;
-#endif
+	NSString *gdb_path = @"/usr/bin/gdb";
+	NSString *lldb_path = @"/usr/bin/lldb";
+	NSString *line = nil;
+	if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
+	    line = [NSString stringWithFormat:@"%@ -x \"%@\" \"%@\"",
+		 gdb_path, gdb_commands_file(), app_path];
+	}
+	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
+	    line = [NSString stringWithFormat:@"%@ -s \"%@\"",
+		 lldb_path, lldb_commands_file(-1, app_path)];
+	}
+	else {
+	    fprintf(stderr,
+		    "*** Cannot locate a debugger (either gdb `%s' or lldb `%s')\n",
+		    [gdb_path UTF8String], [lldb_path UTF8String]);
+	    exit(1);
+	}
+	system([line UTF8String]);
     }
 
 #endif

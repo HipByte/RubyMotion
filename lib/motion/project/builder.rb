@@ -456,7 +456,7 @@ EOS
 
       # Optional support for #eval (OSX-only).
       if config.respond_to?(:eval_support) and config.eval_support
-        repl_dylib_path = File.join(datadir, platform, 'libmacruby-repl.dylib')
+        repl_dylib_path = File.join(datadir, '..', 'libmacruby-repl.dylib')
         dest_path = File.join(app_resources_dir, File.basename(repl_dylib_path))
         copy_resource(repl_dylib_path, dest_path)
         preserve_resources << File.basename(repl_dylib_path)

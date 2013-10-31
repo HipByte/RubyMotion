@@ -31,6 +31,12 @@ Thread model: posix
 ```
 
 
+### Special hacks
+
+Mavericks only: the /usr/lib/system/libdnsinfo.dylib file has to exist in order to build the REPL module. The file can be found in the MacOSX 10.8 SDK (or earlier version) and can simply be copied in /usr/lib/system. Apparently there is no runtime dependency, so the file can be removed from the system and the RubyMotion REPL will still get to work as expected.
+
+Edit /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator{6.0,6.1}.sdk/System/Library/Frameworks/CoreText.framework/Headers/CTRunDelegate.h and comment the declaration of CTRunDelegateGetTypeID(). This function is not exported, the symbol is missing, and it's a bug in iOS.
+
 ### Clone RubyMotion source
 
 ```
@@ -44,9 +50,9 @@ $ git clone git@github.com:lrz/RubyMotion.git
 $ svn checkout https://llvm.org/svn/llvm-project/llvm/branches/release_33 llvm-3.3
 $ cd llvm-3.3 
 $ patch -p0 < /path/to/RubyMotionRepository/llvm.patch
-$ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ ./configure --enable-bindings=none --enable-optimized --with-llvmgccdir=/tmp
-$ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make
-$ sudo env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ make install
+$ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ MACOSX_DEPLOYMENT_TARGET=10.6 ./configure --enable-bindings=none --enable-optimized --with-llvmgccdir=/tmp
+$ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ MACOSX_DEPLOYMENT_TARGET=10.6 make
+$ sudo env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ MACOSX_DEPLOYMENT_TARGET=10.6 make install
 ```
 
 
