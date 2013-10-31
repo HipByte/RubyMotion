@@ -212,7 +212,7 @@ end
 namespace :profile do
   desc "Run a build on the simulator through Instruments"
   task :simulator => 'build:simulator' do
-    plist = App.config.profiler_config_plist('iPhoneSimulator')
+    plist = App.config.profiler_config_plist('iPhoneSimulator', ENV['args'])
     plist['com.apple.xcode.simulatedDeviceFamily'] = App.config.device_family_ints.first
     plist['com.apple.xcode.SDKPath'] = App.config.sdk('iPhoneSimulator')
     plist['optionalData']['launchOptions']['architectureType'] = 0
@@ -231,7 +231,7 @@ namespace :profile do
       App.fail 'Unable to determine remote app path'
     end
 
-    plist = App.config.profiler_config_plist('iPhoneOS')
+    plist = App.config.profiler_config_plist('iPhoneOS', ENV['args'])
     plist['absolutePathOfLaunchable'] = File.join($deployed_app_path, App.config.bundle_name)
     plist['deviceIdentifier'] = (ENV['id'] or App.config.device_id)
     plist['environmentEntries'] = {}
