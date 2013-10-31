@@ -344,7 +344,7 @@ module Motion; module Project;
           }
         },
         'UIAppFonts' => fonts,
-        'UIDeviceFamily' => device_family_ints.map { |x| x.to_s },
+        'UIDeviceFamily' => device_family_ints.map { |x| x.to_i },
         'UISupportedInterfaceOrientations' => interface_orientations_consts,
         'UIStatusBarStyle' => status_bar_style_const,
         'UIBackgroundModes' => background_modes_consts,
