@@ -1,5 +1,11 @@
 = RubyMotion 2.12 =
 
+  * Added support for OS X Mavericks (10.9). The toolchain is now fully usable
+    on a Mavericks machine and can also be used to create Mavericks OS X apps.
+  * [OSX] Added optional support for the #eval method. To enable it, you can
+    set the `app.eval_support' variable to true (default is false). Support
+    is currently experimental and will increase your application bundle size
+    by about 28MB.
   * Fixed a internal memory leak in the Enumerator object.
   * Added support to compile the Objective-C source codes which uses Modules
     syntax in `app.vendor_project'.
@@ -17,10 +23,6 @@
     changelog on OSX 10.9.
   * Fixed a compiler bug where it causes a crash with `rake device' when it 
     overrides the method which has structure as argument.
-  * [OSX] Added optional support for the #eval method. To enable it, you can
-    set the `app.eval_support' variable to true (default is false). Support
-    is currently experimental and will increase your application bundle size
-    by about 28MB.
   * [iOS] Fixed a crash when using certain NSIndexPath objects (64-bit only).
   * [iOS] Fixed `rake debug=1` on OS X 10.9 not working.
 
