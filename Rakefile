@@ -94,7 +94,7 @@ task :install do
     data.concat(Dir.glob("./data/#{name}/*.dylib"))
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
-      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*")})
+      data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneSimulator/*"))
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/iPhoneOS/*")) unless ENV['EVALUATION']
     end
   end
@@ -103,7 +103,7 @@ task :install do
       data.concat(Dir.glob("./data/#{name}/*.dylib"))
       sdk_versions.each do |sdk_version|
         data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
-        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*")})
+        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/MacOSX/*"))
       end
     end
   end
