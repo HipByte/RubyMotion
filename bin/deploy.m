@@ -181,6 +181,37 @@ static NSString *device_id = nil;
 static NSString *app_package_path = nil;
 static NSData *app_package_data = nil;
 
+static NSDictionary *
+read_info_plist(void)
+{
+    NSString *app_path = [[app_package_path stringByDeletingPathExtension]
+	stringByAppendingString:@".app"];
+
+    NSDictionary *info_plist = [NSDictionary dictionaryWithContentsOfFile:
+	[app_path stringByAppendingPathComponent:@"Info.plist"]];
+    assert(info_plist != nil);
+
+    return info_plist;
+}
+
+static NSString *
+remote_app_path(am_device_t dev)
+{
+    NSDictionary *info_plist = read_info_plist();
+    NSString *app_identifier = [info_plist objectForKey:@"CFBundleIdentifier"];
+    assert(app_identifier != nil);
+
+    NSDictionary *apps = nil;
+    const int res = _AMDeviceLookupApplications(dev, 0, (void **)&apps);
+    assert(res == 0);
+    NSDictionary *app = [apps objectForKey:app_identifier];
+    assert(app != nil);
+    NSString *app_remote_path = [app objectForKey:@"Path"];
+    assert(app_remote_path != nil);
+
+    return app_remote_path;
+}
+
 static void
 setup_device_connection(am_device_t dev)
 {
@@ -259,6 +290,7 @@ install_application(am_device_t dev)
     }
 
     LOG("package has been successfully installed on device");
+    printf("%s\n", [remote_app_path(dev) UTF8String]);
     [handle release];
 }
 
@@ -541,22 +573,9 @@ start_debug_server(am_device_t dev)
 		CFSTR("com.apple.debugserver"), &gdb_fd, NULL));
     assert(gdb_fd > 0);
 
-    // Locate app path on device.
-
-    NSDictionary *info_plist = [NSDictionary dictionaryWithContentsOfFile:
-	[app_path stringByAppendingPathComponent:@"Info.plist"]];
-    assert(info_plist != nil);
-    NSString *app_identifier = [info_plist objectForKey:@"CFBundleIdentifier"];
-    assert(app_identifier != nil);
-    NSString *app_name = [info_plist objectForKey:@"CFBundleName"];
+    NSString *app_name = [read_info_plist() objectForKey:@"CFBundleName"];
     assert(app_name != nil);
-
-    NSDictionary *apps = nil;
-    const int res = _AMDeviceLookupApplications(dev, 0, (void **)&apps);
-    assert(res == 0);
-    NSDictionary *app = [apps objectForKey:app_identifier];
-    assert(app != nil);
-    NSString *app_remote_path = [app objectForKey:@"Path"];
+    NSString *app_remote_path = remote_app_path(dev);
 
     // Do we need to attach a debugger? If not, we simply run the app.
 
