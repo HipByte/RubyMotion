@@ -86,7 +86,8 @@ task :install do
   public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/ios/deploy', './bin/ios/sim',
     './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd', './bin/gen_bridge_metadata',
-    'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri', './lldb/lldb.py'])
+    './bin/instruments', 'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri',
+    './lldb/lldb.py'])
   data = ['./NEWS']
   data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH) - ['./lib/Rakefile'])
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
