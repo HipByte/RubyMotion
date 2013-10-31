@@ -96,7 +96,7 @@ task :static do
 end
 
 # TODO change to singular build task for development and release.
-desc "Run a build on the simulator through Instruments"
+desc "Run a build through Instruments"
 task :profile => 'build:development' do
   plist = App.config.profiler_config_plist('MacOSX', "-NSDocumentRevisionsDebugMode YES #{ENV['args']}")
   App.profile('MacOSX', plist)
