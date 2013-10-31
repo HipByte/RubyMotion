@@ -179,6 +179,9 @@ task :static do
   sh "/usr/bin/lipo -create #{libs.join(' ')} -output \"#{fat_lib}\""
 end
 
+desc "Same as profile:simulator"
+task :profile => ['profile:simulator']
+
 namespace :profile do
   desc "Run a build on the simulator through Instruments"
   task :simulator => 'build:simulator' do
