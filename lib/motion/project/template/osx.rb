@@ -95,9 +95,12 @@ task :static do
   App.build('MacOSX', :static => true)
 end
 
-# TODO change to singular build task for development and release.
-desc "Run a build through Instruments"
-task :profile => 'build:development' do
-  plist = App.config.profiler_config_plist('MacOSX', "-NSDocumentRevisionsDebugMode YES #{ENV['args']}")
-  App.profile('MacOSX', plist)
+namespace :profile do
+  %w{ development release }.each do |mode|
+    desc "Run a #{mode} build through Instruments"
+    task mode => "build:#{mode}" do
+      plist = App.config.profiler_config_plist('MacOSX', "-NSDocumentRevisionsDebugMode YES #{ENV['args']}")
+      App.profile('MacOSX', plist)
+    end
+  end
 end
