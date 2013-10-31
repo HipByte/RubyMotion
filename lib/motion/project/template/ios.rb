@@ -172,32 +172,74 @@ task :static do
   sh "/usr/bin/lipo -create #{libs.join(' ')} -output \"#{fat_lib}\""
 end
 
-desc "Run profiler"
-task :profile do
-  unless template = ENV['template']
-    App.fail "Specify the path to a template with the `template' environment variable. For a list of templates, use: $ xcrun instruments -s"
+#desc "Run profiler"
+#task :profile do
+  #unless template = ENV['template']
+    #App.fail "Specify the path to a template with the `template' environment variable. For a list of templates, use: $ xcrun instruments -s"
+  #end
+
+  #sim_home = File.expand_path('~/Library/Application Support/iPhone Simulator')
+  #app_name = App.config.bundle_name + '.app'
+  #processes = `/bin/ps -x -o 'pid,command'`.split("\n")
+
+  #if pid_line = processes.find { |line| line.include?(sim_home) && line.include?(app_name) }
+    #pid, path = pid_line.match(/^(\d+)\s(.+)$/)[1..2]
+    #doc_name = "Beers-#{File.basename(template, File.extname(template))}"
+    #doc_path = File.join(App.config.versionized_build_dir('iPhoneSimulator'), doc_name)
+
+    #App.info 'Profile', path
+    #sh "/usr/bin/xcrun instruments -p #{pid} -t '#{template}' -D '#{doc_path}'"
+
+    #if pid_line = processes.find { |line| line.include?('Instruments.app') }
+      #pid = pid_line.match(/^(\d+)\s/)[1]
+      #open_files = `/usr/sbin/lsof -a -p #{pid} | /usr/bin/grep '#{doc_path}'`
+      #unless open_files.empty?
+        #App.warn "Please close and re-open the `#{doc_name}' trace document in Instruments for the new data to show up."
+      #end
+    #end
+  #else
+    #App.fail 'Unable to determine process ID. Is the application running?'
+  #end
+#end
+
+namespace :profile do
+  task :simulator => 'build:simulator' do
+    c = App.config
+    working_dir = File.expand_path(c.versionized_build_dir('iPhoneSimulator'))
+    plist = Motion::PropertyList.to_s({
+      'CFBundleIdentifier' => c.identifier,
+      'absolutePathOfLaunchable' => File.expand_path(c.app_bundle_executable('iPhoneSimulator')),
+      'argumentEntries' => '',
+      'com.apple.xcode.simulatedDeviceFamily' => c.device_family_ints.first,
+      'com.apple.xcode.SDKPath' => c.sdk('iPhoneSimulator'),
+      'deviceIdentifier' => c.sdk('iPhoneSimulator'),
+      'workingDirectory' => working_dir,
+      'workspacePath' => '', # Normally: /path/to/Project.xcodeproj/project.xcworkspace
+      'environmentEntries' => {
+        'DYLD_FRAMEWORK_PATH' => working_dir,
+        'DYLD_LIBRARY_PATH' => working_dir,
+        '__XCODE_BUILT_PRODUCTS_DIR_PATHS' => working_dir,
+        '__XPC_DYLD_FRAMEWORK_PATH' => working_dir,
+        '__XPC_DYLD_LIBRARY_PATH' => working_dir,
+      },
+      'optionalData' => {
+        'launchOptions' => {
+          'architectureType' => 0, # TODO no idea what these values mean
+        },
+      },
+    })
+    plist_path = File.join(c.versionized_build_dir('iPhoneSimulator'), 'pbxperfconfig.plist')
+    App.info('Create', plist_path)
+    plist_path = File.expand_path(plist_path)
+    File.open(plist_path, 'w') { |f| f << plist }
+
+    instruments_app = File.expand_path('../Applications/Instruments.app', c.xcode_dir)
+    App.info('Profile', c.app_bundle('iPhoneSimulator'))
+    sh "'#{File.join(c.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
   end
 
-  sim_home = File.expand_path('~/Library/Application Support/iPhone Simulator')
-  app_name = App.config.bundle_name + '.app'
-  processes = `/bin/ps -x -o 'pid,command'`.split("\n")
-
-  if pid_line = processes.find { |line| line.include?(sim_home) && line.include?(app_name) }
-    pid, path = pid_line.match(/^(\d+)\s(.+)$/)[1..2]
-    doc_name = "Beers-#{File.basename(template, File.extname(template))}"
-    doc_path = File.join(App.config.versionized_build_dir('iPhoneSimulator'), doc_name)
-
-    App.info 'Profile', path
-    sh "/usr/bin/xcrun instruments -p #{pid} -t '#{template}' -D '#{doc_path}'"
-
-    if pid_line = processes.find { |line| line.include?('Instruments.app') }
-      pid = pid_line.match(/^(\d+)\s/)[1]
-      open_files = `/usr/sbin/lsof -a -p #{pid} | /usr/bin/grep '#{doc_path}'`
-      unless open_files.empty?
-        App.warn "Please close and re-open the `#{doc_name}' trace document in Instruments for the new data to show up."
-      end
-    end
-  else
-    App.fail 'Unable to determine process ID. Is the application running?'
+  task :device => 'build:device' do
   end
 end
+
+task :profile => 'profile:simulator'
