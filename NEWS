@@ -3,7 +3,8 @@
   * Added support for OS X Mavericks (10.9). The toolchain is now fully usable
     on a Mavericks machine and can also be used to create Mavericks OS X apps.
   * Added `profile' rake tasks that launch builds through Instruments.app for
-    iOS (both simulator and device) and OS X applications.
+    iOS (both simulator and device) and OS X applications. Run a `rake clean'
+    before using the task on an existing project.
   * [OSX] Added optional support for the #eval method. To enable it, you can
     set the `app.eval_support' variable to true (default is false). Support
     is currently experimental and will increase your application bundle size
@@ -27,6 +28,8 @@
     overrides the method which has structure as argument.
   * [iOS] Fixed a crash when using certain NSIndexPath objects (64-bit only).
   * [iOS] Fixed `rake debug=1` on OS X 10.9 not working.
+  * [iOS] Fixed a bug in the build system where it would generate invalid
+    values for the UIDeviceFamily key (was using strings instead of integers).
 
 = RubyMotion 2.11 =
 
