@@ -290,7 +290,9 @@ install_application(am_device_t dev)
     }
 
     LOG("package has been successfully installed on device");
-    printf("%s\n", [remote_app_path(dev) UTF8String]);
+    if (getenv("install_only") != NULL) {
+      printf("%s\n", [remote_app_path(dev) UTF8String]);
+    }
     [handle release];
 }
 
