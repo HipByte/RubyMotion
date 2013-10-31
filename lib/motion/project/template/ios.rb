@@ -210,43 +210,17 @@ end
 #end
 
 namespace :profile do
-  desc "Run a development build on the simulator through Instruments"
+  desc "Run a build on the simulator through Instruments"
   task :simulator => 'build:simulator' do
-    c = App.config
-    working_dir = File.expand_path(c.versionized_build_dir('iPhoneSimulator'))
-    plist = Motion::PropertyList.to_s({
-      'CFBundleIdentifier' => c.identifier,
-      'absolutePathOfLaunchable' => File.expand_path(c.app_bundle_executable('iPhoneSimulator')),
-      'argumentEntries' => '',
-      'com.apple.xcode.simulatedDeviceFamily' => c.device_family_ints.first,
-      'com.apple.xcode.SDKPath' => c.sdk('iPhoneSimulator'),
-      'deviceIdentifier' => c.sdk('iPhoneSimulator'),
-      'workingDirectory' => working_dir,
-      'workspacePath' => '', # Normally: /path/to/Project.xcodeproj/project.xcworkspace
-      'environmentEntries' => {
-        'DYLD_FRAMEWORK_PATH' => working_dir,
-        'DYLD_LIBRARY_PATH' => working_dir,
-        '__XCODE_BUILT_PRODUCTS_DIR_PATHS' => working_dir,
-        '__XPC_DYLD_FRAMEWORK_PATH' => working_dir,
-        '__XPC_DYLD_LIBRARY_PATH' => working_dir,
-      },
-      'optionalData' => {
-        'launchOptions' => {
-        'architectureType' => 0, # TODO no idea what these values mean
-        },
-      },
-    })
-    plist_path = File.join(c.versionized_build_dir('iPhoneSimulator'), 'pbxperfconfig.plist')
-    App.info('Create', plist_path)
-    plist_path = File.expand_path(plist_path)
-    File.open(plist_path, 'w') { |f| f << plist }
-
-    instruments_app = File.expand_path('../Applications/Instruments.app', c.xcode_dir)
-    App.info('Profile', c.app_bundle('iPhoneSimulator'))
-    sh "'#{File.join(c.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
+    plist = App.config.profiler_config_plist('iPhoneSimulator')
+    plist['com.apple.xcode.simulatedDeviceFamily'] = App.config.device_family_ints.first
+    plist['com.apple.xcode.SDKPath'] = App.config.sdk('iPhoneSimulator')
+    plist['optionalData']['launchOptions']['architectureType'] = 0
+    plist['deviceIdentifier'] = App.config.sdk('iPhoneSimulator')
+    App.profile('iPhoneSimulator', plist)
   end
 
-  desc "Run a development build on the device through Instruments"
+  desc "Run a build on the device through Instruments"
   task :device do
     # Create a build that allows debugging but doesn’t start a debugger on deploy.
     App.config.entitlements['get-task-allow'] = true
@@ -257,29 +231,11 @@ namespace :profile do
       App.fail 'Unable to determine remote app path'
     end
 
-    c = App.config
-    working_dir = File.expand_path(c.versionized_build_dir('iPhoneOS'))
-    plist = Motion::PropertyList.to_s({
-      'CFBundleIdentifier' => c.identifier,
-      'absolutePathOfLaunchable' => File.join($deployed_app_path, c.bundle_name),
-      'argumentEntries' => '',
-      'deviceIdentifier' => (ENV['id'] or App.config.device_id),
-      'workingDirectory' => working_dir,
-      'workspacePath' => '', # Normally: /path/to/Project.xcodeproj/project.xcworkspace
-      'environmentEntries' => {},
-      'optionalData' => {
-        'launchOptions' => {
-          'architectureType' => 1, # TODO no idea what these values mean
-        },
-      },
-    })
-    plist_path = File.join(c.versionized_build_dir('iPhoneOS'), 'pbxperfconfig.plist')
-    App.info('Create', plist_path)
-    plist_path = File.expand_path(plist_path)
-    File.open(plist_path, 'w') { |f| f << plist }
-
-    instruments_app = File.expand_path('../Applications/Instruments.app', c.xcode_dir)
-    App.info('Profile', c.app_bundle('iPhoneOS'))
-    sh "'#{File.join(c.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
+    plist = App.config.profiler_config_plist('iPhoneOS')
+    plist['absolutePathOfLaunchable'] = File.join($deployed_app_path, App.config.bundle_name)
+    plist['deviceIdentifier'] = (ENV['id'] or App.config.device_id)
+    plist['environmentEntries'] = {}
+    App.profile('iPhoneOS', plist)
   end
 end
+

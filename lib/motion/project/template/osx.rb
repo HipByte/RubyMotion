@@ -95,42 +95,10 @@ task :static do
   App.build('MacOSX', :static => true)
 end
 
-namespace :profiler do
-  desc "Run a development build through Instruments"
-  task :development => ['build:development', :launch]
-
-  desc "Run a release build through Instruments"
-  task :release => ['build:release', :launch]
-
-  task :launch do
-    c = App.config
-    working_dir = File.expand_path(c.versionized_build_dir('MacOSX'))
-    plist = Motion::PropertyList.to_s({
-      'CFBundleIdentifier' => c.identifier,
-      'absolutePathOfLaunchable' => File.expand_path(c.app_bundle_executable('MacOSX')),
-      'argumentEntries' => '-NSDocumentRevisionsDebugMode YES',
-      'workingDirectory' => working_dir,
-      'workspacePath' => '', # Normally: /path/to/Project.xcodeproj/project.xcworkspace
-      'environmentEntries' => {
-        'DYLD_FRAMEWORK_PATH' => working_dir,
-        'DYLD_LIBRARY_PATH' => working_dir,
-        '__XCODE_BUILT_PRODUCTS_DIR_PATHS' => working_dir,
-        '__XPC_DYLD_FRAMEWORK_PATH' => working_dir,
-        '__XPC_DYLD_LIBRARY_PATH' => working_dir,
-      },
-      'optionalData' => {
-        'launchOptions' => {
-          'architectureType' => 1, # TODO no idea what these values mean
-        },
-      },
-    })
-    plist_path = File.join(c.versionized_build_dir('MacOSX'), 'pbxperfconfig.plist')
-    App.info('Create', plist_path)
-    plist_path = File.expand_path(plist_path)
-    File.open(plist_path, 'w') { |f| f << plist }
-
-    instruments_app = File.expand_path('../Applications/Instruments.app', c.xcode_dir)
-    App.info('Profile', c.app_bundle('MacOSX'))
-    sh "'#{File.join(c.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
-  end
+# TODO change to singular build task for development and release.
+desc "Run a build on the simulator through Instruments"
+task :profile => 'build:development' do
+  plist = App.config.profiler_config_plist('MacOSX')
+  plist['argumentEntries'] = '-NSDocumentRevisionsDebugMode YES' # Xcode default
+  App.profile('MacOSX', plist)
 end
