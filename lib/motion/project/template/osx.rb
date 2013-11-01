@@ -105,5 +105,5 @@ namespace :profile do
   end
 end
 
-desc 'Same as profile:release'
-task :profile => 'profile:release'
+desc 'Same as profile:development'
+task :profile => 'profile:development'
