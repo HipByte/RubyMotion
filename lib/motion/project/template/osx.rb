@@ -107,7 +107,7 @@ namespace :profile do
   %w{ development release }.each do |mode|
     desc "Run a #{mode} build through Instruments"
     task mode => "build:#{mode}" do
-      plist = App.config.profiler_config_plist('MacOSX', "-NSDocumentRevisionsDebugMode YES #{ENV['args']}")
+      plist = App.config.profiler_config_plist('MacOSX', "-NSDocumentRevisionsDebugMode YES #{ENV['args']}", ENV['template'], OSX_INSTRUMENTS_TEMPLATES)
       App.profile('MacOSX', plist)
     end
   end

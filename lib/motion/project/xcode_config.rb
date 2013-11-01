@@ -280,8 +280,24 @@ EOS
     # TODO
     # * Add env vars from user.
     # * Add optional Instruments template to use.
-    def profiler_config_plist(platform, args, set_build_env = true)
+    def profiler_config_plist(platform, args, template, builtin_templates, set_build_env = true)
       working_dir = File.expand_path(versionized_build_dir(platform))
+      optional_data = {}
+
+      if template
+        template_path = nil
+        if File.exist?(template)
+          template_path = template
+        elsif !builtin_templates.grep(/#{template}/i).empty?
+          list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map { |line| line.sub(/^\s+"/, '').sub(/",*$/, '') }
+          template = template.downcase
+          template_path = list.find { |path| File.basename(path, File.extname(path)).downcase == template }
+        else
+          App.fail("Invalid Instruments template path or name.")
+        end
+        optional_data['XrayTemplatePath'] = template_path
+      end
+
       env = ENV.to_hash
       if set_build_env
         env.merge!({
@@ -292,6 +308,7 @@ EOS
           '__XPC_DYLD_LIBRARY_PATH' => working_dir,
         })
       end
+
       {
         'CFBundleIdentifier' => identifier,
         'absolutePathOfLaunchable' => File.expand_path(app_bundle_executable(platform)),
@@ -303,7 +320,7 @@ EOS
           'launchOptions' => {
             'architectureType' => 1,
           },
-        },
+        }.merge(optional_data),
       }
     end
 
