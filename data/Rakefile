@@ -53,10 +53,12 @@ task :vm_files do
     end
   end
 
+  # XXX we are no longer stripping symbols since it apparently removes exception handlers
+  # (iOS 7 only). Not a big deal since we do not compile with debug metadata by default (-g).
   # remove debug symbols
-  if NEED_STRIP
-    Dir.glob('{osx,ios}/**/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
-  end
+  #if NEED_STRIP
+  #  Dir.glob('{osx,ios}/**/*.{a,dylib}').each { |x| sh("\"#{strip}\" -S \"#{x}\"") }
+  #end
 end
 
 def apply_bridgesupport_fixes(bs)
