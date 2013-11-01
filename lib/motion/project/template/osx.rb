@@ -103,6 +103,28 @@ namespace :profile do
       App.profile('MacOSX', plist)
     end
   end
+
+  desc 'List all built-in OS X Instruments templates'
+  task :templates do
+    list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map do |line|
+      line.sub(/^\s+"/, '').sub(/",*$/, '')
+    end
+
+    instruments_path = File.expand_path('../Applications/Instruments.app/Contents', App.config.xcode_dir)
+
+    regexp = Regexp.new(Regexp.escape(File.join(instruments_path, 'Resources/templates')))
+    templates_for_all_platforms = list.grep(regexp)
+
+    regexp = Regexp.new(Regexp.escape(File.join(App.config.xcode_dir, 'Platforms/MacOSX.platform/Developer/Library/Instruments/PlugIns')))
+    templates_for_osx_platform = list.grep(regexp)
+
+    templates = templates_for_all_platforms + templates_for_osx_platform
+
+    puts "Built-in templates:"
+    templates.each do |template|
+      puts "* #{File.basename(template, File.extname(template))}"
+    end
+  end
 end
 
 desc 'Same as profile:development'

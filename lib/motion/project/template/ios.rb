@@ -193,6 +193,33 @@ namespace :profile do
     App.profile('iPhoneSimulator', plist)
   end
 
+  namespace :simulator do
+    desc 'List all built-in iOS Simulator Instruments templates'
+    task :templates do
+      list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map do |line|
+        line.sub(/^\s+"/, '').sub(/",*$/, '')
+      end
+
+      instruments_path = File.expand_path('../Applications/Instruments.app/Contents', App.config.xcode_dir)
+
+      regexp = Regexp.new(Regexp.escape(File.join(instruments_path, 'Resources/templates')))
+      templates_for_all_platforms = list.grep(regexp)
+
+      # TODO figure out if there is a way to programatically determine these.
+      templates_for_ios_sim_platform = [
+        File.join(instruments_path, "PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"),
+        File.join(App.config.xcode_dir, "Platforms/MacOSX.platform/Developer/Library/Instruments/PlugIns/CoreData/Core Data.tracetemplate"),
+      ]
+
+      templates = templates_for_all_platforms + templates_for_ios_sim_platform
+
+      puts "Built-in templates:"
+      templates.each do |template|
+        puts "* #{File.basename(template, File.extname(template))}"
+      end
+    end
+  end
+
   desc "Run a build on the device through Instruments"
   task :device do
     # Create a build that allows debugging but doesn’t start a debugger on deploy.
@@ -208,6 +235,32 @@ namespace :profile do
     plist['absolutePathOfLaunchable'] = File.join($deployed_app_path, App.config.bundle_name)
     plist['deviceIdentifier'] = (ENV['id'] or App.config.device_id)
     App.profile('iPhoneOS', plist)
+  end
+
+  namespace :device do
+    desc 'List all built-in iOS device Instruments templates'
+    task :templates do
+      list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map do |line|
+        line.sub(/^\s+"/, '').sub(/",*$/, '')
+      end
+
+      instruments_path = File.expand_path('../Applications/Instruments.app/Contents', App.config.xcode_dir)
+
+      regexp = Regexp.new(Regexp.escape(File.join(instruments_path, 'Resources/templates')))
+      templates_for_all_platforms = list.grep(regexp)
+
+      # TODO figure out if there is a way to programatically determine these.
+      templates_for_ios_sim_platform = [
+        File.join(instruments_path, "PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"),
+      ]
+
+      templates = templates_for_all_platforms + templates_for_ios_sim_platform
+
+      puts "Built-in templates:"
+      templates.each do |template|
+        puts "* #{File.basename(template, File.extname(template))}"
+      end
+    end
   end
 end
 
