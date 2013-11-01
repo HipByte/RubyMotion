@@ -95,6 +95,14 @@ task :static do
   App.build('MacOSX', :static => true)
 end
 
+OSX_INSTRUMENTS_TEMPLATES = [
+  'Allocations', 'Leaks', 'Zombies',
+  'GC Monitor', 'Activity Monitor', 'Time Profiler', 'Multicore',
+  'Dispatch', 'System Trace', 'Event Profiler', 'Counters',
+  'File Activity', 'Core Data', 'UI Recorder', 'Sudden Termination',
+  'Cocoa Layout'
+]
+
 namespace :profile do
   %w{ development release }.each do |mode|
     desc "Run a #{mode} build through Instruments"
@@ -106,23 +114,9 @@ namespace :profile do
 
   desc 'List all built-in OS X Instruments templates'
   task :templates do
-    list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map do |line|
-      line.sub(/^\s+"/, '').sub(/",*$/, '')
-    end
-
-    instruments_path = File.expand_path('../Applications/Instruments.app/Contents', App.config.xcode_dir)
-
-    regexp = Regexp.new(Regexp.escape(File.join(instruments_path, 'Resources/templates')))
-    templates_for_all_platforms = list.grep(regexp)
-
-    regexp = Regexp.new(Regexp.escape(File.join(App.config.xcode_dir, 'Platforms/MacOSX.platform/Developer/Library/Instruments/PlugIns')))
-    templates_for_osx_platform = list.grep(regexp)
-
-    templates = templates_for_all_platforms + templates_for_osx_platform
-
-    puts "Built-in templates:"
-    templates.each do |template|
-      puts "* #{File.basename(template, File.extname(template))}"
+    puts "Built-in OS X Instruments templates:"
+    OSX_INSTRUMENTS_TEMPLATES.each do |template|
+      puts "* #{template}"
     end
   end
 end
