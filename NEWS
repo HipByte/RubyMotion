@@ -1,3 +1,8 @@
+= RubyMotion 2.13 =
+
+  * [iOS] Fixed a bug in build system where it will generate invalid value as
+    UIDeviceFamily.
+
 = RubyMotion 2.12 =
 
   * Added support for OS X Mavericks (10.9). The toolchain is now fully usable
