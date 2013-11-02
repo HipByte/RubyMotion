@@ -234,9 +234,9 @@ def generate_bs_static_stub(file, includes)
     end
 
     if code32
-      text << "\n#if !defined(__LP64__)\n"
+      text << "\n#if !defined(__LP64__)\n" if code64
       text << code32
-      text << "\n#endif\n"
+      text << "\n#endif\n" if code64
     end
 
     did_something = true
