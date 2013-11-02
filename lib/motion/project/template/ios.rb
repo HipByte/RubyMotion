@@ -39,11 +39,19 @@ task :build => ['build:simulator', 'build:device']
 namespace :build do
   desc "Build the simulator version"
   task :simulator do
+    # TODO: Ensure Info.plist gets regenerated on each build so it has ints for
+    # Instruments and strings for normal builds.
+    rm_f File.join(App.config.app_bundle('iPhoneSimulator'), 'Info.plist')
+
     App.build('iPhoneSimulator')
   end
 
   desc "Build the device version"
   task :device do
+    # TODO: Ensure Info.plist gets regenerated on each build so it has ints for
+    # Instruments and strings for normal builds.
+    rm_f File.join(App.config.app_bundle('iPhoneOS'), 'Info.plist')
+
     App.build('iPhoneOS')
     App.codesign('iPhoneOS')
   end
@@ -197,7 +205,10 @@ task :profile => ['profile:simulator']
 
 namespace :profile do
   desc "Run a build on the simulator through Instruments"
-  task :simulator => 'build:simulator' do
+  task :simulator do
+    ENV['__USE_DEVICE_INT__'] = '1'
+    Rake::Task['build:simulator'].invoke
+
     plist = App.config.profiler_config_plist('iPhoneSimulator', ENV['args'], ENV['template'], IOS_SIM_INSTRUMENTS_TEMPLATES)
     plist['com.apple.xcode.simulatedDeviceFamily'] = App.config.device_family_ints.first
     plist['com.apple.xcode.SDKPath'] = App.config.sdk('iPhoneSimulator')
@@ -218,6 +229,8 @@ namespace :profile do
 
   desc "Run a build on the device through Instruments"
   task :device do
+    ENV['__USE_DEVICE_INT__'] = '1'
+
     # Create a build that allows debugging but doesn’t start a debugger on deploy.
     App.config.entitlements['get-task-allow'] = true
     ENV['install_only'] = '1'
