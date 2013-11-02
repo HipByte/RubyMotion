@@ -1,5 +1,7 @@
 = RubyMotion 2.13 =
 
+  * Fixed a bug where the methods which are defined as inline functions in
+    iOS/OSX framework are not worked.
   * [iOS] Fixed a bug in build system where it will generate invalid value as
     UIDeviceFamily.
 
