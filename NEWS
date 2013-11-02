@@ -4,6 +4,8 @@
     iOS/OSX framework are not worked.
   * [iOS] Fixed a bug in build system where it will generate invalid value as
     UIDeviceFamily.
+  * Fixed a bug where using the mouse-over functionality in the REPL would
+    lead to an internal deadlock and hang the process.
 
 = RubyMotion 2.12 =
 
