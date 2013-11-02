@@ -2,10 +2,14 @@
 
   * Fixed a bug where the methods which are defined as inline functions in
     iOS/OSX framework are not worked.
-  * [iOS] Work around an issue where Instruments.app wants an integer
-    UIDeviceFamily value and App Launcher wants a string.
   * Fixed a bug where using the mouse-over functionality in the REPL would
     lead to an internal deadlock and hang the process.
+  * Fixed a bug in the REPL where the result of evaluated expressions could be
+    prematurely released before being sent back to the command-line.
+  * [iOS] Work around an issue where Instruments.app wants an integer
+    UIDeviceFamily value and App Launcher wants a string.
+  * [iOS] Fixed a big where the running the REPL in 64-bit mode would result
+    in an error related to the fact that the REPL library was i386-only.
 
 = RubyMotion 2.12 =
 
