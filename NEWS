@@ -1,7 +1,11 @@
+= RubyMotion 2.14 =
+
+  * Really fix the inline function problem described in the previous update.
+
 = RubyMotion 2.13 =
 
   * Fixed a bug where the methods which are defined as inline functions in
-    iOS/OSX framework are not worked.
+    iOS/OSX framework are not working properly.
   * Fixed a bug where using the mouse-over functionality in the REPL would
     lead to an internal deadlock and hang the process.
   * Fixed a bug in the REPL where the result of evaluated expressions could be
