@@ -344,6 +344,7 @@ locate_app_windows_bounds(void)
 		[NSString stringWithFormat:@"iPhone (Retina 4-inch) - iOS %@", sdk_version],
 		[NSString stringWithFormat:@"iPhone (Retina 4-inch) / iOS %@", sdk_version],
 		[NSString stringWithFormat:@"iPhone Retina (4-inch) / iOS %@", sdk_version],
+		[NSString stringWithFormat:@"iPhone Retina (4-inch 64-bit) / iOS %@", sdk_version],
 		[NSString stringWithFormat:@"iPad (Retina) - iOS %@", sdk_version],
 		[NSString stringWithFormat:@"iPad (Retina) / iOS %@", sdk_version],
 		[NSString stringWithFormat:@"iPad Retina / iOS %@", sdk_version],
