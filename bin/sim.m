@@ -306,6 +306,12 @@ refresh_repl_prompt(NSString *top_level, bool clear)
     });
 }
 
+// TODO We need to be able to fetch the window bounds on-demand and up-to-date
+// so that, for instance, resizing the iOS sim scale does not mean we use an
+// incorrect cached window size:
+//
+// * Find window once and cache window ID.
+// * Add function to quickly get bounds of a specific window ID.
 static void
 locate_app_windows_bounds(void)
 {
@@ -414,13 +420,22 @@ locate_app_windows_bounds(void)
 #undef validate
 	bounds_ok = true;
 
+// TODO is there no better way then this? For instance, the full-size 3.5"
+// retina simulator has a thick border, smaller zoom levels don't.
 #if defined(SIMULATOR_IOS)
 	// Inset the main view frame.
 	if (device_family == DEVICE_FAMILY_IPHONE) {
 	    switch (simulator_retina_type) {
 		case DEVICE_RETINA_4:
-		    bounds.origin.y += 25;
-		    bounds.size.height -= 50;
+		    // TODO I assume this is based on the thick border? Because
+		    // at 50% (as recommended) it has no thick border.
+		    //
+		    // bounds.origin.y += 25;
+		    // bounds.size.height -= 50;
+		    //
+		    // 23x window chrome + 1px sep. line
+		    bounds.origin.y += 24;
+		    bounds.size.height -= 24;
 		    break;
 
 		case DEVICE_RETINA_3_5:
@@ -504,11 +519,11 @@ CONCURRENT_BEGIN
     NSString *res = @"nil";
 
     bool mouseInBounds = false;
-    NSRect bounds = { {0, 0}, {0, 0} };
+    NSRect windowBounds = { {0, 0}, {0, 0} };
     if (app_windows_bounds != nil) {
 	for (NSValue *val in app_windows_bounds) {
-	    bounds = [val rectValue];
-	    if (NSPointInRect(mouseLocation, bounds)) {
+	    windowBounds = [val rectValue];
+	    if (NSPointInRect(mouseLocation, windowBounds)) {
 		mouseInBounds = true;
 		break;
 	    }
@@ -518,8 +533,13 @@ CONCURRENT_BEGIN
     if (mouseInBounds) {
 	// We are over the Simulator.app main view.
 	// Inset the mouse location.
-	mouseLocation.x -= bounds.origin.x;
-	mouseLocation.y -= bounds.origin.y;
+	mouseLocation.x -= windowBounds.origin.x;
+	mouseLocation.y -= windowBounds.origin.y;
+
+	// Convert to relative point, taking scale out of the equation.
+        // (x=1, y=1) means (x=full-width, y=full-height)
+	mouseLocation.x /= windowBounds.size.width;
+	mouseLocation.y /= windowBounds.size.height;
 
 	// Send coordinate to the repl.
 	previousHighlight = true;
