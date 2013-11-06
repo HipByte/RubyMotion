@@ -33,6 +33,7 @@
     const char *cpath = [self.launchPath UTF8String];
     const char *cargs[self.arguments.count + 1];
     size_t i = 0;
+    cargs[i++] = cpath;
     for (NSString *arg in self.arguments) {
 	cargs[i++] = [arg UTF8String];
     }
