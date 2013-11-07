@@ -307,12 +307,6 @@ refresh_repl_prompt(NSString *top_level, bool clear)
     });
 }
 
-// TODO We need to be able to fetch the window bounds on-demand and up-to-date
-// so that, for instance, resizing the iOS sim scale does not mean we use an
-// incorrect cached window size:
-//
-// * Find window once and cache window ID.
-// * Add function to quickly get bounds of a specific window ID.
 static void
 locate_app_windows_ids(void)
 {
