@@ -478,9 +478,47 @@ get_app_windows_bounds(void)
 
 // #undef validate
 
-// TODO is there no better way then this? For instance, the full-size 3.5"
-// retina simulator has a thick border, smaller zoom levels don't.
 #if defined(SIMULATOR_IOS)
+        // Devices that (at a scale of 100%) have thick borders and their
+        // respective frames.
+        //
+        // ===========================================================
+        // DEVICE             | PORTRAIT FRAME
+        // ===========================================================
+        // Original iPhone    | 368x716
+        // -----------------------------------------------------------
+        // iPhone Retina 3.5" | 724x1044
+        // -----------------------------------------------------------
+        // iPhone Retina 4"   | 724x1220
+        // -----------------------------------------------------------
+        // Original iPad      | 852x1108
+        // -----------------------------------------------------------
+        // iPad Retina        | 1704x2216 (TODO This is the screenshot!)
+        // -----------------------------------------------------------
+
+        // TODO
+        // * support landscape
+        // * check on Retina mac
+        int w = (int)CGRectGetWidth(bounds);
+        int h = (int)CGRectGetHeight(bounds);
+        // NSLog(@"W: %d H: %d", w, h);
+        if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
+          if (simulator_retina_type == DEVICE_RETINA_FALSE && w == 368 && h == 716) {
+            NSLog(@"DEVICE WITH THICK BORDERS: Original iPhone");
+          } else if (simulator_retina_type == DEVICE_RETINA_3_5 && w == 724 && h == 1044) {
+            NSLog(@"DEVICE WITH THICK BORDERS: iPhone Retina 3.5");
+          } else if (simulator_retina_type == DEVICE_RETINA_4 && w == 724 && h == 1220) {
+            NSLog(@"DEVICE WITH THICK BORDERS: iPhone Retina 4");
+          }
+        } else {
+          if (simulator_retina_type == DEVICE_RETINA_FALSE && w == 852 && h == 1108) {
+            NSLog(@"DEVICE WITH THICK BORDERS: Original iPad");
+          // TODO This is the screenshot!
+          //} else if (simulator_retina_type == DEVICE_RETINA_TRUE && w == 1704 && h == 2216) {
+            //NSLog(@"DEVICE WITH THICK BORDERS: iPad Retina");
+          }
+        }
+
 	// Inset the main view frame.
 	if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
 	    switch (simulator_retina_type) {
