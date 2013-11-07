@@ -170,10 +170,10 @@ task :device => :archive do
   flags = Rake.application.options.trace ? '-d' : ''
   Signal.trap(:INT) { } if ENV['debug']
   cmd = "#{env} #{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
-  if ENV['debug']
-    sh(cmd)
-  else
+  if ENV['install_only']
     $deployed_app_path = `#{cmd}`.strip
+  else
+    sh(cmd)
   end
 end
 
