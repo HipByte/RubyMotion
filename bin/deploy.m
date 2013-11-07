@@ -888,7 +888,7 @@ start_debug_server(am_device_t dev)
 	    tv.tv_sec = 0;
 	    tv.tv_usec = 10000;
 	    int n = select(lldb_socket + 1, &read_fds, NULL, NULL, &tv);
-	    if (n == -1) {
+	    if (n == -1 && errno != EINTR) {
 		perror("select()");
 		break;
 	    }
