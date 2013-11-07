@@ -454,6 +454,10 @@ EOS
         copy_resource(res_path, File.join(app_resources_dir, res))
       end
 
+      Dir.glob('vendor/Pods/.build/*.bundle').each do |path|
+        copy_resource(path, File.join(app_resources_dir, File.basename(path)))
+      end
+
       # Optional support for #eval (OSX-only).
       if config.respond_to?(:eval_support) and config.eval_support
         repl_dylib_path = File.join(datadir, '..', 'libmacruby-repl.dylib')
