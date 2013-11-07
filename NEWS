@@ -1,3 +1,8 @@
+= RubyMotion 2.15 =
+
+  * [iOS] Fixed a bug where `rake device' would no longer print the application
+    logs from the device.
+
 = RubyMotion 2.14 =
 
   * Really fix the inline function problem described in the previous update.
