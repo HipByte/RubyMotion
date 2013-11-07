@@ -479,6 +479,8 @@ get_app_windows_bounds(void)
 // #undef validate
 
 #if defined(SIMULATOR_IOS)
+	// Inset the main view frame.
+        //
         // Devices that (at a scale of 100%) have thick borders and their
         // respective frames.
         //
@@ -502,62 +504,84 @@ get_app_windows_bounds(void)
         int w = (int)CGRectGetWidth(bounds);
         int h = (int)CGRectGetHeight(bounds);
         // NSLog(@"W: %d H: %d", w, h);
+        bool found_thick_border = false;
         if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
           if (simulator_retina_type == DEVICE_RETINA_FALSE && w == 368 && h == 716) {
             NSLog(@"DEVICE WITH THICK BORDERS: Original iPhone");
+            bounds.origin.x += 25;
+            bounds.origin.y += 121;
+            bounds.size = CGSizeMake(320, 480);
+            found_thick_border = true;
           } else if (simulator_retina_type == DEVICE_RETINA_3_5 && w == 724 && h == 1044) {
             NSLog(@"DEVICE WITH THICK BORDERS: iPhone Retina 3.5");
+            bounds.origin.x += 42;
+            bounds.origin.y += 44;
+            bounds.size = CGSizeMake(640, 960);
+            found_thick_border = true;
           } else if (simulator_retina_type == DEVICE_RETINA_4 && w == 724 && h == 1220) {
             NSLog(@"DEVICE WITH THICK BORDERS: iPhone Retina 4");
+            bounds.origin.x += 42;
+            bounds.origin.y += 44;
+            bounds.size = CGSizeMake(640, 1136);
+            found_thick_border = true;
           }
         } else {
           if (simulator_retina_type == DEVICE_RETINA_FALSE && w == 852 && h == 1108) {
             NSLog(@"DEVICE WITH THICK BORDERS: Original iPad");
+            bounds.origin.x += 42;
+            bounds.origin.y += 44;
+            bounds.size = CGSizeMake(768, 1024);
+            found_thick_border = true;
           // TODO This is the screenshot!
           //} else if (simulator_retina_type == DEVICE_RETINA_TRUE && w == 1704 && h == 2216) {
             //NSLog(@"DEVICE WITH THICK BORDERS: iPad Retina");
+            //found_thick_border = true;
           }
+        }
+        if (!found_thick_border) {
+	    bounds.origin.y += 24;
+	    bounds.size.height -= 24;
         }
 
 	// Inset the main view frame.
-	if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
-	    switch (simulator_retina_type) {
-		case DEVICE_RETINA_4:
-		    // TODO I assume this is based on the thick border? Because
-		    // at 50% (as recommended) it has no thick border.
-		    //
-		    // bounds.origin.y += 25;
-		    // bounds.size.height -= 50;
-		    //
-		    // 23x window chrome + 1px sep. line
-		    bounds.origin.y += 24;
-		    bounds.size.height -= 24;
-		    break;
+	//if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
+	    //switch (simulator_retina_type) {
+		//case DEVICE_RETINA_4:
+		    //// TODO I assume this is based on the thick border? Because
+		    //// at 50% (as recommended) it has no thick border.
+		    ////
+		    //// bounds.origin.y += 25;
+		    //// bounds.size.height -= 50;
+		    ////
+		    //// 23x window chrome + 1px sep. line
+		    //bounds.origin.y += 24;
+		    //bounds.size.height -= 24;
+		    //break;
 
-		case DEVICE_RETINA_3_5:
-		    bounds.origin.y += 25;
-		    bounds.size.height -= 50;
-		    break;
+		//case DEVICE_RETINA_3_5:
+		    //bounds.origin.y += 25;
+		    //bounds.size.height -= 50;
+		    //break;
 
-		default:
-		    if (bounds.size.width < bounds.size.height) {
-			bounds.origin.x += 30;
-			bounds.size.width -= 60;
-			bounds.origin.y += 120;
-			bounds.size.height -= 240;
-		    }
-		    else {
-			bounds.origin.x += 120;
-			bounds.size.width -= 240;
-			bounds.origin.y += 30;
-			bounds.size.height -= 60;
-		    }
-	    }
-	}
-	else {
-	    bounds.origin.y += 25;
-	    bounds.size.height -= 50;
-	}
+		//default:
+		    //if (bounds.size.width < bounds.size.height) {
+			//bounds.origin.x += 30;
+			//bounds.size.width -= 60;
+			//bounds.origin.y += 120;
+			//bounds.size.height -= 240;
+		    //}
+		    //else {
+			//bounds.origin.x += 120;
+			//bounds.size.width -= 240;
+			//bounds.origin.y += 30;
+			//bounds.size.height -= 60;
+		    //}
+	    //}
+	//}
+	//else {
+	    //bounds.origin.y += 25;
+	    //bounds.size.height -= 50;
+	//}
 #endif
 
 	[app_windows_bounds addObject:[NSValue valueWithRect:bounds]];
