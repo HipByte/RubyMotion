@@ -110,13 +110,14 @@ static int debug_mode = -1;
 #define DEBUG_NOTHING 0
 
 static Delegate *delegate = nil;
-static NSMutableArray *app_windows_bounds = nil;
+static NSArray *app_windows_ids = nil;
 #if defined(SIMULATOR_IOS)
 static RMTask *gdb_task = nil;
 static id current_session = nil;
 static BOOL debugger_killed_session = NO;
 static NSString *xcode_path = nil;
 static int simulator_retina_type = DEVICE_RETINA_FALSE;
+static int simulator_device_family = DEVICE_FAMILY_IPHONE;
 #endif
 static NSString *sdk_version = nil;
 static NSString *replSocketPath = nil;
@@ -313,21 +314,18 @@ refresh_repl_prompt(NSString *top_level, bool clear)
 // * Find window once and cache window ID.
 // * Add function to quickly get bounds of a specific window ID.
 static void
-locate_app_windows_bounds(void)
+locate_app_windows_ids(void)
 {
-    if (app_windows_bounds != nil) {
+    if (app_windows_ids != nil) {
 	return;
     }
 
-    app_windows_bounds = [[NSMutableArray alloc] init];
+    NSMutableArray *ids = [[NSMutableArray alloc] init];
 
     CFArrayRef windows = CGWindowListCopyWindowInfo(kCGWindowListOptionAll,
 	    kCGNullWindowID);
-    NSRect bounds = NSZeroRect;
     bool bounds_ok = false;
-#if defined(SIMULATOR_IOS)
-    int device_family = DEVICE_FAMILY_IPHONE;
-#endif
+
     for (NSDictionary *dict in (NSArray *)windows) {
 #define validate(obj, klass) \
     if (obj == nil || ![obj isKindOfClass:[klass class]]) { \
@@ -377,7 +375,7 @@ locate_app_windows_bounds(void)
 	    }
 	}
 	if ([name rangeOfString:@"iPad"].location != NSNotFound) {
-	    device_family = DEVICE_FAMILY_IPAD;
+	    simulator_device_family = DEVICE_FAMILY_IPAD;
 	}
 
 	static bool displayed_mouse_over_message = false;
@@ -396,35 +394,101 @@ locate_app_windows_bounds(void)
 		isEqualToString:@"__HIGHLIGHT_OVERLAY__"]) {
 	    continue;
 	}
-//NSLog(@"found %@", dict);
 #endif
 
+#undef validate
+	[ids addObject:[dict objectForKey:@"kCGWindowNumber"]];
+	bounds_ok = true;
+
+#if defined(SIMULATOR_IOS)
+	// On iOS there is only one app window (the simulator).
+	break;
+#endif
+    }
+
+    if (ids.count > 0) {
+      app_windows_ids = (NSArray *)ids;
+    } else {
+      [ids release];
+    }
+    CFRelease(windows);
+
+    if (!bounds_ok) {
+#if defined(SIMULATOR_IOS)
+	static bool error_printed = false;
+	if (!error_printed) {
+	    fprintf(stderr,
+		    "*** Cannot locate the Simulator app, mouse-over disabled\n");
+	    error_printed = true;
+	}
+#endif
+    }
+
+}
+
+static NSArray *
+get_app_windows_bounds(void)
+{
+    if (app_windows_ids == nil) {
+	locate_app_windows_ids();
+	if (app_windows_ids == nil) return nil;
+    }
+
+    NSMutableArray *app_windows_bounds = [NSMutableArray arrayWithCapacity:app_windows_ids.count];
+
+    int count = app_windows_ids.count;
+    uint32_t ids[count];
+    for (int i = 0; i < count; i++) {
+	ids[i] = [[app_windows_ids objectAtIndex:i] intValue];
+    }
+    CFArrayRef windowArray = CFArrayCreate(NULL, (const void **)ids, count, NULL);
+    NSArray *windows = (NSArray *)CGWindowListCreateDescriptionFromArray(windowArray);
+    CFRelease(windowArray);
+
+    // The window(s) are gone. Need to find them again.
+    //
+    // This happens, for instance, when the iOS Simulator changes the devices
+    // scale.
+    if (windows.count != app_windows_ids.count) {
+	app_windows_ids = nil;
+	locate_app_windows_ids();
+	if (app_windows_ids == nil) return nil;
+    }
+
+    NSRect bounds = NSZeroRect;
+
+    for (NSDictionary *dict in windows) {
+// TODO is validation here really needed?
+//#define validate(obj, klass) \
+    //if (obj == nil || ![obj isKindOfClass:[klass class]]) { \
+	//continue; \
+    //}
+
 	id bounds_dict = [dict objectForKey:@"kCGWindowBounds"];
-	validate(bounds_dict, NSDictionary);
+	// validate(bounds_dict, NSDictionary);
 
 	id x = [bounds_dict objectForKey:@"X"];
 	id y = [bounds_dict objectForKey:@"Y"];
 	id width = [bounds_dict objectForKey:@"Width"];
 	id height = [bounds_dict objectForKey:@"Height"];
 
-	validate(x, NSNumber);
-	validate(y, NSNumber);
-	validate(width, NSNumber);
-	validate(height, NSNumber);
+	//validate(x, NSNumber);
+	//validate(y, NSNumber);
+	//validate(width, NSNumber);
+	//validate(height, NSNumber);
 
 	bounds.origin.x = [x intValue];
 	bounds.origin.y = [y intValue];
 	bounds.size.width = [width intValue];
 	bounds.size.height = [height intValue];
 
-#undef validate
-	bounds_ok = true;
+// #undef validate
 
 // TODO is there no better way then this? For instance, the full-size 3.5"
 // retina simulator has a thick border, smaller zoom levels don't.
 #if defined(SIMULATOR_IOS)
 	// Inset the main view frame.
-	if (device_family == DEVICE_FAMILY_IPHONE) {
+	if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
 	    switch (simulator_retina_type) {
 		case DEVICE_RETINA_4:
 		    // TODO I assume this is based on the thick border? Because
@@ -472,18 +536,8 @@ locate_app_windows_bounds(void)
 #endif
     }
 
-    CFRelease(windows);
-
-    if (!bounds_ok) {
-#if defined(SIMULATOR_IOS)
-	static bool error_printed = false;
-	if (!error_printed) {
-	    fprintf(stderr,
-		    "*** Cannot locate the Simulator app, mouse-over disabled\n");
-	    error_printed = true;
-	}
-#endif
-    }
+    [windows release];
+    return (NSArray *)app_windows_bounds;
 }
 
 #define CONCURRENT_BEGIN dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -506,7 +560,7 @@ CONCURRENT_BEGIN
 CONCURRENT_END
 	if (type == kCGEventLeftMouseDown) {
 	    // Reset the simulator app bounds as it may have moved.
-	    app_windows_bounds = nil;
+	    app_windows_ids = nil;
 	}
 	return event;
     }
@@ -515,7 +569,7 @@ CONCURRENT_END
     const bool capture = type == kCGEventLeftMouseDown;
 
 CONCURRENT_BEGIN
-    locate_app_windows_bounds();
+    NSArray *app_windows_bounds = get_app_windows_bounds();
     NSString *res = @"nil";
 
     bool mouseInBounds = false;
