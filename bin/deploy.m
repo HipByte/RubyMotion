@@ -898,11 +898,17 @@ start_debug_server(am_device_t dev)
 		    if (len > 0) {
 			write(gdb_fd, buf, len);
 		    }
+		    else {
+			break;
+		    }
 		}
 		if (FD_ISSET(gdb_fd, &read_fds)) {
 		    len = read(gdb_fd, buf, sizeof buf);
 		    if (len > 0) {
 			write(lldb_socket, buf, len);
+		    }
+		    else {
+			break;
 		    }
 		}
 	    }
