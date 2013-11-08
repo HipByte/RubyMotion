@@ -402,6 +402,11 @@ get_app_windows_bounds(void)
         // Devices that (at a scale of 100%) have thick borders and their
         // respective frames.
         //
+        // On Retina Mac, the Retina iOS devices are shown at their native size
+        // while on a Non-Retina Mac they are twice as large.
+        //
+
+        // Non-Retina Mac
         // ===========================================================
         // DEVICE             | PORTRAIT FRAME
         // ===========================================================
@@ -416,53 +421,115 @@ get_app_windows_bounds(void)
         // iPad Retina        | 1704x2216 (TODO This is the screenshot!)
         // -----------------------------------------------------------
 
+        // Retina Mac
+        //
+        // ===========================================================
+        // DEVICE             | PORTRAIT FRAME
+        // ===========================================================
+        // Original iPhone    | 368x716
+        // -----------------------------------------------------------
+        // iPhone Retina 3.5" | 368x716
+        // -----------------------------------------------------------
+        // iPhone Retina 4"   | 386x806
+        // -----------------------------------------------------------
+        // Original iPad      | 852x1108
+        // -----------------------------------------------------------
+        // iPad Retina        | 852x1108
+        // -----------------------------------------------------------
 
-        // TODO
-        // * support landscape
-        // * check on Retina mac
         int w = (int)CGRectGetWidth(bounds);
         int h = (int)CGRectGetHeight(bounds);
         // NSLog(@"W: %d H: %d", w, h);
-        bool landscape = w > h;
+        bool portrait = w < h;
+        bool retina_mac = (int)[[NSScreen mainScreen] backingScaleFactor] > 1;
         bool found_thick_border = false;
 
-#define MATCHES_FRAME(ww,hh) (landscape ? (w == hh && h == ww) : (w == ww && h == hh))
-#define UPDATE_BOUNDS(x_delta, y_delta, width, height) \
-  if (landscape) { \
-    bounds.origin.y += x_delta; \
-    bounds.origin.x += y_delta; \
-    bounds.size = CGSizeMake(height, width); \
-  } else { \
-    bounds.origin.x += x_delta; \
-    bounds.origin.y += y_delta; \
-    bounds.size = CGSizeMake(width, height); \
-  } \
+#define MATCHES_FRAME(ww, hh) (portrait ? (w == ww && h == hh) : (w == hh && h == ww))
+#define BORDER_OFFSET(x, y) \
+  bounds = CGRectOffset(portrait ? CGRectInset(bounds, x, y) : CGRectInset(bounds, y, x), 1, 2); \
   found_thick_border = true;
 
         if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
-          if (simulator_retina_type == DEVICE_RETINA_FALSE && MATCHES_FRAME(368, 716)) {
-            UPDATE_BOUNDS(25, 121, 320, 480);
-          } else if (simulator_retina_type == DEVICE_RETINA_3_5 && MATCHES_FRAME(724, 1044)) {
-            UPDATE_BOUNDS(42, 44, 640, 960);
-          } else if (simulator_retina_type == DEVICE_RETINA_4 && MATCHES_FRAME(724, 1220)) {
-            UPDATE_BOUNDS(42, 44, 640, 1136);
+          if (simulator_retina_type == DEVICE_RETINA_FALSE) {
+            if (MATCHES_FRAME(368, 716)) {
+              // Same size on *Non* Retina and Retina Mac *with* iPhone border.
+              // State: Portrait & Landscape perfect!
+              BORDER_OFFSET(24, 118);
+            }
           }
-        } else {
-          if (simulator_retina_type == DEVICE_RETINA_FALSE && MATCHES_FRAME(852, 1108)) {
-            UPDATE_BOUNDS(42, 44, 768, 1024);
-          // TODO This is the screenshot!
-          //} else if (simulator_retina_type == DEVICE_RETINA_TRUE && w == 1704 && h == 2216) {
-            //NSLog(@"DEVICE WITH THICK BORDERS: iPad Retina");
-            //found_thick_border = true;
+          else if (simulator_retina_type == DEVICE_RETINA_3_5) {
+            if (retina_mac) {
+              if (MATCHES_FRAME(368, 716)) {
+                // Retina Mac with enough space for the full iPhone border.
+                // State: Portrait & Landscape perfect!
+                BORDER_OFFSET(24, 118);
+              }
+              else if (MATCHES_FRAME(366, 526)) {
+                // Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                // State: Untested! Does it even exist?
+                BORDER_OFFSET(23, 23);
+              }
+            }
+            else {
+              if (MATCHES_FRAME(368, 716)) {
+                // Non-Retina Mac with enough space for the full iPhone border.
+                // State: Untested!
+                BORDER_OFFSET(24, 118);
+              }
+              else if (MATCHES_FRAME(724, 1044)) {
+                // Non-Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                // State: Portrait & Landscape perfect!
+                BORDER_OFFSET(42, 42);
+              }
+            }
+          }
+          else if (simulator_retina_type == DEVICE_RETINA_4) {
+            if (retina_mac) {
+              if (MATCHES_FRAME(386, 806)) {
+                // Retina Mac with enough space for the full iPhone border.
+                // State: Untested!
+                BORDER_OFFSET(33, 119);
+              }
+              else if (MATCHES_FRAME(366, 614)) {
+                // Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                // State: Untested! Does it even exist?
+                BORDER_OFFSET(23, 23);
+              }
+            }
+            else {
+              if (MATCHES_FRAME(724, 1220)) {
+                // Non-Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                // State: Portrait & Landscape perfect!
+                BORDER_OFFSET(42, 42);
+              }
+              else if (MATCHES_FRAME(706, 1374)) {
+                // Non-Retina Mac with enough space for the full iPhone border.
+                // State: Untested! Does it even exist?
+                BORDER_OFFSET(33, 119);
+              }
+            }
+          }
+        }
+        // iPad
+        else {
+          if (MATCHES_FRAME(852, 1108)) {
+            // Non-Retina iPad is the same size on Non-Retina and Retina Mac, as is the Retina iPad on a Retina Mac.
+            // State: Only Non-Retina iPad + Non-Retina Mac: Portrait & Landscape perfect!
+            BORDER_OFFSET(42, 42);
+          }
+          else if (simulator_retina_type == DEVICE_RETINA_TRUE && !retina_mac && MATCHES_FRAME(1582, 2216)) {
+            // Retina iPad on a Non-Retina Mac is roughly twice as large.
+            // State: Untested! Does it even exist?
+            BORDER_OFFSET(42, 42);
           }
         }
         if (!found_thick_border) {
-	    bounds.origin.y += 24;
-	    bounds.size.height -= 24;
+          bounds.origin.y += 24;
+          bounds.size.height -= 24;
         }
 
 #undef MATCHES_FRAME
-#undef UPDATE_BOUNDS
+#undef BORDER_OFFSET
 #endif
 
 	[app_windows_bounds addObject:[NSValue valueWithRect:bounds]];
