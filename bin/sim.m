@@ -297,14 +297,6 @@ locate_app_windows_ids(void)
 	if ([name rangeOfString:@"iPad"].location != NSNotFound) {
 	    simulator_device_family = DEVICE_FAMILY_IPAD;
 	}
-
-	static bool displayed_mouse_over_message = false;
-	if (simulator_retina_type && !displayed_mouse_over_message) {
-	    fprintf(stderr,
-		    "\n*** In retina mode, mouse-over requires 50%% window scale to work"\
-		    "\n*** (use command+3 in the iOS simulator)\n");
-	    displayed_mouse_over_message = true;
-	}
 #else // !SIMULATOR_IOS
 	int window_pid = [[dict objectForKey:@"kCGWindowOwnerPID"] intValue];
         if (window_pid != [osx_task processIdentifier]) {
