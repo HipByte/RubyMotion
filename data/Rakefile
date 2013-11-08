@@ -110,7 +110,7 @@ task :bridgesupport_files do
 
       linked_framework =
         case framework
-          when 'CFNetwork', 'LaunchServices', 'Metadata' then 'CoreServices'
+          when 'CFNetwork', 'LaunchServices', 'Metadata', 'OSServices' then 'CoreServices'
           when 'ColorSync', 'HIServices' then 'ApplicationServices'
           else framework
         end
