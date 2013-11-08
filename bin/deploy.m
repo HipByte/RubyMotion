@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
 #include "builtin_debugger_cmds.h"
+#include "rmtask.m"
 
 typedef void *am_device_t;
 typedef void *afc_conn_t;
@@ -351,7 +352,7 @@ fdvendor_callback(CFSocketRef s, CFSocketCallBackType callbackType,
     CFRelease(s);
 }
 
-static NSTask *gdb_task = nil;
+static id gdb_task = nil;
 
 static void
 sigforwarder(int sig)
@@ -768,6 +769,7 @@ start_debug_server(am_device_t dev)
 	// Forward ^C to gdb.
 	signal(SIGINT, sigforwarder);
 
+	// TODO : need NSTask to launch gdb
 	gdb_task = [[NSTask launchedTaskWithLaunchPath:gdb_path
 	    arguments:[NSArray arrayWithObjects:@"--arch", remote_arch, @"-q",
 	    @"-x", cmds_path, nil]] retain];
@@ -841,7 +843,7 @@ start_debug_server(am_device_t dev)
 	signal(SIGINT, sigforwarder);
 
 	// Run lldb.
-	gdb_task = [[NSTask launchedTaskWithLaunchPath:lldb_path
+	gdb_task = [[RMTask launchedTaskWithLaunchPath:lldb_path
 	    arguments:[NSArray arrayWithObjects:@"-s", cmds_path, nil]] retain];
 
 	// Connect to the lldb UNIX socket.
@@ -886,7 +888,7 @@ start_debug_server(am_device_t dev)
 	    tv.tv_sec = 0;
 	    tv.tv_usec = 10000;
 	    int n = select(lldb_socket + 1, &read_fds, NULL, NULL, &tv);
-	    if (n == -1) {
+	    if (n == -1 && errno != EINTR) {
 		perror("select()");
 		break;
 	    }
@@ -896,11 +898,17 @@ start_debug_server(am_device_t dev)
 		    if (len > 0) {
 			write(gdb_fd, buf, len);
 		    }
+		    else {
+			break;
+		    }
 		}
 		if (FD_ISSET(gdb_fd, &read_fds)) {
 		    len = read(gdb_fd, buf, sizeof buf);
 		    if (len > 0) {
 			write(lldb_socket, buf, len);
+		    }
+		    else {
+			break;
 		    }
 		}
 	    }
