@@ -445,7 +445,7 @@ get_app_windows_bounds(void)
         bool found_thick_border = false;
 
 #define MATCHES_FRAME(ww, hh) (portrait ? (w == ww && h == hh) : (w == hh && h == ww))
-#define BORDER_OFFSET(x, y) \
+#define BORDER_INSET(x, y) \
   bounds = CGRectOffset(portrait ? CGRectInset(bounds, x, y) : CGRectInset(bounds, y, x), 1, 2); \
   found_thick_border = true;
 
@@ -454,7 +454,7 @@ get_app_windows_bounds(void)
             if (MATCHES_FRAME(368, 716)) {
               // Same size on *Non* Retina and Retina Mac *with* iPhone border.
               // State: Portrait & Landscape perfect!
-              BORDER_OFFSET(24, 118);
+              BORDER_INSET(24, 118);
             }
           }
           else if (simulator_retina_type == DEVICE_RETINA_3_5) {
@@ -462,24 +462,24 @@ get_app_windows_bounds(void)
               if (MATCHES_FRAME(368, 716)) {
                 // Retina Mac with enough space for the full iPhone border.
                 // State: Portrait & Landscape perfect!
-                BORDER_OFFSET(24, 118);
+                BORDER_INSET(24, 118);
               }
               else if (MATCHES_FRAME(366, 526)) {
                 // Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
                 // State: Untested! Does it even exist?
-                BORDER_OFFSET(23, 23);
+                BORDER_INSET(23, 23);
               }
             }
             else {
               if (MATCHES_FRAME(368, 716)) {
                 // Non-Retina Mac with enough space for the full iPhone border.
                 // State: Untested!
-                BORDER_OFFSET(24, 118);
+                BORDER_INSET(24, 118);
               }
               else if (MATCHES_FRAME(724, 1044)) {
                 // Non-Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
                 // State: Portrait & Landscape perfect!
-                BORDER_OFFSET(42, 42);
+                BORDER_INSET(42, 42);
               }
             }
           }
@@ -488,24 +488,24 @@ get_app_windows_bounds(void)
               if (MATCHES_FRAME(386, 806)) {
                 // Retina Mac with enough space for the full iPhone border.
                 // State: Untested!
-                BORDER_OFFSET(33, 119);
+                BORDER_INSET(33, 119);
               }
               else if (MATCHES_FRAME(366, 614)) {
                 // Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
                 // State: Untested! Does it even exist?
-                BORDER_OFFSET(23, 23);
+                BORDER_INSET(23, 23);
               }
             }
             else {
               if (MATCHES_FRAME(724, 1220)) {
                 // Non-Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
                 // State: Portrait & Landscape perfect!
-                BORDER_OFFSET(42, 42);
+                BORDER_INSET(42, 42);
               }
               else if (MATCHES_FRAME(706, 1374)) {
                 // Non-Retina Mac with enough space for the full iPhone border.
                 // State: Untested! Does it even exist?
-                BORDER_OFFSET(33, 119);
+                BORDER_INSET(33, 119);
               }
             }
           }
@@ -515,12 +515,12 @@ get_app_windows_bounds(void)
           if (MATCHES_FRAME(852, 1108)) {
             // Non-Retina iPad is the same size on Non-Retina and Retina Mac, as is the Retina iPad on a Retina Mac.
             // State: Only Non-Retina iPad + Non-Retina Mac: Portrait & Landscape perfect!
-            BORDER_OFFSET(42, 42);
+            BORDER_INSET(42, 42);
           }
           else if (simulator_retina_type == DEVICE_RETINA_TRUE && !retina_mac && MATCHES_FRAME(1582, 2216)) {
             // Retina iPad on a Non-Retina Mac is roughly twice as large.
             // State: Untested! Does it even exist?
-            BORDER_OFFSET(42, 42);
+            BORDER_INSET(42, 42);
           }
         }
         if (!found_thick_border) {
@@ -529,7 +529,7 @@ get_app_windows_bounds(void)
         }
 
 #undef MATCHES_FRAME
-#undef BORDER_OFFSET
+#undef BORDER_INSET
 #endif
 
 	[app_windows_bounds addObject:[NSValue valueWithRect:bounds]];
