@@ -2,6 +2,7 @@
 
   * Improved dispatching of shortcut methods (ex foo= is shortcut of setFoo:).
     20 times faster.
+  * Improved Array#concat performance. About 2 times faster.
   * [iOS] Fixed a bug where `rake device' would no longer print the application
     logs from the device.
 
