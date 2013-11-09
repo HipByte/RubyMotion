@@ -445,6 +445,7 @@ get_app_windows_bounds(void)
         bool found_thick_border = false;
 
 #define MATCHES_FRAME(ww, hh) (portrait ? (w == ww && h == hh) : (w == hh && h == ww))
+// Inset to account for the border and offset for presumably the window drop shadow.
 #define BORDER_INSET(x, y) \
   bounds = CGRectOffset(portrait ? CGRectInset(bounds, x, y) : CGRectInset(bounds, y, x), 1, 2); \
   found_thick_border = true;
