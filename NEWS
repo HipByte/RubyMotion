@@ -5,6 +5,8 @@
   * Improved Array#concat performance. About 2 times faster.
   * [iOS] Fixed a bug where `rake device' would no longer print the application
     logs from the device.
+  * [OSX] Fixed a bug on OSX platform where compiler flags for iOS are passed
+    when it generates bridgesupport file for vendor library.
 
 = RubyMotion 2.14 =
 
