@@ -178,6 +178,17 @@ module Motion; module Project;
       ldflags
     end
 
+    def bridgesupport_flags
+      extra_flags = (OSX_VERSION >= 10.7 && sdk_version < '7.0') ? '--no-64-bit' : ''
+      "--format complete #{extra_flags}"
+    end
+
+    def bridgesupport_cflags
+      a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
+      sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+      "-miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers}"
+    end
+
     def device_family_int(family)
       case family
         when :iphone then 1
