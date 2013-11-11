@@ -30,6 +30,7 @@
 #include "rmtask.m"
 
 static bool spec_mode = false;
+static bool debug_sim_window_offsets = false;
 static int debug_mode = -1;
 #define DEBUG_GDB 1
 #define DEBUG_REPL 2
@@ -445,7 +446,11 @@ get_app_windows_bounds(void)
         bool found_thick_border = false;
 
 #define MATCHES_FRAME(ww, hh) (portrait ? (w == ww && h == hh) : (w == hh && h == ww))
-// Inset to account for the border and offset for presumably the window drop shadow.
+#define LOG_MATCH(desc) \
+  if (debug_sim_window_offsets) { \
+    fprintf(stderr, "*** Recognized current Simulator window as %s.\n", desc); \
+  }
+// Inset to account for the border and offset for the window drop shadow.
 #define BORDER_INSET(x, y) \
   bounds = CGRectOffset(portrait ? CGRectInset(bounds, x, y) : CGRectInset(bounds, y, x), 1, 2); \
   found_thick_border = true;
@@ -453,6 +458,7 @@ get_app_windows_bounds(void)
         if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
           if (simulator_retina_type == DEVICE_RETINA_FALSE) {
             if (MATCHES_FRAME(368, 716)) {
+              LOG_MATCH("a Non-Retina iPhone with thick iPhone border");
               // Same size on *Non* Retina and Retina Mac *with* iPhone border.
               // State: Portrait & Landscape perfect!
               BORDER_INSET(24, 118);
@@ -461,24 +467,34 @@ get_app_windows_bounds(void)
           else if (simulator_retina_type == DEVICE_RETINA_3_5) {
             if (retina_mac) {
               if (MATCHES_FRAME(368, 716)) {
+                LOG_MATCH("a Retina iPhone 3.5\" with thick iPhone border " \
+                          "running on a Retina Mac");
                 // Retina Mac with enough space for the full iPhone border.
                 // State: Portrait & Landscape perfect!
                 BORDER_INSET(24, 118);
               }
               else if (MATCHES_FRAME(366, 526)) {
-                // Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                LOG_MATCH("a Retina iPhone 3.5\" with thick iPad border " \
+                          "running on a Retina Mac");
+                // Retina Mac with not enough space for the full iPhone border,
+                // so gets an iPad border.
                 // State: Untested! Does it even exist?
                 BORDER_INSET(23, 23);
               }
             }
             else {
               if (MATCHES_FRAME(368, 716)) {
+                LOG_MATCH("a Retina iPhone 3.5\" with thick iPhone border " \
+                          "running on a Non-Retina Mac");
                 // Non-Retina Mac with enough space for the full iPhone border.
                 // State: Untested!
                 BORDER_INSET(24, 118);
               }
               else if (MATCHES_FRAME(724, 1044)) {
-                // Non-Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                LOG_MATCH("a Retina iPhone 3.5\" with thick iPad border " \
+                          "running on a Non-Retina Mac");
+                // Non-Retina Mac with not enough space for the full iPhone
+                // border, so gets an iPad border.
                 // State: Portrait & Landscape perfect!
                 BORDER_INSET(42, 42);
               }
@@ -487,23 +503,33 @@ get_app_windows_bounds(void)
           else if (simulator_retina_type == DEVICE_RETINA_4) {
             if (retina_mac) {
               if (MATCHES_FRAME(386, 806)) {
+                LOG_MATCH("a Retina iPhone 4\" with thick iPhone border " \
+                          "running on a Retina Mac");
                 // Retina Mac with enough space for the full iPhone border.
                 // State: Untested!
                 BORDER_INSET(33, 119);
               }
               else if (MATCHES_FRAME(366, 614)) {
-                // Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                 LOG_MATCH("a Retina iPhone 4\" with thick iPad border " \
+                           "running on a Retina Mac"); 
+                // Retina Mac with not enough space for the full iPhone border,
+                // so gets an iPad border.
                 // State: Untested! Does it even exist?
                 BORDER_INSET(23, 23);
               }
             }
             else {
               if (MATCHES_FRAME(724, 1220)) {
-                // Non-Retina Mac with not enough space for the full iPhone border, so gets an iPad border.
+                LOG_MATCH("a Retina iPhone 4\" with thick iPad border " \
+                          "running on a Non-Retina Mac");
+                // Non-Retina Mac with not enough space for the full iPhone
+                // border, so gets an iPad border.
                 // State: Portrait & Landscape perfect!
                 BORDER_INSET(42, 42);
               }
               else if (MATCHES_FRAME(706, 1374)) {
+                LOG_MATCH("a Retina iPhone 4\" with thick iPhone border " \
+                          "running on a Retina Mac");
                 // Non-Retina Mac with enough space for the full iPhone border.
                 // State: Untested! Does it even exist?
                 BORDER_INSET(33, 119);
@@ -514,22 +540,31 @@ get_app_windows_bounds(void)
         // iPad
         else {
           if (MATCHES_FRAME(852, 1108)) {
-            // Non-Retina iPad is the same size on Non-Retina and Retina Mac, as is the Retina iPad on a Retina Mac.
+            LOG_MATCH("a Non-Retina iPad with thick iPad border");
+            // Non-Retina iPad is the same size on Non-Retina and Retina Mac,
+            // as is the Retina iPad on a Retina Mac.
             // State: Only Non-Retina iPad + Non-Retina Mac: Portrait & Landscape perfect!
             BORDER_INSET(42, 42);
           }
-          else if (simulator_retina_type == DEVICE_RETINA_TRUE && !retina_mac && MATCHES_FRAME(1582, 2216)) {
+          else if (simulator_retina_type == DEVICE_RETINA_TRUE &&
+                    !retina_mac && MATCHES_FRAME(1582, 2216)) {
+            LOG_MATCH("a Retina iPad with thick border on a Non-Retina Mac");
             // Retina iPad on a Non-Retina Mac is roughly twice as large.
             // State: Untested! Does it even exist?
             BORDER_INSET(42, 42);
           }
         }
         if (!found_thick_border) {
+          if (debug_sim_window_offsets) {
+            fprintf(stderr, "*** Current Simulator window NOT recognized as " \
+                            "having thick borders (%dx%d).\n", w, h);
+          }
           bounds.origin.y += 24;
           bounds.size.height -= 24;
         }
 
 #undef MATCHES_FRAME
+#undef LOG_MATCH
 #undef BORDER_INSET
 #endif
 
@@ -1249,6 +1284,8 @@ main(int argc, char **argv)
     }
 
     spec_mode = getenv("SIM_SPEC_MODE") != NULL;
+    debug_sim_window_offsets = getenv("DEBUG_SIM_WINDOW_OFFSETS") != NULL;
+
     int argv_n = 1;
     debug_mode = atoi(argv[argv_n++]);
 #if defined(SIMULATOR_IOS)
