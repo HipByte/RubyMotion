@@ -3,6 +3,11 @@
   * Improved dispatching of shortcut methods (ex foo= is shortcut of setFoo:).
     20 times faster.
   * Improved Array#concat performance. About 2 times faster.
+  * Improved Array#reverse performance. 2 times faster.
+  * Improved Array#reverse! performance. 8 times faster.
+  * Improved Array#rotate performance. 5 times faster.
+  * Improved Array#rotate! performance. 40 times faster.
+  * Fixed a bug where Array#rotate! causes a crash in REPL.
   * [iOS] Fixed a bug where `rake device' would no longer print the application
     logs from the device.
   * [OSX] Fixed a bug on OSX platform where compiler flags for iOS are passed
