@@ -13,6 +13,7 @@
   * [OSX] Fixed a bug on OSX platform where compiler flags for iOS are passed
     when it generates bridgesupport file for vendor library.
   * [OSX] Add bridgesupport metadata for Carbon frameworks.
+  * [OSX] Add bridgesupport metadata for OSServices framework.
 
 = RubyMotion 2.14 =
 
