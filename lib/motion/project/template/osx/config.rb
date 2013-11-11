@@ -103,6 +103,16 @@ module Motion; module Project;
       super + " -mmacosx-version-min=#{deployment_target}"
     end
 
+    def bridgesupport_flags
+      "--format complete --64-bit"
+    end
+
+    def bridgesupport_cflags
+      a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
+      sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+      "-mmacosx-version-min=#{sdk_version} -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers}"
+    end
+
     def app_bundle_raw(platform)
       File.join(versionized_build_dir(platform), bundle_name + '.app')
     end

@@ -345,16 +345,7 @@ EOS
       sdk_path = self.sdk(local_platform)
       includes = headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
       exceptions = exceptions.map { |x| "\"#{x}\"" }.join(' ')
-      a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
-      sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
-      if platform == "MacOSX"
-        extra_flags = '--64-bit'
-        require_version = "-mmacosx-version-min=#{sdk_version} -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers}"
-      else
-        extra_flags = (OSX_VERSION >= 10.7 && sdk_version < '7.0') ? '--no-64-bit' : ''
-        require_version = "-miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers}"
-      end
-      sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' --format complete #{extra_flags} --cflags \" #{c_flags} -isysroot \"#{sdk_path}\" #{require_version} -D__STRICT_ANSI__ -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\" #{ "-e #{exceptions}" if exceptions.length != 0}"
+      sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' #{bridgesupport_flags} --cflags \" #{c_flags} -isysroot \"#{sdk_path}\" #{bridgesupport_cflags} -D__STRICT_ANSI__ -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\" #{ "-e #{exceptions}" if exceptions.length != 0}"
     end
 
     def define_global_env_txt
