@@ -1,7 +1,22 @@
 = RubyMotion 2.15 =
 
+  * Improved dispatching of shortcut methods (ex foo= is shortcut of setFoo:).
+    20 times faster.
+  * Improved the performance where Fixnum and Float are returned. 20% faster.
+  * Improved Array#concat performance. About 2 times faster.
+  * Improved Array#reverse performance. 2 times faster.
+  * Improved Array#reverse! performance. 8 times faster.
+  * Improved Array#rotate performance. 5 times faster.
+  * Improved Array#rotate! performance. 40 times faster.
+  * Fixed a bug where Array#rotate! causes a crash in REPL.
+  * Fixed a bug where the objects created by "CFxxxCreate(args)" are not
+    released.
   * [iOS] Fixed a bug where `rake device' would no longer print the application
     logs from the device.
+  * [OSX] Fixed a bug on OSX platform where compiler flags for iOS are passed
+    when it generates bridgesupport file for vendor library.
+  * [OSX] Add bridgesupport metadata for Carbon frameworks.
+  * [OSX] Add bridgesupport metadata for OSServices framework.
 
 = RubyMotion 2.14 =
 

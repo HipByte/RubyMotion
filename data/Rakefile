@@ -88,7 +88,7 @@ def merge_bridgesupport(base_bridgesupport, merge_brigesupport)
   }
 end
 
-EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit', 'Carbon', 'Ruby', 'RubyCocoa', 'vecLib']
+EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit', 'Ruby', 'RubyCocoa', 'vecLib']
 task :bridgesupport_files do
   platform_dev_path = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
   OSX_SDK_VERSIONS.each do |sdk_version|
@@ -110,6 +110,7 @@ task :bridgesupport_files do
 
       linked_framework =
         case framework
+          when 'HIToolbox', 'Ink' then 'Carbon'
           when 'CFNetwork', 'LaunchServices', 'Metadata', 'OSServices' then 'CoreServices'
           when 'ColorSync', 'HIServices' then 'ApplicationServices'
           else framework
