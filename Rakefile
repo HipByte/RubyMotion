@@ -56,6 +56,13 @@ end
 desc "Build all targets"
 task :build => targets.map { |x| "build:#{x}" }
 
+desc "Run the clang static analyzer against the source"
+task :analyze do
+  sh './static-analyzer/scan-build --keep-empty --use-analyzer=/usr/bin/clang -o ./static-analysis rake'
+  results = Dir.glob('static-analysis/*').sort_by { |path| File.mtime(path) }.last
+  sh "./static-analyzer/scan-view #{results}"
+end
+
 targets.each do |target|
   desc "Clean target #{target}"
   task "clean:#{target}" do
