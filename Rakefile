@@ -49,6 +49,9 @@ task :all => :build
 targets.each do |target|
   desc "Build target #{target}"
   task "build:#{target}" do
+    unless ENV['CCC_ANALYZER_ANALYSIS']
+      ENV['CC'] = ENV['CXX'] = nil
+    end
     rake(target)
   end
 end
@@ -58,9 +61,8 @@ task :build => targets.map { |x| "build:#{x}" }
 
 desc "Run the clang static analyzer against the source"
 task :analyze do
-  sh './static-analyzer/scan-build --keep-empty --use-analyzer=/usr/bin/clang -o ./static-analysis rake'
-  results = Dir.glob('static-analysis/*').sort_by { |path| File.mtime(path) }.last
-  sh "./static-analyzer/scan-view #{results}"
+  ENV['DEBUG'] = '1'
+  sh './static-analyzer/scan-build --view --use-analyzer=/usr/bin/clang --use-cc=/usr/bin/clang --use-c++=/usr/bin/clang++ -o ./static-analysis rake'
 end
 
 targets.each do |target|
