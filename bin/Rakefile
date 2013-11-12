@@ -7,7 +7,7 @@ task :default => :all
 task :all => [:files, :deploy, :sim, :nfd, :instruments]
 
 STRIP = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip"
-CLANG = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
+CLANG = ENV['CC'] || "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
 
 task :files do
   bin = 'ruby'
