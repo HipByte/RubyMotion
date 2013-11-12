@@ -33,3 +33,5 @@ test/test/vendor/code/build-iPhoneSimulator/
 test/test/vendor/code/code.bridgesupport
 
 RubyMotion.docset/
+
+static-analysis/
