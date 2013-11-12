@@ -2,6 +2,7 @@
 
   * Improved dispatching of shortcut methods (ex foo= is shortcut of setFoo:).
     20 times faster.
+  * Improved the performance where Fixnum and Float are returned. 20% faster.
   * Improved Array#concat performance. About 2 times faster.
   * Improved Array#reverse performance. 2 times faster.
   * Improved Array#reverse! performance. 8 times faster.
