@@ -61,8 +61,12 @@ task :build => targets.map { |x| "build:#{x}" }
 
 desc "Run the clang static analyzer against the source"
 task :analyze do
-  ENV['DEBUG'] = '1'
-  sh './static-analyzer/scan-build --view --use-analyzer=/usr/bin/clang --use-cc=/usr/bin/clang --use-c++=/usr/bin/clang++ -o ./static-analysis rake'
+  options = []
+  options << '--view'
+  options << '-disable-checker osx.cocoa.RetainCount'
+  options << '--use-analyzer=/usr/bin/clang'
+  options << '--use-cc=/usr/bin/clang --use-c++=/usr/bin/clang++'
+  sh "./static-analyzer/scan-build #{options.join(' ')} -o ./static-analysis rake DEBUG=1"
 end
 
 targets.each do |target|
