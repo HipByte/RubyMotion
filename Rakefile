@@ -62,7 +62,7 @@ task :build => targets.map { |x| "build:#{x}" }
 desc "Run the clang static analyzer against the source"
 task :analyze do
   options = []
-  options << '--view'
+  options << '--view' unless ENV['JENKINS_URL']
   options << '-disable-checker osx.cocoa.RetainCount'
   options << '--use-analyzer=/usr/bin/clang'
   options << '--use-cc=/usr/bin/clang --use-c++=/usr/bin/clang++'
