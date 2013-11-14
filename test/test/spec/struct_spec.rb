@@ -19,3 +19,34 @@
 #     lambda { Struct.new(*fields) }.should.raise(ArgumentError)
 #   end
 # end
+
+describe "Struct" do
+  it "values are stored depending on the member type" do
+    struct = MyStructTestConvert.new
+
+    struct.m_long = 123
+    struct.m_long.should == 123
+    struct.m_long = 123.0
+    struct.m_long.should == 123
+
+    struct.m_ulong = 123
+    struct.m_ulong.should == 123
+    struct.m_ulong = 123.0
+    struct.m_ulong.should == 123
+
+    struct.m_longlong = 123
+    struct.m_longlong.should == 123
+    struct.m_longlong = 123.0
+    struct.m_longlong.should == 123
+
+    struct.m_ulonglong = 123
+    struct.m_ulonglong.should == 123
+    struct.m_ulonglong = 123.0
+    struct.m_ulonglong.should == 123
+
+    struct.m_double = 123
+    struct.m_double.should == 123.0
+    struct.m_double = 123.0
+    struct.m_double.should == 123.0
+  end
+end

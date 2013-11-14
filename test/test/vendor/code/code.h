@@ -1,5 +1,13 @@
 #import <UIKit/UIKit.h>
 
+struct MyStructTestConvert {
+    long m_long;
+    unsigned long m_ulong;
+    long long m_longlong;
+    unsigned long long m_ulonglong;
+    double m_double;
+};
+
 struct MyStruct4C {
     char a, b, c, d;
 };
