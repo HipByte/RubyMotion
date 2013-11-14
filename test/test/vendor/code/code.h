@@ -73,3 +73,8 @@ extern int lowerCaseConstant;
 
 #define TestStringConstant "foo"
 #define TestNSStringConstant @"foo"
+
+typedef int (^ReturnsIntBlock)();
+void KreateStackBlock(void (^inputBlock)(ReturnsIntBlock));
+ReturnsIntBlock KreateMallocBlock(int input);
+ReturnsIntBlock KreateGlobalBlock();

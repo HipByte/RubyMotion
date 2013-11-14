@@ -238,6 +238,29 @@ describe "C-level blocks" do
     end
     $test_dealloc.should == true
   end
+
+  it "wraps C-blocks as Procs" do
+    block = KreateMallocBlock(21)
+    block.should.be.instance_of Proc
+    block.call.should == 42
+
+    block = KreateGlobalBlock()
+    block.should.be.instance_of Proc
+    block.call.should == 42
+  end
+
+  it "yields C-blocks as Procs" do
+    return_value = nil
+    KreateStackBlock(lambda { |block| return_value = block.call })
+    return_value.should == 42
+  end
+
+  it "copies C 'stack' blocks onto the heap, making it safe outside of the yielded block" do
+    yielded_block = nil
+    KreateStackBlock(lambda { |block| yielded_block = block })
+    yielded_block.should.be.instance_of Proc
+    yielded_block.call.should == 42
+  end
 end
 
 describe "self" do

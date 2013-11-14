@@ -124,3 +124,19 @@ int lowerCaseConstant = 42;
 
 @implementation lowerCaseClass
 @end
+
+void KreateStackBlock(void (^inputBlock)(ReturnsIntBlock))
+{
+  int x = 42;
+  inputBlock(^{ return x; });
+}
+
+ReturnsIntBlock KreateMallocBlock(int input)
+{
+  return Block_copy(^{ return input * 2; });
+}
+
+ReturnsIntBlock KreateGlobalBlock()
+{
+  return ^{ return 42; };
+}
