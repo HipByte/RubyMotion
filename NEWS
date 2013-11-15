@@ -11,6 +11,7 @@
   * Improved Array#reverse! performance. 8 times faster.
   * Improved Array#rotate performance. 5 times faster.
   * Improved Array#rotate! performance. 40 times faster.
+  * Improved iterators performance (ex Array#{each, map}). 2-3 times faster.
   * Fixed a bug where Array#rotate! causes a crash in REPL.
   * Fixed a bug where the objects created by "CFxxxCreate(args)" are not
     released.
