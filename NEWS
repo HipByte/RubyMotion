@@ -14,6 +14,8 @@
   * Fixed a bug where Array#rotate! causes a crash in REPL.
   * Fixed a bug where the objects created by "CFxxxCreate(args)" are not
     released.
+  * Fixed a bug in dispatcher where #super cannot look up the shortcut method.
+    (ie #foo=)
   * [iOS] Fixed a bug where `rake device' would no longer print the application
     logs from the device.
   * [OSX] Fixed a bug on OSX platform where compiler flags for iOS are passed
