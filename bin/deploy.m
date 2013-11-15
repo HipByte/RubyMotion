@@ -551,6 +551,13 @@ start_debug_server(am_device_t dev)
 	return;
     }
 
+    if (![[NSFileManager defaultManager] fileExistsAtPath:[device_support_path
+	    stringByAppendingPathComponent:@"Symbols"]]) {
+	fprintf(stderr, "*** symbols not found in `%s': debugger might be "\
+		"slow to attach\n",
+		[device_support_path fileSystemRepresentation]);
+    }
+
     // Mount the .dmg remotely on the device.
 
     NSString *image_sig_path = [image_path stringByAppendingString:
