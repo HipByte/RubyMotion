@@ -819,6 +819,7 @@ start_debug_server(am_device_t dev)
         "error = lldb.SBError()\n"\
 	"listener = lldb.SBListener(\"my-listener\")\n"\
    	"process = target.ConnectRemote(listener, \"unix-accept://%s\", None, error)\n"\
+	"lldb.debugger.HandleCommand(\"process plugin packet send 'QSetEnableAsyncProfiling;enable:1;interval_usec:1000000;scan_type:0xfffffeff;'\")\n"\
 	"broadcaster = process.GetBroadcaster()\n"\
 	"broadcaster.AddListener(listener, lldb.SBProcess.eBroadcastBitStateChanged)\n"\
    	"while True:\n"\
