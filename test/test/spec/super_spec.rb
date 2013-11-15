@@ -15,6 +15,20 @@ class Foo < Base
   end
 end
 
+class B < UIView
+  def frame=(value)
+    NSLog "Calling B with #{value}"
+    super
+  end
+end
+
+class C < B
+  def frame=(value)
+    NSLog "Calling C with #{value}"
+    super(value)
+  end
+end
+
 $spec_result = []
 
 describe "'super'" do
@@ -23,4 +37,12 @@ describe "'super'" do
     obj.bar(%w{1 2 3})
     $spec_result.should == ["a", "1", "a", "2", "a", "3", "a", nil]
   end
+
+  it "should lookup shortcut method" do
+    # RM-322
+    c = C.alloc.init
+    c.frame = [[42,0],[0,0]]
+    c.frame.origin.x.should == 42
+  end
+
 end
