@@ -815,6 +815,7 @@ start_debug_server(am_device_t dev)
    	"module = target.FindModule(target.GetExecutable())\n"\
    	"filespec = lldb.SBFileSpec(\"%@\", False)\n"\
    	"module.SetPlatformFileSpec(filespec)\n"\
+	"lldb.debugger.HandleCommand(\"target modules search-paths add /usr '%@/Symbols/usr' /System '%@/Symbols/System' /Developer '%@/Symbols/Developer'\")\n"\
         "error = lldb.SBError()\n"\
 	"listener = lldb.SBListener(\"my-listener\")\n"\
    	"process = target.ConnectRemote(listener, \"unix-accept://%s\", None, error)\n"\
@@ -838,7 +839,9 @@ start_debug_server(am_device_t dev)
         "      print \"Running...\"\n"\
 	"      process.Continue()\n"\
 	"broadcaster.RemoveListener(listener)\n",
-   	     app_path, app_remote_path, lldb_socket_path];
+   	     app_path, app_remote_path,
+	     device_support_path, device_support_path, device_support_path,
+	     lldb_socket_path];
 	NSString *py_cmds_path = [NSString pathWithComponents:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
 	    @"_deploylldbcmds.py", nil]];
