@@ -523,10 +523,15 @@ start_debug_server(am_device_t dev)
 	NSRange r = [path rangeOfString:@" "];
 	NSString *path_version = r.location == NSNotFound
 	    ? path : [path substringToIndex:r.location];
-	if ([product_version hasPrefix:path_version]) {
-	    device_support_path =
+	if ([product_version isEqualToString:path_version]) {
+	    device_support_path = 
 		[device_supports_path stringByAppendingPathComponent:path];
 	    break;
+	}
+	if ([product_version hasPrefix:path_version]
+		&& device_support_path == nil) {
+	    device_support_path =
+		[device_supports_path stringByAppendingPathComponent:path];
 	}
     }
 
