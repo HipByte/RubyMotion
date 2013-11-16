@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 version = ENV['version'] || ''
-$:.unshift("/Library/RubyMotion#{version}/lib")
+if version != ''
+  $:.unshift("/Library/RubyMotion#{version}/lib")
+else
+  $:.unshift("../../lib")
+end
 
 platform = ENV['platform'] || 'osx'
 require "motion/project/template/#{platform}"
