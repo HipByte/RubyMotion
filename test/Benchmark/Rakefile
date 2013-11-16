@@ -1,0 +1,14 @@
+# -*- coding: utf-8 -*-
+version = ENV['version'] || ''
+$:.unshift("/Library/RubyMotion#{version}/lib")
+
+platform = ENV['platform'] || 'osx'
+require "motion/project/template/#{platform}"
+
+ENV['mode'] = 'release'
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = 'Benchmark'
+  app.files += Dir.glob('lib/**/*.rb')
+end
