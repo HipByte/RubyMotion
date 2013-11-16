@@ -3,6 +3,7 @@
   * Improve REPL to recognize Simulator at any scale and orientation. The only
     unsupported variant at this time is a Simulator window with scroll bars.
   * Fix REPL<->Simulator coordinate translation when run on a Retina Mac.
+  * Fixed undefined behaviour in REPL such as local variables not being stored.
   * Improved dispatching of shortcut methods (ex foo= is shortcut of setFoo:).
     20 times faster.
   * Improved the performance where Fixnum and Float are returned. 20% faster.
