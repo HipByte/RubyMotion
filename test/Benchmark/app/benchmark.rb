@@ -16,5 +16,7 @@ end
 puts "*** Array ***"
 bm_array
 
+puts "*** Hash ***"
+bm_hash
 
 exit(0)
