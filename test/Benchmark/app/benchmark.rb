@@ -19,4 +19,7 @@ bm_array
 puts "*** Hash ***"
 bm_hash
 
+puts "*** String ***"
+bm_string
+
 exit(0)
