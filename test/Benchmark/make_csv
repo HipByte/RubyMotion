@@ -2,6 +2,8 @@
 
 data = STDIN.read
 data.each_line do |line|
+  puts "\"#{line.strip}\",\"\"" if line =~ /^Ruby.+[\d\.]+$/
+  puts "\"#{line.strip}\",\"\"" if line =~ /^\*{3} .+ \*{3}$/
   if line =~ /^(.+)\s+\(([\d\.]+)\)$/
     puts "\"#{$1.strip}\",#{$2}"
   end

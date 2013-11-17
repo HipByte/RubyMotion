@@ -15,3 +15,15 @@
 ```
 % ./cruby
 ```
+
+## How to create CSV file
+
+```
+% rake | ./make_csv > rm_result.csv
+```
+
+and
+
+```
+% open rm_result.csv
+```
