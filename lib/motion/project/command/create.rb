@@ -21,6 +21,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'optparse'
 require 'motion/project/app'
 require 'motion/project/template'
 
@@ -28,40 +29,39 @@ module Motion; module Project
   class CreateCommand < Command
     self.name = 'create'
     self.help = 'Create a new project'
- 
+
     DefaultTemplate = 'ios'
- 
+
     def run(args)
-      app_name = nil
-      template_name = DefaultTemplate
-      args.each do |a|
-        case a
-          when /--([^=]+)=(.+)/
-            opt_name = $1.to_s.strip
-            opt_val = $2.to_s.strip
-            case opt_name
-              when 'template'
-                template_name = opt_val
-              else
-                die "Incorrect option `#{opt_name}'"
-            end
-          else
-            if app_name
-              app_name = nil
-              break
-            else
-              app_name = a
-            end
+      options = {
+        :template_name => DefaultTemplate
+      }
+
+      optparse = OptionParser.new do |opt|
+        opt.banner  = "Usage: motion create [OPTIONS] <app-name>"
+
+        opt.separator '  Options:'
+        opt.on('--template=<template_name>', 'Specify the template') do |name|
+          options[:template_name] = name
         end
+
+        template_names = Motion::Project::Template.all_templates.keys.map { |x| x == DefaultTemplate ? "#{x} (default)" : x }.sort.join(', ')
+        opt.separator "  Available templates:"
+        opt.separator "        #{template_names}"
       end
-  
-      unless app_name
-        $stderr.puts "Usage: motion create [--template=<template_name>] <app-name>"
-        $stderr.puts "Available templates: " + Motion::Project::Template.all_templates.keys.map { |x| x == DefaultTemplate ? "#{x} (default)" : x }.join(', ')
-        exit 1
+
+      begin
+        optparse.parse!(args)
+      rescue OptionParser::ParseError
+        die $!.to_s
       end
-  
-      Motion::Project::App.create(app_name, template_name)
+
+      unless args.size == 1
+        die(optparse.to_s)
+      end
+
+      app_name = args.pop
+      Motion::Project::App.create(app_name, options[:template_name])
     end
   end
 end; end
