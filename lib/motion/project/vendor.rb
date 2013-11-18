@@ -52,6 +52,11 @@ module Motion; module Project;
         if File.exist?(build_dir)
           App.info 'Delete', build_dir
           FileUtils.rm_rf build_dir
+          if File.exist?(build_dir)
+            # It can happen that because of file permissions a dir/file is not
+            # actually removed, which can lead to confusing issues.
+            App.fail "Failed to remove `#{build_dir}'. Please remove this path manually."
+          end
         end
       end
     end
