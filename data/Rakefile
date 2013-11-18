@@ -111,8 +111,8 @@ task :bridgesupport_files do
       linked_framework =
         case framework
           when 'HIToolbox', 'Ink' then 'Carbon'
-          when 'CFNetwork', 'LaunchServices', 'Metadata', 'OSServices' then 'CoreServices'
-          when 'ColorSync', 'HIServices' then 'ApplicationServices'
+          when 'CFNetwork', 'LaunchServices', 'Metadata', 'OSServices', 'SearchKit' then 'CoreServices'
+          when 'ColorSync', 'CoreText', 'HIServices' then 'ApplicationServices'
           else framework
         end
 
