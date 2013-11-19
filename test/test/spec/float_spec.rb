@@ -36,6 +36,9 @@ describe "Float" do
     # issue 506
     flt = 0.678547.round(2)
     flt.to_s.should == "0.68"
+
+    # https://hipbyte.freshdesk.com/helpdesk/tickets/1341
+    -73.98158.round(5).to_s.should == "-73.98158"
   end
 
   it "::MAX constant" do
