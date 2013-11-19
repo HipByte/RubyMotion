@@ -894,7 +894,7 @@ start_debug_server(am_device_t dev)
 	}
 
 	// We are connected, start redirecting input to/from the debug server.
-	char buf[1024];
+	char buf[2048];
 	ssize_t len;
 	while (true) {
 	    fd_set read_fds;
