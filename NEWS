@@ -1,8 +1,8 @@
 = RubyMotion 2.15 =
 
-  * Improve REPL to recognize Simulator at any scale and orientation. The only
+  * Improved REPL to recognize Simulator at any scale and orientation. The only
     unsupported variant at this time is a Simulator window with scroll bars.
-  * Fix REPL<->Simulator coordinate translation when run on a Retina Mac.
+  * Fixed REPL<->Simulator coordinate translation when run on a Retina Mac.
   * Fixed undefined behaviour in REPL such as local variables not being stored.
   * Improved dispatching of shortcut methods (ex foo= is shortcut of setFoo:).
     20 times faster.
@@ -23,8 +23,8 @@
     logs from the device.
   * [OSX] Fixed a bug on OSX platform where compiler flags for iOS are passed
     when it generates bridgesupport file for vendor library.
-  * [OSX] Add bridgesupport metadata for Carbon frameworks.
-  * [OSX] Add bridgesupport metadata for OSServices framework.
+  * [OSX] Added missing bridgesupport metadata for Carbon, OSServices and
+    ApplicationServices frameworks.
 
 = RubyMotion 2.14 =
 
