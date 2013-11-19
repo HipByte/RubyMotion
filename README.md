@@ -86,3 +86,14 @@ Or, debug on RubyMotion app in iOS device
 ```
 $ rake device debug=1 no_continue=1
 ```
+
+## How to build with Xcode Developer Preview
+
+Download and install Xcode Developer Preview into /Applications folder.
+And its folder would has three Xcode version (Xcode.app, Xcode4.app and Xcode51-DP.app)
+
+Then, run
+
+```
+$ ./build.sh
+```
