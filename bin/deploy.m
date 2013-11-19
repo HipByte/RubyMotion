@@ -809,7 +809,7 @@ start_debug_server(am_device_t dev)
    	"import sys\n"\
    	"import lldb\n"\
    	"debugger = lldb.debugger\n"\
-	/*"debugger.EnableLog(\"lldb\", [\"all\"])\n"*/\
+	"debugger.SetAsync(False)\n"\
         "error = lldb.SBError()\n"\
    	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", False, error)\n"\
    	"module = target.FindModule(target.GetExecutable())\n"\
@@ -817,29 +817,13 @@ start_debug_server(am_device_t dev)
    	"module.SetPlatformFileSpec(filespec)\n"\
 	"lldb.debugger.HandleCommand(\"target modules search-paths add /usr '%@/Symbols/usr' /System '%@/Symbols/System' /Developer '%@/Symbols/Developer'\")\n"\
         "error = lldb.SBError()\n"\
-	"listener = lldb.SBListener(\"my-listener\")\n"\
+	"listener = lldb.debugger.GetListener()\n"\
    	"process = target.ConnectRemote(listener, \"unix-accept://%s\", None, error)\n"\
 	"lldb.debugger.HandleCommand(\"process plugin packet send 'QSetEnableAsyncProfiling;enable:1;interval_usec:1000000;scan_type:0xfffffeff;'\")\n"\
-	"broadcaster = process.GetBroadcaster()\n"\
-	"broadcaster.AddListener(listener, lldb.SBProcess.eBroadcastBitStateChanged)\n"\
-   	"while True:\n"\
-        "  print \"Connecting...\"\n"\
-        "  event = lldb.SBEvent()\n"\
-   	"  if listener.WaitForEvent(1, event):\n"\
-        "    if process.GetStateFromEvent(event) == lldb.eStateConnected:\n"\
-        "      break\n"\
-   	"print \"Launching...\"\n"\
         "error = lldb.SBError()\n"\
-   	"ok = process.RemoteLaunch(None, None, None, None, None, None, 0, False, error)\n"\
-   	"while True:\n"\
-        "  event = lldb.SBEvent()\n"\
-   	"  if listener.WaitForEvent(1, event):\n"\
-        "    if process.GetStateFromEvent(event) == lldb.eStateRunning:\n"\
-        "      break\n"\
-        "    if process.GetStateFromEvent(event) == lldb.eStateStopped:\n"\
-        "      print \"Running...\"\n"\
-	"      process.Continue()\n"\
-	"broadcaster.RemoveListener(listener)\n",
+        "process.RemoteLaunch(None, None, None, None, None, None, 0, False, error)\n"\
+        "process.Continue()\n"\
+        "",
    	     app_path, app_remote_path,
 	     device_support_path, device_support_path, device_support_path,
 	     lldb_socket_path];
