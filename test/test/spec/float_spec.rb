@@ -72,7 +72,7 @@ describe "Float" do
   end
 
   it "fixfloat" do
-    0.1.step(100.0, 0.1) do |f|
+    0.1.step(30.0, 0.1) do |f|
       f.__fixfloat__?.should == true
     end
   end
