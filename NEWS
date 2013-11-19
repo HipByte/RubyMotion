@@ -27,6 +27,9 @@
     when it generates bridgesupport file for vendor library.
   * [OSX] Added missing bridgesupport metadata for Carbon, OSServices and
     ApplicationServices frameworks.
+  * [iOS] Deprecated optional block that can be passed to the `tests` method
+    when making use of the view test helpers. This can be done with normal
+    `before` filters.
 
 = RubyMotion 2.14 =
 
