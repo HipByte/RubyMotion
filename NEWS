@@ -21,6 +21,7 @@
     (ie #foo=)
   * Improve the precision of Float value.
   * Raise error if cleaning a build artefact fails.
+  * [iOS] Fixed and optimized remote debugging (`rake device debug=1').
   * [iOS] Fixed a bug where `rake device' would no longer print the application
     logs from the device.
   * [OSX] Fixed a bug on OSX platform where compiler flags for iOS are passed
