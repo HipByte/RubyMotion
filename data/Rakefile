@@ -46,12 +46,17 @@ task :vm_files do
     install File.join(objs, 'libmacruby-static.a'), sim
   end
 
-  # Create a fat libmacruby-repl.dylib library for iOS simulator. The i386 slice has a deployment_target for 4.3 and the x86_64 slice has a deployment_target for 7.0.
-  first_ios_repl = "../vm/iPhoneSimulator#{IOS_SDK_VERSIONS.first}-repl.objs/libmacruby-repl.dylib"
-  raise "does not target 7.0?" unless IOS_SDK_VERSIONS.include?('7.0')
-  last_ios_repl = "../vm/iPhoneSimulator7.0-repl.objs/libmacruby-repl.dylib"
-  sh "/usr/bin/lipo -extract_family x86_64 \"#{last_ios_repl}\" -output /tmp/libmacruby-repl64.dylib"
-  sh "/usr/bin/lipo -create \"#{first_ios_repl}\" /tmp/libmacruby-repl64.dylib -output ios/libmacruby-repl.dylib"
+  if IOS_SDK_VERSIONS.size > 1
+    # Create a fat libmacruby-repl.dylib library for iOS simulator. The i386 slice has a deployment_target for 4.3 and the x86_64 slice has a deployment_target for 7.0.
+    first_ios_repl = "../vm/iPhoneSimulator#{IOS_SDK_VERSIONS.first}-repl.objs/libmacruby-repl.dylib"
+
+    # FIXME : Need to use latest SDK version instead of '7.0'
+    raise "does not target 7.0?" unless IOS_SDK_VERSIONS.include?('7.0')
+    last_ios_repl = "../vm/iPhoneSimulator7.0-repl.objs/libmacruby-repl.dylib"
+
+    sh "/usr/bin/lipo -extract_family x86_64 \"#{last_ios_repl}\" -output /tmp/libmacruby-repl64.dylib"
+    sh "/usr/bin/lipo -create \"#{first_ios_repl}\" /tmp/libmacruby-repl64.dylib -output ios/libmacruby-repl.dylib"
+  end
 
   # XXX we are no longer stripping symbols since it apparently removes exception handlers
   # (iOS 7 only). Not a big deal since we do not compile with debug metadata by default (-g).
