@@ -117,7 +117,7 @@ task :bridgesupport_files do
         case framework
           when 'HIToolbox', 'Ink' then 'Carbon'
           when 'CFNetwork', 'LaunchServices', 'Metadata', 'OSServices', 'SearchKit' then 'CoreServices'
-          when 'ColorSync', 'CoreText', 'HIServices' then 'ApplicationServices'
+          when 'ColorSync', 'CoreText', 'HIServices', 'ImageIO' then 'ApplicationServices'
           else framework
         end
 
