@@ -914,6 +914,10 @@ start_debug_server(am_device_t dev)
 		if (FD_ISSET(lldb_socket, &read_fds)) {
 		    len = read(lldb_socket, buf, sizeof buf);
 		    if (len > 0) {
+#if 0
+			buf[len] = '\0';
+			printf("lldb -> device: %ld bytes: %s\n", len, buf);
+#endif
 			write(gdb_fd, buf, len);
 		    }
 		    else {
@@ -923,6 +927,10 @@ start_debug_server(am_device_t dev)
 		if (FD_ISSET(gdb_fd, &read_fds)) {
 		    len = read(gdb_fd, buf, sizeof buf);
 		    if (len > 0) {
+#if 0
+			buf[len] = '\0';
+			printf("device -> lldb: %ld bytes: %s\n", len, buf);
+#endif
 			write(lldb_socket, buf, len);
 		    }
 		    else {
