@@ -168,6 +168,9 @@ module Bacon
     # * :navigation => true
     # * :tab => true
     def tests(controller_class, options = {}, &block)
+      if block
+        puts "   \e[1mWARNING!\e[0m Passing a block to the `tests` method is deprecated and will be removed in an upcoming release. Instead, simply define a `before` filter above your call to `tests`. For more information see: http://www.rubymotion.com/developer-center/articles/testing/#_configuring_your_context"
+      end
       @controller_class, @options, @after_created_block = controller_class, options, block
       extend Bacon::Functional::API
       extend Bacon::Functional::ContextExt
