@@ -14,15 +14,15 @@ rescue
 end
 
 puts "*** Array ***"
-bm_array
+autorelease_pool { bm_array }
 
 puts "*** Hash ***"
-bm_hash
+autorelease_pool { bm_hash }
 
 puts "*** String ***"
-bm_string
+autorelease_pool { bm_string }
 
 puts "*** Time ***"
-bm_time
+autorelease_pool { bm_time }
 
 exit(0)

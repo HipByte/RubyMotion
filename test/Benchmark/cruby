@@ -1,3 +1,7 @@
 #!/usr/bin/env ruby
 
+def autorelease_pool(&block)
+  block.call
+end
+
 load './app/benchmark.rb'
