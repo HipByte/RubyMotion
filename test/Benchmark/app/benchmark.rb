@@ -22,4 +22,7 @@ bm_hash
 puts "*** String ***"
 bm_string
 
+puts "*** Time ***"
+bm_time
+
 exit(0)
