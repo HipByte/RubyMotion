@@ -169,7 +169,7 @@ module Motion; module Project;
     end
 
     def cflags(platform, cplusplus)
-      super + " -g -fobjc-legacy-dispatch -fobjc-abi-version=2 -DTARGET_OS_IPHONE"
+      super + " -g -fobjc-legacy-dispatch -fobjc-abi-version=2"
     end
 
     def ldflags(platform)
