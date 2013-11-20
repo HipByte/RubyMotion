@@ -20,4 +20,4 @@ function! MRIIndent()
   setlocal cinoptions=(0,t0
 endfunction
 
-autocmd Filetype c,cpp call MRIIndent()
+autocmd Filetype c,cpp,objc call MRIIndent()
