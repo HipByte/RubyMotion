@@ -92,10 +92,15 @@ EOS
       sh "\"#{App.config.sdk_path}/build-tools/android-4.4/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\""
       sh "\"#{App.config.sdk_path}/build-tools/android-4.4/aapt\" add -f \"../#{archive}\" lib/armeabi/libpayload.so"
     end
+
+    debug_keystore = File.expand_path('~/.android/debug.keystore')
+    unless File.exist?(debug_keystore)
+      App.info 'Create', debug_keystore
+      sh "/usr/bin/keytool -genkeypair -alias androiddebugkey -keypass android -keystore \"#{debug_keystore}\" -storepass android -dname \"CN=Android Debug,O=Android,C=US\" -validity 9999"
     end
 
     App.info 'Sign', archive
-    sh "/usr/bin/jarsigner -storepass android -keystore ~/.android/debug.keystore \"#{archive}\" androiddebugkey"
+    sh "/usr/bin/jarsigner -storepass android -keystore \"#{debug_keystore}\" \"#{archive}\" androiddebugkey"
 
     App.info 'Align', archive
     sh "\"#{App.config.sdk_path}/tools/zipalign\" -f 4 \"#{archive}\" \"#{archive}-aligned\""
