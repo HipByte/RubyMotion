@@ -1,6 +1,8 @@
 = RubyMotion 2.16 =
 
   * Improve Time#{<, >, ==, eql?} performance. 9 times faster.
+  * Improve the performance where NSDate object is converted to Time object.
+    10 times faster.
 
 = RubyMotion 2.15 =
 
