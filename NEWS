@@ -3,6 +3,7 @@
   * Improve Time#{<, >, ==, eql?} performance. 9 times faster.
   * Improve the performance where NSDate object is converted to Time object.
     10 times faster.
+  * Fixed a heap overflow in floating point parsing.
 
 = RubyMotion 2.15 =
 

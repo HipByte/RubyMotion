@@ -79,4 +79,10 @@ describe "Float" do
       f.__fixfloat__?.should == true
     end
   end
+
+  it "Heap Overflow in Floating Point Parsing" do
+    # https://www.ruby-lang.org/en/news/2013/11/22/heap-overflow-in-floating-point-parsing-cve-2013-4164/
+    (("1."+"1"*300000).to_f * 9).should == 10.0
+  end
+
 end
