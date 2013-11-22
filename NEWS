@@ -4,6 +4,8 @@
   * Improved Time#{<, >, ==, eql?} performance. 9 times faster.
   * Improved the performance when NSDate objects are converted to Time objects.
     10 times faster.
+  * Fixed regression in the REPL that made it impossible to use block local
+    variables.
 
 = RubyMotion 2.15 =
 
