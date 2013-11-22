@@ -1,3 +1,8 @@
+= RubyMotion 2.17 =
+
+  * Define implementations of NSObject methods, such as `conformsToProtocol',
+    that take Ruby semantics into account on all classes created by RubyMotion.
+
 = RubyMotion 2.16 =
 
   * Fixed a heap overflow in floating point parsing (CVE-2013-4164).
