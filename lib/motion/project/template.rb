@@ -93,6 +93,7 @@ module Motion; module Project
       template_files = File.join(template_directory, 'files')
       Dir.glob(File.join(template_files, "**/")).each do |dir|
         dir.sub!("#{template_files}/", '')
+        dir = replace_file_name(dir)
         FileUtils.mkdir_p(dir) if dir.length > 0
       end
     end
@@ -118,7 +119,7 @@ module Motion; module Project
     end
 
     def replace_file_name(file_name)
-      file_name = file_name.sub("{name}", "#{@name}")
+      file_name = file_name.gsub("{name}", "#{@name}")
       file_name
     end
 
