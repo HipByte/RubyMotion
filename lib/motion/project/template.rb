@@ -119,7 +119,7 @@ module Motion; module Project
     end
 
     def replace_file_name(file_name)
-      file_name = file_name.sub("{name}", "#{@name}")
+      file_name = file_name.gsub("{name}", "#{@name}")
       file_name
     end
 
