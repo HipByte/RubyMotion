@@ -1,11 +1,13 @@
 = RubyMotion 2.17 =
 
-  * Define implementations of NSObject methods, such as `conformsToProtocol',
+  * Define implementations of NSObject methods, such as `conformsToProtocol:',
     that take Ruby semantics into account on all classes created by RubyMotion.
   * Fixed a bug in compiler where boxed type is not registered if structure is
     only used within pointer.
   * Added support for dynamic name directory in template. Thanks to Toshiwo for
     the patch (pull request #144).
+  * Fixed a bug in NSArray#{take,drop} where nil could be returned instead of
+    an empty Array object in certain cases.
 
 = RubyMotion 2.16 =
 
