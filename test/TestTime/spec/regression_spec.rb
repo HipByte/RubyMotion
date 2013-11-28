@@ -20,3 +20,16 @@ describe "Time" do
   end
 end
 
+#RM-337
+describe "Time#hash" do
+  class Time
+    def to_nsdate
+      NSDate.dateWithTimeIntervalSince1970(self.to_i)
+    end
+  end
+
+  it "should be equal after converting NSDate to Time" do
+    a = Time.now
+    a.to_nsdate.hash.should == a.to_nsdate.hash
+  end
+end
