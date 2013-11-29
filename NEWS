@@ -9,7 +9,7 @@
   * Fixed a bug in NSArray#{take,drop} where nil could be returned instead of
     an empty Array object in certain cases.
   * Fixed a bug where NSDate objects are converted to Time objects.
-  * Improved Range.new performance. 20% times faster.
+  * Improved Range.new performance. 20% faster.
 
 = RubyMotion 2.16 =
 
