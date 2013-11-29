@@ -19,6 +19,9 @@ autorelease_pool { bm_array }
 puts "*** Hash ***"
 autorelease_pool { bm_hash }
 
+puts "*** Range ***"
+autorelease_pool { bm_range }
+
 puts "*** String ***"
 autorelease_pool { bm_string }
 
