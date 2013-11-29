@@ -10,6 +10,8 @@
     an empty Array object in certain cases.
   * Fixed a bug where NSDate objects are converted to Time objects.
   * Improved Range.new performance. 20% faster.
+  * Improved Array performance where finalizes object and expands internal
+    memory. 15% faster.
 
 = RubyMotion 2.16 =
 
