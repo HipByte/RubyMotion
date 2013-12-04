@@ -12,6 +12,8 @@
   * Fixed a bug in NSArray#{take,drop} where nil could be returned instead of
     an empty Array object in certain cases.
   * Fixed a bug where NSDate objects are converted to Time objects.
+  * Fixed a bug where it cannot use the structures which have same signature.
+    (Ex NSRect and CGRect in 64-bit app)
   * Improved Range.new performance. 20% faster.
   * Improved Array performance where finalizes object and expands internal
     memory. 15% faster.
