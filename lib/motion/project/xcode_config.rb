@@ -343,9 +343,10 @@ EOS
 
     def gen_bridge_metadata(platform, headers, bs_file, c_flags, exceptions=[])
       sdk_path = self.sdk(local_platform)
-      includes = headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
+      includes = ['-I.'] + headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
       exceptions = exceptions.map { |x| "\"#{x}\"" }.join(' ')
-      sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' #{bridgesupport_flags} --cflags \" #{c_flags} -isysroot \"#{sdk_path}\" #{bridgesupport_cflags} -D__STRICT_ANSI__ -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\" #{ "-e #{exceptions}" if exceptions.length != 0}"
+      c_flags = "#{c_flags} -isysroot '#{sdk_path}' #{bridgesupport_cflags} -D__STRICT_ANSI__ #{includes.join(' ')}"
+      sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' #{bridgesupport_flags} --cflags \"#{c_flags}\" #{headers.map { |x| "'#{x}'" }.join(' ')} -o '#{bs_file}' #{ "-e #{exceptions}" if exceptions.length != 0}"
     end
 
     def define_global_env_txt
