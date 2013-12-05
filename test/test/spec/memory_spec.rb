@@ -257,6 +257,26 @@ describe "Objective-C methods that return retained objects" do
   end
 end
 
+describe "Ruby methods that return retained objects" do
+  def newObject; Object.new; end
+  def newbuildObject; Object.new; end
+
+  it "returns a retained object if the method name starts exactly with 'new'" do
+    lambda { newObject }.should.not.be.autoreleased
+    lambda { newbuildObject }.should.be.autoreleased
+  end
+
+  def copyObject; Object.new; end
+  def objectCopy; Object.new; end
+  def copyingObject; Object.new; end
+
+  it "returns a retained object if the method name contains 'copy'" do
+    lambda { copyObject }.should.not.be.autoreleased
+    lambda { objectCopy }.should.not.be.autoreleased
+    lambda { copyingObject }.should.be.autoreleased
+  end
+end
+
 class TestSetValueForKey
   attr_accessor :foo
 end
