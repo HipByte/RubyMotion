@@ -17,6 +17,9 @@
   * Improved Range.new performance. 20% faster.
   * Improved Array performance where finalizes object and expands internal
     memory. 15% faster.
+  * Fixed bug where ARC's rules related to method names starting with `new` or
+    containing `copy` or `Copy` where not being followed and returned objects
+    were not being autoreleased.
 
 = RubyMotion 2.16 =
 

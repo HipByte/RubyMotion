@@ -209,6 +209,54 @@ describe "init+super" do
   end
 end
 
+class Proc
+  # The block should return the object that is supposed to be autoreleased.
+  def autoreleased?
+    object = count_in_autorelease_pool = nil
+    autorelease_pool do
+      object = self.call
+      raise 'Unexpected `nil` value' if object.nil?
+      object.retain
+      count_in_autorelease_pool = object.retainCount
+    end
+    result = (object.retainCount == count_in_autorelease_pool - 1)
+    object.release
+    result
+  end
+end
+
+describe "C functions that return retained objects" do
+  it "returns an autoreleased object if the function name contains 'Create'" do
+    lambda {
+      CFStringCreateWithFormat(nil, {}, '%@', 42)
+    }.should.be.autoreleased
+  end
+
+  it "returns an autoreleased object if the function name contains 'Copy'" do
+    lambda {
+      CFURLCopyPath(NSURL.URLWithString('http://example.com/some/path'))
+    }.should.be.autoreleased
+  end
+end
+
+describe "Objective-C methods that return retained objects" do
+  # TODO Needed?
+  #it "returns an autoreleased object if the method name starts with 'alloc'" do
+  #end
+
+  it "returns an autoreleased object if the method name starts exactly with 'new'" do
+    lambda { TestMethod.newRetainedInstance }.should.be.autoreleased
+    lambda { TestMethod.newbuildRetainedInstance }.should.not.be.autoreleased
+  end
+
+  it "returns an autoreleased object if the method name contains 'copy'" do
+    object = TestMethod.new
+    lambda { object.copyAndReturnRetainedInstance }.should.be.autoreleased
+    lambda { object.retainedCopy }.should.be.autoreleased
+    lambda { object.copyingAndReturningRetainedInstance }.should.not.be.autoreleased
+  end
+end
+
 class TestSetValueForKey
   attr_accessor :foo
 end

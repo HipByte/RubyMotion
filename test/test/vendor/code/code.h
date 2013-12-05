@@ -31,7 +31,7 @@ typedef id (^MyBlock)(void);
 - (int)optionalMethod3;
 @end
 
-@interface TestMethod : NSObject <TestProtocol>
+@interface TestMethod : NSObject <TestProtocol, NSCopying>
 {
     BOOL _testProtocolFlag;
 }
@@ -57,6 +57,12 @@ typedef id (^MyBlock)(void);
 - (id)methodSendingNew:(Class)klass;
 
 + (BOOL)testConformsToProtocol:(id <TestConformsToProtocol>)obj;
+
++ (instancetype)newRetainedInstance;
++ (instancetype)newbuildRetainedInstance;
+- (instancetype)copyAndReturnRetainedInstance;
+- (instancetype)retainedCopy;
+- (instancetype)copyingAndReturningRetainedInstance;
 
 @end
 

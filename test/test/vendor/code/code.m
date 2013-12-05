@@ -105,6 +105,36 @@
     return [obj conformsToProtocol:@protocol(TestConformsToProtocol)];
 }
 
++ (instancetype)newRetainedInstance;
+{
+    return [[self alloc] init];
+}
+
++ (instancetype)newbuildRetainedInstance;
+{
+    return [[self alloc] init];
+}
+
+- (instancetype)copyAndReturnRetainedInstance;
+{
+    return [self copy];
+}
+
+- (instancetype)retainedCopy;
+{
+    return [self copy];
+}
+
+- (instancetype)copyingAndReturningRetainedInstance;
+{
+    return [self copy];
+}
+
+- (id)copyWithZone:(NSZone *)zone;
+{
+    return [[[self class] alloc] init];
+}
+
 @end
 
 @implementation TestIterator
