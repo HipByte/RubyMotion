@@ -345,7 +345,7 @@ EOS
       sdk_path = self.sdk(local_platform)
       includes = ['-I.'] + headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
       exceptions = exceptions.map { |x| "\"#{x}\"" }.join(' ')
-      c_flags = "#{c_flags} -isysroot '#{sdk_path}' #{bridgesupport_cflags} -D__STRICT_ANSI__ #{includes.join(' ')}"
+      c_flags = "#{c_flags} -isysroot '#{sdk_path}' #{bridgesupport_cflags} #{includes.join(' ')}"
       sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' #{bridgesupport_flags} --cflags \"#{c_flags}\" #{headers.map { |x| "'#{x}'" }.join(' ')} -o '#{bs_file}' #{ "-e #{exceptions}" if exceptions.length != 0}"
     end
 
