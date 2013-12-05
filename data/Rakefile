@@ -124,7 +124,7 @@ task :bridgesupport_files do
       unless File.exist?(dest)
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
         sdk_version_headers = ((a[0].to_i * 100) + (a[1].to_i * 10)).to_s
-        sh "../bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -mmacosx-version-min=#{sdk_version} -DTARGET_OS_MAC -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -D__STRICT_ANSI__ -F#{File.dirname(framework_path)} -framework #{linked_framework}\" --framework #{framework_path} > #{dest}"
+        sh "../bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -mmacosx-version-min=#{sdk_version} -DTARGET_OS_MAC -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -F#{File.dirname(framework_path)} -framework #{linked_framework}\" --framework #{framework_path} > #{dest}"
         apply_bridgesupport_fixes(dest)
         return dest
       end
@@ -139,7 +139,7 @@ task :bridgesupport_files do
         child_framework_paths.each do |child_framework_path|
           if sdk_version == "10.7" && child_framework_path.include?("CoreGraphics")
             dest = 'osx/10.7/BridgeSupport/child/CoreGraphics.bridgesupport'
-            sh "../bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -F#{sdk_path}/System/Library/Frameworks/ApplicationServices.framework/Frameworks -mmacosx-version-min=10.7 -DTARGET_OS_MAC -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=100700 -D__STRICT_ANSI__ -framework ApplicationServices\" --framework #{child_framework_path} > #{dest}"
+            sh "../bin/gen_bridge_metadata --format complete --cflags \"-isysroot #{sdk_path} -F#{sdk_path}/System/Library/Frameworks/ApplicationServices.framework/Frameworks -mmacosx-version-min=10.7 -DTARGET_OS_MAC -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=100700 -framework ApplicationServices\" --framework #{child_framework_path} > #{dest}"
             apply_bridgesupport_fixes(dest)
             merge_path = dest
           else
@@ -172,12 +172,12 @@ task :bridgesupport_files do
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
         sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
         extra_flags = (sdk_version >= '7.0') ? '--64-bit' : '--no-64-bit'
-        sh "../bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -D__STRICT_ANSI__ -framework #{framework}\" --framework #{framework_path} > #{dest}"
+        sh "../bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework}\" --framework #{framework_path} > #{dest}"
         apply_bridgesupport_fixes(dest)
 
         if framework == 'Foundation' and sdk_version >= '7.0'
           # In iOS 7.0, NSObject is defined in /usr/include/objc/NSObject.h
-          sh "../bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -D__STRICT_ANSI__ -framework #{framework} -I#{sdk_path}/usr/include \" objc/NSObject.h objc/NSObjCRuntime.h > /tmp/NSObject.bridgesupport"
+          sh "../bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework} -I#{sdk_path}/usr/include \" objc/NSObject.h objc/NSObjCRuntime.h > /tmp/NSObject.bridgesupport"
           merge_bridgesupport dest, '/tmp/NSObject.bridgesupport'
         end
 
