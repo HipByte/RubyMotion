@@ -18,8 +18,8 @@
   * Improved Array performance where finalizes object and expands internal
     memory. 15% faster.
   * Fixed bug where ARC's rules related to method names starting with `new` or
-    containing `copy` or `Copy` where not being followed and returned objects
-    were not being autoreleased.
+    containing `copy` or `Copy` where not being followed and objects returned
+    from Objective-C methods that matched these rules were not autoreleased.
 
 = RubyMotion 2.16 =
 
