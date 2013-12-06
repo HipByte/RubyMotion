@@ -64,6 +64,8 @@ typedef id (^MyBlock)(void);
 - (instancetype)retainedCopy;
 - (instancetype)copyingAndReturningRetainedInstance;
 
++ (BOOL)isReturnValueRetained:(id)object forSelector:(SEL)sel;
+
 @end
 
 @interface TestIterator : NSObject <NSFastEnumeration>

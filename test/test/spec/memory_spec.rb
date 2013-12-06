@@ -257,23 +257,59 @@ describe "Objective-C methods that return retained objects" do
   end
 end
 
+class RetainCounter
+  attr_reader :retain_count
+
+  def initialize
+    @retain_count = 0
+  end
+
+  def retain
+    @retain_count += 1
+    super
+  end
+end
+
 describe "Ruby methods that return retained objects" do
   def newObject; Object.new; end
   def newbuildObject; Object.new; end
 
-  it "returns a retained object if the method name starts exactly with 'new'" do
-    lambda { newObject }.should.not.be.autoreleased
-    lambda { newbuildObject }.should.be.autoreleased
+  def newRetainCounter; RetainCounter.new; end
+  def newbuildRetainCounter; RetainCounter.new; end
+
+  it "returns an unretained autoreleased object if the method starts with 'new' and is called from Ruby" do
+    lambda { newRetainCounter }.should.be.autoreleased
+    lambda { newbuildRetainCounter }.should.be.autoreleased
+    newRetainCounter.retain_count.should == 0
+    newbuildRetainCounter.retain_count.should == 0
+  end
+
+  it "returns a retained object if the method name starts exactly with 'new' and is called from Objective-C" do
+    TestMethod.isReturnValueRetained(self, forSelector:'newRetainCounter').should == true
+    TestMethod.isReturnValueRetained(self, forSelector:'newbuildRetainCounter').should == false
   end
 
   def copyObject; Object.new; end
   def objectCopy; Object.new; end
   def copyingObject; Object.new; end
 
-  it "returns a retained object if the method name contains 'copy'" do
-    lambda { copyObject }.should.not.be.autoreleased
-    lambda { objectCopy }.should.not.be.autoreleased
+  def copyRetainCounter; RetainCounter.new; end
+  def retainCounterCopy; RetainCounter.new; end
+  def copyingRetainCounter; RetainCounter.new; end
+
+  it "returns an unretained autoreleased object if the method name contains 'copy' and is called from Ruby" do
+    lambda { copyObject }.should.be.autoreleased
+    lambda { objectCopy }.should.be.autoreleased
     lambda { copyingObject }.should.be.autoreleased
+    copyRetainCounter.retain_count.should == 0
+    retainCounterCopy.retain_count.should == 0
+    copyingRetainCounter.retain_count.should == 0
+  end
+
+  it "returns a retained object if the method name contains 'copy' and is called from Objective-C" do
+    TestMethod.isReturnValueRetained(self, forSelector:'copyRetainCounter').should == true
+    TestMethod.isReturnValueRetained(self, forSelector:'retainCounterCopy').should == true
+    TestMethod.isReturnValueRetained(self, forSelector:'newbuildRetainCounter').should == false
   end
 end
 

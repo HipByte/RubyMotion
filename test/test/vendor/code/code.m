@@ -135,6 +135,13 @@
     return [[[self class] alloc] init];
 }
 
++ (BOOL)isReturnValueRetained:(id)object forSelector:(SEL)sel;
+{
+    id return_object = [object performSelector:sel];
+    NSNumber *count = [return_object performSelector:@selector(retain_count)];
+    return [count intValue] == 1;
+}
+
 @end
 
 @implementation TestIterator
