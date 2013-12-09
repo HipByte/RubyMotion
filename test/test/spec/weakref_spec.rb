@@ -60,4 +60,18 @@ describe "WeakRef" do
     ref2.object_id.should == obj.object_id
     ref3.object_id.should == obj.object_id
   end
+
+  it "are resolved by NSObject#==" do
+    vc = UIViewController.new
+    ref = WeakRef.new(vc)
+    ref.should == vc
+    vc.should == ref
+  end
+
+  it "are resolved by Boxed#==" do
+    rect = CGRect.new(CGPoint.new(1, 2), CGSize.new(3, 4))
+    ref = WeakRef.new(rect)
+    ref.should == rect
+    rect.should == ref
+  end
 end
