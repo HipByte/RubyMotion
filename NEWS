@@ -28,6 +28,8 @@
   * [OSX] Introduced the `app.codesign_for_release' variable, which controls
     whether code-signing should occur during `rake build:release'. The default
     value for this variable is `true'.
+  * Fixed a bug where nested WeakRef objects (WeakRef.new(WeakRef.new(...)))
+    would not be properly resolved at dispatch time.
 
 = RubyMotion 2.16 =
 
