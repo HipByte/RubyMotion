@@ -44,7 +44,7 @@ namespace :build do
   task :release do
     App.config_without_setup.build_mode = :release
     App.build('MacOSX')
-    App.codesign('MacOSX')
+    App.codesign('MacOSX') if App.config_without_setup.codesign_for_release
   end
 end
 
