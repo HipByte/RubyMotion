@@ -22,6 +22,7 @@
     returned from Objective-C methods that matched these rules not being
     autoreleased and objects returned from Ruby to Objective-C not being
     retained.
+  * Fixed the runtime to prefix certain kernel symbols we export (ex. selCopy).
 
 = RubyMotion 2.16 =
 
