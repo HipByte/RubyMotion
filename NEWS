@@ -23,6 +23,8 @@
     autoreleased and objects returned from Ruby to Objective-C not being
     retained.
   * Fixed the runtime to prefix certain kernel symbols we export (ex. selCopy).
+  * Fixed a bug in in the build system where duplicated entries in the
+    app.resource_dirs array would mess up the resource-copying process.
 
 = RubyMotion 2.16 =
 
