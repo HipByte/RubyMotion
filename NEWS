@@ -30,6 +30,8 @@
     value for this variable is `true'.
   * Fixed a bug where nested WeakRef objects (WeakRef.new(WeakRef.new(...)))
     would not be properly resolved at dispatch time.
+  * Fixed a bug in {NSObject,Boxed}#== with a WeakRef object operand where said
+    operand would not be resolved.
 
 = RubyMotion 2.16 =
 
