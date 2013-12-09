@@ -50,4 +50,14 @@ describe "WeakRef" do
     end
     $weakref_destroyed.should == true
   end
+
+  it "can be nested" do
+    obj = Object.new
+    ref1 = WeakRef.new(obj)
+    ref2 = WeakRef.new(ref1)
+    ref3 = WeakRef.new(ref2)
+    ref1.object_id.should == obj.object_id
+    ref2.object_id.should == obj.object_id
+    ref3.object_id.should == obj.object_id
+  end
 end
