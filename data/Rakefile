@@ -197,6 +197,8 @@ task :bridgesupport_files do
       end
     end
   end
+
+  Rake::Task['UIAutomation:generate_bridgesupport_files'].invoke
 end
 
 def generate_bs_static_stub(file, includes)
@@ -345,7 +347,9 @@ namespace :UIAutomation do
 
     IOS_SDK_VERSIONS.each do |sdk_version|
       framework_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk/Developer/Library/PrivateFrameworks/UIAutomation.framework"
-      sh "class-dump -H -o UIAutomation/#{sdk_version} '#{framework_path}'"
+      destination = File.join('UIAutomation', sdk_version)
+      next if File.exist?(destination)
+      sh "class-dump -H -o #{destination} '#{framework_path}'"
       Dir.glob("UIAutomation/#{sdk_version}/*.h").each do |header|
         content = File.read(header)
         if File.basename(header) == 'CDStructures.h'
@@ -363,16 +367,17 @@ namespace :UIAutomation do
   end
 
   desc 'Generate BridgeSupport from dumped headers'
-  task :generate_bridgesupport_files do
+  task :generate_bridgesupport_files => :dump_headers do
     IOS_SDK_VERSIONS.each do |sdk_version|
+      destination = "ios/#{sdk_version}/BridgeSupport/UIAutomation.bridgesupport"
+      next if File.exist?(destination)
       platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
       sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
       a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
       sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
       extra_flags = (sdk_version >= '7.0') ? '--64-bit' : '--no-64-bit'
-      mkdir_p "UIAutomation/#{sdk_version}"
       Dir.chdir "UIAutomation/#{sdk_version}" do
-        sh "/usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I.\" *.h > ../../ios/#{sdk_version}/BridgeSupport/UIAutomation.bridgesupport"
+        sh "/usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I.\" *.h > ../../#{destination}"
       end
     end
   end
@@ -381,4 +386,5 @@ end
 task :clean do
   IOS_SDK_VERSIONS.each { |path| rm_rf('ios/' + path) }
   OSX_SDK_VERSIONS.each { |path| rm_rf('osx/' + path) }
+  rm_rf 'UIAutomation'
 end
