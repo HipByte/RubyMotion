@@ -46,6 +46,7 @@ module Motion; module Project;
       end
 
       config.resources_dirs.flatten!
+      config.resources_dirs.uniq!
 
       # Locate SDK and compilers.
       sdk = config.sdk(platform)
