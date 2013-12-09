@@ -25,6 +25,9 @@
   * Fixed the runtime to prefix certain kernel symbols we export (ex. selCopy).
   * Fixed a bug in in the build system where duplicated entries in the
     app.resource_dirs array would mess up the resource-copying process.
+  * [OSX] Introduced the `app.codesign_for_release' variable, which controls
+    whether code-signing should occur during `rake build:release'. The default
+    value for this variable is `true'.
 
 = RubyMotion 2.16 =
 
