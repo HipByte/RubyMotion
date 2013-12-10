@@ -349,7 +349,9 @@ namespace :UIAutomation do
       framework_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk/Developer/Library/PrivateFrameworks/UIAutomation.framework"
       destination = File.join('UIAutomation', sdk_version)
       next if File.exist?(destination)
-      sh "class-dump -H -o #{destination} '#{framework_path}'"
+      # Use the 386 slice here because it's easier to differentiate between
+      # CGFloat and NSTimeInterval. Otherwise a `double` arg is too ambigous.
+      sh "class-dump --arch i386 -H -o #{destination} '#{framework_path}'"
       Dir.glob("UIAutomation/#{sdk_version}/*.h").each do |header|
         content = File.read(header)
         if File.basename(header) == 'CDStructures.h'
@@ -360,6 +362,20 @@ namespace :UIAutomation do
           content = "#import <CoreGraphics/CGGeometry.h>\n" << content
           # Replace `struct CGRect` with just `CGRect`.
           content.gsub!(/struct (CGAffineTransform|CGPoint|CGSize|CGRect)/) { $1 }
+
+          content.gsub!(/(duration):\(double\)/i) { "#{$1}:(NSTimeInterval)" }
+
+          content.gsub!(/\(((float|int|unsigned int)(\s*\*)?)\)/) do
+            type = case $2
+                   when 'float'
+                     'CGFloat'
+                   when 'int'
+                     'NSInteger'
+                   when 'unsigned int'
+                     'NSUInteger'
+                   end
+            "(#{type}#{$3})"
+          end
         end
         File.open(header, 'w') { |f| f << content }
       end
