@@ -6,15 +6,24 @@ Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'MacBacon UI'
   app.frameworks << 'CoreGraphics'
+  #app.archs['iPhoneSimulator'] = ['x86_64']
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
 end
 
+sdk_versions = Dir.glob(File.join(App.config.platforms_dir, "#{App.config.deploy_platform}.platform/Developer/SDKs/#{App.config.deploy_platform}*.sdk")).map do |path|
+  File.basename(path).scan(/#{App.config.deploy_platform}(.*)\.sdk/)[0][0]
+end
+
 namespace :spec do
-  desc "Run on all available iOS SDKs"
-  task :all do
-    sdk_versions = Dir.glob(File.join(App.config.platforms_dir, "#{App.config.deploy_platform}.platform/Developer/SDKs/#{App.config.deploy_platform}*.sdk")).map do |path|
-      File.basename(path).scan(/#{App.config.deploy_platform}(.*)\.sdk/)[0][0]
+  sdk_versions.each do |sdk_version|
+    desc "Run tests on the iOS #{sdk_version} SDK"
+    task sdk_version do
+      sh "rake spec deployment_target=#{sdk_version}"
     end
+  end
+
+  desc "Run tests on all available iOS SDKs"
+  task :all do
     counter = 0
     sdk_versions.each do |sdk_version|
       App.info "Info", "Running specs on iOS #{sdk_version} SDK."
