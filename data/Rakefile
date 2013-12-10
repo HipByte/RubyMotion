@@ -93,6 +93,17 @@ def merge_bridgesupport(base_bridgesupport, merge_brigesupport)
   }
 end
 
+def apply_CoreText_fix(framework_path)
+  header_path = File.join(framework_path, 'Headers', 'CTRunDelegate.h')
+  content = File.read(header_path)
+  signature = 'CFTypeID CTRunDelegateGetTypeID'
+  message = "// Disabled by the RubyMotion build system: #{signature}"
+  unless content.include?(message)
+    content.sub!(/^#{signature}/, message)
+    File.open(header_path, 'w') { |f| f << content }
+  end
+end
+
 EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit', 'Ruby', 'RubyCocoa', 'vecLib']
 task :bridgesupport_files do
   platform_dev_path = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
@@ -169,6 +180,8 @@ task :bridgesupport_files do
       dest = "ios/#{sdk_version}/BridgeSupport/#{framework}.bridgesupport"
       dest = "ios/#{sdk_version}/BridgeSupport/child/#{framework}.bridgesupport" if is_handle_nested
       unless File.exist?(dest)
+        apply_CoreText_fix(framework_path) if framework == 'CoreText'
+
         a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
         sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
         extra_flags = (sdk_version >= '7.0') ? '--64-bit' : '--no-64-bit'
