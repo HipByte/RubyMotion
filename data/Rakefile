@@ -350,9 +350,10 @@ end
 
 desc "Build the UIAutomation lib, PublicAutomation, for the UI spec helper"
 task :build_ui_automation_lib do
+  deployment_target, sdk_version = IOS_SDK_VERSIONS.first, IOS_SDK_VERSIONS.last
+
   vendor_dir = '../vendor/PublicAutomation'
   Dir.chdir vendor_dir do
-    deployment_target, sdk_version = IOS_SDK_VERSIONS.first, IOS_SDK_VERSIONS.last
     %w{ iPhoneSimulator iPhoneOS }.each do |sdk_type|
       platform_dev_path = "#{PLATFORMS_DIR}/#{sdk_type}.platform/Developer"
       sdk_path = "#{platform_dev_path}/SDKs/#{sdk_type}#{sdk_version}.sdk"
@@ -362,6 +363,10 @@ task :build_ui_automation_lib do
   end
   input_files = %w{ iphoneos iphonesimulator }.map { |x| File.join(vendor_dir, 'build', "Debug-#{x}", 'libPublicAutomation.a') }
   sh "/usr/bin/lipo -output ios/libPublicAutomation.a -create #{input_files.join(' ')}"
+
+  Dir.chdir File.join(vendor_dir, 'build/Debug-iphonesimulator/include/PublicAutomation') do
+    sh "../../../../../../bin/gen_bridge_metadata --format complete --cflags '-I.' UIAutomationBridge.h > ../../../../../../data/ios/libPublicAutomation.bridgesupport"
+  end
 end
 
 task :clean do
