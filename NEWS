@@ -34,6 +34,7 @@
     operand would not be resolved.
   * Fixed a compiler bug where `not precompiled' errors when it uses structure
     of GLKit framework.
+  * [OSX] Fixed #eval to honor the self binding when evaluating the string.
 
 = RubyMotion 2.16 =
 
