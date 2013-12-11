@@ -32,6 +32,8 @@
     would not be properly resolved at dispatch time.
   * Fixed a bug in {NSObject,Boxed}#== with a WeakRef object operand where said
     operand would not be resolved.
+  * Fixed a compiler bug where `not precompiled' errors when it uses structure
+    of GLKit framework.
 
 = RubyMotion 2.16 =
 
