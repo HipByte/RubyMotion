@@ -1,3 +1,6 @@
 [submodule "vm"]
 	path = vm
 	url = git@github.com:lrz/RubyMotionVM.git
+[submodule "vendor/PublicAutomation"]
+	path = vendor/PublicAutomation
+	url = https://github.com/TestingWithFrank/PublicAutomation.git
