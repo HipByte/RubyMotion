@@ -6,7 +6,7 @@ verbose(true)
 NEED_STRIP = !ENV['DEBUG']
 
 task :default => :all
-task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
+task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs, :build_ui_automation_lib]
 
 task :vm_files do
   strip = File.join(PLATFORMS_DIR, '../Toolchains/XcodeDefault.xctoolchain/usr/bin/strip')
@@ -351,21 +351,25 @@ end
 desc "Build the UIAutomation lib, PublicAutomation, for the UI spec helper"
 task :build_ui_automation_lib do
   deployment_target, sdk_version = IOS_SDK_VERSIONS.first, IOS_SDK_VERSIONS.last
-
   vendor_dir = '../vendor/PublicAutomation'
-  Dir.chdir vendor_dir do
-    %w{ iPhoneSimulator iPhoneOS }.each do |sdk_type|
-      platform_dev_path = "#{PLATFORMS_DIR}/#{sdk_type}.platform/Developer"
-      sdk_path = "#{platform_dev_path}/SDKs/#{sdk_type}#{sdk_version}.sdk"
-      # TODO 64-bit!
-      sh "xcodebuild -project PublicAutomation.xcodeproj -target PublicAutomation -configuration Debug -sdk '#{sdk_path}' IPHONEOS_DEPLOYMENT_TARGET=#{deployment_target}"
-    end
-  end
-  input_files = %w{ iphoneos iphonesimulator }.map { |x| File.join(vendor_dir, 'build', "Debug-#{x}", 'libPublicAutomation.a') }
-  sh "/usr/bin/lipo -output ios/libPublicAutomation.a -create #{input_files.join(' ')}"
 
-  Dir.chdir File.join(vendor_dir, 'build/Debug-iphonesimulator/include/PublicAutomation') do
-    sh "../../../../../../bin/gen_bridge_metadata --format complete --cflags '-I.' UIAutomationBridge.h > ../../../../../../data/ios/libPublicAutomation.bridgesupport"
+  unless File.exist?('ios/libPublicAutomation.a')
+    Dir.chdir vendor_dir do
+      %w{ iPhoneSimulator iPhoneOS }.each do |sdk_type|
+        platform_dev_path = "#{PLATFORMS_DIR}/#{sdk_type}.platform/Developer"
+        sdk_path = "#{platform_dev_path}/SDKs/#{sdk_type}#{sdk_version}.sdk"
+        # TODO 64-bit!
+        sh "xcodebuild -project PublicAutomation.xcodeproj -target PublicAutomation -configuration Debug -sdk '#{sdk_path}' IPHONEOS_DEPLOYMENT_TARGET=#{deployment_target}"
+      end
+    end
+    input_files = %w{ iphoneos iphonesimulator }.map { |x| File.join(vendor_dir, 'build', "Debug-#{x}", 'libPublicAutomation.a') }
+    sh "/usr/bin/lipo -output ios/libPublicAutomation.a -create #{input_files.join(' ')}"
+  end
+
+  unless File.exist?('ios/libPublicAutomation.bridgesupport')
+    Dir.chdir File.join(vendor_dir, 'build/Debug-iphonesimulator/include/PublicAutomation') do
+      sh "../../../../../../bin/gen_bridge_metadata --format complete --cflags '-I.' UIAutomationBridge.h > ../../../../../../data/ios/libPublicAutomation.bridgesupport"
+    end
   end
 end
 
