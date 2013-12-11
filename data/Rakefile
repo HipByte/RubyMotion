@@ -348,6 +348,22 @@ task :bridgesupport_static_stubs do
   end
 end
 
+desc "Build the UIAutomation lib, PublicAutomation, for the UI spec helper"
+task :build_ui_automation_lib do
+  vendor_dir = '../vendor/PublicAutomation'
+  Dir.chdir vendor_dir do
+    deployment_target, sdk_version = IOS_SDK_VERSIONS.first, IOS_SDK_VERSIONS.last
+    %w{ iPhoneSimulator iPhoneOS }.each do |sdk_type|
+      platform_dev_path = "#{PLATFORMS_DIR}/#{sdk_type}.platform/Developer"
+      sdk_path = "#{platform_dev_path}/SDKs/#{sdk_type}#{sdk_version}.sdk"
+      # TODO 64-bit!
+      sh "xcodebuild -project PublicAutomation.xcodeproj -target PublicAutomation -configuration Debug -sdk '#{sdk_path}' IPHONEOS_DEPLOYMENT_TARGET=#{deployment_target}"
+    end
+  end
+  input_files = %w{ iphoneos iphonesimulator }.map { |x| File.join(vendor_dir, 'build', "Debug-#{x}", 'libPublicAutomation.a') }
+  sh "/usr/bin/lipo -output ios/libPublicAutomation.a -create #{input_files.join(' ')}"
+end
+
 task :clean do
   IOS_SDK_VERSIONS.each { |path| rm_rf('ios/' + path) }
   OSX_SDK_VERSIONS.each { |path| rm_rf('osx/' + path) }
