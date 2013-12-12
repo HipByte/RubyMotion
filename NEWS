@@ -7,40 +7,41 @@
     not able to handle yet.
   * Defined implementations of NSObject methods, such as `conformsToProtocol:',
     that take Ruby semantics into account on all classes created by RubyMotion.
-  * Fixed a bug in compiler where boxed type is not registered if structure is
-    only used within pointer.
+  * Fixed a bug in compiler where boxed types would not be properly registered
+    if a structure was only used for a pointer.
   * Fixed the dispatcher to let methods expecting a structure of type A accept
     a structure of type B who has the exact same fields signature, as in C
     (ex. MKCoordinateRegion and CGRect).
-  * Added support for dynamic name directory in template. Thanks to Toshiwo for
-    the patch (pull request #144).
+  * Added support for dynamic name directory in project templates. Thanks to
+    Toshiwo for the patch (pull request #144).
   * Fixed a bug in NSArray#{take,drop} where nil could be returned instead of
     an empty Array object in certain cases.
-  * Fixed a bug where NSDate objects are converted to Time objects.
-  * Fixed a bug where it cannot use the structures which have same signature.
-    (Ex NSRect and CGRect in 64-bit app)
+  * Fixed a bug where NSDate objects would be wrongly converted to Time objects.
+  * Fixed a bug where certain structures of the same signatures could not be
+    used. (Ex. NSRect and CGRect in a 64-bit OS X app)
   * Improved Range.new performance. 20% faster.
   * Improved Array performance where finalizes object and expands internal
     memory. 15% faster.
-  * Fixed bug where ARC's rules related to method names starting with `new` or
+  * Fixed bugs where ARC's rules related to method names starting with `new` or
     containing `copy` or `Copy` where not being followed. This lead to objects
     returned from Objective-C methods that matched these rules not being
     autoreleased and objects returned from Ruby to Objective-C not being
     retained.
-  * Fixed the runtime to prefix certain kernel symbols we export (ex. selCopy).
+  * Fixed the runtime to prefix certain kernel symbols we export (ex. selCopy)
+    in order to avoid clashes at link time with certain 3rd-party libraries.
   * Fixed a bug in in the build system where duplicated entries in the
     app.resource_dirs array would mess up the resource-copying process.
-  * [OSX] Introduced the `app.codesign_for_release' variable, which controls
-    whether code-signing should occur during `rake build:release'. The default
-    value for this variable is `true'.
   * Fixed a bug where nested WeakRef objects (WeakRef.new(WeakRef.new(...)))
     would not be properly resolved at dispatch time.
   * Fixed a bug in {NSObject,Boxed}#== with a WeakRef object operand where said
     operand would not be resolved.
   * Fixed a compiler bug where `not precompiled' errors when it uses structure
     of GLKit framework.
-  * [OSX] Fixed #eval to honor the self binding when evaluating the string.
   * [iOS] Fix various bugs in the UI test helpers, like `tap`.
+  * [OSX] Fixed #eval to honor the self binding when evaluating the string.
+  * [OSX] Introduced the `app.codesign_for_release' variable, which controls
+    whether code-signing should occur during `rake build:release'. The default
+    value for this variable is `true'.
 
 = RubyMotion 2.16 =
 
