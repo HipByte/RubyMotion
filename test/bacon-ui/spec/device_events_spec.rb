@@ -10,6 +10,14 @@ class DeviceSpecController < UIViewController
     true
   end
 
+  def supportedInterfaceOrientations
+    UIInterfaceOrientationMaskAll
+  end
+
+  def shouldAutorotate
+    true
+  end
+
   # This is all for `shake` support
 
   attr_accessor :shaked

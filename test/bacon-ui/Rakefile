@@ -5,6 +5,7 @@ require 'motion/project/template/ios'
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'MacBacon UI'
+  app.interface_orientations = [:portrait, :landscape_left, :landscape_right, :portrait_upside_down]
   app.frameworks << 'CoreGraphics'
   #app.archs['iPhoneSimulator'] = ['x86_64']
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
