@@ -388,20 +388,24 @@ module Bacon
         view     = view(label_or_view)
         duration = options[:duration] || Functional.default_duration
         touches  = options[:touches]  || 1
+        if touches > 1
+          raise 'Dragging with more than 1 touch is currently unavailable. Please file a support ticket in case you were using this.'
+        end
 
         unless points = options[:points]
           from, to = _extract_start_and_end_points(view, options)
           points   = linear_interpolate(from, to, options[:number_of_points])
         end
 
-        pointer  = Pointer.new(CGPoint.type, points.size)
-        points.each.with_index do |point, i|
-          pointer[i] = point
+        pause = duration.to_f / points.size
+        _event_generator.touchDown(points.first)
+        proper_wait(pause)
+        points[1..-1].each do |point|
+          _event_generator._moveLastTouchPoint(point)
+          proper_wait(pause)
         end
-
-        EventDispatcher.dispatch(duration) do
-          _event_generator.sendMultifingerDragWithPointArray(pointer, numPoints:points.size, duration:duration, numFingers:touches)
-        end
+        _event_generator.liftUp(points.last)
+        proper_wait(pause)
 
         view
       end
