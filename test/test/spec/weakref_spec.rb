@@ -75,3 +75,25 @@ describe "WeakRef" do
     rect.should == ref
   end
 end
+
+describe "Proc#weak!" do
+  it "sets ->self to a weak-reference" do
+    rc = retainCount
+    b1 = Proc.new {}.weak!
+    retainCount.should == rc
+    b2 = Proc.new {}
+    retainCount.should == rc + 1
+  end
+
+  it "returns a reference to the Proc object" do
+    b = Proc.new {}
+    b.weak!.should == b
+  end
+
+  it "can safely be called multiple times" do
+    b = Proc.new {}.weak!
+    rc = retainCount
+    i = 0; while i < 100; b.weak!; i += 1; end
+    rc.should == retainCount
+  end
+end
