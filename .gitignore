@@ -13,6 +13,7 @@ bin/instruments
 
 data/ios
 data/osx
+data/UIAutomation
 
 doc/.yardoc
 doc/*.html

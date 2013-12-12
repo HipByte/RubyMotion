@@ -187,7 +187,7 @@ EOS
       @bridgesupport_files ||= begin
         bs_files = []
         deps = ['RubyMotion'] + (frameworks_dependencies + weak_frameworks).uniq
-        deps << 'PublicAutomation' if spec_mode
+        deps << 'UIAutomation' if spec_mode
         deps.each do |framework|
           supported_versions.each do |ver|
             next if ver < deployment_target || sdk_version < ver

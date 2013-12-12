@@ -6,7 +6,7 @@ verbose(true)
 NEED_STRIP = !ENV['DEBUG']
 
 task :default => :all
-task :all => [:vm_files, :build_ui_automation_lib, :bridgesupport_files, :bridgesupport_static_stubs]
+task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
 
 task :vm_files do
   strip = File.join(PLATFORMS_DIR, '../Toolchains/XcodeDefault.xctoolchain/usr/bin/strip')
@@ -210,6 +210,8 @@ task :bridgesupport_files do
       end
     end
   end
+
+  Rake::Task['UIAutomation:generate_bridgesupport_files'].invoke
 end
 
 def generate_bs_static_stub(file, includes)
@@ -348,28 +350,64 @@ task :bridgesupport_static_stubs do
   end
 end
 
-desc "Build the UIAutomation lib, PublicAutomation, for the UI spec helper"
-task :build_ui_automation_lib do
-  deployment_target, sdk_version = IOS_SDK_VERSIONS.first, IOS_SDK_VERSIONS.last
-  vendor_dir = '../vendor/PublicAutomation'
+namespace :UIAutomation do
+  desc 'Dump the headers of the private iOS UIAutomation frameworks'
+  task :dump_headers do
+    if `which class-dump`.empty?
+      $stderr.puts "[!] This requires the `class-dump` tool. Install it with: $ brew install class-dump."
+      exit 1
+    end
 
-  unless File.exist?('ios/libPublicAutomation.a')
-    Dir.chdir vendor_dir do
-      %w{ iPhoneSimulator iPhoneOS }.each do |sdk_type|
-        platform_dev_path = "#{PLATFORMS_DIR}/#{sdk_type}.platform/Developer"
-        sdk_path = "#{platform_dev_path}/SDKs/#{sdk_type}#{sdk_version}.sdk"
-        # TODO 64-bit!
-        sh "xcodebuild -project PublicAutomation.xcodeproj -target PublicAutomation -configuration Debug -sdk '#{sdk_path}' IPHONEOS_DEPLOYMENT_TARGET=#{deployment_target}"
+    IOS_SDK_VERSIONS.each do |sdk_version|
+      framework_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk/Developer/Library/PrivateFrameworks/UIAutomation.framework"
+      destination = File.join('UIAutomation', sdk_version)
+      next if File.exist?(destination)
+      # Use the 386 slice here because it's easier to differentiate between
+      # CGFloat and NSTimeInterval. Otherwise a `double` arg is too ambigous.
+      sh "class-dump --arch i386 -H -o #{destination} '#{framework_path}'"
+      Dir.glob("UIAutomation/#{sdk_version}/*.h").each do |header|
+        content = File.read(header)
+        if File.basename(header) == 'CDStructures.h'
+          # Remove definitions of structs such as `CGRect`.
+          content.sub!(/#pragma mark Named Structures.+?#pragma/m, '#pragma')
+        else
+          # Use definitions such as `CGRect` from canonical headers.
+          content = "#import <CoreGraphics/CGGeometry.h>\n" << content
+          # Replace `struct CGRect` with just `CGRect`.
+          content.gsub!(/struct (CGAffineTransform|CGPoint|CGSize|CGRect)/) { $1 }
+
+          content.gsub!(/(duration):\(double\)/i) { "#{$1}:(NSTimeInterval)" }
+
+          content.gsub!(/\(((float|int|unsigned int)(\s*\*)?)\)/) do
+            type = case $2
+                   when 'float'
+                     'CGFloat'
+                   when 'int'
+                     'NSInteger'
+                   when 'unsigned int'
+                     'NSUInteger'
+                   end
+            "(#{type}#{$3})"
+          end
+        end
+        File.open(header, 'w') { |f| f << content }
       end
     end
-    input_files = %w{ iphoneos iphonesimulator }.map { |x| File.join(vendor_dir, 'build', "Debug-#{x}", 'libPublicAutomation.a') }
-    sh "/usr/bin/lipo -output ios/libPublicAutomation.a -create #{input_files.join(' ')}"
   end
 
-  unless File.exist?('ios/libPublicAutomation.bridgesupport')
-    # This gets copied into each SDK version subdir by the bridgesupport_files task.
-    Dir.chdir File.join(vendor_dir, 'build/Debug-iphonesimulator/include/PublicAutomation') do
-      sh "../../../../../../bin/gen_bridge_metadata --format complete --cflags '-I.' UIAutomationBridge.h > ../../../../../../data/ios/PublicAutomation.bridgesupport"
+  desc 'Generate BridgeSupport from dumped headers'
+  task :generate_bridgesupport_files => :dump_headers do
+    IOS_SDK_VERSIONS.each do |sdk_version|
+      destination = "ios/#{sdk_version}/BridgeSupport/UIAutomation.bridgesupport"
+      next if File.exist?(destination)
+      platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
+      sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
+      a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
+      sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+      extra_flags = (sdk_version >= '7.0') ? '--64-bit' : '--no-64-bit'
+      Dir.chdir "UIAutomation/#{sdk_version}" do
+        sh "/usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I.\" *.h > ../../#{destination}"
+      end
     end
   end
 end
@@ -377,4 +415,5 @@ end
 task :clean do
   IOS_SDK_VERSIONS.each { |path| rm_rf('ios/' + path) }
   OSX_SDK_VERSIONS.each { |path| rm_rf('osx/' + path) }
+  rm_rf 'UIAutomation'
 end
