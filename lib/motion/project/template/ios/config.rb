@@ -175,6 +175,7 @@ module Motion; module Project;
     def ldflags(platform)
       ldflags = super
       ldflags << " -fobjc-arc" if deployment_target < '5.0'
+      ldflags << " -ObjC -L#{File.join(App.config.motiondir, 'data', 'ios')} -lPublicAutomation" if spec_mode
       ldflags
     end
 
