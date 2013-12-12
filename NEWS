@@ -1,5 +1,10 @@
 = RubyMotion 2.17 =
 
+  * Added the `Proc#weak!' method which transforms the strong reference to the
+    block `self' variable into a weak reference. Once the `self' variable is
+    weakly referenced there is no coming back to a strong reference. This
+    method can be used to break cyclic references that the cycle detector is
+    not able to handle yet.
   * Defined implementations of NSObject methods, such as `conformsToProtocol:',
     that take Ruby semantics into account on all classes created by RubyMotion.
   * Fixed a bug in compiler where boxed type is not registered if structure is
