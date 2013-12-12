@@ -13,6 +13,7 @@ bin/instruments
 
 data/ios
 data/osx
+data/UIAutomation
 
 doc/.yardoc
 doc/*.html
@@ -31,6 +32,9 @@ sample/*/.repl_history
 
 test/test/vendor/code/build-iPhoneSimulator/
 test/test/vendor/code/code.bridgesupport
+
+test/bacon-ui/build
+test/bacon-ui/resources/*.storyboardc
 
 RubyMotion.docset/
 
