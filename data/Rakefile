@@ -6,7 +6,7 @@ verbose(true)
 NEED_STRIP = !ENV['DEBUG']
 
 task :default => :all
-task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs, :build_ui_automation_lib]
+task :all => [:vm_files, :build_ui_automation_lib, :bridgesupport_files, :bridgesupport_static_stubs]
 
 task :vm_files do
   strip = File.join(PLATFORMS_DIR, '../Toolchains/XcodeDefault.xctoolchain/usr/bin/strip')
@@ -367,8 +367,9 @@ task :build_ui_automation_lib do
   end
 
   unless File.exist?('ios/libPublicAutomation.bridgesupport')
+    # This gets copied into each SDK version subdir by the bridgesupport_files task.
     Dir.chdir File.join(vendor_dir, 'build/Debug-iphonesimulator/include/PublicAutomation') do
-      sh "../../../../../../bin/gen_bridge_metadata --format complete --cflags '-I.' UIAutomationBridge.h > ../../../../../../data/ios/libPublicAutomation.bridgesupport"
+      sh "../../../../../../bin/gen_bridge_metadata --format complete --cflags '-I.' UIAutomationBridge.h > ../../../../../../data/ios/PublicAutomation.bridgesupport"
     end
   end
 end
