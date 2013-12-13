@@ -456,6 +456,15 @@ describe "Hash" do
 
       @fields[:foo] = "foo"
     end
+
+    def test_hash_removeObjectForKey
+      foo = @fields[:foo]
+      @fields.removeObjectForKey(:foo)
+
+      foo.inspect
+
+      @fields[:foo] = "foo"
+    end
   end
 
   # RM-350
@@ -484,6 +493,18 @@ describe "Hash" do
     1.should == 1
   end
 
+  # RM-352
+  it "#removeObjectForKey should not released the object" do
+    @foo = TestHash.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_hash_removeObjectForKey', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_hash_removeObjectForKey should not cause a crash
+    1.should == 1
+  end
 end
 
 # RM-290
