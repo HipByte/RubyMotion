@@ -6,7 +6,7 @@ class RunloopYield
 
   def run
     performSelectorOnMainThread(:'test_start', withObject:nil, waitUntilDone:false)
-    NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))    
+    NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))
   end
 
   def test_start
