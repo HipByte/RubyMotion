@@ -162,6 +162,10 @@ task :install do
     end
   end
 
+  # Include the XCPretty gem.
+  binaries << './vendor/XCPretty/bin/xcpretty'
+  data.concat(FileList["./vendor/XCPretty/{LICENSE.txt,lib/**/*.rb}"])
+
   # Android support is not ready yet.
   data.delete_if { |x| x.match(/^.\/lib\/motion\/project\/template\/android/) }
 
