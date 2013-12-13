@@ -39,7 +39,7 @@ describe "Bacon::Functional::API, concerning continuous gestures" do
   tests ScrollViewController
 
   # TODO this spec fails if the Accessibility Inspector is on
-  it "creates 'pinch open' and 'pinch close' gesture events" do
+  xit "creates 'pinch open' and 'pinch close' gesture events" do
     before = controller.scrollView.zoomScale
     pinch_open 'Scroll view'
     controller.scrollView.zoomScale.should > before
@@ -69,7 +69,7 @@ describe "Bacon::Functional::API, concerning continuous gestures" do
   end
 
   # TODO this spec fails if the Accessibility Inspector is on
-  it "drags from point A to point B" do
+  xit "drags from point A to point B" do
     before = controller.scrollView.contentOffset
     drag 'Scroll view', :from => CGPointMake(310, 100), :to => CGPointMake(5, 150)
     controller.scrollView.contentOffset.x.should > before.x
@@ -77,7 +77,7 @@ describe "Bacon::Functional::API, concerning continuous gestures" do
   end
 
   # TODO this spec fails if the Accessibility Inspector is on
-  it "drags along the specified list of points" do
+  xit "drags along the specified list of points" do
     view = controller.scrollView
     before = view.contentOffset
     drag 'Scroll view', :points => linear_interpolate(_location_to_point(view, :bottom_right), _location_to_point(view, :left))
@@ -85,7 +85,7 @@ describe "Bacon::Functional::API, concerning continuous gestures" do
     view.contentOffset.y.should > before.y
   end
 
-  it "drags with multiple fingers" do
+  xit "drags with multiple fingers" do
     controller.scrollView.panGestureRecognizer.minimumNumberOfTouches = 3
     controller.scrollView.panGestureRecognizer.maximumNumberOfTouches = 3
     before = controller.scrollView.contentOffset
