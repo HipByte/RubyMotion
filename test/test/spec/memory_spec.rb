@@ -457,6 +457,9 @@ describe "Hash" do
       @foo.performSelectorOnMainThread(:'test_hash_aset', withObject:nil, waitUntilDone:false)
       NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
     end
+
+    # test_hash_aset should not cause a crash
+    1.should == 1
   end
 end
 
