@@ -433,7 +433,6 @@ describe "Range" do
   end
 end
 
-# RM-350
 describe "Hash" do
   class TestHash
     def initialize
@@ -448,8 +447,18 @@ describe "Hash" do
 
       @fields[:foo] = "foo"
     end
+
+    def test_hash_clear
+      foo = @fields[:foo]
+      @fields.clear
+
+      foo.inspect
+
+      @fields[:foo] = "foo"
+    end
   end
 
+  # RM-350
   it "#[]= should not released the object" do
     @foo = TestHash.new
 
@@ -461,6 +470,20 @@ describe "Hash" do
     # test_hash_aset should not cause a crash
     1.should == 1
   end
+
+  # RM-351
+  it "#clear should not released the object" do
+    @foo = TestHash.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_hash_clear', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_hash_clear should not cause a crash
+    1.should == 1
+  end
+
 end
 
 # RM-290
