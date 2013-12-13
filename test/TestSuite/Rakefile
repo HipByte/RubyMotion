@@ -2,8 +2,12 @@
 $:.unshift("../../lib")
 require 'motion/project'
 
+ENV['output'] ||= 'pretty_spec_dox'
+
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'TestSuite'
+
+  app.spec_files.insert(1, *FileList['../helpers/*.rb'])
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
 end

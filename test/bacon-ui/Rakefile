@@ -2,12 +2,16 @@
 $:.unshift(File.expand_path('../../../lib', __FILE__))
 require 'motion/project/template/ios'
 
+ENV['output'] ||= 'pretty_spec_dox'
+
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'MacBacon UI'
   app.interface_orientations = [:portrait, :landscape_left, :landscape_right, :portrait_upside_down]
   app.frameworks << 'CoreGraphics'
   #app.archs['iPhoneSimulator'] = ['x86_64']
+
+  app.spec_files.insert(1, *FileList['../helpers/*.rb'])
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
 end
 

@@ -2,13 +2,15 @@ $:.unshift("../../lib")
 #$:.unshift("/Library/RubyMotion/lib")
 require 'motion/project'
 
-ENV['output'] = 'pretty_spec_dox'
+ENV['output'] ||= 'pretty_spec_dox'
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'test'
   app.frameworks += ['AddressBook', 'AddressBookUI', 'CoreData', 'CoreMIDI', 'GameKit']
   app.vendor_project('vendor/code', :static)
+
+  app.spec_files.insert(1, *FileList['../helpers/*.rb'])
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
 end
 
