@@ -39,7 +39,6 @@ module Motion; module Project;
     attr_reader :path, :libs, :bs_files, :opts
 
     def build(platform)
-      App.info 'Build', @path
       send gen_method('build'), platform, @opts.dup
       if @libs.empty?
         App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
@@ -62,6 +61,7 @@ module Motion; module Project;
     end
 
     def build_static(platform, opts)
+      App.info 'Build', @path
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
 
@@ -146,6 +146,7 @@ EOS
     end
 
     def build_xcode(platform, opts)
+      project_dir = File.expand_path(@config.project_dir)
       Dir.chdir(@path) do
         build_dir = "build-#{platform}"
         if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
@@ -178,7 +179,11 @@ EOS
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
-          sh "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+          command = "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+          unless App::VERBOSE
+            command << " | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
+          end
+          sh command
 
           # Copy .a files into the platform build directory.
           prods = opts.delete(:products)
