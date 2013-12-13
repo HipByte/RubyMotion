@@ -1,7 +1,7 @@
 = RubyMotion 2.18 =
 
   * Improve terminal output when using `vendor_project` with an Xcode project.
-  * Fixed a bug where Hash#[]= will immediately release an object.
+  * Fixed a bug where Hash#{[]=, clear} will immediately release an object.
 
 = RubyMotion 2.17 =
 
