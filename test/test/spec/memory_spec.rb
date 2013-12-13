@@ -433,6 +433,33 @@ describe "Range" do
   end
 end
 
+# RM-350
+describe "Hash" do
+  class TestHash
+    def initialize
+      @fields = { foo: "foo" }
+    end
+
+    def test_hash_aset
+      foo = @fields[:foo]
+      @fields[:foo] = "bar"
+
+      foo.inspect
+
+      @fields[:foo] = "foo"
+    end
+  end
+
+  it "#[]= should not released the object" do
+    @foo = TestHash.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_hash_aset', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+  end
+end
+
 # RM-290
 describe "NSMutableData" do
   class NSMutableData
