@@ -1,3 +1,6 @@
 [submodule "vm"]
 	path = vm
 	url = git@github.com:lrz/RubyMotionVM.git
+[submodule "vendor/XCPretty"]
+	path = vendor/XCPretty
+	url = https://github.com/mneorr/XCPretty.git
