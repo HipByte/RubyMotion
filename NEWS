@@ -6,6 +6,8 @@
   * Fixed a bug where Array#delete will immediately release an object.
   * Fixed a bug where Struct#[]= and setter of Struct member will immediately
     release an object.
+  * Fixed a bug in the cycle detectors where weak Proc objects would have their
+    `self' reference scanned, resulting in a double-release crash at runtime.
 
 = RubyMotion 2.17 =
 
