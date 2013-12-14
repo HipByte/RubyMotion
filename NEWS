@@ -4,6 +4,7 @@
   * Fixed a bug where Hash#{[]=, clear, removeObjectForKey} will immediately
     release an object.
   * Fixed a bug where Array#delete will immediately release an object.
+  * Fixed a bug where Struct#[]= will immediately release an object.
 
 = RubyMotion 2.17 =
 
