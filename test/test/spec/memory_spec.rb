@@ -555,6 +555,13 @@ describe "Struct" do
 
       state.inspect
     end
+
+    def test_struct_setter
+      name = @cat.name
+      @cat.name = "foo"
+
+      name.inspect
+    end
   end
 
   # RM-355
@@ -567,6 +574,19 @@ describe "Struct" do
     end
 
     # test_struct_aset should not cause a crash
+    1.should == 1
+  end
+
+  # RM-356
+  xit "setter method should not released the object" do
+    @foo = TestStruct.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_struct_setter', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_struct_setter should not cause a crash
     1.should == 1
   end
 end
