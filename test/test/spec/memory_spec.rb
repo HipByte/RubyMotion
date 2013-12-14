@@ -507,6 +507,36 @@ describe "Hash" do
   end
 end
 
+describe "Array" do
+  class TestArray
+    def initialize
+      @array = ["a", "b", "c"]
+    end
+
+    def test_array_delete
+      obj = @array[0]
+      @array.delete("a")
+
+      obj.inspect
+
+      @array.unshift("a")
+    end
+  end
+
+  # RM-354
+  it "#delete should not released the object" do
+    @foo = TestArray.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_array_delete', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_array_delete should not cause a crash
+    1.should == 1
+  end
+end
+
 # RM-290
 describe "NSMutableData" do
   class NSMutableData
