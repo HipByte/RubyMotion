@@ -537,6 +537,40 @@ describe "Array" do
   end
 end
 
+describe "Struct" do
+  class TestStruct
+    def initialize
+      st = Struct.new("Cat", :name, :state)
+      @cat = st.new("foo", "sleep")
+    end
+
+    def test_struct_aset
+      name = @cat.name
+      @cat[:name] = "foo"
+
+      name.inspect
+
+      state = @cat.state
+      @cat[1] = "sleep"
+
+      state.inspect
+    end
+  end
+
+  # RM-355
+  xit "#[]= should not released the object" do
+    @foo = TestStruct.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_struct_aset', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_struct_aset should not cause a crash
+    1.should == 1
+  end
+end
+
 # RM-290
 describe "NSMutableData" do
   class NSMutableData
