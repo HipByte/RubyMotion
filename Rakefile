@@ -1,10 +1,10 @@
 PROJECT_VERSION = '2.18'
-PLATFORMS_DIR = (ENV['PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
+XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
-sim_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
+sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
 end
-ios_sdks = Dir.glob(File.join(PLATFORMS_DIR, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk')).map do |path|
+ios_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneOS(.+)\.sdk$/)[0][0]
 end
 IOS_SDK_VERSIONS = (sim_sdks & ios_sdks)
@@ -14,7 +14,7 @@ if IOS_SDK_VERSIONS.empty?
   exit 1
 end
 
-OSX_SDK_VERSIONS = Dir.glob(File.join(PLATFORMS_DIR, 'MacOSX.platform/Developer/SDKs/MacOSX*.sdk')).map do |path|
+OSX_SDK_VERSIONS = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'MacOSX.platform/Developer/SDKs/MacOSX*.sdk')).map do |path|
   File.basename(path).scan(/^MacOSX(.+)\.sdk$/)[0][0]
 end
 
@@ -36,7 +36,7 @@ def rake(dir, cmd='all')
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
     sdk_beta = ENV['SDK_BETA'] ? 'sdk_beta=1' : ''
     trace = Rake.application.options.trace
-    sh "rake platforms_dir=\"#{PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
+    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
   end
 end
 

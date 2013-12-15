@@ -1,4 +1,4 @@
-PLATFORMS_DIR = ENV['platforms_dir']
+XCODE_PLATFORMS_DIR = ENV['xcode_platforms_dir']
 IOS_SDK_VERSIONS = ENV['ios_sdk_versions'].split(',')
 OSX_SDK_VERSIONS = ENV['osx_sdk_versions'].split(',')
 
@@ -9,7 +9,7 @@ task :default => :all
 task :all => [:vm_files, :bridgesupport_files, :bridgesupport_static_stubs]
 
 task :vm_files do
-  strip = File.join(PLATFORMS_DIR, '../Toolchains/XcodeDefault.xctoolchain/usr/bin/strip')
+  strip = File.join(XCODE_PLATFORMS_DIR, '../Toolchains/XcodeDefault.xctoolchain/usr/bin/strip')
 
   first = true
   OSX_SDK_VERSIONS.each do |sdk_version|
@@ -106,7 +106,7 @@ end
 
 EXCLUDED_FRAMEWORKS = ['Kernel', 'System', 'IOKit', 'Ruby', 'RubyCocoa', 'vecLib']
 task :bridgesupport_files do
-  platform_dev_path = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
+  platform_dev_path = "#{XCODE_PLATFORMS_DIR}/MacOSX.platform/Developer"
   OSX_SDK_VERSIONS.each do |sdk_version|
     sdk_path = "#{platform_dev_path}/SDKs/MacOSX#{sdk_version}.sdk"
     sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
@@ -162,7 +162,7 @@ task :bridgesupport_files do
     end
   end
 
-  platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
+  platform_dev_path = "#{XCODE_PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
   IOS_SDK_VERSIONS.each do |sdk_version|
     sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
     sdk_frameworks = "#{sdk_path}/System/Library/Frameworks"
@@ -294,7 +294,7 @@ task :bridgesupport_static_stubs do
 
       obj = "osx/#{sdk_version}/MacOSX/#{framework}_stubs.o"
       next if File.exist?(obj)
-      platform_dev = "#{PLATFORMS_DIR}/MacOSX.platform/Developer"
+      platform_dev = "#{XCODE_PLATFORMS_DIR}/MacOSX.platform/Developer"
       cflags = "-isysroot #{platform_dev}/SDKs/MacOSX#{sdk_version}.sdk"
       cflags << " -arch i386 -arch x86_64"
       cflags << " -mmacosx-version-min=#{sdk_version} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
@@ -340,11 +340,11 @@ task :bridgesupport_static_stubs do
       [['iPhoneOS', *device_archs], ['iPhoneSimulator', *sim_archs]].each do |platform, *archs|
         obj = "ios/#{sdk_version}/#{platform}/#{framework}_stubs.o"
         next if File.exist?(obj)
-        platform_dev = "#{PLATFORMS_DIR}/#{platform}.platform/Developer"
+        platform_dev = "#{XCODE_PLATFORMS_DIR}/#{platform}.platform/Developer"
         cflags = "-isysroot #{platform_dev}/SDKs/#{platform}#{sdk_version}.sdk "
         cflags << archs.map { |a| "-arch #{a}" }.join(' ')
         cflags << " -miphoneos-version-min=#{sdk_version} -Wall -Werror -O3 -fobjc-abi-version=2 -fobjc-legacy-dispatch"
-        sh "#{PLATFORMS_DIR}/../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{cflags} #{code} -c -o #{obj}"
+        sh "#{XCODE_PLATFORMS_DIR}/../Toolchains/XcodeDefault.xctoolchain/usr/bin/clang #{cflags} #{code} -c -o #{obj}"
       end
     end
   end
@@ -359,7 +359,7 @@ namespace :UIAutomation do
     end
 
     IOS_SDK_VERSIONS.each do |sdk_version|
-      framework_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk/Developer/Library/PrivateFrameworks/UIAutomation.framework"
+      framework_path = "#{XCODE_PLATFORMS_DIR}/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator#{sdk_version}.sdk/Developer/Library/PrivateFrameworks/UIAutomation.framework"
       destination = File.join('UIAutomation', sdk_version)
       next if File.exist?(destination)
       # Use the 386 slice here because it's easier to differentiate between
@@ -400,7 +400,7 @@ namespace :UIAutomation do
     IOS_SDK_VERSIONS.each do |sdk_version|
       destination = "ios/#{sdk_version}/BridgeSupport/UIAutomation.bridgesupport"
       next if File.exist?(destination)
-      platform_dev_path = "#{PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
+      platform_dev_path = "#{XCODE_PLATFORMS_DIR}/iPhoneSimulator.platform/Developer"
       sdk_path = "#{platform_dev_path}/SDKs/iPhoneSimulator#{sdk_version}.sdk"
       a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
       sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
