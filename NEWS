@@ -7,6 +7,8 @@
   * Fixed a bug where Struct#[]= and setter of Struct member will immediately
     release an object.
   * Fixed a bug where setter of Boxed member will immediately release an object.
+  * Fixed a bug where Kernel#instance_variable_set will immediately release an
+    object.
   * Fixed a bug in the cycle detectors where weak Proc objects would have their
     `self' reference scanned, resulting in a double-release crash at runtime.
 
