@@ -591,6 +591,35 @@ describe "Struct" do
   end
 end
 
+describe "Boxed" do
+  class TestBoxed
+    def initialize
+      @member = MyStructHasName.new
+      @member.name = "foo"
+    end
+
+    def test_boxed_setter
+      name = @member.name
+      @member.name = "foo"
+
+      name.inspect
+    end
+  end
+
+  # RM-358
+  it "setter method should not released the object" do
+    @foo = TestBoxed.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_boxed_setter', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_boxed_setter should not cause a crash
+    1.should == 1
+  end
+end
+
 # RM-290
 describe "NSMutableData" do
   class NSMutableData

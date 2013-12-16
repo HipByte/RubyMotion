@@ -1,4 +1,8 @@
-#import <UIKit/UIKit.h>
+ #import <UIKit/UIKit.h>
+
+struct MyStructHasName {
+    id name;
+};
 
 struct MyStructTestConvert {
     long m_long;
