@@ -620,6 +620,40 @@ describe "Boxed" do
   end
 end
 
+describe "Kernel" do
+  class TestKernelOther
+    def initialize
+      @name = "bar"
+    end
+  end
+
+  class TestKernel
+    def initialize
+      @bar = TestKernelOther.new
+    end
+
+    def test_ivar_set
+      name = @bar.instance_variable_get(:@name)
+      @bar.instance_variable_set(:@name, "bar")
+
+      name.inspect
+    end
+  end
+
+  # RM-359
+  it "#instance_variable_set method should not released the object" do
+    @foo = TestKernel.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_ivar_set', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_ivar_set should not cause a crash
+    1.should == 1
+  end
+end
+
 # RM-290
 describe "NSMutableData" do
   class NSMutableData
