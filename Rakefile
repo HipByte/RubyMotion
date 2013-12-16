@@ -515,3 +515,12 @@ END
     end
   end
 end
+
+desc "Build Android support (experimental)"
+task "android" do
+  if ANDROID_API_VERSIONS.empty?
+    $stderr.puts "Android SDK does not exist or does not have platforms class paths"
+    exit 1
+  end
+  rake "data", "android"
+end

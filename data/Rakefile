@@ -2,6 +2,9 @@ XCODE_PLATFORMS_DIR = ENV['xcode_platforms_dir']
 IOS_SDK_VERSIONS = ENV['ios_sdk_versions'].split(',')
 OSX_SDK_VERSIONS = ENV['osx_sdk_versions'].split(',')
 
+ANDROID_SDK = ENV['android_sdk']
+ANDROID_API_VERSIONS = ENV['android_api_versions'].split(',')
+
 verbose(true)
 NEED_STRIP = !ENV['DEBUG']
 
@@ -415,5 +418,69 @@ end
 task :clean do
   IOS_SDK_VERSIONS.each { |path| rm_rf('ios/' + path) }
   OSX_SDK_VERSIONS.each { |path| rm_rf('osx/' + path) }
+  ANDROID_API_VERSIONS.each { |path| rm_rf('android/' + path) }
   rm_rf 'UIAutomation'
+end
+
+ANDROID_API_PACKAGES = %w{android}
+
+task :android do
+  ANDROID_API_VERSIONS.each do |api_vers|
+    jar_path = File.join(ANDROID_SDK, 'platforms', "android-#{api_vers}", 'android.jar')
+    tmp_path = File.join("/tmp/rm_android_#{api_vers}")
+    tmp_path_clear = !File.exist?(tmp_path)
+    mkdir_p tmp_path if tmp_path_clear
+    data_dir = Dir.pwd
+    Dir.chdir(tmp_path) do
+      sh "/usr/bin/unzip \"#{jar_path}\"" if tmp_path_clear
+      ANDROID_API_PACKAGES.each do |package|
+        bs_path = "#{data_dir}/android/#{api_vers}/BridgeSupport/#{package}.bridgesupport"
+        next if File.exist?(bs_path)
+        mkdir_p File.dirname(bs_path)
+        classes = Dir.glob("#{package}/**/*.class").map { |x| x.gsub('/', '.').sub(/\.class$/, '') }.select { |x| !x.include?('$') }
+        javap_tmp_path = "/tmp/rm_android_#{api_vers}_#{package}.txt"
+        sh "/usr/bin/javap -s #{classes.join(' ')} > \"#{javap_tmp_path}\""
+        bs_data = ''
+        bs_data << <<EOS
+<?xml version='1.0'?>
+<signatures version='1.0'>
+EOS
+        txt = File.read(javap_tmp_path)
+        txt.scan(/([^\s]+)\s+extends\s+([^\s]+)\s*\{([^}]+)\}/).each do |klass, superclass, body_txt|
+          bs_data << <<EOS
+  <class name=\"#{klass}\">
+EOS
+          body_txt.strip.split(/\n/).each_cons(2) do |elem_line, signature_line|
+            signature_line = signature_line.strip
+            md = signature_line.match(/^Signature:\s+(.+)$/)
+            next unless md
+            signature = md[1]
+
+            elem_line = elem_line.strip
+            if md = elem_line.match(/\s([^(\s]+)\(/)
+              # A method.
+              method = md[1]
+              class_method = elem_line.include?('static')
+              bs_data << <<EOS
+    <method name=\"#{method}\" type=\"#{signature}\" class_method=\"#{class_method ? 'true' : 'false'}\"/>
+EOS
+            elsif md = elem_line.match(/\s([^;\s]+);$/)
+              # A constant.
+              constant = md[1] 
+              bs_data << <<EOS
+    <const name=\"#{constant}\" type=\"#{signature}\"/>
+EOS
+            end
+          end
+          bs_data << <<EOS
+  </class>
+EOS
+        end
+        bs_data << <<EOS
+</signatures>
+EOS
+        File.open(bs_path, 'w') { |io| io.write(bs_data) }
+      end
+    end
+  end
 end
