@@ -446,7 +446,7 @@ task :android do
 <signatures version='1.0'>
 EOS
         txt = File.read(javap_tmp_path)
-        txt.scan(/([^\s]+)\s+extends\s+([^\s]+)\s*\{([^}]+)\}/).each do |klass, superclass, body_txt|
+        txt.scan(/([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/).each do |klass, body_txt|
           bs_data << <<EOS
   <class name=\"#{klass}\">
 EOS
@@ -462,7 +462,7 @@ EOS
               method = md[1]
               class_method = elem_line.include?('static')
               bs_data << <<EOS
-    <method name=\"#{method}\" type=\"#{signature}\" class_method=\"#{class_method ? 'true' : 'false'}\"/>
+    <method name=\"#{method}\" type=\"#{signature}\"#{class_method ? ' class_method="true"' : ''}/>
 EOS
             elsif md = elem_line.match(/\s([^;\s]+);$/)
               # A constant.
