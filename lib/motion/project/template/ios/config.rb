@@ -1,15 +1,15 @@
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -229,7 +229,7 @@ module Motion; module Project;
 
     def device_retina_xcode5_string(family, target, retina)
       retina4_string = begin
-        if (target >= '7.0' && App.config.archs['iPhoneSimulator'].include?("x86_64")) 
+        if (target >= '7.0' && App.config.archs['iPhoneSimulator'].include?("x86_64"))
           " Retina (4-inch 64-bit)"
         else
           " Retina (4-inch)"
@@ -251,7 +251,7 @@ module Motion; module Project;
         end
       end
     end
-    
+
     def device_family_ints
       ary = @device_family.is_a?(Array) ? @device_family : [@device_family]
       ary.map { |family| device_family_int(family) }
@@ -419,6 +419,9 @@ EOS
       if spec_mode
         main_txt << <<EOS
 @interface SpecLauncher : NSObject
+{
+  BOOL hasLaunched;
+}
 @end
 
 #include <dlfcn.h>
@@ -451,13 +454,25 @@ EOS
 
     SpecLauncher *launcher = [[self alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
-    return launcher; 
+    return launcher;
+}
+
+- (id)init
+{
+    self = [super init];
+    if (self) {
+        hasLaunched = NO;
+    }
+    return self;
 }
 
 - (void)appLaunched:(id)notification
 {
-    // Give a bit of time for the simulator to attach...
-    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
+    if (!hasLaunched) {
+        // Give a bit of time for the simulator to attach...
+        [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
+        hasLaunched = YES;
+    }
 }
 
 - (void)runSpecs
