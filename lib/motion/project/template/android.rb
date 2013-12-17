@@ -57,7 +57,7 @@ task :build do
   dex_classes = File.join(App.config.build_dir, 'classes.dex')
   if !File.exist?(dex_classes) or rebuild_dex_classes
     App.info 'Create', dex_classes
-    sh "\"#{App.config.sdk_path}/build-tools/android-4.4/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\""
+    sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\""
   end
 
   android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
@@ -87,10 +87,10 @@ EOS
   if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive)
     App.info 'Create', archive
     resource_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
-    sh "\"#{App.config.sdk_path}/build-tools/android-4.4/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{App.config.sdk_path}/platforms/android-#{App.config.api_level}/android.jar\" -F \"#{archive}\""
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{App.config.sdk_path}/platforms/android-#{App.config.api_level}/android.jar\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
-      sh "\"#{App.config.sdk_path}/build-tools/android-4.4/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\""
-      sh "\"#{App.config.sdk_path}/build-tools/android-4.4/aapt\" add -f \"../#{archive}\" lib/armeabi/libpayload.so"
+      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\""
+      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" lib/armeabi/libpayload.so"
     end
 
     debug_keystore = File.expand_path('~/.android/debug.keystore')
@@ -109,7 +109,7 @@ EOS
 end
 
 namespace 'emulator' do
-  desc "Create the Android virtual device (AVD)"
+  desc "Create the Android Virtual Device for the emulator"
   task :create_avd do
     all_targets = `\"#{App.config.sdk_path}/tools/android\" list avd --compact`.split(/\n/)
     if !all_targets.include?(App.config.avd_config[:name])
@@ -141,13 +141,13 @@ namespace 'emulator' do
 end
 
 namespace 'device' do
-  desc "Install the app in the device (USB)"
+  desc "Install the app in the device"
   task :install do
     App.info 'Install', App.config.apk_path
     sh "\"#{App.config.sdk_path}/platform-tools/adb\" -d install -r \"#{App.config.apk_path}\""
   end
 
-  desc "Start the app's main intent in the device (USB)"
+  desc "Start the app's main intent in the device"
   task :start do
     activity_path = "#{App.config.package}/.#{App.config.main_activity}"
     App.info 'Start', activity_path
@@ -155,7 +155,7 @@ namespace 'device' do
   end
 end
 
-desc "Build the app then run it in the device (USB)"
+desc "Build the app then run it in the device"
 task :device => ['build', 'device:install', 'device:start']
 
 desc "Build the app then run it in the emulator"
