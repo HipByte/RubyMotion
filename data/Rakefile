@@ -422,7 +422,7 @@ task :clean do
   rm_rf 'UIAutomation'
 end
 
-ANDROID_API_PACKAGES = %w{android}
+ANDROID_API_PACKAGES = %w{java android}
 
 task :android do
   ANDROID_API_VERSIONS.each do |api_vers|
