@@ -422,10 +422,20 @@ task :clean do
   rm_rf 'UIAutomation'
 end
 
+# TODO - merge to main task
 ANDROID_API_PACKAGES = %w{java android}
-
 task :android do
   ANDROID_API_VERSIONS.each do |api_vers|
+    # Copy runtime library
+    archs = %w{arm}
+    archs.each do |arch|
+      vm_lib_path = "../vm/android-#{api_vers}-#{arch}/libmacruby-static.a"
+      dest_lib_path = "android/#{api_vers}/arm"
+      mkdir_p dest_lib_path
+      cp vm_lib_path, dest_lib_path
+    end
+
+    # Generate .bridgesupport files
     jar_path = File.join(ANDROID_SDK, 'platforms', "android-#{api_vers}", 'android.jar')
     tmp_path = File.join("/tmp/rm_android_#{api_vers}")
     tmp_path_clear = !File.exist?(tmp_path)
