@@ -523,5 +523,6 @@ task "android" do
     $stderr.puts "Android SDK does not exist or does not have platforms class paths"
     exit 1
   end
+  rake "vm", "android"
   rake "data", "android"
 end
