@@ -31,6 +31,7 @@ end
 
 # Android support - experimental
 ANDROID_SDK = File.join(ENV['HOME'], 'src/android-sdk-macosx')
+ANDROID_NDK = File.join(ENV['HOME'], 'src/android-ndk-r9b')
 ANDROID_API_VERSIONS =
   if File.exist?(ANDROID_SDK)
     Dir.glob(File.join(ANDROID_SDK, 'platforms/android-*')).map do |platform_dir|
@@ -47,7 +48,7 @@ def rake(dir, cmd='all')
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
     sdk_beta = ENV['SDK_BETA'] ? 'sdk_beta=1' : ''
     trace = Rake.application.options.trace
-    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
+    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" android_ndk=\"#{ANDROID_NDK}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
   end
 end
 
