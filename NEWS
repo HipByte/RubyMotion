@@ -11,6 +11,8 @@
     object.
   * Fixed a bug in the cycle detectors where weak Proc objects would have their
     `self' reference scanned, resulting in a double-release crash at runtime.
+  * Fixed a bug where Kernel#block_given? would not work as expected if Proc
+    object was passed into method argument.
 
 = RubyMotion 2.17 =
 
