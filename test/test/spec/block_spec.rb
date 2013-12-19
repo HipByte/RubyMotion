@@ -295,3 +295,20 @@ describe "self" do
     $test_dealloc.should == true
   end
 end
+
+# RM-357, RM-156
+describe "Kernel.#block_given?" do
+  def first_block
+    second_block do
+      block_given?
+    end
+  end
+   
+  def second_block(&block)
+    block.call
+  end
+
+  it "should return true even if passed Proc into method argument" do
+    first_block.should == true
+  end
+end
