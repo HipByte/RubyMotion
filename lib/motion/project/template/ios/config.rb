@@ -419,9 +419,6 @@ EOS
       if spec_mode
         main_txt << <<EOS
 @interface SpecLauncher : NSObject
-{
-  BOOL hasLaunched;
-}
 @end
 
 #include <dlfcn.h>
@@ -457,22 +454,12 @@ EOS
     return launcher;
 }
 
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        hasLaunched = NO;
-    }
-    return self;
-}
-
 - (void)appLaunched:(id)notification
 {
-    if (!hasLaunched) {
-        // Give a bit of time for the simulator to attach...
-        [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
-        hasLaunched = YES;
-    }
+    // Give a bit of time for the simulator to attach...
+    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
+    // unregister observer to avoid duplicate invocation
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
 }
 
 - (void)runSpecs
