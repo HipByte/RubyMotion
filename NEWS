@@ -13,6 +13,9 @@
     `self' reference scanned, resulting in a double-release crash at runtime.
   * Fixed a bug where Kernel#block_given? would not work as expected if Proc
     object was passed into method argument.
+  * Fixed a bug in the spec runner app that could cause the test suite to be
+    started multiple times. Thanks to Jason W. May for the patch (pull request
+    #145).
 
 = RubyMotion 2.17 =
 
