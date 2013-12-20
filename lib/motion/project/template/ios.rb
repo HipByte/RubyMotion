@@ -111,7 +111,7 @@ END
   App.info 'Simulate', app
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']
-  system "#{env} #{sim} #{debug} #{family_int} '#{simulate_device}' #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
+  system "#{env} #{sim} #{debug} #{family_int} \"#{simulate_device}\" #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
   App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
   exit($?.exitstatus)
 end
