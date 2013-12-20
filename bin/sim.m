@@ -1171,12 +1171,11 @@ lldb_commands_file(int pid, NSString *app_path)
 
     if (spec_mode || error == nil || debugger_killed_session) {
 	int status = 0;
-	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
+	int pidNumber = ((int (*)(id, SEL))objc_msgSend)(session,
 		@selector(simulatedApplicationPID));
-	if (pidNumber != nil && [pidNumber isKindOfClass:[NSNumber class]]) {
+	if (pidNumber != 0) {
 	    NSString *path = [NSString stringWithFormat:
-		@"/tmp/.rubymotion_process_exited.%@",
-		     [pidNumber description]];
+		@"/tmp/.rubymotion_process_exited.%d", pidNumber];
 	    NSString *res = [NSString stringWithContentsOfFile:path
 		encoding:NSASCIIStringEncoding error:nil];
 	    if (res != nil) {
