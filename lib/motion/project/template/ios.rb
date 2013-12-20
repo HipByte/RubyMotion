@@ -91,7 +91,7 @@ END
     end
   end
 
-  # Prepare the device family.
+  # Prepare the device info.
   family_int =
     if family = ENV['device_family']
       App.config.device_family_int(family.downcase.intern)
@@ -99,15 +99,7 @@ END
       App.config.device_family_ints[0]
     end
   retina = ENV['retina']
-
-  # Configure the SimulateDevice variable (the only way to specify if we want to run in retina mode or not).
   simulate_device = App.config.device_family_string(family_int, target, retina)
-  default_simulator = `/usr/bin/defaults read com.apple.iphonesimulator "SimulateDevice"`.strip
-  if default_simulator != simulate_device && default_simulator != "'#{simulate_device}'"
-    simulate_device = "'#{simulate_device}'" if simulate_device.include?(" ")
-    system("/usr/bin/killall \"iPhone Simulator\" >& /dev/null")
-    system("/usr/bin/defaults write com.apple.iphonesimulator \"SimulateDevice\" \"#{simulate_device}\"")
-  end
 
   # Launch the simulator.
   xcode = App.config.xcode_dir
@@ -119,7 +111,7 @@ END
   App.info 'Simulate', app
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']
-  system "#{env} #{sim} #{debug} #{family_int} #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
+  system "#{env} #{sim} #{debug} #{family_int} '#{simulate_device}' #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
   App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
   exit($?.exitstatus)
 end

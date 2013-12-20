@@ -1274,7 +1274,7 @@ main(int argc, char **argv)
     [[NSAutoreleasePool alloc] init];
 
 #if defined(SIMULATOR_IOS)
-# define MIN_ARGS 6
+# define MIN_ARGS 7
 #else
 # define MIN_ARGS 4
 #endif
@@ -1290,6 +1290,7 @@ main(int argc, char **argv)
     debug_mode = atoi(argv[argv_n++]);
 #if defined(SIMULATOR_IOS)
     NSNumber *device_family = [NSNumber numberWithInt:atoi(argv[argv_n++])];
+    NSString *device_name = [[NSString stringWithUTF8String:argv[argv_n++]] retain];
 #endif
     sdk_version = [[NSString stringWithUTF8String:argv[argv_n++]] retain];
 #if defined(SIMULATOR_IOS)
@@ -1304,8 +1305,12 @@ main(int argc, char **argv)
     }
 
 #if defined(SIMULATOR_IOS)
-    // Load the framework.
-    [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/iPhoneSimulatorRemoteClient.framework"]] load];
+    // Load the frameworks.
+    [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"../SharedFrameworks/DVTFoundation.framework"]] load];
+    [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/DVTiPhoneSimulatorRemoteClient.framework"]] load];
+
+    Class Platform = NSClassFromString(@"DVTPlatform");
+    assert(Platform != nil);
 
     Class AppSpecifier =
 	NSClassFromString(@"DTiPhoneSimulatorApplicationSpecifier");
@@ -1371,6 +1376,16 @@ main(int argc, char **argv)
     }
 
 #if defined(SIMULATOR_IOS)
+    NSError *error = nil;
+
+    // Initialize the DevTools environment.
+    if (!((BOOL (*)(id, SEL, id *))objc_msgSend)(Platform,
+	    @selector(loadAllPlatformsReturningError:), &error)) {
+	fprintf(stderr, "*** Cannot load simulator platforms: %s\n",
+		[[error description] UTF8String]);
+	exit(1);
+    }
+
     // Create application specifier.
     id app_spec = ((id (*)(id, SEL, id))objc_msgSend)(AppSpecifier,
 	    @selector(specifierWithApplicationPath:), app_path);
@@ -1399,6 +1414,8 @@ main(int argc, char **argv)
 	(debug_mode == DEBUG_GDB || getenv("SIM_WAIT_FOR_DEBUGGER") != NULL));
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedDeviceFamily:), device_family);
+    ((void (*)(id, SEL, id))objc_msgSend)(config,
+	@selector(setSimulatedDeviceInfoName:), device_name);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedSystemRoot:), system_root);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
@@ -1442,7 +1459,6 @@ main(int argc, char **argv)
 	delegate);
 
     // Start session.
-    NSError *error = nil;
     if (!((BOOL (*)(id, SEL, id, double, id *))objc_msgSend)(session,
 		@selector(requestStartWithConfig:timeout:error:), config, 0.0,
 		&error)) {
