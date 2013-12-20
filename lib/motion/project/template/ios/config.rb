@@ -456,10 +456,10 @@ EOS
 
 - (void)appLaunched:(id)notification
 {
-    // Give a bit of time for the simulator to attach...
-    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
     // unregister observer to avoid duplicate invocation
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
+    // Give a bit of time for the simulator to attach...
+    [self performSelector:@selector(runSpecs) withObject:nil afterDelay:0.3];
 }
 
 - (void)runSpecs
