@@ -1309,8 +1309,8 @@ main(int argc, char **argv)
     [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/DVTiPhoneSimulatorRemoteClient.framework"]] load];
 
     Class Platform = NSClassFromString(@"DVTPlatform");
-    if (!Platform) {
-	fprintf(stderr, "*** We stopped supporting Xcode 4. Please use Xcode 5 or higher.\n\n");
+    if (Platform == NULL) {
+	fprintf(stderr, "*** RubyMotion requires Xcode 5 or higher.\n\n");
 	exit(1);
     }
 
