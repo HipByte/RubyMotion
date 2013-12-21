@@ -17,7 +17,7 @@
     started multiple times. Thanks to Jason W. May for the patch (pull request
     #145).
   * Fixed a bug where applications could not be launched on the simulator when
-    using Xcode 5.1.
+    using Xcode 5.1, and stopped supporting Xcode 4.
 
 = RubyMotion 2.17 =
 
