@@ -1309,7 +1309,10 @@ main(int argc, char **argv)
     [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/DVTiPhoneSimulatorRemoteClient.framework"]] load];
 
     Class Platform = NSClassFromString(@"DVTPlatform");
-    assert(Platform != nil);
+    if (!Platform) {
+	fprintf(stderr, "*** We stopped supporting Xcode 4. Please use Xcode 5 or higher.\n\n");
+	exit(1);
+    }
 
     Class AppSpecifier =
 	NSClassFromString(@"DTiPhoneSimulatorApplicationSpecifier");
