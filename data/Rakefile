@@ -22,11 +22,11 @@ task :vm_files do
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
       install path, sdk
     end
-    install File.join(objs, 'libmacruby-static.a'), sdk
+    install File.join(objs, 'librubymotion-static.a'), sdk
 
     if first
       objs = "../vm/MacOSX#{sdk_version}-repl.objs"
-      install File.join(objs, 'libmacruby-repl.dylib'), 'osx'
+      install File.join(objs, 'librubymotion-repl.dylib'), 'osx'
       first = false
     end
   end
@@ -38,7 +38,7 @@ task :vm_files do
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
       install path, ios
     end
-    install File.join(objs, 'libmacruby-static.a'), ios
+    install File.join(objs, 'librubymotion-static.a'), ios
 
     sim = File.join('ios', sdk_version, 'iPhoneSimulator')
     mkdir_p sim
@@ -46,19 +46,19 @@ task :vm_files do
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
       install path, sim
     end
-    install File.join(objs, 'libmacruby-static.a'), sim
+    install File.join(objs, 'librubymotion-static.a'), sim
   end
 
   if IOS_SDK_VERSIONS.size > 1
-    # Create a fat libmacruby-repl.dylib library for iOS simulator. The i386 slice has a deployment_target for 4.3 and the x86_64 slice has a deployment_target for 7.0.
-    first_ios_repl = "../vm/iPhoneSimulator#{IOS_SDK_VERSIONS.first}-repl.objs/libmacruby-repl.dylib"
+    # Create a fat librubymotion-repl.dylib library for iOS simulator. The i386 slice has a deployment_target for 4.3 and the x86_64 slice has a deployment_target for 7.0.
+    first_ios_repl = "../vm/iPhoneSimulator#{IOS_SDK_VERSIONS.first}-repl.objs/librubymotion-repl.dylib"
 
     # FIXME : Need to use latest SDK version instead of '7.0'
     raise "does not target 7.0?" unless IOS_SDK_VERSIONS.include?('7.0')
-    last_ios_repl = "../vm/iPhoneSimulator7.0-repl.objs/libmacruby-repl.dylib"
+    last_ios_repl = "../vm/iPhoneSimulator7.0-repl.objs/librubymotion-repl.dylib"
 
-    sh "/usr/bin/lipo -extract_family x86_64 \"#{last_ios_repl}\" -output /tmp/libmacruby-repl64.dylib"
-    sh "/usr/bin/lipo -create \"#{first_ios_repl}\" /tmp/libmacruby-repl64.dylib -output ios/libmacruby-repl.dylib"
+    sh "/usr/bin/lipo -extract_family x86_64 \"#{last_ios_repl}\" -output /tmp/librubymotion-repl64.dylib"
+    sh "/usr/bin/lipo -create \"#{first_ios_repl}\" /tmp/librubymotion-repl64.dylib -output ios/librubymotion-repl.dylib"
   end
 
   # XXX we are no longer stripping symbols since it apparently removes exception handlers
@@ -429,7 +429,7 @@ task :android do
     # Copy runtime library
     archs = %w{arm}
     archs.each do |arch|
-      vm_lib_path = "../vm/android-#{api_vers}-#{arch}/libmacruby-static.a"
+      vm_lib_path = "../vm/android-#{api_vers}-#{arch}/librubymotion-static.a"
       dest_lib_path = "android/#{api_vers}/arm"
       mkdir_p dest_lib_path
       cp vm_lib_path, dest_lib_path

@@ -1361,7 +1361,7 @@ main(int argc, char **argv)
 #else
 	replPath = [replPath stringByAppendingPathComponent:@"osx"];
 #endif
-	replPath = [replPath stringByAppendingPathComponent:@"libmacruby-repl.dylib"];
+	replPath = [replPath stringByAppendingPathComponent:@"librubymotion-repl.dylib"];
 	[appEnvironment setObject:replPath forKey:@"REPL_DYLIB_PATH"];
     }
 
