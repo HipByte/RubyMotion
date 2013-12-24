@@ -11,6 +11,7 @@ bin/ios/sim
 bin/osx/sim
 bin/instruments
 
+data/android
 data/ios
 data/osx
 data/UIAutomation
