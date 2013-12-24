@@ -244,13 +244,13 @@ EOS
         sh "#{cxx} \"#{init}\" #{config.cflags(platform, true)} -c -o \"#{init_o}\""
       end
 
+      librubymotion = File.join(datadir, platform, 'librubymotion-static.a')
       if static_library
         # Create a static archive with all object files + the runtime.
         lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
         App.info 'Create', lib
-        libmacruby = File.join(datadir, platform, 'libmacruby-static.a')
         objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        sh "/usr/bin/libtool -static \"#{libmacruby}\" #{objs_list} -o \"#{lib}\""
+        sh "/usr/bin/libtool -static \"#{librubymotion}\" #{objs_list} -o \"#{lib}\""
         return lib
       end
 
@@ -284,7 +284,7 @@ EOS
           or objs.any? { |path, _| File.mtime(path) > File.mtime(main_exec) } \
 	  or File.mtime(main_o) > File.mtime(main_exec) \
           or vendor_libs.any? { |lib| File.mtime(lib) > File.mtime(main_exec) } \
-          or File.mtime(File.join(datadir, platform, 'libmacruby-static.a')) > File.mtime(main_exec)
+          or File.mtime(librubymotion) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
         framework_search_paths = (config.framework_search_paths + embedded_frameworks.map { |x| File.dirname(x) }).uniq.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
@@ -301,7 +301,7 @@ EOS
             "-stdlib=libstdc++"
           end
         end || ""
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lmacruby-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
 
         # Change the install name of embedded frameworks.
@@ -457,7 +457,7 @@ EOS
 
       # Optional support for #eval (OSX-only).
       if config.respond_to?(:eval_support) and config.eval_support
-        repl_dylib_path = File.join(datadir, '..', 'libmacruby-repl.dylib')
+        repl_dylib_path = File.join(datadir, '..', 'librubymotion-repl.dylib')
         dest_path = File.join(app_resources_dir, File.basename(repl_dylib_path))
         copy_resource(repl_dylib_path, dest_path)
         preserve_resources << File.basename(repl_dylib_path)
