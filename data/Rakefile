@@ -419,6 +419,7 @@ task :clean do
   IOS_SDK_VERSIONS.each { |path| rm_rf('ios/' + path) }
   OSX_SDK_VERSIONS.each { |path| rm_rf('osx/' + path) }
   ANDROID_API_VERSIONS.each { |path| rm_rf('android/' + path) }
+  Dir.glob(["ios/*.dylib", "osx/*.dylib"]) { |path| rm_rf(path) }
   rm_rf 'UIAutomation'
 end
 
