@@ -521,6 +521,16 @@ describe "Array" do
 
       @array.unshift("a")
     end
+
+    def test_clear
+      obj = @array[0]
+      @array.clear
+
+      obj.inspect
+
+      @array = ["a", "b", "c"]
+    end
+
   end
 
   # RM-354
@@ -533,6 +543,19 @@ describe "Array" do
     end
 
     # test_array_delete should not cause a crash
+    1.should == 1
+  end
+
+  # RM-368
+  it "#clear should not released the object" do
+    @foo = TestArray.new
+
+    5.times do 
+      @foo.performSelectorOnMainThread(:'test_clear', withObject:nil, waitUntilDone:false)
+      NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.2))
+    end
+
+    # test_clear should not cause a crash
     1.should == 1
   end
 end
