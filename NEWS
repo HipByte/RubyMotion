@@ -3,7 +3,7 @@
   * Improve terminal output when using `vendor_project` with an Xcode project.
   * Fixed a bug where Hash#{[]=, clear, removeObjectForKey} will immediately
     release an object.
-  * Fixed a bug where Array#delete will immediately release an object.
+  * Fixed a bug where Array#{delete, clear} will immediately release an object.
   * Fixed a bug where Struct#[]= and setter of Struct member will immediately
     release an object.
   * Fixed a bug where setter of Boxed member will immediately release an object.
