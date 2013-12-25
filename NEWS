@@ -19,6 +19,7 @@
   * Fixed a bug where applications could not be launched on the simulator when
     using Xcode 5.1, and stopped supporting Xcode 4.
   * Improved Range.new performance. 20% faster.
+  * Improved Array#flatten performance. 70% faster.
 
 = RubyMotion 2.17 =
 
