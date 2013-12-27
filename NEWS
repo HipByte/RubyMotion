@@ -21,6 +21,9 @@
   * Improved Range.new performance. 20% faster.
   * Improved Array#flatten performance. 70% faster.
   * Improved Time#strftime performance. ~30% faster.
+  * Improved Numeric#{div, to_int} performance. 20-60% faster.
+  * Improved Fixnum#== and Float#== performance when it would compare an object.
+    2.5-3 times faster.
   * Improved build system in order to compile spec files in parallel as much as
     possible.
 
