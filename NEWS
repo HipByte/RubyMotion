@@ -21,6 +21,8 @@
   * Improved Range.new performance. 20% faster.
   * Improved Array#flatten performance. 70% faster.
   * Improved Time#strftime performance. ~30% faster.
+  * Improved build system in order to compile spec files in parallel as much as
+    possible.
 
 = RubyMotion 2.17 =
 
