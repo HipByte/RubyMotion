@@ -165,21 +165,17 @@ module Motion; module Project;
 
       parallel = ParallelBuilder.new(objs_build_dir, build_file)
       parallel.files = config.ordered_build_files
+      parallel.files += config.spec_files if config.spec_mode
       parallel.run
-      objs = parallel.objects
 
-      FileUtils.touch(objs_build_dir) if any_obj_file_built
-
-      app_objs = objs
+      objs = app_objs = parallel.objects
       spec_objs = []
       if config.spec_mode
-        # Build spec files too, but sequentially.
-        parallel = ParallelBuilder.new(objs_build_dir, build_file)
-        parallel.files = config.spec_files
-        parallel.run
-        spec_objs = parallel.objects
-        objs += spec_objs
+        app_objs = objs[0...config.ordered_build_files.size]
+        spec_objs = objs[-(config.spec_files.size)..-1]
       end
+
+      FileUtils.touch(objs_build_dir) if any_obj_file_built
 
       # Generate init file.
       init_txt = <<EOS
