@@ -1,5 +1,8 @@
 = RubyMotion 2.18 =
 
+  * Fixed a bug where it would causes a crash when it will run OS X app on
+    older machine which has Core 2 Duo CPU when the app was built on newer
+    machine.
   * Improve terminal output when using `vendor_project` with an Xcode project.
   * Fixed a bug where Hash#{[]=, clear, removeObjectForKey} will immediately
     release an object.
