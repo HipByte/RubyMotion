@@ -88,11 +88,12 @@ task :ctags do
 end
 
 desc "Open the latest crash report generated for the app"
-task :crashlog do
+# This task does not have a description as it is being used by template Rakefiles instead.
+task :__local_crashlog do
   logs = Dir.glob(File.join(File.expand_path("~/Library/Logs/DiagnosticReports/"), "#{App.config.name}_*"))
   if logs.empty?
     $stderr.puts "Unable to find any crash report file"
   else
-    sh "open -a Console \"#{logs.last}\""
+    sh "/usr/bin/open -a Console \"#{logs.last}\""
   end
 end

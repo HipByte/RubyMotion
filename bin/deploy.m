@@ -5,6 +5,8 @@
 
 typedef void *am_device_t;
 typedef void *afc_conn_t;
+typedef void *afc_dir_t;
+typedef void *afc_dict_t;
 typedef void *afc_fileref_t;
 typedef void *am_device_notif_context_t;
 
@@ -63,12 +65,34 @@ SET_FUNC(AMDeviceStartService);
 typedef int (*fptr_AFCConnectionOpen)(int, void *, afc_conn_t *conn);
 SET_FUNC(AFCConnectionOpen);
 
+typedef int (*fptr_AFCDirectoryOpen)(afc_conn_t, const char *, afc_dir_t *);
+SET_FUNC(AFCDirectoryOpen);
+
+typedef int (*fptr_AFCDirectoryRead)(afc_conn_t, afc_dir_t, char **);
+SET_FUNC(AFCDirectoryRead);
+
 typedef int (*fptr_AFCDirectoryCreate)(afc_conn_t, const char *);
 SET_FUNC(AFCDirectoryCreate);
+
+typedef int (*fptr_AFCDirectoryClose)(afc_conn_t, afc_dir_t);
+SET_FUNC(AFCDirectoryClose);
 
 typedef int (*fptr_AFCFileRefOpen)(afc_conn_t, const char *, int,
 	afc_fileref_t *);
 SET_FUNC(AFCFileRefOpen);
+
+typedef int (*fptr_AFCFileInfoOpen)(afc_conn_t, const char *, afc_dict_t *);
+SET_FUNC(AFCFileInfoOpen);
+
+typedef int (*fptr_AFCKeyValueRead)(afc_dict_t, char **, char **);
+SET_FUNC(AFCKeyValueRead);
+
+typedef int (*fptr_AFCKeyValueClose)(afc_dict_t);
+SET_FUNC(AFCKeyValueClose);
+
+typedef int (*fptr_AFCFileRefRead)(afc_conn_t, afc_fileref_t, void *,
+	size_t *);
+SET_FUNC(AFCFileRefRead);
 
 typedef int (*fptr_AFCFileRefWrite)(afc_conn_t, afc_fileref_t, const void *,
 	size_t);
@@ -91,8 +115,15 @@ init_private_funcs(void)
     LOOKUP_FUNC(handler, AMDeviceStartSession);
     LOOKUP_FUNC(handler, AMDeviceStartService);
     LOOKUP_FUNC(handler, AFCConnectionOpen);
+    LOOKUP_FUNC(handler, AFCDirectoryOpen);
+    LOOKUP_FUNC(handler, AFCDirectoryRead);
     LOOKUP_FUNC(handler, AFCDirectoryCreate);
+    LOOKUP_FUNC(handler, AFCDirectoryClose);
     LOOKUP_FUNC(handler, AFCFileRefOpen);
+    LOOKUP_FUNC(handler, AFCFileInfoOpen);
+    LOOKUP_FUNC(handler, AFCKeyValueRead);
+    LOOKUP_FUNC(handler, AFCKeyValueClose);
+    LOOKUP_FUNC(handler, AFCFileRefRead);
     LOOKUP_FUNC(handler, AFCFileRefWrite);
     LOOKUP_FUNC(handler, AFCFileRefClose);
 }
@@ -100,6 +131,7 @@ init_private_funcs(void)
 static bool debug_mode = false;
 static bool discovery_mode = false;
 static bool console_mode = false;
+static bool logs_mode = false;
 
 #define LOG(fmt, ...) \
     do { \
@@ -928,12 +960,232 @@ start_debug_server(am_device_t dev)
     [gdb_task waitUntilExit];
 }
 
+static NSDictionary *
+read_remote_file_info(afc_conn_t afc_conn, const char *path)
+{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+
+    afc_dict_t afc_dict = NULL; 
+    if (_AFCFileInfoOpen(afc_conn, path, &afc_dict) != 0 || afc_dict == NULL) {
+	return nil;
+    }
+
+    while (true) {
+	char *key = NULL;
+	char *value = NULL;
+	if (_AFCKeyValueRead(afc_dict, &key, &value) != 0
+		|| key == NULL || value == NULL) {
+	    break;
+	}
+	[dict setValue:[NSString stringWithUTF8String:value]
+	    forKey:[NSString stringWithUTF8String:key]];
+    }
+
+    _AFCKeyValueClose(afc_dict); // We don't check for errors here.
+    return dict;
+}
+
+static NSData *
+read_remote_file_data(afc_conn_t afc_conn, const char *path)
+{
+    NSMutableData *data = [NSMutableData data];
+
+    afc_fileref_t afc_fileref = NULL;
+    PERFORM("opening crash log", _AFCFileRefOpen(afc_conn, path,
+		0x2 /* read */, &afc_fileref));
+    assert(afc_fileref != NULL);
+
+    while (true) {
+	char buf[1024];
+	size_t length = sizeof buf;
+	memset(buf, 0, sizeof buf);
+	PERFORM("read crash log data",
+		_AFCFileRefRead(afc_conn, afc_fileref, buf, &length));
+	if (length > 0) {
+	    [data appendBytes:buf length:length];
+	}
+	else {
+	    break;
+	}
+    }
+
+    PERFORM("closing crash log", _AFCFileRefClose(afc_conn,
+		afc_fileref));
+    return data;
+}
+
+static void
+recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
+	NSString *app_name)
+{
+    NSString *app_path_pattern = [NSString stringWithFormat:@"%s%@_",
+	     root, app_name];
+
+    // Figure out where the .dSYM bundle is.
+    NSString *dsym_path = [[app_package_path stringByDeletingPathExtension]
+	stringByAppendingPathExtension:@"dSYM"];
+    assert([[NSFileManager defaultManager] fileExistsAtPath:dsym_path]);
+
+    // Get the directory where the files will be saved.
+    const char *_local_dir = getenv("CRASH_REPORTS_DIR");
+    assert(_local_dir != NULL);
+    NSString *local_dir = [NSString stringWithUTF8String:_local_dir];
+    assert([[NSFileManager defaultManager] fileExistsAtPath:local_dir]);
+
+    // Prepare the temporary directory where we will download the files.
+    NSString *tmp_dir = [NSTemporaryDirectory()
+	stringByAppendingPathComponent:@"RubyMotion-Device-Crashlogs"];
+    [[NSFileManager defaultManager] createDirectoryAtPath:tmp_dir
+	withIntermediateDirectories:true attributes:nil error:nil]; 
+
+    afc_dir_t afc_dir = NULL;
+    PERFORM("opening crash report directory", _AFCDirectoryOpen(afc_conn,
+		root, &afc_dir));
+    assert(afc_dir != NULL);
+
+    NSString *last_generated_path = nil;
+    while (true) {
+	// Read a directory entry, skip private files.
+	char *path = NULL;
+	PERFORM("reading crash report directory path",
+		_AFCDirectoryRead(afc_conn, afc_dir, &path));
+	if (path == NULL) {
+	    break;
+	}
+	if (*path == '.') {
+	    continue;
+	}
+
+	// Retrieve the file info dictionary from the file.
+	char full_path[1024];
+	snprintf(full_path, sizeof full_path, "%s%s", root, path);
+	NSDictionary *path_info = read_remote_file_info(afc_conn, full_path);
+	if (path_info == nil) {
+	    continue;
+	}
+	NSString *fileType = [path_info objectForKey:@"st_ifmt"];
+	if (fileType == nil) {
+	    continue;
+	}
+	if ([fileType isEqualToString:@"S_IFDIR"]) {
+	    // A directory.
+	    // Recursive iteration does not seem to be required, app crash
+	    // reports seem to always be in the top-level directory. Only
+	    // system stuff is in separate directories.
+	    //strlcat(full_path, "/", sizeof full_path);
+	    //recursive_retrieve_crash_reports(afc_conn, full_path);
+	}
+	else if ([fileType isEqualToString:@"S_IFREG"]) {
+	    // A regular file!
+	    NSString *ns_full_path = [NSString stringWithUTF8String:full_path];
+	    if ([ns_full_path rangeOfString:app_path_pattern].location != 0) {
+		// Does not look like a crash report from our app.
+		continue;
+	    }
+
+	    // Calculate what will be the local path on the file system.
+	    NSString *local_path = [local_dir stringByAppendingPathComponent:
+		[ns_full_path lastPathComponent]];
+	    if ([[local_path pathExtension] isEqualToString:@"synced"]) {
+		local_path = [local_path stringByDeletingPathExtension];
+	    }
+	    if ([[local_path pathExtension] isEqualToString:@"plist"]) {
+		local_path = [local_path stringByDeletingPathExtension];
+	    }
+	    local_path = [local_path stringByAppendingPathExtension:@"crash"];
+
+	    // No need to retrieve the file if we already worked on it.
+	    if ([[NSFileManager defaultManager] fileExistsAtPath:local_path]) {
+		continue;
+	    }
+
+	    // Read the data. It should be a property list. The actual crash
+	    // report is a long string associated to the `description' key.
+	    NSData *data = read_remote_file_data(afc_conn, full_path);
+	    id obj = [NSPropertyListSerialization propertyListWithData:data
+		options:0 format:nil error:nil];
+	    if (obj == nil || ![obj isKindOfClass:[NSDictionary class]]) {
+		fprintf(stderr,
+			"Error when parsing crash report data from `%s'\n",
+			full_path);
+		exit(1);
+	    }
+	    id content = [(NSDictionary *)obj
+		valueForKey:@"description"];
+	    if (content == nil || ![content isKindOfClass:[NSString class]]) {
+		fprintf(stderr,
+			"Crash report data from `%s' has no content\n",
+			full_path);
+		exit(1);
+	    }
+
+	    // Write the data on the file system.
+	    NSError *error = nil;
+	    NSString *tmp_path = [tmp_dir stringByAppendingPathComponent:
+		[local_path lastPathComponent]];
+	    if (![(NSString *)content writeToFile:tmp_path atomically:true
+		    encoding:NSUTF8StringEncoding error:&error]) {
+		fprintf(stderr,
+			"Error when writing crash report at path `%s': %s\n",
+			[local_path fileSystemRepresentation],
+			[[error description] UTF8String]);
+		exit(1);
+	    }
+
+	    // Run symbolicate.
+	    char cmd_line[5000];
+	    char *xcode_dir = getenv("XCODE_DIR");
+	    assert(xcode_dir != NULL);
+	    snprintf(cmd_line, sizeof cmd_line, "DEVELOPER_DIR=\"%s\" %s/Platforms/iPhoneOS.platform/Developer/Library/PrivateFrameworks/DTDeviceKitBase.framework/Versions/A/Resources/symbolicatecrash -o \"%s\" \"%s\" \"%s\" >& /dev/null", xcode_dir, xcode_dir, [local_path fileSystemRepresentation], [tmp_path fileSystemRepresentation], [dsym_path fileSystemRepresentation]);
+	    system(cmd_line);
+
+	    printf("New crash report: %s\n",
+		    [local_path fileSystemRepresentation]);
+	    last_generated_path = local_path;
+	}
+    }
+
+    PERFORM("closing crash report directory", _AFCDirectoryClose(afc_conn,
+		afc_dir));
+
+    if (last_generated_path == nil) {
+	printf("Unable to find any crash report file on the device for this app that hasn't been processed yet. Already-processed crash report files for this app might be in `%s'.\n", _local_dir);
+    }
+}
+
+static void
+retrieve_crash_reports(am_device_t dev)
+{
+    setup_device_connection(dev);
+
+    // Figure out the app name from the given .ipa path.
+    NSString *app_name = [[app_package_path lastPathComponent]
+	stringByDeletingPathExtension];
+
+    int afc_fd = 0;
+    PERFORM("starting crash report copy service", _AMDeviceStartService(dev,
+		CFSTR("com.apple.crashreportcopymobile"), &afc_fd, NULL));
+    assert(afc_fd > 0);
+
+    afc_conn_t afc_conn = NULL;
+    PERFORM("opening file copy connection", _AFCConnectionOpen(afc_fd, 0,
+		&afc_conn));
+    assert(afc_conn != NULL);
+
+    recursive_retrieve_crash_reports(afc_conn, "/", app_name);
+}
+
 static void
 device_go(am_device_t dev)
 {
-    install_application(dev);
-    if (getenv("install_only") == NULL) {
-	start_debug_server(dev);
+    if (logs_mode) {
+	retrieve_crash_reports(dev);
+    }
+    else {
+	install_application(dev);
+	if (getenv("install_only") == NULL) {
+	    start_debug_server(dev);
+	}
     }
 }
 
@@ -981,6 +1233,9 @@ main(int argc, char **argv)
 	}
 	else if (strcmp(argv[i], "-c") == 0) {
 	    console_mode = true;
+	}
+	else if (strcmp(argv[i], "-l") == 0) {
+	    logs_mode = true;
 	}
 	else {
 	    if (device_id == nil) {
