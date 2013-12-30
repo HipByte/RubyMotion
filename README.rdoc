@@ -18,6 +18,7 @@ you can run the following commands.
 
   $ git clone https://github.com/HipByte/RubyMotion.git
   $ cd RubyMotion
+  $ git submodule update --init
   $ rake install
 
 +/Library/RubyMotion/lib+ is replaced with +lib+ of git repository,
