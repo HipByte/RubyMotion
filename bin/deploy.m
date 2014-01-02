@@ -585,8 +585,8 @@ start_debug_server(am_device_t dev)
 
     if (![[NSFileManager defaultManager] fileExistsAtPath:[device_support_path
 	    stringByAppendingPathComponent:@"Symbols"]]) {
-	fprintf(stderr, "*** symbols not found in `%s': debugger might be "\
-		"slow to attach\n",
+	fprintf(stderr, "*** Symbols not found in `%s': debugger might be "\
+		"slow to attach.\n",
 		[device_support_path fileSystemRepresentation]);
     }
 
