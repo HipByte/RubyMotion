@@ -1,3 +1,10 @@
+= RubyMotion 2.19 =
+
+  * Improved Hash#{default, shift} when Hash#default_proc returns a block.
+    2 times faster.
+  * Improved where compares the value in a block where returns float.
+    (Ex Array#sort{|a,b| return float_object }). 2 times faster.
+
 = RubyMotion 2.18 =
 
   * Added the `rake crashlog:device' task which will download crash reports
