@@ -1,12 +1,12 @@
 = RubyMotion 2.19 =
 
-  * Improved Hash#{default, shift} when Hash#default_proc returns a block.
-    2 times faster.
-  * Improved where compares the value in a block where returns float.
-    (Ex Array#sort{|a,b| return float_object }). 2 times faster.
   * [iOS] Fixed a regression related to the sim launcher changes for Xcode 5.1
     that broke `rake simulator debug=1`.
   * [OSX] Fixed a regression where #eval support was not working anymore.
+  * Improved Hash#{default, shift} when Hash#default_proc returns a block.
+    2 times faster.
+  * Improved comparison iterator blocks that return Float objects.
+    (Ex. Array#sort{|a,b| return float_object }). 2 times faster.
 
 = RubyMotion 2.18 =
 
