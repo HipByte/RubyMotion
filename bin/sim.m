@@ -1211,9 +1211,9 @@ lldb_commands_file(int pid, NSString *app_path)
     }
 
     if (debug_mode == DEBUG_GDB) {
-	NSNumber *pidNumber = ((id (*)(id, SEL))objc_msgSend)(session,
+	int pidNumber = ((int (*)(id, SEL))objc_msgSend)(session,
 		@selector(simulatedApplicationPID));
-	if (pidNumber == nil || ![pidNumber isKindOfClass:[NSNumber class]]) {
+	if (pidNumber == 0) {
 	    fprintf(stderr, "*** Cannot get simulated application PID\n");
 	    exit(1);
 	}
@@ -1227,12 +1227,13 @@ lldb_commands_file(int pid, NSString *app_path)
 	if ([[NSFileManager defaultManager] fileExistsAtPath:gdb_path]) {
             gdb_task = [[RMTask launchedTaskWithLaunchPath:gdb_path
 		arguments:[NSArray arrayWithObjects:@"--arch", @"i386", @"-q",
-		@"--pid", [pidNumber description], @"-x", gdb_commands_file(), nil]] retain];
+		@"--pid", [NSString stringWithFormat:@"%d", pidNumber], @"-x",
+		gdb_commands_file(), nil]] retain];
 	}
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
 	    gdb_task = [[RMTask launchedTaskWithLaunchPath:lldb_path
 		arguments:[NSArray arrayWithObjects:@"-a", @"i386",
-		@"-s", lldb_commands_file([pidNumber intValue], nil), nil]]
+		@"-s", lldb_commands_file(pidNumber, nil), nil]]
 		    retain];
 	}
 	else {
