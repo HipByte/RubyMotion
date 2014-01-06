@@ -6,6 +6,7 @@
     (Ex Array#sort{|a,b| return float_object }). 2 times faster.
   * [iOS] Fixed a regression related to the sim launcher changes for Xcode 5.1
     that broke `rake simulator debug=1`.
+  * [OSX] Fixed a regression where #eval support was not working anymore.
 
 = RubyMotion 2.18 =
 
