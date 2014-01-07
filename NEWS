@@ -1,3 +1,8 @@
+= RubyMotion 2.20 =
+
+  * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
+    would cause a calculation error.
+
 = RubyMotion 2.19 =
 
   * [iOS] Fixed a regression related to the sim launcher changes for Xcode 5.1
