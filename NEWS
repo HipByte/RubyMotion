@@ -2,6 +2,8 @@
 
   * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
     would cause a calculation error.
+  * [OSX] Fixed a bug where using certain NSManagedObjectID objects would cause
+    a runtime crash due to the fact that they are pointer-tagged.
 
 = RubyMotion 2.19 =
 
