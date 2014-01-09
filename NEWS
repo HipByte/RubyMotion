@@ -1,5 +1,7 @@
 = RubyMotion 2.20 =
 
+  * Fixed a bug in build system that app cannot be built with Ruby 2.1 when it
+    would use UTF-8 as app name.
   * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
     would cause a calculation error.
   * [OSX] Fixed a bug where using certain NSManagedObjectID objects would cause
