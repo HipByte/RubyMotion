@@ -123,3 +123,6 @@ end
 
 desc 'Same as profile:development'
 task :profile => 'profile:development'
+
+desc "Open the latest crash report generated for the app"
+task :crashlog => :__local_crashlog
