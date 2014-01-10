@@ -4,6 +4,7 @@ OSX_SDK_VERSIONS = ENV['osx_sdk_versions'].split(',')
 
 ANDROID_SDK = ENV['android_sdk']
 ANDROID_API_VERSIONS = ENV['android_api_versions'].split(',')
+ANDROID_ARCHS = ENV['android_archs'].split(',')
 
 verbose(true)
 NEED_STRIP = !ENV['DEBUG']
@@ -425,7 +426,6 @@ end
 
 # TODO - merge to main task
 ANDROID_API_PACKAGES = %w{java android}
-ANDROID_ARCHS = ['armv5'] # XXX add more targets?
 task :android do
   ANDROID_API_VERSIONS.each do |api_vers|
     # Copy runtime library and kernel file

@@ -40,6 +40,7 @@ ANDROID_API_VERSIONS =
   else
     []
   end
+ANDROID_ARCHS = ['armv5te']
 
 verbose(true)
 
@@ -48,7 +49,7 @@ def rake(dir, cmd='all')
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
     sdk_beta = ENV['SDK_BETA'] ? 'sdk_beta=1' : ''
     trace = Rake.application.options.trace
-    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" android_ndk=\"#{ANDROID_NDK}\" project_version=\"#{PROJECT_VERSION}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
+    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" android_ndk=\"#{ANDROID_NDK}\" project_version=\"#{PROJECT_VERSION}\" android_archs=\"#{ANDROID_ARCHS.join(',')}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
   end
 end
 
