@@ -5,8 +5,9 @@
   * Fixed a bug where user defined bang method would be not called.
   * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
     would cause a calculation error.
-  * [OSX] Fixed a bug where using certain NSManagedObjectID objects would cause
-    a runtime crash due to the fact that they are pointer-tagged.
+  * Fixed the runtime to be able to deal with all tagged pointers from the
+    Objective-C world. For instance, using NSTaggedManagedObjectID would lead
+    to a runtime crash.
 
 = RubyMotion 2.19 =
 
