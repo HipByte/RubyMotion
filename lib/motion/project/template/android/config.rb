@@ -28,12 +28,13 @@ module Motion; module Project;
     register :android
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
-      :api_level
+      :api_version, :arch
 
     def initialize(project_dir, build_mode)
       super
       @avd_config = { :name => 'RubyMotion', :target => '1', :abi => 'armeabi-v7a' }
       @main_activity = '.Main'
+      @arch = 'armv5te'
     end
 
     def validate
@@ -52,16 +53,16 @@ module Motion; module Project;
       @package ||= 'com.yourcompany' + '.' + name.downcase.gsub(/\s/, '')
     end
 
-    def api_level
-      @api_level ||= begin
-        levels = Dir.glob(sdk_path + '/platforms/android-*').map do |path|
+    def api_version
+      @api_version ||= begin
+        versions = Dir.glob(sdk_path + '/platforms/android-*').map do |path|
           md = File.basename(path).match(/\d+$/)
           md ? md[0] : nil
         end.compact
-        if levels.empty?
-          App.fail "Given Android SDK does not support any API level (nothing relevant in `#{sdk_path}/platforms')"
+        if versions.empty?
+          App.fail "Given Android SDK does not support any API version (nothing relevant in `#{sdk_path}/platforms')"
         end
-        levels.sort.max
+        versions.sort.max
       end
     end
 
@@ -71,6 +72,39 @@ module Motion; module Project;
 
     def apk_path
       File.join(build_dir, name + '.apk')
+    end
+
+    def ndk_toolchain_bin_dir
+      File.join(ndk_path, 'toolchains/llvm-3.3/prebuilt/darwin-x86_64/bin')
+    end
+
+    def cc
+      File.join(ndk_toolchain_bin_dir, 'clang')
+    end
+
+    def cxx
+      File.join(ndk_toolchain_bin_dir, 'clang++')
+    end
+
+    def cflags
+      "-MMD -MP -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -target #{arch}-none-linux-androideabi -march=#{arch} -mtune=xscale -msoft-float -fno-rtti -mthumb -fomit-frame-pointer -fno-strict-aliasing -O0 -marm -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -Wa,--noexecstack -Wformat -Werror=format-security"
+    end
+
+    def cxxflags
+      "#{cflags} -I\"#{ndk_path}/sources/cxx-stl/stlport/stlport\""
+    end
+
+    def payload_library_name
+      'libpayload.so'
+    end
+
+    def ldflags
+      "-Wl,-soname,#{payload_library_name} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version}/arch-arm\" -lgcc  -gcc-toolchain /Users/lrz/src/android-ndk-r9b/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64 -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"  
+    end
+
+    def ldlibs
+      # The order of the libraries matters here.
+      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{motiondir}/data/android/#{api_version}/#{arch}\" -lrubymotion-static -L#{ndk_path}/sources/cxx-stl/stlport/libs/armeabi -lstlport_static"
     end
   end
 end; end

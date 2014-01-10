@@ -35,8 +35,8 @@ task :build do
 
   # XXX
   FileUtils.mkdir_p("#{App.config.build_dir}/#{File.dirname(libpayload_subpath)}")
-  sh "#{App.config.ndk_path}/toolchains/arm-linux-androideabi-4.6/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-gcc -MMD -MP -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ -no-canonical-prefixes -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -g -DNDEBUG -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -O0 -UNDEBUG -marm -fno-omit-frame-pointer -Ijni -DANDROID  -Wa,--noexecstack -I\"#{App.config.ndk_path}/platforms/android-#{App.config.api_level}/arch-arm/usr/include\" -c #{App.config.build_dir}/payload.c -o #{App.config.build_dir}/payload.o"
-  sh "#{App.config.ndk_path}/toolchains/arm-linux-androideabi-4.6/prebuilt/darwin-x86_64/bin/arm-linux-androideabi-g++ -Wl,-soname,libpayload.so -shared --sysroot=\"#{App.config.ndk_path}/platforms/android-#{App.config.api_level}/arch-arm\" #{App.config.build_dir}/payload.o -no-canonical-prefixes  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now  -lc -lm -llog -o #{App.config.build_dir}/#{libpayload_subpath} -L#{File.join(App.config.motiondir, 'data', 'android', App.config.api_level, 'arm')} -lrubymotion-static -L#{App.config.ndk_path}/sources/cxx-stl/stlport/libs/armeabi -lstlport_static -g"
+  sh "#{App.config.cc} #{App.config.cflags} -c #{App.config.build_dir}/payload.c -o #{App.config.build_dir}/payload.o"
+  sh "#{App.config.cxx} #{App.config.ldflags} #{App.config.build_dir}/payload.o -o #{App.config.build_dir}/#{libpayload_subpath} #{App.config.ldlibs}"
   # XXX
 
   classes_dir = File.join(App.config.build_dir, 'classes')
@@ -51,7 +51,7 @@ task :build do
     class_path = paths.join('/')
     if !File.exist?(class_path) or File.mtime(java_path) > File.mtime(class_path)
       App.info 'Compile', java_path
-      sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath \"#{classes_dir}:#{App.config.sdk_path}/tools/support/annotations.jar\" -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{App.config.sdk_path}/platforms/android-#{App.config.api_level}/android.jar\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
+      sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath \"#{classes_dir}:#{App.config.sdk_path}/tools/support/annotations.jar\" -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
       rebuild_dex_classes = true
     end
   end
@@ -89,7 +89,7 @@ EOS
   if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(File.join(App.config.build_dir, libpayload_subpath)) > File.mtime(archive)
     App.info 'Create', archive
     resource_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{App.config.sdk_path}/platforms/android-#{App.config.api_level}/android.jar\" -F \"#{archive}\""
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
       sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\""
       sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{libpayload_subpath}"
