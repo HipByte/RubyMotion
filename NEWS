@@ -8,6 +8,7 @@
   * Fixed the runtime to be able to deal with all tagged pointers from the
     Objective-C world. For instance, using NSTaggedManagedObjectID would lead
     to a runtime crash.
+  * [OSX] Fixed the `rake crashlog' task.
 
 = RubyMotion 2.19 =
 
