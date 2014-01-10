@@ -425,15 +425,16 @@ end
 
 # TODO - merge to main task
 ANDROID_API_PACKAGES = %w{java android}
+ANDROID_ARCHS = ['armv5'] # XXX add more targets?
 task :android do
   ANDROID_API_VERSIONS.each do |api_vers|
-    # Copy runtime library
-    archs = %w{arm}
-    archs.each do |arch|
-      vm_lib_path = "../vm/android-#{api_vers}-#{arch}.objs/librubymotion-static.a"
-      dest_lib_path = "android/#{api_vers}/arm"
+    # Copy runtime library and kernel file
+    ANDROID_ARCHS.each do |arch|
+      dest_lib_path = "android/#{api_vers}/#{arch}"
       mkdir_p dest_lib_path
-      cp vm_lib_path, dest_lib_path
+      vm_objs_dir = "../vm/android-#{api_vers}-#{arch}.objs"
+      cp "#{vm_objs_dir}/librubymotion-static.a", dest_lib_path
+      cp "#{vm_objs_dir}/kernel-#{arch}.bc", dest_lib_path
     end
 
     # Generate .bridgesupport files
