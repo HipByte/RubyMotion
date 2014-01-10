@@ -87,7 +87,6 @@ task :ctags do
   end
 end
 
-desc "Open the latest crash report generated for the app"
 # This task does not have a description as it is being used by template Rakefiles instead.
 task :__local_crashlog do
   logs = Dir.glob(File.join(File.expand_path("~/Library/Logs/DiagnosticReports/"), "#{App.config.name}_*"))
