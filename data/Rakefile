@@ -430,7 +430,7 @@ task :android do
     # Copy runtime library
     archs = %w{arm}
     archs.each do |arch|
-      vm_lib_path = "../vm/android-#{api_vers}-#{arch}/librubymotion-static.a"
+      vm_lib_path = "../vm/android-#{api_vers}-#{arch}.objs/librubymotion-static.a"
       dest_lib_path = "android/#{api_vers}/arm"
       mkdir_p dest_lib_path
       cp vm_lib_path, dest_lib_path
