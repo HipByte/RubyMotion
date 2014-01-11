@@ -31,7 +31,7 @@ require 'motion/project/template/android/config'
 
 desc "Create an application package file (.apk)"
 task :build do
-  libpayload_subpath = "lib/armeabi/libpayload.so"
+  libpayload_subpath = "lib/armeabi/#{App.config.payload_library_name}"
 
   # XXX
   FileUtils.mkdir_p("#{App.config.build_dir}/#{File.dirname(libpayload_subpath)}")
