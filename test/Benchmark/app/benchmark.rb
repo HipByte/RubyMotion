@@ -28,4 +28,7 @@ autorelease_pool { bm_string }
 puts "*** Time ***"
 autorelease_pool { bm_time }
 
+puts "*** Rational ***"
+autorelease_pool { bm_rational }
+
 exit(0)
