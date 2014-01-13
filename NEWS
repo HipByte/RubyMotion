@@ -3,6 +3,7 @@
   * Fixed a bug in build system that app cannot be built with Ruby 2.1 when it
     would use UTF-8 as app name.
   * Fixed a bug where user defined bang method would be not called.
+  * Improved Rational performance. ~4 times faster.
   * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
     would cause a calculation error.
   * Fixed the runtime to be able to deal with all tagged pointers from the
