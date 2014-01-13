@@ -11,6 +11,8 @@
     Objective-C world. For instance, using NSTaggedManagedObjectID would lead
     to a runtime crash.
   * [OSX] Fixed the `rake crashlog' task.
+  * Fixed a bug in the compiler that would ignore BridgeSupport enum values if
+    they only have a 64-bit value.
 
 = RubyMotion 2.19 =
 
