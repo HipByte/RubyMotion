@@ -66,7 +66,7 @@ module Motion; module Project;
         build_dir = "build-#{platform}"
 
         libs = (opts.delete(:products) or Dir.glob('*.a'))
-        source_files = (opts.delete(:source_files) or Dir.glob('**/*.{c,m,cpp,cxx,mm,h}'))
+        source_files = (opts.delete(:source_files) or ['**/*.{c,m,cpp,cxx,mm,h}']).map { |pattern| Dir.glob(pattern) }.flatten
         cflags = (opts.delete(:cflags) or '')
 
         source_files.each do |srcfile|
