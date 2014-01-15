@@ -74,7 +74,7 @@ module Motion; module Project;
       end
 
       # Prepare embedded and external frameworks BridgeSupport files (OSX-only).
-      if config.is_a?(OSXConfig)
+      if config.respond_to?(:embedded_frameworks) && config.respond_to?(:external_frameworks)
         embedded_frameworks = config.embedded_frameworks.map { |x| File.expand_path(x) }
         external_frameworks = config.external_frameworks.map { |x| File.expand_path(x) }
         (embedded_frameworks + external_frameworks).each do |path|
