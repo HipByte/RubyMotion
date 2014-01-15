@@ -5,6 +5,9 @@
   * Fixed a bug where user defined bang method would be not called.
   * Improved Rational performance. ~4 times faster.
   * Improved Proc#new performance. 15% faster.
+  * Fixed a race condition bug in the runtime where a crash would occur if
+    the same Objective-C constant was being resolved at the same time from
+    different threads.
   * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
     would cause a calculation error.
   * Fixed the runtime to be able to deal with all tagged pointers from the
