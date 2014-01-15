@@ -13,6 +13,10 @@
   * [OSX] Fixed the `rake crashlog' task.
   * Fixed a bug in the compiler that would ignore BridgeSupport enum values if
     they only have a 64-bit value.
+  * [OSX] Added `external_frameworks' config variable, which is used for
+    frameworks that are outside of `/System/Library/Frameworks`, but are not
+    meant to be embedded inside the application.
+    E.g. `/Library/Frameworks/iTunesLibrary.framework'.
 
 = RubyMotion 2.19 =
 

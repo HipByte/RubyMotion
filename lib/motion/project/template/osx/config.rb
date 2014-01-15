@@ -29,7 +29,8 @@ module Motion; module Project;
   class OSXConfig < XcodeConfig
     register :osx
 
-    variable :icon, :copyright, :category, :embedded_frameworks,
+    variable :icon, :copyright, :category,
+        :embedded_frameworks, :external_frameworks,
         :codesign_for_development, :codesign_for_release,
         :eval_support
 
@@ -40,6 +41,7 @@ module Motion; module Project;
       @category = 'utilities'
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
       @embedded_frameworks = []
+      @external_frameworks = []
       @codesign_for_development = false
       @codesign_for_release = true
       @eval_support = false
@@ -51,9 +53,11 @@ module Motion; module Project;
     def device_family; 'mac'; end
 
     def validate
-      # Embedded frameworks.
-      if !(embedded_frameworks.is_a?(Array) and embedded_frameworks.all? { |x| File.exist?(x) and File.extname(x) == '.framework' })
-        App.fail "app.embedded_frameworks should be an array of framework paths"
+      %w{ embedded_frameworks external_frameworks }.each do |attr|
+        value = send(attr)
+        if !(value.is_a?(Array) and value.all? { |x| File.exist?(x) and File.extname(x) == '.framework' })
+          App.fail "app.#{attr} should be an array of framework paths"
+        end
       end
 
       super

@@ -56,7 +56,7 @@ module Motion; module Project;
       build_dir = File.join(config.versionized_build_dir(platform))
       App.info 'Build', build_dir
  
-      # Prepare the list of BridgeSupport files needed. 
+      # Prepare the list of BridgeSupport files needed.
       bs_files = config.bridgesupport_files
 
       # Build vendor libraries.
@@ -73,10 +73,11 @@ module Motion; module Project;
         exit 1
       end
 
-      # Prepare embedded frameworks BridgeSupport files (OSX-only).
-      embedded_frameworks = (config.respond_to?(:embedded_frameworks) ? config.embedded_frameworks.map { |x| File.expand_path(x) } : [])
-      unless embedded_frameworks.empty?
-        embedded_frameworks.each do |path|
+      # Prepare embedded and external frameworks BridgeSupport files (OSX-only).
+      if config.is_a?(OSXConfig)
+        embedded_frameworks = config.embedded_frameworks.map { |x| File.expand_path(x) }
+        external_frameworks = config.external_frameworks.map { |x| File.expand_path(x) }
+        (embedded_frameworks + external_frameworks).each do |path|
           headers = Dir.glob(File.join(path, 'Headers/**/*.h'))
           bs_file = File.join(Builder.common_build_dir, File.expand_path(path) + '.bridgesupport')
           if !File.exist?(bs_file) or File.mtime(path) > File.mtime(bs_file)
@@ -85,6 +86,8 @@ module Motion; module Project;
           end
           bs_files << bs_file
         end
+      else
+        embedded_frameworks = external_frameworks = []
       end
 
       # Build object files.
@@ -283,8 +286,8 @@ EOS
           or File.mtime(librubymotion) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        framework_search_paths = (config.framework_search_paths + embedded_frameworks.map { |x| File.dirname(x) }).uniq.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
-        frameworks = (config.frameworks_dependencies + embedded_frameworks.map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
+        framework_search_paths = (config.framework_search_paths + (embedded_frameworks + external_frameworks).map { |x| File.dirname(x) }).uniq.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
+        frameworks = (config.frameworks_dependencies + (embedded_frameworks + external_frameworks).map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
           libs << vendor_project.libs.map { |x|
