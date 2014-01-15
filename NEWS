@@ -20,6 +20,7 @@
     frameworks that are outside of `/System/Library/Frameworks`, but are not
     meant to be embedded inside the application.
     E.g. `/Library/Frameworks/iTunesLibrary.framework'.
+  * Made `vendor_project' accept glob patterns for the `source_files' option.
 
 = RubyMotion 2.19 =
 
