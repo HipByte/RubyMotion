@@ -22,24 +22,30 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion; module Project
-  class ActivateCommand < Command
-    self.name = 'activate'
-    self.help = 'Activate the software license'
-  
-    def run(args)
+  class Activate < Command
+    self.summary = 'Activate the software license'
+
+    self.arguments = 'LICENSE-KEY'
+
+    def initialize(argv)
+      @license_key = argv.shift_argument
+      super
+    end
+
+    def validate!
+      super
+      die "Activating a license requires a `LICENSE-KEY`." unless @license_key
+    end
+
+    def run
       if File.exist?(LicensePath)
         die "Product is already activated. Delete the license file `#{LicensePath}' if you want to activate a new license."
       end
-  
-      if args.size != 1
-        die "Usage: motion activate <license-key>"
+
+      unless @license_key.match(/^[a-f0-9]{40}$/)
+        die "Given license key `#{@license_key}' seems invalid. It should be a string of 40 hexadecimal characters. Check the mail you received after the order, or contact us if you need any help: info@hipbyte.com"
       end
-  
-      license_key = args[0]
-      unless license_key.match(/^[a-f0-9]{40}$/)
-        die "Given license key `#{license_key}' seems invalid. It should be a string of 40 hexadecimal characters. Check the mail you received after the order, or contact us if you need any help: info@hipbyte.com"
-      end
-  
+
       need_root
       File.open(LicensePath, 'w') { |io| io.write license_key }
       puts "Product activated. Thanks for purchasing RubyMotion :-)"
