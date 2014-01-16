@@ -83,7 +83,7 @@ module Motion; module Project
     # Base command class of RubyMotion
     # -------------------------------------------------------------------------
 
-    #require 'motion/project/command/account'
+    require 'motion/project/command/account'
     #require 'motion/project/command/archive'
     #require 'motion/project/command/activate'
     require 'motion/project/command/changelog'
@@ -144,6 +144,7 @@ module Motion; module Project
     end
 
     def guess_email_address
+      require 'uri'
       # Guess the default email address from git.
       URI.escape(`git config --get user.email`.strip)
     end

@@ -22,18 +22,14 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion; module Project
-  class AccountCommand < Command
-    self.name = 'account'
-    self.help = 'Access the software license account'
-  
-    def run(args)
-      unless args.empty?
-        die "Usage: motion account"
-      end
-  
+  class Account < Command
+    self.summary = 'Access account details.'
+    self.description = 'Access the details of your software license account.'
+
+    def run
       license_key = read_license_key
       email = guess_email_address
-  
+
       system("open \"https://secure.rubymotion.com/account?license_key=#{license_key}&email=#{email}\"")
     end
   end
