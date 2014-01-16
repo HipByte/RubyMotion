@@ -21,6 +21,8 @@
     meant to be embedded inside the application.
     E.g. `/Library/Frameworks/iTunesLibrary.framework'.
   * Made `vendor_project' accept glob patterns for the `source_files' option.
+  * Made BridgeSupport metadata generation for `vendor' projects by default use
+    the `:cflags` option.
 
 = RubyMotion 2.19 =
 
