@@ -23,6 +23,9 @@
   * Made `vendor_project' accept glob patterns for the `source_files' option.
   * Made BridgeSupport metadata generation for `vendor' projects by default use
     the `:cflags` option.
+  * [iOS] Made the UI test helper search for views from the `keyWindow' instead
+    of the `current' window that was created specifically for the test. This
+    makes it easier to interact with modal views such as `UIAlertView`.
 
 = RubyMotion 2.19 =
 

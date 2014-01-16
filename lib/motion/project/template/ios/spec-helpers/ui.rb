@@ -288,12 +288,12 @@ module Bacon
 
       def view(label)
         return label if label.is_a?(UIView)
-        window.viewByName(label) ||
+        UIApplication.sharedApplication.keyWindow.viewByName(label) ||
           raise(Bacon::Error.new(:error, "Unable to find a view with label `#{label}'"))
       end
 
       def views(view_class)
-        views = window.viewsByClass(view_class)
+        views = UIApplication.sharedApplication.keyWindow.viewsByClass(view_class)
         if views.empty?
           raise(Bacon::Error.new(:error, "Unable to find any view of class `#{view_class.name}'"))
         end
@@ -518,12 +518,6 @@ module Bacon
         from = _extract_point(view, options, :from)
         to   = _extract_point(view, options, :to)
         [from, to]
-      end
-
-      def _view(accessibilityLabel, error_message = nil)
-        return accessibilityLabel if accessibilityLabel.is_a?(UIView)
-        window.viewByName(accessibilityLabel) ||
-          raise(Bacon::Error.new(:error, error_message || "Unable to find a view with label `#{accessibilityLabel}'"))
       end
 
       # This class wraps a block that will be executed on a GCD queue, but will
