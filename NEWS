@@ -1,5 +1,7 @@
 = RubyMotion 2.20 =
 
+  * Fixed that variadic method is not working when there is a method which 
+    have the same signature.
   * Fixed a bug in build system that app cannot be built with Ruby 2.1 when it
     would use UTF-8 as app name.
   * Fixed a bug where user defined bang method would be not called.
