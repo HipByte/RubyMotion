@@ -24,9 +24,34 @@
 require 'motion/project/builder'
 
 module Motion; module Project
-  class UpdateCommand < Command
-    self.name = 'update'
-    self.help = 'Update the software'
+  class Update < Command
+    self.summary = 'Update the software.'
+    # TODO make more elaborate
+    # self.description = '...'
+
+    def self.options
+      [
+        ['--check', 'Only check whether or not a newer version is available'],
+        ['--cache-version=VERSION', 'Install a specific RubyMotion version'],
+      ].concat(super)
+    end
+
+    def initialize(argv)
+      @check_mode = argv.flag?('check', false)
+      @wanted_software_version = argv.option('cache-version')
+      @force_version = argv.option('force-version')
+      super
+    end
+
+    def validate!
+      super
+      if @force_version
+        die "--force-version has been deprecated in favor of --cache-version"
+      end
+      if @wanted_software_version && File.exist?('/Library/RubyMotion.old')
+        die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version")
+      end
+    end
 
     def curl(cmd)
       resp = `/usr/bin/curl --connect-timeout 60 #{cmd}`
@@ -42,27 +67,11 @@ module Motion; module Project
       (product[0].to_i >= latest[0].to_i) && (product[1].to_i >= latest[1].to_i)
     end
 
-    def run(args)
-      check_mode = false
-      wanted_software_version = nil
-      args.each do |a|
-        case a
-          when '--check'
-            check_mode = true
-          when /--cache-version=(.+)/
-            die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version") if File.exist?('/Library/RubyMotion.old')
-            wanted_software_version = $1.to_s
-          when /--force-version=(.+)/
-            die "--force-version has been removed in favor of --cache-version"
-          else
-            die "Usage: motion update [--cache-version=X]"
-        end
-      end
-
+    def run
       license_key = read_license_key
       product_version = Motion::Version
 
-      if check_mode
+      if @check_mode
         update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
         if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
           resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/latest_software_version")
@@ -88,7 +97,7 @@ module Motion; module Project
       need_root
 
       $stderr.puts "Connecting to the server..."
-      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"wanted_software_version=#{wanted_software_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
+      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"@wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
       unless resp.match(/^http:/)
         die resp
       end
@@ -98,7 +107,7 @@ module Motion; module Project
       tmp_dest = '/tmp/_rubymotion_su.pkg'
       curl("-# \"#{url}\" -o #{tmp_dest}")
 
-      if wanted_software_version
+      if @wanted_software_version
         $stderr.puts 'Saving current RubyMotion version...'
         FileUtils.mv '/Library/RubyMotion', '/Library/RubyMotion.old'
       end
@@ -106,14 +115,14 @@ module Motion; module Project
       $stderr.puts "Installing software update..."
       installer = "/usr/sbin/installer -pkg \"#{tmp_dest}\" -target / >& /tmp/installer.stderr"
       unless system(installer)
-        die "An error happened when installing the software update: #{File.read('/tmp/installer.stderr')}"
+        die "An error occurred while installing the software update: #{File.read('/tmp/installer.stderr')}"
       end
       FileUtils.rm_f tmp_dest
 
-      if wanted_software_version
-        FileUtils.mv '/Library/RubyMotion', "/Library/RubyMotion#{wanted_software_version}"
+      if @wanted_software_version
+        FileUtils.mv '/Library/RubyMotion', "/Library/RubyMotion#{@wanted_software_version}"
         $stderr.puts 'Restoring current RubyMotion version...' # done in ensure
-        $stderr.puts "RubyMotion #{wanted_software_version} installed as /Library/RubyMotion#{wanted_software_version}. To use it in a project, edit the Rakefile to point to /Library/RubyMotion#{wanted_software_version}/lib instead of /Library/RubyMotion/lib."
+        $stderr.puts "RubyMotion #{@wanted_software_version} installed as /Library/RubyMotion#{@wanted_software_version}. To use it in a project, edit the Rakefile to point to /Library/RubyMotion#{@wanted_software_version}/lib instead of /Library/RubyMotion/lib."
       else
         $stderr.puts "Software update installed.\n\n"
         news = File.read('/Library/RubyMotion/NEWS')
@@ -133,7 +142,7 @@ module Motion; module Project
 
       FileUtils.rm_rf Motion::Project::Builder.common_build_dir
     ensure
-      if wanted_software_version && File.exist?('/Library/RubyMotion.old')
+      if @wanted_software_version && File.exist?('/Library/RubyMotion.old')
         FileUtils.mv '/Library/RubyMotion.old', '/Library/RubyMotion'
       end
     end
