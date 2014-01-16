@@ -33,13 +33,6 @@ module Motion; module Project
     # Deprecations
     # -------------------------------------------------------------------------
 
-    def die(message)
-      warn "The usage of `Motion::Project::Command#die` is deprecated use the " \
-           "`Motion::Project::Command#help!` method instead. " \
-           "(Called from: #{caller.first})"
-      help! message
-    end
-
     # This is lifted straight from CLAide, but adjusted slightly because the
     # Class#name method is overriden in the old (deprecated) API below.
     def self.command
@@ -85,7 +78,7 @@ module Motion; module Project
 
     require 'motion/project/command/account'
     #require 'motion/project/command/archive'
-    #require 'motion/project/command/activate'
+    require 'motion/project/command/activate'
     require 'motion/project/command/changelog'
     #require 'motion/project/command/create'
     #require 'motion/project/command/device_console'
@@ -128,6 +121,14 @@ module Motion; module Project
         #end
       #end
     #end
+
+    class InformativeError < StandardError
+      include CLAide::InformativeError
+    end
+
+    def die(message)
+      raise InformativeError, message
+    end
 
     def need_root
       if Process.uid != 0
