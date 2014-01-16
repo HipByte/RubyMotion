@@ -23,56 +23,101 @@
 
 require 'motion/version'
 
+$:.unshift File.expand_path('../../../../vendor/CLAide/lib', __FILE__)
+require 'claide'
+
 module Motion; module Project
-  class Command
-    class << self
-      attr_accessor :name
-      attr_accessor :help
+  class Command < CLAide::Command
+
+    # -------------------------------------------------------------------------
+    # Deprecations
+    # -------------------------------------------------------------------------
+
+    def die(message)
+      warn "The usage of `Motion::Project::Command#die` is deprecated use the " \
+           "`Motion::Project::Command#help!` method instead. " \
+           "(Called from: #{caller.first})"
+      help! message
     end
 
-    Commands = []
-    def self.inherited(klass)
-      Commands << klass if self == Command
+    def self.name
+      warn "The usage of `Motion::Project::Command.name` is deprecated use the " \
+           "`Motion::Project::Command.command` method instead. " \
+           "(Called from: #{caller.first})"
+      command
     end
 
-    def self.main(args)
-      arg = args.shift
-      case arg
-        when '-h', '--help'
-          usage
-        when '-v', '--version'
-          $stdout.puts Motion::Version
-          exit 1
-        when /^-/
-          $stderr.puts "Unknown option: #{arg}"
-          exit 1
+    def self.name=(name)
+      warn "The usage of `Motion::Project::Command.name=` is deprecated use the " \
+           "`Motion::Project::Command.command=` method instead. " \
+           "(Called from: #{caller.first})"
+      self.command = name
+    end
+
+
+    def self.help
+      warn "The usage of `Motion::Project::Command.help` is deprecated use the " \
+           "`Motion::Project::Command.summary` method instead. " \
+           "(Called from: #{caller.first})"
+      summary
+    end
+
+    def self.help=(summary)
+      warn "The usage of `Motion::Project::Command.help=` is deprecated use the " \
+           "`Motion::Project::Command.summary=` method instead. " \
+           "(Called from: #{caller.first})"
+      self.summary = summary
+    end
+
+    # -------------------------------------------------------------------------
+    # Base command class of RubyMotion
+    # -------------------------------------------------------------------------
+
+    #require 'motion/project/command/account'
+    #require 'motion/project/command/archive'
+    #require 'motion/project/command/activate'
+    require 'motion/project/command/changelog'
+    #require 'motion/project/command/create'
+    #require 'motion/project/command/device_console'
+    #require 'motion/project/command/ri'
+    #require 'motion/project/command/update'
+
+    self.abstract_command = true
+    self.command = 'motion'
+    self.description = 'RubyMotion is a revolutionary toolchain that lets ' \
+                       'you quickly develop and test native iOS and OS X '  \
+                       'applications for iPhone, iPad and Mac, all using '  \
+                       'the awesome Ruby language you know and love.'
+    #self.plugin_prefix = 'motion'
+
+    def self.options
+      [
+        ['--version',  'Show the version of RubyMotion'],
+      ].concat(super)
+    end
+
+    def self.run(argv)
+      argv = CLAide::ARGV.new(argv)
+      if argv.flag?('version')
+        $stdout.puts Motion::Version
+        exit 0
       end
-      command = Commands.find { |command| command.name == arg }
-      usage unless command
-      command.new.run(args)
+      super(argv)
     end
 
-    def self.usage
-      $stderr.puts 'Usage:'
-      $stderr.puts "  motion [-h, --help]"
-      $stderr.puts "  motion [-v, --version]"
-      $stderr.puts "  motion <command> [<args...>]"
-      $stderr.puts ''
-      $stderr.puts 'Commands:'
-      Commands.each do |command|
-        $stderr.puts "  #{command.name}".ljust(20) + command.help
-      end
-      exit 1
-    end
-
-    def run(args)
-      # To be implemented by subclasses.
-    end
- 
-    def die(*msg)
-      $stderr.puts msg
-      exit 1
-    end
+    #def self.report_error(exception)
+      #if exception.is_a?(Interrupt)
+        #puts "[!] Cancelled".red
+        #Config.instance.verbose? ? raise : exit(1)
+      #else
+        #if ENV['COCOA_PODS_ENV'] != 'development'
+          #puts UI::ErrorReport.report(exception)
+          #exit 1
+        #else
+          #raise exception
+        #end
+      #end
+    #end
 
     def need_root
       if Process.uid != 0
@@ -92,5 +137,51 @@ module Motion; module Project
       # Guess the default email address from git.
       URI.escape(`git config --get user.email`.strip)
     end
+
   end
 end; end
+
+# TODO deprecate/alias
+#
+#module Motion; module Project
+  #class Command
+    #class << self
+      #attr_accessor :name
+      #attr_accessor :help
+    #end
+
+    #def self.main(args)
+      #arg = args.shift
+      #case arg
+        #when '-h', '--help'
+          #usage
+        #when '-v', '--version'
+          #$stdout.puts Motion::Version
+          #exit 1
+        #when /^-/
+          #$stderr.puts "Unknown option: #{arg}"
+          #exit 1
+      #end
+      #command = Commands.find { |command| command.name == arg }
+      #usage unless command
+      #command.new.run(args)
+    #end
+
+    #def self.usage
+      #$stderr.puts 'Usage:'
+      #$stderr.puts "  motion [-h, --help]"
+      #$stderr.puts "  motion [-v, --version]"
+      #$stderr.puts "  motion <command> [<args...>]"
+      #$stderr.puts ''
+      #$stderr.puts 'Commands:'
+      #Commands.each do |command|
+        #$stderr.puts "  #{command.name}".ljust(20) + command.help
+      #end
+      #exit 1
+    #end
+
+    #def run(args)
+      ## To be implemented by subclasses.
+    #end
+  #end
+#end; end

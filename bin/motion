@@ -4,17 +4,14 @@
 # This file is subject to the terms and conditions of the End User License
 # Agreement accompanying the package this file is a part of.
 
-require 'fileutils'
-
-relative_libdir = File.expand_path(File.join(File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__), '../lib'))
+file = File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__
+relative_libdir = File.expand_path('../../lib', file)
 $motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_libdir : '/Library/RubyMotion/lib'
 $:.unshift($motion_libdir)
 
 require 'motion/project/command'
 
-command_paths = [File.join($motion_libdir, 'motion/project/command'), File.join(ENV['HOME'], 'Library/RubyMotion/command')]
-command_paths.each do |path|
-  Dir.glob(File.join(path, '*.rb')).each { |x| require x }
-end
+# TODO
+# Dir.glob(File.join(ENV['HOME'], 'Library/RubyMotion/command', '*.rb')).each { |x| require x }
 
-Motion::Project::Command.main(ARGV)
+Motion::Project::Command.run(ARGV)
