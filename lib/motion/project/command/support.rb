@@ -24,18 +24,15 @@
 require 'uri'
 
 module Motion; module Project
-  class SupportCommand < Command
-    self.name = 'support'
-    self.help = 'Create a support ticket'
-  
-    def run(args)
-      unless args.empty?
-        die "Usage: motion support"
-      end
-  
+  class Support < Command
+    self.summary = 'Create a support ticket.'
+    # TODO make more elaborate
+    # self.description = '...'
+
+    def run
       license_key = read_license_key
       email = guess_email_address
-  
+
       # Collect details about the environment.
       osx_vers = `/usr/bin/sw_vers -productVersion`.strip
       rm_vers = Motion::Version
@@ -49,9 +46,9 @@ module Motion; module Project
         vers = 'unknown' if vers.empty?
         vers
       end
-  
+
       environment = URI.escape("OSX #{osx_vers}, RubyMotion #{rm_vers}, Xcode #{xcode_vers}")
-  
+
       system("open \"https://secure.rubymotion.com/new_support_ticket?license_key=#{license_key}&email=#{email}&environment=#{environment}\"")
     end
   end
