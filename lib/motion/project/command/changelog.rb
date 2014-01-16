@@ -22,15 +22,12 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion; module Project
-  class ChangelogCommand < Command
-    self.name = 'changelog'
-    self.help = 'View the changelog'
+  class Changelog < Command
+    self.summary = 'View the changelog.'
+    self.description = 'View the changes that have been made in all ' \
+                       'RubyMotion versions.'
 
-    def run(args)
-      unless args.empty?
-        die "Usage: motion changelog"
-      end
-
+    def run
       pager = (ENV['PAGER'] or '/usr/bin/less')
       system("#{pager} /Library/RubyMotion/NEWS")
     end
