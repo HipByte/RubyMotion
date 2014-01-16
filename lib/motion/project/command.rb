@@ -40,6 +40,17 @@ module Motion; module Project
       help! message
     end
 
+    # This is lifted straight from CLAide, but adjusted slightly because the
+    # Class#name method is overriden in the old (deprecated) API below.
+    def self.command
+      @command ||= __name__.split('::').last.gsub(/[A-Z]+[a-z]*/) do |part|
+        part.downcase << '-'
+      end[0..-2]
+    end
+    class << self
+      alias_method :__name__, :name
+    end
+
     def self.name
       warn "The usage of `Motion::Project::Command.name` is deprecated use the " \
            "`Motion::Project::Command.command` method instead. " \
@@ -53,7 +64,6 @@ module Motion; module Project
            "(Called from: #{caller.first})"
       self.command = name
     end
-
 
     def self.help
       warn "The usage of `Motion::Project::Command.help` is deprecated use the " \
