@@ -83,7 +83,7 @@ module Motion; module Project
     #require 'motion/project/command/device_console'
     #require 'motion/project/command/ri'
     require 'motion/project/command/support'
-    #require 'motion/project/command/update'
+    require 'motion/project/command/update'
 
     self.abstract_command = true
     self.command = 'motion'
@@ -95,7 +95,7 @@ module Motion; module Project
 
     def self.options
       [
-        ['--version',  'Show the version of RubyMotion'],
+        ['--version', 'Show the version of RubyMotion'],
       ].concat(super)
     end
 
