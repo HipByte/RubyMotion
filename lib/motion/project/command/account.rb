@@ -21,7 +21,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
+module Motion; module Project; class Command
   class Account < Command
     self.summary = 'Access account details.'
     self.description = 'Access the details of your software license account.'
@@ -33,4 +33,4 @@ module Motion; module Project
       system("open \"https://secure.rubymotion.com/account?license_key=#{license_key}&email=#{email}\"")
     end
   end
-end; end
+end; end; end

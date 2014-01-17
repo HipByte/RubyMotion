@@ -21,7 +21,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
+module Motion; module Project; class Command
   class Activate < Command
     self.summary = 'Activate software license.'
     self.description = 'Activate your RubyMotion software license key.'
@@ -52,4 +52,4 @@ module Motion; module Project
       puts "Product activated. Thanks for purchasing RubyMotion :-)"
     end
   end
-end; end
+end; end; end

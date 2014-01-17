@@ -21,7 +21,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
+module Motion; module Project; class Command
   class Changelog < Command
     self.summary = 'View the changelog.'
     self.description = 'View the changes that have been made in all ' \
@@ -31,5 +31,4 @@ module Motion; module Project
       system("#{pager} /Library/RubyMotion/NEWS")
     end
   end
-end; end
-
+end; end; end

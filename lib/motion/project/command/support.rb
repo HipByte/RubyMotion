@@ -23,7 +23,7 @@
 
 require 'uri'
 
-module Motion; module Project
+module Motion; module Project; class Command
   class Support < Command
     self.summary = 'Create a support ticket.'
     # TODO make more elaborate
@@ -52,4 +52,4 @@ module Motion; module Project
       system("open \"https://secure.rubymotion.com/new_support_ticket?license_key=#{license_key}&email=#{email}&environment=#{environment}\"")
     end
   end
-end; end
+end; end; end
