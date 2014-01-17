@@ -24,17 +24,25 @@
 module Motion; module Project
   class RI < Command
     self.summary = 'Display API reference.'
+    self.description = 'Display Cocoa(Touch) API reference documentation ' \
+                       'using a command-line interface.'
 
-    def run(args)
-      if args.size <= 0
-        die "Usage: motion ri <API-name>"
-      end
+    self.arguments = 'API-NAME'
 
+    def initialize(argv)
+      @api_name = argv.shift_argument
+      super
+    end
+
+    def validate!
+      super
+      die "Specify a term to search the API reference for." unless @api_name
+    end
+
+    def run
       line = "/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc "
-      if pager = ENV['PAGER']
-        line << "-p #{pager} "
-      end
-      line << "#{args[0]}"
+      line << "-p #{pager} "
+      line << "#{@api_name}"
       system(line)
     end
   end
