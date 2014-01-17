@@ -53,12 +53,16 @@ module Motion; module Project
       end
     end
 
-    def curl(cmd)
-      resp = `/usr/bin/curl --connect-timeout 60 #{cmd}`
-      if $?.exitstatus != 0
-        die "Error when connecting to the server. Check your Internet connection and try again."
+    def run
+      if @check_mode
+        perform_check
+      else
+        perform_update
       end
-      resp
+    end
+
+    def product_version
+      Motion::Version
     end
 
     def latest_version?(product, latest)
@@ -67,37 +71,42 @@ module Motion; module Project
       (product[0].to_i >= latest[0].to_i) && (product[1].to_i >= latest[1].to_i)
     end
 
-    def run
-      license_key = read_license_key
-      product_version = Motion::Version
+    def curl(cmd)
+      resp = `/usr/bin/curl --connect-timeout 60 #{cmd}`
+      if $?.exitstatus != 0
+        die "Error when connecting to the server. Check your Internet connection and try again."
+      end
+      resp
+    end
 
-      if @check_mode
-        update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
-        if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
-          resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/latest_software_version")
-          exit 1 unless resp.match(/^\d+\.\d+/)
-          File.open(update_check_file, 'w') { |io| io.write(resp) }
-        end
-
-        latest_version, message = File.read(update_check_file).split('|', 2)
-        message ||= ''
-        unless latest_version?(product_version, latest_version)
-          message = "A new version of RubyMotion is available. Run `sudo motion update' to upgrade.\n" + message
-        end
-        message.strip!
-        unless message.empty?
-          puts '=' * 80
-          puts message
-          puts '=' * 80
-          puts ''
-        end
-        exit 1
+    def perform_check
+      update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
+      if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
+        resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{read_license_key}\" https://secure.rubymotion.com/latest_software_version")
+        exit 1 unless resp.match(/^\d+\.\d+/)
+        File.open(update_check_file, 'w') { |io| io.write(resp) }
       end
 
+      latest_version, message = File.read(update_check_file).split('|', 2)
+      message ||= ''
+      unless latest_version?(product_version, latest_version)
+        message = "A new version of RubyMotion is available. Run `sudo motion update' to upgrade.\n" + message
+      end
+      message.strip!
+      unless message.empty?
+        puts '=' * 80
+        puts message
+        puts '=' * 80
+        puts ''
+      end
+      exit 1
+    end
+
+    def perform_update
       need_root
 
       $stderr.puts "Connecting to the server..."
-      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"@wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{license_key}\" https://secure.rubymotion.com/update_software")
+      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"@wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{read_license_key}\" https://secure.rubymotion.com/update_software")
       unless resp.match(/^http:/)
         die resp
       end
