@@ -46,7 +46,7 @@ module Motion; module Project; class Command
     def validate!
       super
       if @force_version
-        die "--force-version has been deprecated in favor of --cache-version"
+        help! "--force-version has been deprecated in favor of --cache-version"
       end
       if @wanted_software_version && File.exist?('/Library/RubyMotion.old')
         die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version")

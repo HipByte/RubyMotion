@@ -35,7 +35,7 @@ module Motion; module Project; class Command
 
     def validate!
       super
-      die "Activating a license requires a `LICENSE-KEY`." unless @license_key
+      help! "Activating a license requires a `LICENSE-KEY`." unless @license_key
     end
 
     def run
