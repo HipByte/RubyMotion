@@ -21,7 +21,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
+module Motion; module Project; class Command
   class RI < Command
     self.summary = 'Display API reference.'
     self.description = 'Display Cocoa(Touch) API reference documentation ' \
@@ -46,4 +46,4 @@ module Motion; module Project
       system(line)
     end
   end
-end; end
+end; end; end

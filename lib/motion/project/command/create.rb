@@ -24,7 +24,7 @@
 require 'motion/project/app'
 require 'motion/project/template'
 
-module Motion; module Project
+module Motion; module Project; class Command
   class Create < Command
     DefaultTemplate = 'ios'
 
@@ -69,4 +69,4 @@ module Motion; module Project
       Motion::Project::App.create(@app_name, @template)
     end
   end
-end; end
+end; end; end
