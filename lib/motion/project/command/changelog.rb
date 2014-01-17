@@ -28,7 +28,6 @@ module Motion; module Project
                        'RubyMotion versions.'
 
     def run
-      pager = (ENV['PAGER'] or '/usr/bin/less')
       system("#{pager} /Library/RubyMotion/NEWS")
     end
   end

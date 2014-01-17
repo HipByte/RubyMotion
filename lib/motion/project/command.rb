@@ -124,6 +124,8 @@ module Motion; module Project
       include CLAide::InformativeError
     end
 
+    protected
+
     def die(message)
       raise InformativeError, message
     end
@@ -132,6 +134,10 @@ module Motion; module Project
       if Process.uid != 0
         die "You need to be root to run this command."
       end
+    end
+
+    def pager
+      ENV['PAGER'] || '/usr/bin/less'
     end
 
     LicensePath = '/Library/RubyMotion/license.key'
