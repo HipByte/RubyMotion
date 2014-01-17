@@ -25,43 +25,48 @@ require 'motion/project/app'
 require 'motion/project/template'
 
 module Motion; module Project
-  class CreateCommand < Command
-    self.name = 'create'
-    self.help = 'Create a new project'
- 
+  class Create < Command
     DefaultTemplate = 'ios'
- 
-    def run(args)
-      app_name = nil
-      template_name = DefaultTemplate
-      args.each do |a|
-        case a
-          when /--([^=]+)=(.+)/
-            opt_name = $1.to_s.strip
-            opt_val = $2.to_s.strip
-            case opt_name
-              when 'template'
-                template_name = opt_val
-              else
-                die "Incorrect option `#{opt_name}'"
-            end
-          else
-            if app_name
-              app_name = nil
-              break
-            else
-              app_name = a
-            end
-        end
+
+    def self.all_templates
+      Motion::Project::Template.all_templates.keys
+    end
+
+    def self.templates_description
+      all_templates.map do |x|
+        x == DefaultTemplate ? "#{x} (default)" : x
+      end.join(', ')
+    end
+
+    self.summary = 'Create a new project.'
+
+    self.description = "Create a new RubyMotion project from one of the " \
+                       "following templates: #{templates_description}."
+
+    self.arguments = 'APP-NAME'
+
+    def self.options
+      [
+        ['--template=NAME', "One of #{templates_description}."],
+      ].concat(super)
+    end
+
+    def initialize(argv)
+      @template = argv.option('template') || DefaultTemplate
+      @app_name = argv.shift_argument
+      super
+    end
+
+    def validate!
+      super
+      help! "A name for the new project is required." unless @app_name
+      unless self.class.all_templates.include?(@template)
+        help! "Invalid template specified `#{@template}'."
       end
-  
-      unless app_name
-        $stderr.puts "Usage: motion create [--template=<template_name>] <app-name>"
-        $stderr.puts "Available templates: " + Motion::Project::Template.all_templates.keys.map { |x| x == DefaultTemplate ? "#{x} (default)" : x }.join(', ')
-        exit 1
-      end
-  
-      Motion::Project::App.create(app_name, template_name)
+    end
+
+    def run
+      Motion::Project::App.create(@app_name, @template)
     end
   end
 end; end

@@ -79,7 +79,7 @@ module Motion; module Project
     require 'motion/project/command/account'
     require 'motion/project/command/activate'
     require 'motion/project/command/changelog'
-    #require 'motion/project/command/create'
+    require 'motion/project/command/create'
     require 'motion/project/command/device_console'
     require 'motion/project/command/ri'
     require 'motion/project/command/support'
