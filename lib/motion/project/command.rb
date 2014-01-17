@@ -22,9 +22,18 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/version'
+require 'motion/error'
 
 $:.unshift File.expand_path('../../../../vendor/CLAide/lib', __FILE__)
 require 'claide'
+
+module Motion
+  # This will cause these errors to only show their message when raised, unless
+  # the `--verbose` option is specified.
+  class InformativeError
+    include CLAide::InformativeError
+  end
+end
 
 module Motion; module Project
   class Command < CLAide::Command
@@ -119,10 +128,6 @@ module Motion; module Project
         #end
       #end
     #end
-
-    class InformativeError < StandardError
-      include CLAide::InformativeError
-    end
 
     protected
 
