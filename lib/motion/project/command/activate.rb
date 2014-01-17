@@ -23,7 +23,8 @@
 
 module Motion; module Project
   class Activate < Command
-    self.summary = 'Activate the software license'
+    self.summary = 'Activate software license.'
+    self.description = 'Activate your RubyMotion software license key.'
 
     self.arguments = 'LICENSE-KEY'
 
