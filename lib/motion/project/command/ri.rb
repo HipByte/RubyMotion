@@ -22,15 +22,14 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion; module Project
-  class RICommand < Command
-    self.name = 'ri'
-    self.help = 'Display API reference'
-  
+  class RI < Command
+    self.summary = 'Display API reference.'
+
     def run(args)
       if args.size <= 0
         die "Usage: motion ri <API-name>"
       end
- 
+
       line = "/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc "
       if pager = ENV['PAGER']
         line << "-p #{pager} "

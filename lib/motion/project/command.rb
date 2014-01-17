@@ -81,16 +81,14 @@ module Motion; module Project
     require 'motion/project/command/changelog'
     #require 'motion/project/command/create'
     #require 'motion/project/command/device_console'
-    #require 'motion/project/command/ri'
+    require 'motion/project/command/ri'
     require 'motion/project/command/support'
     require 'motion/project/command/update'
 
     self.abstract_command = true
     self.command = 'motion'
-    self.description = 'RubyMotion is a revolutionary toolchain that lets ' \
-                       'you quickly develop and test native iOS and OS X '  \
-                       'applications for iPhone, iPad and Mac, all using '  \
-                       'the awesome Ruby language you know and love.'
+    self.description = 'RubyMotion lets you develop native iOS and OS X ' \
+                       'applications using the awesome Ruby language.'
     #self.plugin_prefix = 'motion'
 
     def self.options
