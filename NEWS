@@ -28,8 +28,9 @@
   * [iOS] Made the UI test helper search for views from the `keyWindow' instead
     of the `current' window that was created specifically for the test. This
     makes it easier to interact with modal views such as `UIAlertView`.
-  * [iOS] Fixed a bug in build system where link error was caused with ARM64.
-    Thanks to Andrew Larssen for the patch (pull request #146).
+  * [iOS] Fixed a bug in build system where link error was caused when the app
+    is built for ARM64 with Xcode 5.1. Thanks to Andrew Larssen for the patch 
+    (pull request #146).
 
 = RubyMotion 2.19 =
 
