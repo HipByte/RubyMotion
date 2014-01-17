@@ -175,6 +175,9 @@ task :install do
     end
   end
 
+  # Include the CLAide gem.
+  data.concat(FileList["./vendor/CLAide/{LICENSE,lib/**/*.rb}"])
+
   # Include the XCPretty gem.
   binaries << './vendor/XCPretty/bin/xcpretty'
   data.concat(FileList["./vendor/XCPretty/{LICENSE.txt,lib/**/*.rb}"])
