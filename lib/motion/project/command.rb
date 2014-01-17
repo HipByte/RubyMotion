@@ -116,17 +116,7 @@ module Motion; module Project
     end
 
     #def self.report_error(exception)
-      #if exception.is_a?(Interrupt)
-        #puts "[!] Cancelled".red
-        #Config.instance.verbose? ? raise : exit(1)
-      #else
-        #if ENV['COCOA_PODS_ENV'] != 'development'
-          #puts UI::ErrorReport.report(exception)
-          #exit 1
-        #else
-          #raise exception
-        #end
-      #end
+      # TODO in case we ever want to report expections.
     #end
 
     protected
