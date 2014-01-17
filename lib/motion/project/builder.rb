@@ -143,7 +143,8 @@ module Motion; module Project;
                 sh "#{cc} -c #{src_path} -o #{obj_path} -arch arm64 -miphoneos-version-min=7.0"
                 obj_path
               end
-              sh "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\"" 
+              ld_path = File.join(App.config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/ld')
+              sh "#{ld_path} \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\"" 
             else
               sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
             end
