@@ -21,6 +21,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'motion/error'
+
 require 'erb'
 require 'fileutils'
 
@@ -58,19 +60,17 @@ module Motion; module Project
 
       @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
-        $stderr.puts "Cannot find template `#{@template_name}' in #{Paths.join(' or ')}"
-        $stderr.puts "Available templates: " + self.class.all_templates.keys.join(', ')
-        exit 1
+        raise InformativeError, "Cannot find template `#{@template_name}' in " \
+                                "#{Paths.join(' or ')}. Available templates: " \
+                                "#{self.class.all_templates.keys.join(', ')}"
       end
 
       unless app_name.match(/^[\w\s-]+$/)
-        $stderr.puts "Invalid app name"
-        exit 1
+        raise InformativeError, "Invalid project name."
       end
 
       if File.exist?(app_name)
-        $stderr.puts "Directory `#{app_name}' already exists"
-        exit 1
+        raise InformativeError, "Directory `#{app_name}' already exists"
       end
     end
 
