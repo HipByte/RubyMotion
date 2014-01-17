@@ -22,15 +22,20 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion; module Project
-  class DeviceConsoleCommand < Command
-    self.name = 'device:console'
-    self.help = 'Print the device console logs'
+  class DeprecatedDeviceConsole < Command
+    self.command = 'device:console'
 
-    def run(args)
-      unless args.empty?
-        die "Usage: motion device:console"
-      end
+    def run
+      warn "[!] The usage of the `device:console` command is deprecated" \
+           "use the `device-console` command instead."
+      DeviceConsole.run([])
+    end
+  end
 
+  class DeviceConsole < Command
+    self.summary = 'Print iOS device logs'
+
+    def run
       deploy = File.join(File.dirname(__FILE__), '../../../../bin/ios/deploy')
       devices = `\"#{deploy}\" -D`.strip.split(/\n/)
       if devices.empty?

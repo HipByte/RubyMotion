@@ -45,29 +45,29 @@ module Motion; module Project
     end
 
     def self.name
-      warn "The usage of `Motion::Project::Command.name` is deprecated use the " \
-           "`Motion::Project::Command.command` method instead. " \
+      warn "[!] The usage of `Motion::Project::Command.name` is deprecated " \
+           "use the `Motion::Project::Command.command` method instead. " \
            "(Called from: #{caller.first})"
       command
     end
 
     def self.name=(name)
-      warn "The usage of `Motion::Project::Command.name=` is deprecated use the " \
-           "`Motion::Project::Command.command=` method instead. " \
+      warn "[!] The usage of `Motion::Project::Command.name=` is deprecated " \
+           "use the `Motion::Project::Command.command=` method instead. " \
            "(Called from: #{caller.first})"
       self.command = name
     end
 
     def self.help
-      warn "The usage of `Motion::Project::Command.help` is deprecated use the " \
-           "`Motion::Project::Command.summary` method instead. " \
+      warn "[!] The usage of `Motion::Project::Command.help` is deprecated " \
+           "use the `Motion::Project::Command.summary` method instead. " \
            "(Called from: #{caller.first})"
       summary
     end
 
     def self.help=(summary)
-      warn "The usage of `Motion::Project::Command.help=` is deprecated use the " \
-           "`Motion::Project::Command.summary=` method instead. " \
+      warn "[!] The usage of `Motion::Project::Command.help=` is deprecated " \
+           "use the `Motion::Project::Command.summary=` method instead. " \
            "(Called from: #{caller.first})"
       self.summary = summary
     end
@@ -80,7 +80,7 @@ module Motion; module Project
     require 'motion/project/command/activate'
     require 'motion/project/command/changelog'
     #require 'motion/project/command/create'
-    #require 'motion/project/command/device_console'
+    require 'motion/project/command/device_console'
     require 'motion/project/command/ri'
     require 'motion/project/command/support'
     require 'motion/project/command/update'
