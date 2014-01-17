@@ -36,7 +36,7 @@ module Motion; module Project; class Command
 
     def validate!
       super
-      die "Specify a term to search the API reference for." unless @api_name
+      help! "Specify a term to search the API reference for." unless @api_name
     end
 
     def run
