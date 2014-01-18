@@ -7,7 +7,10 @@
   * Fixed a bug where user defined bang method would be not called.
   * Improved Rational performance. ~4 times faster.
   * Improved Proc#new performance. 15% faster.
-  * Improve performance where Range objects are created with literal. 80% faster.
+  * Improved performance where Range objects are created with literal.
+    ~80% faster.
+  * Improved Object#inspect performance. ~25% faster.
+  * Improved Object#!~ performance. ~3 times faster.
   * Fixed a race condition bug in the runtime where a crash would occur if
     the same Objective-C constant was being resolved at the same time from
     different threads.
