@@ -312,3 +312,10 @@ describe "Kernel.#block_given?" do
     first_block.should == true
   end
 end
+
+# RM-193
+describe "Method#to_proc" do
+  it "should return lambda block" do
+    method(:test_block_dvars_proc).to_proc.lambda?.should == true
+  end
+end
