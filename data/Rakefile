@@ -474,7 +474,7 @@ EOS
               method = md[1]
               if method == klass
                 # An initializer.
-                method = '<init>'
+                method = '&lt;init&gt;'
               end
               class_method = elem_line.include?('static')
               bs_data << <<EOS

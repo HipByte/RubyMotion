@@ -102,9 +102,17 @@ module Motion; module Project;
       "-Wl,-soname,#{payload_library_name} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"  
     end
 
+    def versioned_datadir
+      "#{motiondir}/data/android/#{api_version}"
+    end
+
+    def versioned_arch_datadir
+      "#{versioned_datadir}/#{arch}"
+    end
+
     def ldlibs
       # The order of the libraries matters here.
-      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{motiondir}/data/android/#{api_version}/#{arch}\" -lrubymotion-static -L#{ndk_path}/sources/cxx-stl/stlport/libs/armeabi -lstlport_static"
+      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir}\" -lrubymotion-static -L#{ndk_path}/sources/cxx-stl/stlport/libs/armeabi -lstlport_static"
     end
   end
 end; end

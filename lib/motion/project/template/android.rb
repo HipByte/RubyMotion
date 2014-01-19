@@ -31,18 +31,83 @@ require 'motion/project/template/android/config'
 
 desc "Create an application package file (.apk)"
 task :build do
-  libpayload_subpath = "lib/armeabi/#{App.config.payload_library_name}"
-
-  # XXX
-  FileUtils.mkdir_p("#{App.config.build_dir}/#{File.dirname(libpayload_subpath)}")
-  sh "#{App.config.cc} #{App.config.cflags} -c #{App.config.build_dir}/payload.c -o #{App.config.build_dir}/payload.o"
-  sh "#{App.config.cxx} #{App.config.ldflags} #{App.config.build_dir}/payload.o -o #{App.config.build_dir}/#{libpayload_subpath} #{App.config.ldlibs}"
-  # XXX
-
-  classes_dir = File.join(App.config.build_dir, 'classes')
+  # Compile Ruby files.
   java_dir = File.join(App.config.build_dir, 'java')
+  FileUtils.mkdir_p(java_dir)
+  ruby = File.join(App.config.motiondir, 'bin/ruby')
+  init_func_n = 0
+  ruby_objs = []
+  bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
+  ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
+  Dir.glob("app/**/*.rb").each do |ruby_path|
+    App.info 'Compile', ruby_path
+    init_func = "InitRubyFile#{init_func_n += 1}"
+
+    as_path = File.join(App.config.build_dir, App.config.arch, ruby_path + '.s')
+    FileUtils.mkdir_p(File.dirname(as_path))
+    sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{as_path}\" #{init_func} \"#{java_dir}\" \"#{ruby_path}\""
+
+    obj_path = File.join(App.config.build_dir, App.config.arch, ruby_path + '.o')
+    sh "#{App.config.cc} #{App.config.cflags} -c \"#{as_path}\" -o \"#{obj_path}\""
+
+    ruby_objs << [obj_path, init_func]
+  end
+
+  # Generate payload main file.
+  payload_c_txt = <<EOS
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <jni.h>
+#include <assert.h>
+#include <android/log.h>
+EOS
+  ruby_objs.each do |_, init_func|
+    payload_c_txt << "void #{init_func}(void *rcv, void *sel);\n" 
+  end
+  payload_c_txt << <<EOS
+void rb_vm_register_method(jclass klass, const char *sel, bool class_method, const char *signature);
+void rb_vm_register_native_methods(void);
+bool rb_vm_init(const char *app_package, JNIEnv *env);
+jint
+JNI_OnLoad(JavaVM *vm, void *reserved)
+{
+    __android_log_write(ANDROID_LOG_INFO, "INFO", "loading payload");
+    JNIEnv *env = NULL;
+    if ((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_6) != JNI_OK) {
+	return -1;
+    }
+    assert(env != NULL);
+    rb_vm_init("#{App.config.package.gsub('.', '/')}", env);
+    // XXX
+    rb_vm_register_method((*env)->FindClass(env, "android/app/Activity"), "onCreate", false, "(Landroid/os/Bundle;)V");
+    rb_vm_register_method((*env)->FindClass(env, "android/app/Activity"), "setContentView", false, "(Landroid/view/View;)V");
+    rb_vm_register_method((*env)->FindClass(env, "android/widget/TextView"), "<init>", false, "(Landroid/content/Context;)V");
+    rb_vm_register_method((*env)->FindClass(env, "android/widget/TextView"), "setText", false, "(Ljava/lang/CharSequence;)V");
+    // XXX
+EOS
+  ruby_objs.each do |_, init_func|
+    payload_c_txt << "    #{init_func}(NULL, NULL);\n"
+  end
+  payload_c_txt << <<EOS
+    rb_vm_register_native_methods();
+    __android_log_write(ANDROID_LOG_INFO, "INFO", "Loaded payload");
+    return JNI_VERSION_1_6;
+}
+EOS
+  payload_c = File.join(App.config.build_dir, 'payload.c')
+  File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
+
+  # Compile and link payload library.
+  libpayload_subpath = "lib/armeabi/#{App.config.payload_library_name}"
+  App.info 'Create', libpayload_subpath
+  sh "#{App.config.cc} #{App.config.cflags} -c #{App.config.build_dir}/payload.c -o #{App.config.build_dir}/payload.o"
+  FileUtils.mkdir_p("#{App.config.build_dir}/#{File.dirname(libpayload_subpath)}")
+  sh "#{App.config.cxx} #{App.config.ldflags} #{App.config.build_dir}/payload.o #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o #{App.config.build_dir}/#{libpayload_subpath} #{App.config.ldlibs}"
+
+  # Compile java files.
+  classes_dir = File.join(App.config.build_dir, 'classes')
   FileUtils.mkdir_p(classes_dir)
- 
   rebuild_dex_classes = false
   Dir.glob(File.join(App.config.build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
@@ -56,12 +121,14 @@ task :build do
     end
   end
 
+  # Generate the dex file.
   dex_classes = File.join(App.config.build_dir, 'classes.dex')
   if !File.exist?(dex_classes) or rebuild_dex_classes
     App.info 'Create', dex_classes
     sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\""
   end
 
+  # Generate the Android manifest file.
   android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
   File.open(android_manifest, 'w') do |io|
     io.print <<EOS
@@ -85,6 +152,7 @@ task :build do
 EOS
   end
 
+  # Generate the APK file.
   archive = App.config.apk_path
   if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(File.join(App.config.build_dir, libpayload_subpath)) > File.mtime(archive)
     App.info 'Create', archive
@@ -95,6 +163,7 @@ EOS
       sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{libpayload_subpath}"
     end
 
+    # Create the debug keystore if needed.
     debug_keystore = File.expand_path('~/.android/debug.keystore')
     unless File.exist?(debug_keystore)
       App.info 'Create', debug_keystore

@@ -526,4 +526,5 @@ task "android" do
   end
   rake "vm", "android"
   rake "data", "android"
+  rake "bin", "all"
 end
