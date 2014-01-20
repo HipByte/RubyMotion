@@ -86,8 +86,12 @@ module Motion; module Project;
       File.join(ndk_toolchain_bin_dir, 'clang++')
     end
 
+    def asflags
+      "-no-canonical-prefixes -target #{arch}-none-linux-androideabi -march=#{arch} -msoft-float -mthumb -marm -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -Wa,--noexecstack"
+    end
+
     def cflags
-      "-MMD -MP -fpic -ffunction-sections -funwind-tables -fstack-protector -no-canonical-prefixes -target #{arch}-none-linux-androideabi -march=#{arch} -mtune=xscale -msoft-float -fno-rtti -mthumb -fomit-frame-pointer -fno-strict-aliasing -O0 -marm -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -Wa,--noexecstack -Wformat -Werror=format-security"
+      "#{asflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fstack-protector -mtune=xscale -fno-rtti -fno-strict-aliasing -O0 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -Wformat -Werror=format-security"
     end
 
     def cxxflags

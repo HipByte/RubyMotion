@@ -48,7 +48,7 @@ task :build do
     sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{as_path}\" #{init_func} \"#{java_dir}\" \"#{ruby_path}\""
 
     obj_path = File.join(App.config.build_dir, App.config.arch, ruby_path + '.o')
-    sh "#{App.config.cc} #{App.config.cflags} -c \"#{as_path}\" -o \"#{obj_path}\""
+    sh "#{App.config.cc} #{App.config.asflags} -c \"#{as_path}\" -o \"#{obj_path}\""
 
     ruby_objs << [obj_path, init_func]
   end
