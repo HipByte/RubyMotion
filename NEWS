@@ -15,6 +15,7 @@
     the same Objective-C constant was being resolved at the same time from
     different threads.
   * Fixed a memory leak where the constants were compiled in compile time.
+  * Fixed a memory leak which is caused by Dispatch::Queue.new.
   * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
     would cause a calculation error.
   * Fixed the runtime to be able to deal with all tagged pointers from the
