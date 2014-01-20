@@ -21,38 +21,52 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'uri'
+require 'motion/project/app'
+require 'motion/project/template'
 
-module Motion; module Project
-  class SupportCommand < Command
-    self.name = 'support'
-    self.help = 'Create a support ticket'
-  
-    def run(args)
-      unless args.empty?
-        die "Usage: motion support"
+module Motion; class Command
+  class Create < Command
+    DefaultTemplate = 'ios'
+
+    def self.all_templates
+      Motion::Project::Template.all_templates.keys
+    end
+
+    def self.templates_description
+      all_templates.map do |x|
+        x == DefaultTemplate ? "#{x} (default)" : x
+      end.join(', ')
+    end
+
+    self.summary = 'Create a new project.'
+
+    self.description = "Create a new RubyMotion project from one of the " \
+                       "following templates: #{templates_description}."
+
+    self.arguments = 'APP-NAME'
+
+    def self.options
+      [
+        ['--template=NAME', "One of #{templates_description}."],
+      ].concat(super)
+    end
+
+    def initialize(argv)
+      @template = argv.option('template') || DefaultTemplate
+      @app_name = argv.shift_argument
+      super
+    end
+
+    def validate!
+      super
+      help! "A name for the new project is required." unless @app_name
+      unless self.class.all_templates.include?(@template)
+        help! "Invalid template specified `#{@template}'."
       end
-  
-      license_key = read_license_key
-      email = guess_email_address
-  
-      # Collect details about the environment.
-      osx_vers = `/usr/bin/sw_vers -productVersion`.strip
-      rm_vers = Motion::Version
-      xcode_vers = begin
-        xcodebuild = `which xcodebuild`.strip
-        xcodebuild = '/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild' if xcodebuild.empty?
-        vers = ''
-        if File.exist?(xcodebuild)
-          vers = `#{xcodebuild} -version`.strip.scan(/Xcode\s(.+)$/).flatten[0].to_s
-        end
-        vers = 'unknown' if vers.empty?
-        vers
-      end
-  
-      environment = URI.escape("OSX #{osx_vers}, RubyMotion #{rm_vers}, Xcode #{xcode_vers}")
-  
-      system("open \"https://secure.rubymotion.com/new_support_ticket?license_key=#{license_key}&email=#{email}&environment=#{environment}\"")
+    end
+
+    def run
+      Motion::Project::App.create(@app_name, @template)
     end
   end
 end; end

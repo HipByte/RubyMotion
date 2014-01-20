@@ -1,4 +1,4 @@
-# Copyright (c) 2013, HipByte SPRL and contributors
+# Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -21,26 +21,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
-  class DeviceConsoleCommand < Command
-    self.name = 'device:console'
-    self.help = 'Print the device console logs'
-
-    def run(args)
-      unless args.empty?
-        die "Usage: motion device:console"
-      end
-
-      deploy = File.join(File.dirname(__FILE__), '../../../../bin/ios/deploy')
-      devices = `\"#{deploy}\" -D`.strip.split(/\n/)
-      if devices.empty?
-        $stderr.puts "No device found on USB. Connect a device and try again." 
-      elsif devices.size > 1
-        $stderr.puts "Multiple devices found on USB. Disconnect all but one and try again."
-      else
-        system("\"#{deploy}\" -c #{devices[0]}")
-      end
-    end
-  end
-end; end
-
+module Motion
+  # This class is extended, when using the commands, with the
+  # `CLAide::InformativeError` module. This will cause these errors to only
+  # show their message when raised, unless the `--verbose` option is specified.
+  class InformativeError < StandardError; end
+end

@@ -21,28 +21,35 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
-  class ActivateCommand < Command
-    self.name = 'activate'
-    self.help = 'Activate the software license'
-  
-    def run(args)
-      if File.exist?(LicensePath)
-        die "Product is already activated. Delete the license file `#{LicensePath}' if you want to activate a new license."
+require 'uri'
+
+module Motion; class Command
+  class Support < Command
+    self.summary = 'Create a support ticket.'
+    # TODO make more elaborate
+    # self.description = '...'
+
+    def run
+      license_key = read_license_key
+      email = guess_email_address
+
+      # Collect details about the environment.
+      osx_vers = `/usr/bin/sw_vers -productVersion`.strip
+      rm_vers = Motion::Version
+      xcode_vers = begin
+        xcodebuild = `which xcodebuild`.strip
+        xcodebuild = '/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild' if xcodebuild.empty?
+        vers = ''
+        if File.exist?(xcodebuild)
+          vers = `#{xcodebuild} -version`.strip.scan(/Xcode\s(.+)$/).flatten[0].to_s
+        end
+        vers = 'unknown' if vers.empty?
+        vers
       end
-  
-      if args.size != 1
-        die "Usage: motion activate <license-key>"
-      end
-  
-      license_key = args[0]
-      unless license_key.match(/^[a-f0-9]{40}$/)
-        die "Given license key `#{license_key}' seems invalid. It should be a string of 40 hexadecimal characters. Check the mail you received after the order, or contact us if you need any help: info@hipbyte.com"
-      end
-  
-      need_root
-      File.open(LicensePath, 'w') { |io| io.write license_key }
-      puts "Product activated. Thanks for purchasing RubyMotion :-)"
+
+      environment = URI.escape("OSX #{osx_vers}, RubyMotion #{rm_vers}, Xcode #{xcode_vers}")
+
+      system("open \"https://secure.rubymotion.com/new_support_ticket?license_key=#{license_key}&email=#{email}&environment=#{environment}\"")
     end
   end
 end; end

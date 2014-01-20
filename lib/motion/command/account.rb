@@ -21,22 +21,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
-  class RICommand < Command
-    self.name = 'ri'
-    self.help = 'Display API reference'
-  
-    def run(args)
-      if args.size <= 0
-        die "Usage: motion ri <API-name>"
-      end
- 
-      line = "/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc "
-      if pager = ENV['PAGER']
-        line << "-p #{pager} "
-      end
-      line << "#{args[0]}"
-      system(line)
+module Motion; class Command
+  class Account < Command
+    self.summary = 'Access account details.'
+    self.description = 'Access the details of your software license account.'
+
+    def run
+      license_key = read_license_key
+      email = guess_email_address
+
+      system("open \"https://secure.rubymotion.com/account?license_key=#{license_key}&email=#{email}\"")
     end
   end
 end; end

@@ -21,76 +21,62 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/version'
-
 module Motion; module Project
-  class Command
+  # Deprecated base command class, will be removed in RM v3.
+  #
+  # See the Motion::Command class in lib/motion/command.rb instead.
+  #
+  class Command < Motion::Command
+    self.ignore_in_command_lookup = true
+
     class << self
-      attr_accessor :name
-      attr_accessor :help
-    end
-
-    Commands = []
-    def self.inherited(klass)
-      Commands << klass if self == Command
-    end
-
-    def self.main(args)
-      arg = args.shift
-      case arg
-        when '-h', '--help'
-          usage
-        when '-v', '--version'
-          $stdout.puts Motion::Version
-          exit 1
-        when /^-/
-          $stderr.puts "Unknown option: #{arg}"
-          exit 1
+      # This is lifted straight from CLAide, but adjusted slightly because
+      # the Class#name method is overriden in the old (deprecated) API below.
+      def command
+        @command ||= __name__.split('::').last.gsub(/[A-Z]+[a-z]*/) do |part|
+          part.downcase << '-'
+        end[0..-2]
       end
-      command = Commands.find { |command| command.name == arg }
-      usage unless command
-      command.new.run(args)
-    end
-
-    def self.usage
-      $stderr.puts 'Usage:'
-      $stderr.puts "  motion [-h, --help]"
-      $stderr.puts "  motion [-v, --version]"
-      $stderr.puts "  motion <command> [<args...>]"
-      $stderr.puts ''
-      $stderr.puts 'Commands:'
-      Commands.each do |command|
-        $stderr.puts "  #{command.name}".ljust(20) + command.help
+      class << self
+        alias_method :__name__, :name
       end
-      exit 1
+
+      def inherited(klass)
+        warn "[!] Inheriting from `Motion::Project::Command' has been " \
+             "deprecated, inherit from `Motion::Command' instead. " \
+             "(Called from: #{caller.first})"
+        super
+      end
+
+      # Override initializer to return a proxy that calls the instance with
+      # the expected arguments when needed.
+      #
+      # Normal CLAide command classes are called with `Command#run`, whereas
+      # these deprecated classes need to be called with `Command#run(argv)`.
+      def new(argv)
+        instance = super(argv)
+        wrapper = lambda { instance.run(argv.remainder) }
+        def wrapper.run; call; end # Call lambda which forwards to #run(argv)
+        def wrapper.validate!; end # Old command has no notion of validation.
+        wrapper
+      end
+
+      # ---------------------------------------------------------------------
+
+      alias_method :name, :command
+      def name=(command); self.command = command; end
+
+      alias_method :help, :summary
+      def help=(summary); self.summary = summary; end
     end
 
     def run(args)
       # To be implemented by subclasses.
     end
- 
-    def die(*msg)
-      $stderr.puts msg
-      exit 1
-    end
-
-    def need_root
-      if Process.uid != 0
-        die "You need to be root to run this command."
-      end
-    end
-
-    LicensePath = '/Library/RubyMotion/license.key'
-    def read_license_key
-      unless File.exist?(LicensePath)
-        die "License file not present. Please activate RubyMotion with `motion activate' and try again."
-      end
-      File.read(LicensePath).strip
-    end
-
-    def guess_email_address
-      # Guess the default email address from git.
-      URI.escape(`git config --get user.email`.strip)
-    end
   end
 end; end
+
+# Now load plugins installed the old way.
+#
+# TODO deprecate in favor of RubyGems plugins?
+Dir.glob(File.join(ENV['HOME'], 'Library/RubyMotion/command', '*.rb')).each { |x| require x }

@@ -21,47 +21,35 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/project/app'
-require 'motion/project/template'
+module Motion; class Command
+  class Activate < Command
+    self.summary = 'Activate software license.'
+    self.description = 'Activate your RubyMotion software license key.'
 
-module Motion; module Project
-  class CreateCommand < Command
-    self.name = 'create'
-    self.help = 'Create a new project'
- 
-    DefaultTemplate = 'ios'
- 
-    def run(args)
-      app_name = nil
-      template_name = DefaultTemplate
-      args.each do |a|
-        case a
-          when /--([^=]+)=(.+)/
-            opt_name = $1.to_s.strip
-            opt_val = $2.to_s.strip
-            case opt_name
-              when 'template'
-                template_name = opt_val
-              else
-                die "Incorrect option `#{opt_name}'"
-            end
-          else
-            if app_name
-              app_name = nil
-              break
-            else
-              app_name = a
-            end
-        end
+    self.arguments = 'LICENSE-KEY'
+
+    def initialize(argv)
+      @license_key = argv.shift_argument
+      super
+    end
+
+    def validate!
+      super
+      help! "Activating a license requires a `LICENSE-KEY`." unless @license_key
+    end
+
+    def run
+      if File.exist?(LicensePath)
+        die "Product is already activated. Delete the license file `#{LicensePath}' if you want to activate a new license."
       end
-  
-      unless app_name
-        $stderr.puts "Usage: motion create [--template=<template_name>] <app-name>"
-        $stderr.puts "Available templates: " + Motion::Project::Template.all_templates.keys.map { |x| x == DefaultTemplate ? "#{x} (default)" : x }.join(', ')
-        exit 1
+
+      unless @license_key.match(/^[a-f0-9]{40}$/)
+        die "Given license key `#{@license_key}' seems invalid. It should be a string of 40 hexadecimal characters. Check the mail you received after the order, or contact us if you need any help: info@hipbyte.com"
       end
-  
-      Motion::Project::App.create(app_name, template_name)
+
+      need_root
+      File.open(LicensePath, 'w') { |io| io.write license_key }
+      puts "Product activated. Thanks for purchasing RubyMotion :-)"
     end
   end
 end; end

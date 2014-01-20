@@ -21,19 +21,30 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
-  class ChangelogCommand < Command
-    self.name = 'changelog'
-    self.help = 'View the changelog'
+module Motion; class Command
+  class DeprecatedDeviceConsole < Command
+    self.command = 'device:console'
 
-    def run(args)
-      unless args.empty?
-        die "Usage: motion changelog"
+    def run
+      warn "[!] The usage of the `device:console` command is deprecated" \
+           "use the `device-console` command instead."
+      DeviceConsole.run([])
+    end
+  end
+
+  class DeviceConsole < Command
+    self.summary = 'Print iOS device logs'
+
+    def run
+      deploy = File.join(File.dirname(__FILE__), '../../../../bin/ios/deploy')
+      devices = `\"#{deploy}\" -D`.strip.split(/\n/)
+      if devices.empty?
+        $stderr.puts "No device found on USB. Connect a device and try again." 
+      elsif devices.size > 1
+        $stderr.puts "Multiple devices found on USB. Disconnect all but one and try again."
+      else
+        system("\"#{deploy}\" -c #{devices[0]}")
       end
-
-      pager = (ENV['PAGER'] or '/usr/bin/less')
-      system("#{pager} /Library/RubyMotion/NEWS")
     end
   end
 end; end
-

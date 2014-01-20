@@ -1,4 +1,4 @@
-# Copyright (c) 2012, HipByte SPRL and contributors
+# Copyright (c) 2013, HipByte SPRL and contributors
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -21,20 +21,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project
-  class AccountCommand < Command
-    self.name = 'account'
-    self.help = 'Access the software license account'
-  
-    def run(args)
-      unless args.empty?
-        die "Usage: motion account"
-      end
-  
-      license_key = read_license_key
-      email = guess_email_address
-  
-      system("open \"https://secure.rubymotion.com/account?license_key=#{license_key}&email=#{email}\"")
+module Motion; class Command
+  class Changelog < Command
+    self.summary = 'View the changelog.'
+    self.description = 'View the changes that have been made in all ' \
+                       'RubyMotion versions.'
+
+    def run
+      system("#{pager} /Library/RubyMotion/NEWS")
     end
   end
 end; end
