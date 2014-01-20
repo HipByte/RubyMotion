@@ -21,35 +21,29 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'uri'
+module Motion; class Command
+  class RI < Command
+    self.summary = 'Display API reference.'
+    self.description = 'Display Cocoa(Touch) API reference documentation ' \
+                       'using a command-line interface.'
 
-module Motion; module Project; class Command
-  class Support < Command
-    self.summary = 'Create a support ticket.'
-    # TODO make more elaborate
-    # self.description = '...'
+    self.arguments = 'API-NAME'
+
+    def initialize(argv)
+      @api_name = argv.shift_argument
+      super
+    end
+
+    def validate!
+      super
+      help! "Specify a term to search the API reference for." unless @api_name
+    end
 
     def run
-      license_key = read_license_key
-      email = guess_email_address
-
-      # Collect details about the environment.
-      osx_vers = `/usr/bin/sw_vers -productVersion`.strip
-      rm_vers = Motion::Version
-      xcode_vers = begin
-        xcodebuild = `which xcodebuild`.strip
-        xcodebuild = '/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild' if xcodebuild.empty?
-        vers = ''
-        if File.exist?(xcodebuild)
-          vers = `#{xcodebuild} -version`.strip.scan(/Xcode\s(.+)$/).flatten[0].to_s
-        end
-        vers = 'unknown' if vers.empty?
-        vers
-      end
-
-      environment = URI.escape("OSX #{osx_vers}, RubyMotion #{rm_vers}, Xcode #{xcode_vers}")
-
-      system("open \"https://secure.rubymotion.com/new_support_ticket?license_key=#{license_key}&email=#{email}&environment=#{environment}\"")
+      line = "/Library/RubyMotion/lib/yard/bin/yri --db /Library/RubyMotion/doc/yardoc "
+      line << "-p #{pager} "
+      line << "#{@api_name}"
+      system(line)
     end
   end
-end; end; end
+end; end

@@ -1,4 +1,4 @@
-# Copyright (c) 2012, HipByte SPRL and contributors
+# Copyright (c) 2013, HipByte SPRL and contributors
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -21,52 +21,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/project/app'
-require 'motion/project/template'
-
-module Motion; module Project; class Command
-  class Create < Command
-    DefaultTemplate = 'ios'
-
-    def self.all_templates
-      Motion::Project::Template.all_templates.keys
-    end
-
-    def self.templates_description
-      all_templates.map do |x|
-        x == DefaultTemplate ? "#{x} (default)" : x
-      end.join(', ')
-    end
-
-    self.summary = 'Create a new project.'
-
-    self.description = "Create a new RubyMotion project from one of the " \
-                       "following templates: #{templates_description}."
-
-    self.arguments = 'APP-NAME'
-
-    def self.options
-      [
-        ['--template=NAME', "One of #{templates_description}."],
-      ].concat(super)
-    end
-
-    def initialize(argv)
-      @template = argv.option('template') || DefaultTemplate
-      @app_name = argv.shift_argument
-      super
-    end
-
-    def validate!
-      super
-      help! "A name for the new project is required." unless @app_name
-      unless self.class.all_templates.include?(@template)
-        help! "Invalid template specified `#{@template}'."
-      end
-    end
+module Motion; class Command
+  class Changelog < Command
+    self.summary = 'View the changelog.'
+    self.description = 'View the changes that have been made in all ' \
+                       'RubyMotion versions.'
 
     def run
-      Motion::Project::App.create(@app_name, @template)
+      system("#{pager} /Library/RubyMotion/NEWS")
     end
   end
-end; end; end
+end; end
