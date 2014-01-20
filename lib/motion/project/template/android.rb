@@ -159,8 +159,8 @@ EOS
     resource_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
-      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\""
-      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{libpayload_subpath}"
+      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\" > /dev/null"
+      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{libpayload_subpath} > /dev/null"
     end
 
     # Create the debug keystore if needed.
