@@ -73,7 +73,7 @@ end
 def apply_bridgesupport_fixes(bs)
   rules = []
   case File.basename(bs, '.bridgesupport')
-    when 'CoreMIDI', 'AudioToolBox'
+    when 'CoreMIDI', 'AudioToolbox'
       rules << [/<cftype /, '<opaque ']
     else
       rules << [/<opaque /, '<cftype ']
