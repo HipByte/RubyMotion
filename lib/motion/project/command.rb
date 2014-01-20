@@ -39,20 +39,20 @@ module Motion; module Project
       arg = args.shift
       case arg
         when '-h', '--help'
-          usage
+          print_usage
         when '-v', '--version'
           $stdout.puts Motion::Version
-          exit 1
+          exit 0
         when /^-/
           $stderr.puts "Unknown option: #{arg}"
           exit 1
       end
       command = Commands.find { |command| command.name == arg }
-      usage unless command
+      print_usage unless command
       command.new.run(args)
     end
 
-    def self.usage
+    def self.print_usage
       $stderr.puts 'Usage:'
       $stderr.puts "  motion [-h, --help]"
       $stderr.puts "  motion [-v, --version]"
