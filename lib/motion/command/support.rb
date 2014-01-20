@@ -1,4 +1,4 @@
-# Copyright (c) 2013, HipByte SPRL and contributors
+# Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -21,30 +21,35 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project; class Command
-  class DeprecatedDeviceConsole < Command
-    self.command = 'device:console'
+require 'uri'
+
+module Motion; class Command
+  class Support < Command
+    self.summary = 'Create a support ticket.'
+    # TODO make more elaborate
+    # self.description = '...'
 
     def run
-      warn "[!] The usage of the `device:console` command is deprecated" \
-           "use the `device-console` command instead."
-      DeviceConsole.run([])
-    end
-  end
+      license_key = read_license_key
+      email = guess_email_address
 
-  class DeviceConsole < Command
-    self.summary = 'Print iOS device logs'
-
-    def run
-      deploy = File.join(File.dirname(__FILE__), '../../../../bin/ios/deploy')
-      devices = `\"#{deploy}\" -D`.strip.split(/\n/)
-      if devices.empty?
-        $stderr.puts "No device found on USB. Connect a device and try again." 
-      elsif devices.size > 1
-        $stderr.puts "Multiple devices found on USB. Disconnect all but one and try again."
-      else
-        system("\"#{deploy}\" -c #{devices[0]}")
+      # Collect details about the environment.
+      osx_vers = `/usr/bin/sw_vers -productVersion`.strip
+      rm_vers = Motion::Version
+      xcode_vers = begin
+        xcodebuild = `which xcodebuild`.strip
+        xcodebuild = '/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild' if xcodebuild.empty?
+        vers = ''
+        if File.exist?(xcodebuild)
+          vers = `#{xcodebuild} -version`.strip.scan(/Xcode\s(.+)$/).flatten[0].to_s
+        end
+        vers = 'unknown' if vers.empty?
+        vers
       end
+
+      environment = URI.escape("OSX #{osx_vers}, RubyMotion #{rm_vers}, Xcode #{xcode_vers}")
+
+      system("open \"https://secure.rubymotion.com/new_support_ticket?license_key=#{license_key}&email=#{email}&environment=#{environment}\"")
     end
   end
-end; end; end
+end; end

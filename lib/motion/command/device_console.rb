@@ -1,4 +1,4 @@
-# Copyright (c) 2012, HipByte SPRL and contributors
+# Copyright (c) 2013, HipByte SPRL and contributors
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -21,16 +21,30 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project; class Command
-  class Account < Command
-    self.summary = 'Access account details.'
-    self.description = 'Access the details of your software license account.'
+module Motion; class Command
+  class DeprecatedDeviceConsole < Command
+    self.command = 'device:console'
 
     def run
-      license_key = read_license_key
-      email = guess_email_address
-
-      system("open \"https://secure.rubymotion.com/account?license_key=#{license_key}&email=#{email}\"")
+      warn "[!] The usage of the `device:console` command is deprecated" \
+           "use the `device-console` command instead."
+      DeviceConsole.run([])
     end
   end
-end; end; end
+
+  class DeviceConsole < Command
+    self.summary = 'Print iOS device logs'
+
+    def run
+      deploy = File.join(File.dirname(__FILE__), '../../../../bin/ios/deploy')
+      devices = `\"#{deploy}\" -D`.strip.split(/\n/)
+      if devices.empty?
+        $stderr.puts "No device found on USB. Connect a device and try again." 
+      elsif devices.size > 1
+        $stderr.puts "Multiple devices found on USB. Disconnect all but one and try again."
+      else
+        system("\"#{deploy}\" -c #{devices[0]}")
+      end
+    end
+  end
+end; end

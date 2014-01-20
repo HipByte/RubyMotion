@@ -21,178 +21,62 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/version'
-require 'motion/error'
-
-$:.unshift File.expand_path('../../../../vendor/CLAide/lib', __FILE__)
-require 'claide'
-
-module Motion
-  # This will cause these errors to only show their message when raised, unless
-  # the `--verbose` option is specified.
-  class InformativeError
-    include CLAide::InformativeError
-  end
-end
-
 module Motion; module Project
-  class Command < CLAide::Command
+  # Deprecated base command class, will be removed in RM v3.
+  #
+  # See the Motion::Command class in lib/motion/command.rb instead.
+  #
+  class Command < Motion::Command
+    self.ignore_in_command_lookup = true
 
-    # -------------------------------------------------------------------------
-    # Deprecations
-    # -------------------------------------------------------------------------
-
-    # This is lifted straight from CLAide, but adjusted slightly because the
-    # Class#name method is overriden in the old (deprecated) API below.
-    def self.command
-      @command ||= __name__.split('::').last.gsub(/[A-Z]+[a-z]*/) do |part|
-        part.downcase << '-'
-      end[0..-2]
-    end
     class << self
-      alias_method :__name__, :name
-    end
-
-    def self.name
-      warn "[!] The usage of `Motion::Project::Command.name` is deprecated " \
-           "use the `Motion::Project::Command.command` method instead. " \
-           "(Called from: #{caller.first})"
-      command
-    end
-
-    def self.name=(name)
-      warn "[!] The usage of `Motion::Project::Command.name=` is deprecated " \
-           "use the `Motion::Project::Command.command=` method instead. " \
-           "(Called from: #{caller.first})"
-      self.command = name
-    end
-
-    def self.help
-      warn "[!] The usage of `Motion::Project::Command.help` is deprecated " \
-           "use the `Motion::Project::Command.summary` method instead. " \
-           "(Called from: #{caller.first})"
-      summary
-    end
-
-    def self.help=(summary)
-      warn "[!] The usage of `Motion::Project::Command.help=` is deprecated " \
-           "use the `Motion::Project::Command.summary=` method instead. " \
-           "(Called from: #{caller.first})"
-      self.summary = summary
-    end
-
-    # -------------------------------------------------------------------------
-    # Base command class of RubyMotion
-    # -------------------------------------------------------------------------
-
-    require 'motion/project/command/account'
-    require 'motion/project/command/activate'
-    require 'motion/project/command/changelog'
-    require 'motion/project/command/create'
-    require 'motion/project/command/device_console'
-    require 'motion/project/command/ri'
-    require 'motion/project/command/support'
-    require 'motion/project/command/update'
-
-    self.abstract_command = true
-    self.command = 'motion'
-    self.description = 'RubyMotion lets you develop native iOS and OS X ' \
-                       'applications using the awesome Ruby language.'
-    #self.plugin_prefix = 'motion'
-
-    def self.options
-      [
-        ['--version', 'Show the version of RubyMotion'],
-      ].concat(super)
-    end
-
-    def self.run(argv)
-      argv = CLAide::ARGV.new(argv)
-      if argv.flag?('version')
-        $stdout.puts Motion::Version
-        exit 0
+      # This is lifted straight from CLAide, but adjusted slightly because
+      # the Class#name method is overriden in the old (deprecated) API below.
+      def command
+        @command ||= __name__.split('::').last.gsub(/[A-Z]+[a-z]*/) do |part|
+          part.downcase << '-'
+        end[0..-2]
       end
-      super(argv)
-    end
-
-    #def self.report_error(exception)
-      # TODO in case we ever want to report expections.
-    #end
-
-    protected
-
-    def die(message)
-      raise InformativeError, message
-    end
-
-    def need_root
-      if Process.uid != 0
-        die "You need to be root to run this command."
+      class << self
+        alias_method :__name__, :name
       end
-    end
 
-    def pager
-      ENV['PAGER'] || '/usr/bin/less'
-    end
-
-    LicensePath = '/Library/RubyMotion/license.key'
-    def read_license_key
-      unless File.exist?(LicensePath)
-        die "License file not present. Please activate RubyMotion with `motion activate' and try again."
+      def inherited(klass)
+        warn "[!] Inheriting from `Motion::Project::Command' has been " \
+             "deprecated, inherit from `Motion::Command' instead. " \
+             "(Called from: #{caller.first})"
+        super
       end
-      File.read(LicensePath).strip
+
+      # Override initializer to return a proxy that calls the instance with
+      # the expected arguments when needed.
+      #
+      # Normal CLAide command classes are called with `Command#run`, whereas
+      # these deprecated classes need to be called with `Command#run(argv)`.
+      def new(argv)
+        instance = super(argv)
+        wrapper = lambda { instance.run(argv.remainder) }
+        def wrapper.run; call; end # Call lambda which forwards to #run(argv)
+        def wrapper.validate!; end # Old command has no notion of validation.
+        wrapper
+      end
+
+      # ---------------------------------------------------------------------
+
+      alias_method :name, :command
+      def name=(command); self.command = command; end
+
+      alias_method :help, :summary
+      def help=(summary); self.summary = summary; end
     end
 
-    def guess_email_address
-      require 'uri'
-      # Guess the default email address from git.
-      URI.escape(`git config --get user.email`.strip)
+    def run(args)
+      # To be implemented by subclasses.
     end
-
   end
 end; end
 
-# TODO deprecate/alias
+# Now load plugins installed the old way.
 #
-#module Motion; module Project
-  #class Command
-    #class << self
-      #attr_accessor :name
-      #attr_accessor :help
-    #end
-
-    #def self.main(args)
-      #arg = args.shift
-      #case arg
-        #when '-h', '--help'
-          #usage
-        #when '-v', '--version'
-          #$stdout.puts Motion::Version
-          #exit 1
-        #when /^-/
-          #$stderr.puts "Unknown option: #{arg}"
-          #exit 1
-      #end
-      #command = Commands.find { |command| command.name == arg }
-      #usage unless command
-      #command.new.run(args)
-    #end
-
-    #def self.usage
-      #$stderr.puts 'Usage:'
-      #$stderr.puts "  motion [-h, --help]"
-      #$stderr.puts "  motion [-v, --version]"
-      #$stderr.puts "  motion <command> [<args...>]"
-      #$stderr.puts ''
-      #$stderr.puts 'Commands:'
-      #Commands.each do |command|
-        #$stderr.puts "  #{command.name}".ljust(20) + command.help
-      #end
-      #exit 1
-    #end
-
-    #def run(args)
-      ## To be implemented by subclasses.
-    #end
-  #end
-#end; end
+# TODO deprecate in favor of RubyGems plugins?
+Dir.glob(File.join(ENV['HOME'], 'Library/RubyMotion/command', '*.rb')).each { |x| require x }

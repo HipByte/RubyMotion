@@ -1,0 +1,114 @@
+# Copyright (c) 2012, HipByte SPRL and contributors
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+# 1. Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+require 'motion/version'
+require 'motion/error'
+
+$:.unshift File.expand_path('../../../vendor/CLAide/lib', __FILE__)
+require 'claide'
+
+module Motion
+  # This will cause these errors to only show their message when raised, unless
+  # the `--verbose` option is specified.
+  class InformativeError
+    include CLAide::InformativeError
+  end
+end
+
+module Motion
+  # -------------------------------------------------------------------------
+  # Base command class of RubyMotion
+  # -------------------------------------------------------------------------
+  class Command < CLAide::Command
+    require 'motion/command/account'
+    require 'motion/command/activate'
+    require 'motion/command/changelog'
+    require 'motion/command/create'
+    require 'motion/command/device_console'
+    require 'motion/command/ri'
+    require 'motion/command/support'
+    require 'motion/command/update'
+
+    # TODO support RubyGems plugins?
+    # require 'rubygems'
+    # self.plugin_prefix = 'motion'
+
+    self.abstract_command = true
+    self.command = 'motion'
+    self.description = 'RubyMotion lets you develop native iOS and OS X ' \
+                       'applications using the awesome Ruby language.'
+
+    def self.options
+      [
+        ['--version', 'Show the version of RubyMotion'],
+      ].concat(super)
+    end
+
+    def self.run(argv)
+      argv = CLAide::ARGV.new(argv)
+      if argv.flag?('version')
+        $stdout.puts Motion::Version
+        exit 0
+      end
+      super(argv)
+    end
+
+    #def self.report_error(exception)
+      # TODO in case we ever want to report expections.
+    #end
+
+    protected
+
+    def die(message)
+      raise InformativeError, message
+    end
+
+    def need_root
+      if Process.uid != 0
+        die "You need to be root to run this command."
+      end
+    end
+
+    def pager
+      ENV['PAGER'] || '/usr/bin/less'
+    end
+
+    LicensePath = '/Library/RubyMotion/license.key'
+    def read_license_key
+      unless File.exist?(LicensePath)
+        die "License file not present. Please activate RubyMotion with `motion activate' and try again."
+      end
+      File.read(LicensePath).strip
+    end
+
+    def guess_email_address
+      require 'uri'
+      # Guess the default email address from git.
+      URI.escape(`git config --get user.email`.strip)
+    end
+  end
+end
+
+# Now load the deprecated Motion::Project::Command class and plugins.
+# TODO remove in RM-3.
+require 'motion/project/command'

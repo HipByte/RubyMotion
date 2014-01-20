@@ -23,7 +23,7 @@
 
 require 'motion/project/builder'
 
-module Motion; module Project; class Command
+module Motion; class Command
   class Update < Command
     self.summary = 'Update the software.'
     # TODO make more elaborate
@@ -156,4 +156,4 @@ module Motion; module Project; class Command
       end
     end
   end
-end; end; end
+end; end

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, HipByte SPRL and contributors
+# Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -21,14 +21,35 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Motion; module Project; class Command
-  class Changelog < Command
-    self.summary = 'View the changelog.'
-    self.description = 'View the changes that have been made in all ' \
-                       'RubyMotion versions.'
+module Motion; class Command
+  class Activate < Command
+    self.summary = 'Activate software license.'
+    self.description = 'Activate your RubyMotion software license key.'
+
+    self.arguments = 'LICENSE-KEY'
+
+    def initialize(argv)
+      @license_key = argv.shift_argument
+      super
+    end
+
+    def validate!
+      super
+      help! "Activating a license requires a `LICENSE-KEY`." unless @license_key
+    end
 
     def run
-      system("#{pager} /Library/RubyMotion/NEWS")
+      if File.exist?(LicensePath)
+        die "Product is already activated. Delete the license file `#{LicensePath}' if you want to activate a new license."
+      end
+
+      unless @license_key.match(/^[a-f0-9]{40}$/)
+        die "Given license key `#{@license_key}' seems invalid. It should be a string of 40 hexadecimal characters. Check the mail you received after the order, or contact us if you need any help: info@hipbyte.com"
+      end
+
+      need_root
+      File.open(LicensePath, 'w') { |io| io.write license_key }
+      puts "Product activated. Thanks for purchasing RubyMotion :-)"
     end
   end
-end; end; end
+end; end

@@ -9,9 +9,6 @@ relative_libdir = File.expand_path('../../lib', file)
 $motion_libdir = File.exist?(File.join(relative_libdir, 'motion')) ? relative_libdir : '/Library/RubyMotion/lib'
 $:.unshift($motion_libdir)
 
-require 'motion/project/command'
+require 'motion/command'
 
-# TODO
-# Dir.glob(File.join(ENV['HOME'], 'Library/RubyMotion/command', '*.rb')).each { |x| require x }
-
-Motion::Project::Command.run(ARGV)
+Motion::Command.run(ARGV)
