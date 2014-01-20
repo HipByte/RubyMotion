@@ -21,7 +21,8 @@
     Objective-C world. For instance, using NSTaggedManagedObjectID would lead
     to a runtime crash.
   * Fixed a bug that Method#to_proc would not return lambda block.
-  * Fixed that cftype constant in AudioToolbox could not be used.
+  * Fixed a bug where cftype structures which are defined in AudioToolbox could
+    not be used.
   * [OSX] Fixed the `rake crashlog' task.
   * Fixed a bug in the compiler that would ignore BridgeSupport enum values if
     they only have a 64-bit value.
