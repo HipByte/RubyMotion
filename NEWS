@@ -12,7 +12,8 @@
   * Improved Object#inspect performance. ~25% faster.
   * Improved Object#!~ performance. ~3 times faster.
   * Improved performance in dispatcher. ~25% faster.
-  * Improved calculation performance where Float objects are used. ~80% faster.
+  * Improved calculation performance where Float objects are used on 32-bit
+    platform. ~80% faster.
   * Fixed a race condition bug in the runtime where a crash would occur if
     the same Objective-C constant was being resolved at the same time from
     different threads.
