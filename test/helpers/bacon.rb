@@ -112,5 +112,9 @@ module Bacon
     end
   end
 
+  module TapOutput
+    attr_accessor :running_disabled_spec
+  end
+
   Outputs['pretty_spec_dox'] = PrettySpecDoxOutput
 end
