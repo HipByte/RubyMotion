@@ -27,6 +27,7 @@
   * Fixed a bug that Method#to_proc would not return lambda block.
   * Fixed a bug where cftype structures which are defined in AudioToolbox could
     not be used.
+  * Fixed a bug which Kernel.raise cannot raise NSException instance.
   * [OSX] Fixed the `rake crashlog' task.
   * Fixed a bug in the compiler that would ignore BridgeSupport enum values if
     they only have a 64-bit value.
