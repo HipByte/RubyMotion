@@ -1,6 +1,6 @@
 = RubyMotion 2.20 =
 
-  * Fixed that variadic method is not working when there is a method which 
+  * Fixed that variadic method is not working when there is a method which
     have the same signature.
   * Fixed a bug in build system that app cannot be built with Ruby 2.1 when it
     would use UTF-8 as app name.
@@ -19,7 +19,7 @@
     different threads.
   * Fixed a memory leak where the constants were compiled in compile time.
   * Fixed a memory leak which is caused by Dispatch::Queue.new.
-  * [OSX] Fixed a bug where NSDate object was convered to Time object that it 
+  * [OSX] Fixed a bug where NSDate object was convered to Time object that it
     would cause a calculation error.
   * Fixed the runtime to be able to deal with all tagged pointers from the
     Objective-C world. For instance, using NSTaggedManagedObjectID would lead
@@ -41,7 +41,7 @@
     of the `current' window that was created specifically for the test. This
     makes it easier to interact with modal views such as `UIAlertView'.
   * [iOS] Fixed a bug in build system where link error was caused when the app
-    is built for ARM64 with Xcode 5.1. Thanks to Andrew Larssen for the patch 
+    is built for ARM64 with Xcode 5.1. Thanks to Andrew Larssen for the patch
     (pull request #146).
   * Improved command-line interface, e.g. `$ motion create --help' will now no
     longer create an application called ‘--help’. This deprecates the interface
@@ -221,12 +221,12 @@
   * Fixed a memory leak when ObjC #initXXX methods will return internal class
     object (ex NSMutableData#initWithLength, NSArray#initWithArray).
   * Fixed where #new method doesn't work for GLKKit structure.
-    (ex GLKMatrix2.new, GLKVector2.new). 
+    (ex GLKMatrix2.new, GLKVector2.new).
   * Fixed a bug in Array#sample where it would return duplicated elements when
     a value greater than self length was passed into argument.
   * Fixed a bug where `motion update' might cause an error when it displays the
     changelog on OSX 10.9.
-  * Fixed a compiler bug where it causes a crash with `rake device' when it 
+  * Fixed a compiler bug where it causes a crash with `rake device' when it
     overrides the method which has structure as argument.
   * [iOS] Fixed a crash when using certain NSIndexPath objects (64-bit only).
   * [iOS] Fixed `rake debug=1` on OS X 10.9 not working.
@@ -263,7 +263,7 @@
   * Fixed a bug in the compiler where providing nil as the value of a C-level
     block argument would not actually pass NULL but an empty Block structure
     instead. Thanks to Ruben Fonseca for the detective work.
-  * [iOS] Fixed a bug where device log is wrong filtered with `rake device' 
+  * [iOS] Fixed a bug where device log is wrong filtered with `rake device'
     when performed day is 1-9.
   * [iOS] Added support to launch the app as 64-bit in simulator.
   * [iOS] Fixed where non-retina iPad simulator does not launch as default.
@@ -397,7 +397,7 @@
   * Fixed a bug, apparently caused by a change in the Objective-C runtime in
     Xcode 5, that would make certain methods (ex. MKAnnotationView#image) not
     returning a proper type at runtime but a pointer to a structure instead.
-  * Fixed the build system to make the content of the ARR_CYCLES_DISABLE 
+  * Fixed the build system to make the content of the ARR_CYCLES_DISABLE
     environment variable persistent when distributing an app.
   * [iOS] The `rake device' task will now start the application (without the
     need to attach a debugger). Logs emitted by the app will be redirected in
@@ -600,7 +600,7 @@
     :url => 'http://hipbyte.com/foo.ipa' }).
   * [iOS] Fixed `rake simulator' to show a warning message in case the user is
     running tmux without `reattach-to-user-namespace', which is necessary.
-  * [iOS] Fixed compilation issues with 6.0 SDK. 
+  * [iOS] Fixed compilation issues with 6.0 SDK.
   * [OSX] Fixed a bug in `rake debug=1' where the debugger would not properly
     start in case the application name includes a space character.
   * [OSX] Added `rake ctags' task to generate `tags' file.
@@ -626,7 +626,7 @@
   * Fixed a bug in `app.files_dependencies' where it would not allow a path
     containing "../" (ex. app.files_dependencies 'foo.rb' => '../bar.rb').
     Thanks to Jeremy Ruppel for the patch (pull request #90).
-  * Fixed a bug in `app.vendor_project' to properly set the 
+  * Fixed a bug in `app.vendor_project' to properly set the
     CONFIGURATION_BUILD_DIR variable for non-standard Xcode projects. Thanks to
     Jack Chen for the patch (pull request #94).
   * Fixed `app.vendor_project' with Xcode projects to rebuild the project in
@@ -717,14 +717,14 @@
                           |\      _,,,---,,_
                           /,`.-'`'    -.  ;-;;,_
                          |,4-  ) )-,_..;\ (  `'-'
-                        '---''(_/--'  `-'\_)  
+                        '---''(_/--'  `-'\_)
 
 = RubyMotion 1.35 =
 
   * Added support for string constants defined in 3rd-party header files using
     the macro system (ex. #define MyConstant @"SomeValue").
   * Added the `no_start' option to `rake device debug=1' to let the user attach
-    a custom debugger. This is for the RubyMine integration. 
+    a custom debugger. This is for the RubyMine integration.
   * Fixed a bug in the REPL where the history could not be saved if it included
     UTF-8 characters.
   * Fixed a caching bug in Object#respond_to? which could return true for a
@@ -968,7 +968,7 @@
     `TWTweetComposeViewController#setInitialText' method on iOS 5.1 or below
     would trigger a crash at runtime.
   * Fixed a bug in Pointer#cast! where symbol arguments could not be given to.
-  * Fixed a bug where methods that take variable arguments do not call 
+  * Fixed a bug where methods that take variable arguments do not call
     the appropriate function if an ArgumentError exception if raised.
   * Fixed a bug where calling super from a #define_method block would fail.
   * Fixed a bug in the compiler when compiling references to C constants which
@@ -988,7 +988,7 @@
   * Added the Pointer#value method which is alias for Pointer#[0].
   * Added the `app.framework_search_paths' variable that lets you configure
     the custom framework paths for the project build.
-  * Added the `RUBYMOTION_VERSION' Ruby constant at runtime which points to the 
+  * Added the `RUBYMOTION_VERSION' Ruby constant at runtime which points to the
     version of RubyMotion, as a String. Cleaned up other RUBY_ constants.
   * Added the `spec:device' Rake task which will run the spec/test suite on the
     device via the debugger.
@@ -1057,7 +1057,7 @@
     (ex. `rake spec | ...').
   * Added the Dispatch.once method, which wraps the dispatch_once() function,
     that can be useful to implement singletons. Usage: Dispatch.once { ... }.
-  * Added support for `define_method'. Like `attr_*', it cannot be used to 
+  * Added support for `define_method'. Like `attr_*', it cannot be used to
     overwrite existing Objective-C methods due to limitations of the compiler.
   * Fixed a bug when converting Bignum objects into 'long long' types.
   * Fixed a bug in the build system where relative source paths pointing to the
@@ -1150,7 +1150,7 @@
     extension).
   * Fixed a bug in the runtime where an exception would occur when Objective-C
     code would try to allocate a new instance of a class defined in Ruby using
-    the +new method (ex. RestKit). 
+    the +new method (ex. RestKit).
   * Fixed a memory bug in Hash.[] when a Hash was passed (ex. Hash[a:'a']).
   * Fixed a bug in certain Dispatch APIs when the main Dispatch::Queue object
     was passed causing an ArgumentError exception.
@@ -1229,12 +1229,12 @@
   * Introduced the `files' option to `rake spec', which can be used to filter
     the spec files that should be run. Filters can be either the basename of
     a spec file or its full path, and are separated by a comma.
-    Example: rake spec files=main_spec,kvo_spec,spec/foo_spec.rb 
+    Example: rake spec files=main_spec,kvo_spec,spec/foo_spec.rb
   * Introduced the RUBYMOTION_ENV constant in the runtime which can have one of
     the following string values: 'test', 'development' and 'release'.
   * Introduced the `rake static' task which creates a universal static library
     containing the project's object files and the RubyMotion runtime, which is
-    suitable for inclusion in Objective-C/Xcode projects. 
+    suitable for inclusion in Objective-C/Xcode projects.
   * Introduced weak frameworks support. The `app.weak_frameworks' setting can
     be set to an array of framework names, similar to how `app.frameworks'
     works (ex. app.weak_frameworks += ['Twitter']). Patch by Satoshi Ebisawa.
@@ -1253,7 +1253,7 @@
     properly initialized in certain cases (ex. Array#sample), therefore always
     returning the same values.
   * Fixed a bug where using C structures containing bitfields (ex. NSDecimal)
-    would trigger an exception at compilation time. 
+    would trigger an exception at compilation time.
   * Added support for pointers to C strings (needed for glShaderSource()).
     Usage: Pointer.new(:string, n) where n is the number of C strings, then
     simply assign Ruby strings with #[]=.
@@ -1341,7 +1341,7 @@
     passing the '--no-64-bit' flag (which was added in Lion).
   * Fixed `motion create' to accept dash or underscore characters in the app
     name. Patch by Mark Villacampa.
-  * Added a workaround for an iOS 5.1 bug that causes write(2) to return EBADF 
+  * Added a workaround for an iOS 5.1 bug that causes write(2) to return EBADF
     when writing to stdout. The bug seems to happen on devices not configured
     for development. Writing to stdout (using p/puts) in this scenario becomes
     a no-op.
