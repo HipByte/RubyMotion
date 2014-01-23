@@ -20,4 +20,13 @@ describe "NSExceptions" do
       e.name.should == 'NSInvalidArgumentException'
     end
   end
+
+  it "should be raised with Kernel.raise" do
+    begin
+      raise NSException.exceptionWithName('NSInvalidArgumentException', reason:'Woops!', userInfo:nil)
+    rescue => e
+      e.class.should == NSException
+      e.name.should == 'NSInvalidArgumentException'
+    end
+  end
 end
