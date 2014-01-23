@@ -36,7 +36,7 @@ module Motion; class Command
     self.summary = 'Print iOS device logs'
 
     def run
-      deploy = File.join(File.dirname(__FILE__), '../../../../bin/ios/deploy')
+      deploy = File.join(File.dirname(__FILE__), '../../../bin/ios/deploy')
       devices = `\"#{deploy}\" -D`.strip.split(/\n/)
       if devices.empty?
         $stderr.puts "No device found on USB. Connect a device and try again." 
