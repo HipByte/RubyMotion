@@ -9,10 +9,8 @@ bin/nfd
 bin/ios/deploy
 bin/ios/sim
 bin/osx/sim
-bin/ios/deploy.dSYM
-bin/ios/sim.dSYM
-bin/osx/sim.dSYM
 bin/instruments
+bin/**/*.dSYM
 
 data/android
 data/ios
