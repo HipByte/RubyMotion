@@ -49,6 +49,9 @@
   * Improved command-line interface, e.g. `$ motion create --help' will now no
     longer create an application called ‘--help’. This deprecates the interface
     for any command plugins and this will fully be removed with RubyMotion v3.
+  * [OSX] Fixed bug where method types of NSOpenPanel and NSSavePanel were not
+    being cached for their private counterparts that are substituted at runtime
+    in case the application is running in a sandbox.
 
 = RubyMotion 2.19 =
 
