@@ -19,6 +19,7 @@
     different threads.
   * Fixed a memory leak where the constants were compiled in compile time.
   * Fixed a memory leak which is caused by Dispatch::Queue.new.
+  * Fixed a memory leak which is triggered by Array#shift.
   * [OSX] Fixed a bug where NSDate object was convered to Time object that it
     would cause a calculation error.
   * Fixed the runtime to be able to deal with all tagged pointers from the
