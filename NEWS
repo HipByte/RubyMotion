@@ -11,6 +11,7 @@
     ~80% faster.
   * Improved Object#inspect performance. ~25% faster.
   * Improved Object#!~ performance. ~3 times faster.
+  * Improved Object#{send, respond_to?} performance. ~30% times faster.
   * Improved performance in dispatcher. ~25% faster.
   * Improved calculation performance where Float objects are used on 32-bit
     platform. ~80% faster.
