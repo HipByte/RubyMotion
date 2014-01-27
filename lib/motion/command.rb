@@ -37,10 +37,13 @@ module Motion
   end
 end
 
+# Make text pretty (by adding bold ANSI codes) by default.
+CLAide::Command.ansi_output = true
+
 module Motion
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   # Base command class of RubyMotion
-  # -------------------------------------------------------------------------
+  # ---------------------------------------------------------------------------
   class Command < CLAide::Command
     require 'motion/command/account'
     require 'motion/command/activate'
@@ -116,6 +119,34 @@ module Motion
       require 'uri'
       # Guess the default email address from git.
       URI.escape(`git config --get user.email`.strip)
+    end
+
+    # -------------------------------------------------------------------------
+    # Prettify overrides
+    # -------------------------------------------------------------------------
+
+    class BoldBanner < CLAide::Command::Banner
+      def make_bold(text)
+        ansi_output? ? "\e[1m#{text}\e[0m" : text
+      end
+
+      alias_method :prettify_command_in_usage_description, :make_bold
+      alias_method :prettify_option_name, :make_bold
+      alias_method :prettify_subcommand_name, :make_bold
+    end
+
+    def self.banner(ansi_output = false, banner_class = BoldBanner)
+      super
+    end
+
+    class BoldHelp < CLAide::Help
+      def prettify_error_message(message)
+        ansi_output? ? "\e[1m#{message}\e[0m" : message
+      end
+    end
+
+    def self.help!(error_message = nil, ansi_output = false, help_class = BoldHelp)
+      super
     end
   end
 end
