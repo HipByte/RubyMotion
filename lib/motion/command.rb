@@ -24,6 +24,8 @@
 require 'motion/version'
 require 'motion/error'
 
+require 'rubygems'
+
 $:.unshift File.expand_path('../../../vendor/CLAide/lib', __FILE__)
 require 'claide'
 
@@ -49,12 +51,10 @@ module Motion
     require 'motion/command/support'
     require 'motion/command/update'
 
-    # TODO support RubyGems plugins?
-    # require 'rubygems'
-    # self.plugin_prefix = 'motion'
-
     self.abstract_command = true
     self.command = 'motion'
+    self.plugin_prefix = 'motion'
+
     self.description = 'RubyMotion lets you develop native iOS and OS X ' \
                        'applications using the awesome Ruby language.'
 
