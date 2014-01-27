@@ -8,6 +8,8 @@
     longer do so, but instead add a `lib/motion_plugin.rb' file (see Joybox for
     an example). The `~/Library/RubyMotion' is from now on only meant for local
     usage, i.e. outside of the scope of a gem.
+  * Added the Proc#owner method, which returns a reference to the object the
+    block was created from (the `self' reference).
   * Improved Rational performance. ~4 times faster.
   * Improved Proc#new performance. 15% faster.
   * Improved performance of Range objects created with the literal syntax.
