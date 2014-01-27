@@ -37,4 +37,7 @@ autorelease_pool { bm_rational }
 puts "*** Module ***"
 autorelease_pool { bm_module }
 
+puts "*** Object ***"
+autorelease_pool { bm_object }
+
 exit(0)
