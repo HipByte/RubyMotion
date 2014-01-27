@@ -58,6 +58,17 @@ module Motion
     self.description = 'RubyMotion lets you develop native iOS and OS X ' \
                        'applications using the awesome Ruby language.'
 
+    # TODO remove in RM 3.
+    def self.command=(name)
+      if name.include?(':')
+        root = File.expand_path('../../../', __FILE__)
+        external_caller = caller.find { |line| !line.start_with?(root) }
+        warn "[!] Commands should no longer use colons to indicate their " \
+             "own namespace. (Called from: #{external_caller})"
+      end
+      super
+    end
+
     def self.options
       [
         ['--version', 'Show the version of RubyMotion'],
