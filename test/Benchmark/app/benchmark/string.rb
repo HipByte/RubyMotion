@@ -14,6 +14,7 @@ def bm_string
     string_split(x)
     string_to_f(x)
     string_to_i(x)
+    string_to_sym(x)
   end
 end
 

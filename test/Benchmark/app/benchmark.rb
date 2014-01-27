@@ -25,6 +25,9 @@ autorelease_pool { bm_range }
 puts "*** String ***"
 autorelease_pool { bm_string }
 
+puts "*** Symbol ***"
+autorelease_pool { bm_symbol }
+
 puts "*** Time ***"
 autorelease_pool { bm_time }
 
