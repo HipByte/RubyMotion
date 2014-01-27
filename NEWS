@@ -41,13 +41,6 @@
     they only have a 64-bit value.
   * Fixed a bug where NSMutableArray#delete_at would immediately release an
     object.
-  * [OSX] Fixed a bug where an NSDate object convered to a Time object would
-    cause a calculation error.
-  * [OSX] Fixed the `rake crashlog' task.
-  * [OSX] Added `external_frameworks' config variable, which is used for
-    frameworks that are outside of `/System/Library/Frameworks`, but are not
-    meant to be embedded inside the application.
-    E.g. `/Library/Frameworks/iTunesLibrary.framework'.
   * Made `vendor_project' accept glob patterns for the `source_files' option.
   * Made BridgeSupport metadata generation for `vendor' projects by default use
     the `:cflags` option.
@@ -57,6 +50,13 @@
   * [iOS] Fixed a bug in the build system where a link error would be caused
     when building for arm64 with Xcode 5.1. Thanks to Andrew Larssen for the
     patch (pull request #146).
+  * [OSX] Fixed a bug where an NSDate object convered to a Time object would
+    cause a calculation error.
+  * [OSX] Fixed the `rake crashlog' task.
+  * [OSX] Added `external_frameworks' config variable, which is used for
+    frameworks that are outside of `/System/Library/Frameworks`, but are not
+    meant to be embedded inside the application.
+    E.g. `/Library/Frameworks/iTunesLibrary.framework'.
   * [OSX] Fixed a bug where method types of NSOpenPanel and NSSavePanel were
     not being cached for their private counterparts that are substituted at
     runtime in case the application is running in a sandbox.
