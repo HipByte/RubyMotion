@@ -31,4 +31,7 @@ autorelease_pool { bm_time }
 puts "*** Rational ***"
 autorelease_pool { bm_rational }
 
+puts "*** Module ***"
+autorelease_pool { bm_module }
+
 exit(0)
