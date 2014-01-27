@@ -54,6 +54,8 @@
   * [OSX] Fixed bug where method types of NSOpenPanel and NSSavePanel were not
     being cached for their private counterparts that are substituted at runtime
     in case the application is running in a sandbox.
+  * Fixed a bug where NSMutableArray#delete_at will immediately release an
+    object.
 
 = RubyMotion 2.19 =
 
