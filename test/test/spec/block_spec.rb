@@ -319,3 +319,10 @@ describe "Method#to_proc" do
     method(:test_block_dvars_proc).to_proc.lambda?.should == true
   end
 end
+
+describe "Proc#owner" do
+  it "returns a reference to the object the proc was created from (Proc->self)" do
+    b = Proc.new {}
+    b.owner.should == self
+  end
+end
