@@ -40,8 +40,11 @@ module Motion; class Command
 
     self.summary = 'Create a new project.'
 
-    self.description = "Create a new RubyMotion project from one of the " \
-                       "following templates: #{templates_description}."
+    # Override getter so that we fetch the template names as late as possible.
+    def self.description
+      "Create a new RubyMotion project from one of the " \
+      "following templates: #{templates_description}."
+    end
 
     self.arguments = 'APP-NAME'
 

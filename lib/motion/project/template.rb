@@ -36,6 +36,18 @@ module Motion; module Project
       File.expand_path(File.join(ENV['HOME'], 'Library/RubyMotion/template'))
     ]
 
+    # TODO Caching these and making it based on the Paths constant makes it
+    #      less simple to register plugin templates, because you cannot add
+    #      them to the Paths constant and ensure this method will return those
+    #      newly registered templates either. The only nice way atm to register
+    #      them is to add them directly to this cached `@all_templates` var.
+    #      For instance, from the Joybox plugin:
+    #
+    # require 'motion/project/template'
+    # Dir.glob(File.expand_path('../../template/joybox-*', __FILE__)).each do |template_path|
+    #   Motion::Project::Template.all_templates[File.basename(template_path)] = template_path
+    # end
+    #
     def self.all_templates
       @all_templates ||= begin
         h = {}
@@ -46,6 +58,7 @@ module Motion; module Project
       end
     end
 
+    # TODO This seems to be unused.
     Templates = Paths.map { |path| Dir.glob(path + '/*') }.flatten.select { |x| !x.match(/^\./) and File.directory?(x) }.map { |x| File.basename(x) }
 
     def initialize(app_name, template_name)
