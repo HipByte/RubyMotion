@@ -24,6 +24,8 @@
 require 'motion/version'
 require 'motion/error'
 
+require 'rubygems'
+
 $:.unshift File.expand_path('../../../vendor/CLAide/lib', __FILE__)
 require 'claide'
 
@@ -49,14 +51,23 @@ module Motion
     require 'motion/command/support'
     require 'motion/command/update'
 
-    # TODO support RubyGems plugins?
-    # require 'rubygems'
-    # self.plugin_prefix = 'motion'
-
     self.abstract_command = true
     self.command = 'motion'
+    self.plugin_prefix = 'motion'
+
     self.description = 'RubyMotion lets you develop native iOS and OS X ' \
                        'applications using the awesome Ruby language.'
+
+    # TODO remove in RM 3.
+    def self.command=(name)
+      if name.include?(':')
+        root = File.expand_path('../../../', __FILE__)
+        external_caller = caller.find { |line| !line.start_with?(root) }
+        warn "[!] Commands should no longer use colons to indicate their " \
+             "own namespace. (Called from: #{external_caller})"
+      end
+      super
+    end
 
     def self.options
       [

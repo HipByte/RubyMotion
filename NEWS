@@ -3,6 +3,11 @@
   * Improved command-line interface, e.g. `$ motion create --help' will now no
     longer create an application called ‘--help’. This deprecates the interface
     for any command plugins and this will fully be removed with RubyMotion v3.
+  * Added support for loading plugins through RubyGems. Libraries that used to
+    use `~/Library/RubyMotion' to load commands and/or templates should no
+    longer do so, but instead add a `lib/motion_plugin.rb' file (see Joybox for
+    an example). The `~/Library/RubyMotion' is from now on only meant for local
+    usage, i.e. outside of the scope of a gem.
   * Improved Rational performance. ~4 times faster.
   * Improved Proc#new performance. 15% faster.
   * Improved performance of Range objects created with the literal syntax.
