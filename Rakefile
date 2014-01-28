@@ -185,6 +185,9 @@ task :install do
   # Android support is not ready yet.
   data.delete_if { |x| x.match(/^.\/lib\/motion\/project\/template\/android/) }
 
+  # Delete temporary VIM files.
+  data.delete_if { |x| base = File.basename(x); base.match(/^\./) and base.match(/\.sw.$/) }
+
 =begin
   # === 6.0 support (beta) ===
   data.concat(Dir.glob("./data/6.0/Rakefile"))
