@@ -179,7 +179,16 @@ EOS
           xcopts = ''
           xcopts << "-target \"#{target}\" " if target
           xcopts << "-scheme \"#{scheme}\" " if scheme
-          command = "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} build"
+          xcconfig = "CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" "
+          case platform
+          when "MacOSX"
+            xcconfig << "MACOSX_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+          when /^iPhone/
+            xcconfig << "IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+          else
+            App.fail "Unknown platform : #{platform}"
+          end
+          command = "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} #{xcconfig} build"
           unless App::VERBOSE
             command << " | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
           end
