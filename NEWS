@@ -3,6 +3,9 @@
   * Fixed a bug which `motion update --cache-version=X' is broken.
   * Fixed a bug where vendored Xcode OS X projects were build with the
     IPHONEOS_DEPLOYMENT_TARGET option instead of MACOSX_DEPLOYMENT_TARGET.
+  * Added reference zeroing to `WeakRef', which will now raise an exception in
+    case a message is sent after the reference has been deallocated. Use the
+    `WeakRef#weakref_alive?' method to check if it has been deallocated.
 
 = RubyMotion 2.20 =
 
