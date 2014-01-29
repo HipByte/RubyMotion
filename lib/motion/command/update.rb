@@ -106,7 +106,7 @@ module Motion; class Command
       need_root
 
       $stderr.puts "Connecting to the server..."
-      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"@wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{read_license_key}\" https://secure.rubymotion.com/update_software")
+      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{read_license_key}\" https://secure.rubymotion.com/update_software")
       unless resp.match(/^http:/)
         die resp
       end
