@@ -41,7 +41,7 @@ describe "WeakRef" do
     lambda { class Foo < WeakRef; end }.should.raise(RuntimeError)
   end
 
-  it "are destroyed like regular objects" do
+  it "is destroyed like regular objects" do
     $weakref_destroyed = false
     autorelease_pool do
       obj = Object.new
@@ -49,6 +49,30 @@ describe "WeakRef" do
       ObjectSpace.define_finalizer(ref, proc { $weakref_destroyed = true })
     end
     $weakref_destroyed.should == true
+  end
+
+  it "responds to #weakref_alive? (which is special cased in the dispatcher)" do
+    WeakRef.new(Object.new).respond_to?(:weakref_alive?).should == true
+  end
+
+  it "returns whether or not the reference is still alive" do
+    autorelease_pool do
+      @ref = WeakRef.new(Object.new)
+      @ref.weakref_alive?.should == true
+    end
+    wait 0.1 do
+      @ref.weakref_alive?.should == false
+    end
+  end
+
+  it "raises a WeakRef::RefError if messaged when the reference is no longer alive" do
+    autorelease_pool do
+      @ref = WeakRef.new(Object.new)
+      lambda { @ref.to_s }.should.not.raise
+    end
+    wait 0.1 do
+      lambda { @ref.to_s }.should.raise(WeakRef::RefError)
+    end
   end
 
   it "can be nested" do
@@ -61,14 +85,14 @@ describe "WeakRef" do
     ref3.object_id.should == obj.object_id
   end
 
-  it "are resolved by NSObject#==" do
+  it "is resolved by NSObject#==" do
     vc = UIViewController.new
     ref = WeakRef.new(vc)
     ref.should == vc
     vc.should == ref
   end
 
-  it "are resolved by Boxed#==" do
+  it "is resolved by Boxed#==" do
     rect = CGRect.new(CGPoint.new(1, 2), CGSize.new(3, 4))
     ref = WeakRef.new(rect)
     ref.should == rect
