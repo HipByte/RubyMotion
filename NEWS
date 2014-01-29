@@ -1,3 +1,7 @@
+= RubyMotion 2.21 =
+
+  * Fixed a bug which `motion update --cache-version=X' is broken.
+
 = RubyMotion 2.20 =
 
   * Improved command-line interface, e.g. `$ motion create --help' will now no
