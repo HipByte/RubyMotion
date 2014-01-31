@@ -3,6 +3,8 @@
   * Fixed a bug which `motion update --cache-version=X' is broken.
   * Fixed a bug where vendored Xcode OS X projects were build with the
     IPHONEOS_DEPLOYMENT_TARGET option instead of MACOSX_DEPLOYMENT_TARGET.
+  * Fixed a memory leak where the objects which has cycle reference would not
+    be released when it would use Dispatch::Queue with asynchronous.
   * Added reference zeroing to `WeakRef' starting from iOS 5 and OS X 10.7. It
     will now raise an exception in case a message is sent after the reference
     has been deallocated. Use the `WeakRef#weakref_alive?' method to check if
