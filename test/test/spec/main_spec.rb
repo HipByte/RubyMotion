@@ -23,7 +23,7 @@ describe 'A method returning a 64-bit struct' do
 
   it "can be defined" do
     o = MyTestMethod.new
-    TestMethod.testMethodReturningCGSize(o).should == true    
+    TestMethod.testMethodReturningCGSize(o).should == true
   end
 end
 
@@ -35,19 +35,23 @@ describe 'A method returning a 128-bit struct' do
 
   it "can be defined" do
     o = MyTestMethod.new
-    TestMethod.testMethodReturningCGRect(o).should == true    
+    TestMethod.testMethodReturningCGRect(o).should == true
   end
 end
 
+class Bacon::Context
+  alias_method :on_ios_it, defined?(UIView) ? :it : :xit
+end
+
 describe 'A 3rd-party method accepting an iOS enum' do
-  it "can be called" do
+  on_ios_it "can be called" do
     TestMethod.testMethodAcceptingUIInterfaceOrientation(UIInterfaceOrientationPortrait).should == true
     TestMethod.testMethodAcceptingUIInterfaceOrientation(UIInterfaceOrientationLandscapeLeft).should == false
   end
 end
 
 describe 'A method accepting and returning UIEdgeInsets' do
-  it "can be called" do
+  on_ios_it "can be called" do
     s = UIEdgeInsetsMake(1, 2, 3, 4)
     TestMethod.testMethodAcceptingUIEdgeInsets(s).should == true
   end
@@ -81,7 +85,7 @@ describe 'A method accepting a CF type' do
     TestMethod.testMethodAcceptingCFType('foo').should == true
   end
 
-  it "can be called (2)" do
+  on_ios_it "can be called (2)" do
     controller = ABPersonViewController.alloc.init
     person = ABPersonCreate()
     controller.displayedPerson = person
@@ -173,12 +177,16 @@ describe "A private method" do
 end
 
 describe "An informal protocol method with BOOL types" do
-  it "can be called" do
+  it "can be called (1)" do
     o = TestMethod.new
     o.testProtocolFlag = true
     o.testProtocolFlag.should == true
     o.testProtocolFlag = false
     o.testProtocolFlag.should == false
+  end
+
+  # TODO Do we know of a Foundation version that works on OS X as well?
+  on_ios_it "can be called (1)" do
     o = UITextField.new
     o.enablesReturnKeyAutomatically = true
     o.enablesReturnKeyAutomatically.should == true

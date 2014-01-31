@@ -24,6 +24,7 @@
     return rect.origin.x == 1 && rect.origin.y == 2 && rect.size.width == 3 && rect.size.height == 4;
 }
 
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
 + (BOOL)testMethodAcceptingUIInterfaceOrientation:(UIInterfaceOrientation)orientation
 {
     return orientation == UIInterfaceOrientationPortrait;
@@ -33,6 +34,7 @@
 {
     return YES;
 }
+#endif
 
 + (BOOL)testMethodAcceptingCFType:(CFStringRef)cfstring
 {

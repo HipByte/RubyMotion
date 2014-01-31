@@ -1,8 +1,14 @@
 $:.unshift("../../lib")
-#$:.unshift("/Library/RubyMotion/lib")
-require 'motion/project'
+
+platform = ENV['PLATFORM'] || 'ios'
+require "motion/project/template/#{platform}"
 
 ENV['output'] ||= 'pretty_spec_dox'
+
+# Always delete the vendor BS file, because it isn't namespaced by platform and
+# thus leads to problems when running against another platform than the BS file
+# was created for.
+FileUtils.rm_f 'vendor/code/code.bridgesupport'
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
@@ -12,5 +18,28 @@ Motion::Project::App.setup do |app|
 
   app.spec_files.insert(1, *FileList['../helpers/*.rb'])
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
+
+  app.archs[app.local_platform] = [ENV['ARCH']] if ENV['ARCH']
 end
 
+namespace :spec do
+  task :clean_run => [:clean, :spec]
+
+  [:ios, :osx].each do |platform|
+    namespace platform do
+      { '32' => 'i386', '64' => 'x86_64' }.each do |bit, arch|
+        desc "Run tests on #{platform} (#{bit}-bit)"
+        task bit do
+          App.info "TESTING", "Running test suite on platform: #{platform} (#{bit}-bit)"
+          sh "env PLATFORM=#{platform} ARCH=#{arch} rake spec:clean_run"
+        end
+      end
+    end
+  end
+
+  desc 'Run tests on iOS and OS X'
+  task :all => [:ios, :osx]
+end
+
+# TODO enable this once full test suite works on OS X.
+#task :default => 'spec:all'

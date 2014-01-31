@@ -1,4 +1,10 @@
- #import <UIKit/UIKit.h>
+#import "Availability.h"
+
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
+#import <UIKit/UIKit.h>
+#else
+#import <Cocoa/Cocoa.h>
+#endif
 
 struct MyStructHasName {
     id name;
@@ -45,8 +51,11 @@ typedef id (^MyBlock)(void);
 + (BOOL)testMethodReturningCGSize:(TestMethod *)testMethod;
 + (BOOL)testMethodReturningCGRect:(TestMethod *)testMethod;
 
+#ifdef __IPHONE_OS_VERSION_MIN_REQUIRED
 + (BOOL)testMethodAcceptingUIInterfaceOrientation:(UIInterfaceOrientation)orientation;
 + (BOOL)testMethodAcceptingUIEdgeInsets:(UIEdgeInsets)insets;
+#endif
+
 + (id)testMethodCallingBlock:(MyBlock)block;
 + (BOOL)testMethodAcceptingCFType:(CFStringRef)cfstring;
 + (BOOL)testMethodAcceptingMyStruct4C:(struct MyStruct4C)s;
