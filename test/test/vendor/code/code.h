@@ -90,3 +90,11 @@ typedef int (^ReturnsIntBlock)();
 void KreateStackBlock(void (^inputBlock)(ReturnsIntBlock));
 ReturnsIntBlock KreateMallocBlock(int input);
 ReturnsIntBlock KreateGlobalBlock();
+
+#ifdef __LP64__
+@interface TaggedNSObjectSubclass : NSObject
++ (id)taggedObject:(uintptr_t)value;
+- (uintptr_t)taggedValue;
+- (BOOL)isEqualTo:(id)other;
+@end
+#endif
