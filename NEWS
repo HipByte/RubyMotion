@@ -9,6 +9,8 @@
     will now raise an exception in case a message is sent after the reference
     has been deallocated. Use the `WeakRef#weakref_alive?' method to check if
     it has been deallocated or not.
+  * Improved performance where Array elements would be converted from Ruby to
+    Objective-C instance. ~10% faster.
 
 = RubyMotion 2.20 =
 
