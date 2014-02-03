@@ -1,3 +1,7 @@
+= RubyMotion 2.23 =
+
+  * Added a feature to support Subscripting (Objective-C Literals).
+
 = RubyMotion 2.22 =
 
   * Fixed a bug with `vendor_project' and prebuilt libraries, where the
