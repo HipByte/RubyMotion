@@ -131,7 +131,7 @@ EOS
         headers = source_files.select { |p| File.extname(p) == '.h' }
         bs_files = []
         unless headers.empty?
-          bs_file = File.basename(@path) + '.bridgesupport'
+          bs_file = File.join(build_dir, File.basename(@path) + '.bridgesupport')
           if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
             bs_cflags = (opts.delete(:bridgesupport_cflags) or opts.delete(:cflags) or '')
             bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
@@ -206,7 +206,7 @@ EOS
         end
 
         # Generate the bridgesupport file if we need to.
-        bs_file = File.expand_path(File.basename(@path) + '.bridgesupport')
+        bs_file = File.join(build_dir, File.basename(@path) + '.bridgesupport')
         headers_dir = opts.delete(:headers_dir)
         if headers_dir
           project_dir = File.expand_path(@config.project_dir)
