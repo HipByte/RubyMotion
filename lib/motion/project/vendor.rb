@@ -220,7 +220,7 @@ EOS
           end
         end
 
-        @bs_files = Dir.glob('*.bridgesupport').map { |x| File.expand_path(x) }
+        @bs_files = Dir.glob("#{build_dir}/*.bridgesupport").map { |x| File.expand_path(x) }
         @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
       end
     end
