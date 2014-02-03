@@ -5,11 +5,6 @@ require "motion/project/template/#{platform}"
 
 ENV['output'] ||= 'pretty_spec_dox'
 
-# Always delete the vendor BS file, because it isn't namespaced by platform and
-# thus leads to problems when running against another platform than the BS file
-# was created for.
-FileUtils.rm_f 'vendor/code/code.bridgesupport'
-
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'test'
