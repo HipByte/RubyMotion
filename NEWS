@@ -1,5 +1,7 @@
 = RubyMotion 2.21 =
 
+  * Fixed a bug where incorrect SDK version values were being used in the
+    Info.plist file resulting in iOS App Store submissions being rejected.
   * Fixed a bug which `motion update --cache-version=X' is broken.
   * Fixed a bug where vendored Xcode OS X projects were build with the
     IPHONEOS_DEPLOYMENT_TARGET option instead of MACOSX_DEPLOYMENT_TARGET.
