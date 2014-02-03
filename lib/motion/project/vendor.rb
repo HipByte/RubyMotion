@@ -133,6 +133,7 @@ EOS
         unless headers.empty?
           bs_file = File.join(build_dir, File.basename(@path) + '.bridgesupport')
           if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
+            FileUtils.mkdir_p File.dirname(bs_file)
             bs_cflags = (opts.delete(:bridgesupport_cflags) or opts.delete(:cflags) or '')
             bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
             @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
@@ -212,6 +213,7 @@ EOS
           project_dir = File.expand_path(@config.project_dir)
           headers = Dir.glob(File.join(project_dir, headers_dir, '**/*.h'))
           if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
+            FileUtils.mkdir_p File.dirname(bs_file)
             bs_cflags = (opts.delete(:bridgesupport_cflags) or opts.delete(:cflags) or '')
             bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
             @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
