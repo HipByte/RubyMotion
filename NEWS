@@ -1,3 +1,9 @@
+= RubyMotion 2.22 =
+
+  * Fixed a bug with `vendor_project' and prebuilt libraries, where the
+    BridgeSupport file could not be created, as the build directory wouldn’t
+    exist yet.
+
 = RubyMotion 2.21 =
 
   * Added reference zeroing to `WeakRef' starting from iOS 5 and OS X 10.7. It
