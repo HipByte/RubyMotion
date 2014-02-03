@@ -1,21 +1,21 @@
 = RubyMotion 2.21 =
 
-  * Fixed a bug where incorrect SDK version values were being used in the
-    Info.plist file resulting in iOS App Store submissions being rejected.
-  * Fixed a bug which `motion update --cache-version=X' is broken.
-  * Fixed a bug where vendored Xcode OS X projects were build with the
-    IPHONEOS_DEPLOYMENT_TARGET option instead of MACOSX_DEPLOYMENT_TARGET.
-  * Fixed a memory leak where the objects which has cycle reference would not
-    be released when it would use Dispatch::Queue with asynchronous.
-  * Fixed a bug where BridgeSupport files for external projects included via
-    `vendor_project' were being shared across platform and not removed with
-    `rake clean'.
   * Added reference zeroing to `WeakRef' starting from iOS 5 and OS X 10.7. It
     will now raise an exception in case a message is sent after the reference
     has been deallocated. Use the `WeakRef#weakref_alive?' method to check if
     it has been deallocated or not.
   * Improved performance where Array elements would be converted from Ruby to
     Objective-C instance. ~10% faster.
+  * Fixed a bug where incorrect SDK version values were being used in the
+    Info.plist file resulting in iOS App Store submissions being rejected.
+  * Fixed a bug where `motion update --cache-version=X' is broken.
+  * Fixed a bug where vendored Xcode OS X projects were build with the
+    IPHONEOS_DEPLOYMENT_TARGET option instead of MACOSX_DEPLOYMENT_TARGET.
+  * Fixed a memory leak where the objects with a cyclic reference would not
+    be released when used inside an asynchronous Dispatch::Queue.
+  * Fixed a bug where BridgeSupport files for external projects included via
+    `vendor_project' were being shared across platform and not removed with
+    `rake clean'.
 
 = RubyMotion 2.20 =
 
