@@ -334,15 +334,6 @@ module Motion; module Project;
     end
 
     def info_plist_data(platform)
-      ios_version_to_build = lambda do |vers|
-        # XXX we should retrieve these values programmatically.
-        case vers
-          when '4.3'; '8F191m'
-          when '5.0'; '9A334'
-          when '5.1'; '9B176'
-          else; '10A403' # 6.0 or later
-        end
-      end
       Motion::PropertyList.to_s({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
@@ -370,11 +361,11 @@ module Motion; module Project;
         end,
         'DTXcodeBuild' => xcode_version[1],
         'DTSDKName' => "#{platform.downcase}#{sdk_version}",
-        'DTSDKBuild' => ios_version_to_build.call(sdk_version),
+        'DTSDKBuild' => sdk_build_version(platform),
         'DTPlatformName' => platform.downcase,
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
-        'DTPlatformBuild' => ios_version_to_build.call(sdk_version)
+        'DTPlatformBuild' => sdk_build_version(platform),
       }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
     end
 
@@ -395,6 +386,13 @@ module Motion; module Project;
 
     def supported_sdk_versions(versions)
       versions.reverse.find { |vers| File.exist?(datadir(vers)) }
+    end
+
+    def sdk_build_version(platform)
+      @sdk_build_version ||= begin
+        sdk_path = sdk(platform)
+        `xcodebuild -version -sdk '#{sdk_path}' ProductBuildVersion`.strip
+      end
     end
 
     def main_cpp_file_txt(spec_objs)
