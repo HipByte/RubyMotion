@@ -3,6 +3,7 @@
   * Fixed a bug with `vendor_project' and prebuilt libraries, where the
     BridgeSupport file could not be created, as the build directory wouldn’t
     exist yet.
+  * Added a feature to support Subscripting (Objective-C Literals).
 
 = RubyMotion 2.21 =
 
