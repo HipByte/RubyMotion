@@ -48,7 +48,7 @@ module Motion; class Command
       end
 
       need_root
-      File.open(LicensePath, 'w') { |io| io.write license_key }
+      File.open(LicensePath, 'w') { |io| io.write @license_key }
       puts "Product activated. Thanks for purchasing RubyMotion :-)"
     end
   end
