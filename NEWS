@@ -1,5 +1,7 @@
 = RubyMotion 2.23 =
 
+  * Fixed a bug with the `activate' CLI command. Thanks to Joffrey Jaffeux for
+    the patch.
   * Added a feature to support Subscripting (Objective-C Literals).
 
 = RubyMotion 2.22 =
