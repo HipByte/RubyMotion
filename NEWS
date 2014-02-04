@@ -3,6 +3,8 @@
   * Fixed a bug with the `activate' CLI command. Thanks to Joffrey Jaffeux for
     the patch.
   * Added a feature to support Subscripting (Objective-C Literals).
+  * Made the REPL for a OS X application work in development mode when it is
+    sandboxed.
 
 = RubyMotion 2.22 =
 

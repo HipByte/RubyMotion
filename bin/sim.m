@@ -1334,16 +1334,20 @@ main(int argc, char **argv)
 	environment] mutableCopy];
     if (debug_mode != DEBUG_NOTHING) {
 	// Prepare repl socket path.
-	NSString *tmpdir = NSTemporaryDirectory();
-	assert(tmpdir != nil);
-	char path[PATH_MAX];
-	snprintf(path, sizeof path, "%s/rubymotion-repl-XXXXXX",
-		[tmpdir fileSystemRepresentation]);
-	assert(mktemp(path) != NULL);
-	replSocketPath = [[[NSFileManager defaultManager]
-	    stringWithFileSystemRepresentation:path length:strlen(path)]
-	    retain];
-	[appEnvironment setObject:replSocketPath forKey:@"REPL_SOCKET_PATH"];
+	replSocketPath = [appEnvironment[@"REPL_SOCKET_PATH"] retain];
+	if (replSocketPath == nil) {
+	    NSString *tmpdir = NSTemporaryDirectory();
+	    assert(tmpdir != nil);
+	    char path[PATH_MAX];
+	    snprintf(path, sizeof path, "%s/rubymotion-repl-XXXXXX",
+		    [tmpdir fileSystemRepresentation]);
+	    assert(mktemp(path) != NULL);
+	    replSocketPath = [[[NSFileManager defaultManager]
+		stringWithFileSystemRepresentation:path length:strlen(path)]
+		retain];
+	    [appEnvironment setObject:replSocketPath
+			       forKey:@"REPL_SOCKET_PATH"];
+	}
 
 	// Make sure the unix socket path does not exist.
 	[[NSFileManager defaultManager] removeItemAtPath:replSocketPath
