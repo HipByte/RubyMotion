@@ -5,6 +5,7 @@
   * Added a feature to support Subscripting (Objective-C Literals).
   * Made the REPL for a OS X application work in development mode when it is
     sandboxed.
+  * Fixed a regression with specifying external templates to `motion create'.
 
 = RubyMotion 2.22 =
 

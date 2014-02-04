@@ -63,9 +63,11 @@ module Motion; class Command
     def validate!
       super
       help! "A name for the new project is required." unless @app_name
-      unless self.class.all_templates.include?(@template)
-        help! "Invalid template specified `#{@template}'."
-      end
+      # TODO This needs to take into account external templates (e.g. from git
+      #      or a local path.)
+      #unless self.class.all_templates.include?(@template)
+        #help! "Invalid template specified `#{@template}'."
+      #end
     end
 
     def run
