@@ -58,7 +58,10 @@ task :run do
   end
   exec = App.config.app_bundle_executable('MacOSX')
   env = ''
-  env << 'SIM_SPEC_MODE=1' if App.config.spec_mode
+  env << 'SIM_SPEC_MODE=1 ' if App.config.spec_mode
+  if App.config.needs_repl_sandbox_entitlements?
+    env << "REPL_SOCKET_PATH='#{App.config.app_sandbox_repl_socket_path}' "
+  end
   sim = File.join(App.config.bindir, 'osx/sim')
   debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
   target = App.config.sdk_version

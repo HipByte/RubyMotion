@@ -100,8 +100,16 @@ module Motion; module Project;
       super('Mac')
     end
 
+    def needs_repl_sandbox_entitlements?
+      development? && codesign_for_development && entitlements['com.apple.security.app-sandbox']
+    end
+
     def entitlements_data
-      dict = entitlements
+      dict = entitlements.dup
+      if needs_repl_sandbox_entitlements?
+        files = (dict['com.apple.security.temporary-exception.files.absolute-path.read-only'] ||= [])
+        files << datadir('librubymotion-repl.dylib')
+      end
       Motion::PropertyList.to_s(dict)
     end
 
@@ -133,6 +141,10 @@ module Motion; module Project;
 
     def app_resources_dir(platform)
       File.join(app_bundle(platform), 'Resources')
+    end
+
+    def app_sandbox_repl_socket_path
+      File.expand_path(File.join('~/Library/Containers', identifier, "Data/rubymotion-repl-#{Time.now.to_i}"))
     end
 
     def info_plist_data(platform)
