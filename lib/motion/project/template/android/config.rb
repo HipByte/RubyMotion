@@ -28,13 +28,14 @@ module Motion; module Project;
     register :android
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
-      :api_version, :arch
+      :api_version, :arch, :vendored_jars
 
     def initialize(project_dir, build_mode)
       super
       @avd_config = { :name => 'RubyMotion', :target => '1', :abi => 'armeabi-v7a' }
       @main_activity = '.Main'
       @arch = 'armv5te'
+      @vendored_jars = []
     end
 
     def validate

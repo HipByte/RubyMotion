@@ -106,8 +106,11 @@ EOS
   sh "#{App.config.cxx} #{App.config.ldflags} #{App.config.build_dir}/payload.o #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o #{App.config.build_dir}/#{libpayload_subpath} #{App.config.ldlibs}"
 
   # Compile java files.
+  android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
+  vendored_jars = App.config.vendored_jars
   classes_dir = File.join(App.config.build_dir, 'classes')
   FileUtils.mkdir_p(classes_dir)
+  class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
   rebuild_dex_classes = false
   Dir.glob(File.join(App.config.build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
@@ -116,7 +119,7 @@ EOS
     class_path = paths.join('/')
     if !File.exist?(class_path) or File.mtime(java_path) > File.mtime(class_path)
       App.info 'Compile', java_path
-      sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath \"#{classes_dir}:#{App.config.sdk_path}/tools/support/annotations.jar\" -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
+      sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
       rebuild_dex_classes = true
     end
   end
@@ -125,7 +128,7 @@ EOS
   dex_classes = File.join(App.config.build_dir, 'classes.dex')
   if !File.exist?(dex_classes) or rebuild_dex_classes
     App.info 'Create', dex_classes
-    sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\""
+    sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
   end
 
   # Generate the Android manifest file.
@@ -157,7 +160,7 @@ EOS
   if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(File.join(App.config.build_dir, libpayload_subpath)) > File.mtime(archive)
     App.info 'Create', archive
     resource_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar\" -F \"#{archive}\""
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{android_jar}\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
       sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\" > /dev/null"
       sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{libpayload_subpath} > /dev/null"
