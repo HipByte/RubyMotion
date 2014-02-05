@@ -331,13 +331,13 @@ EOS
     def codesign_certificate(platform)
       @codesign_certificate ||= begin
         cert_type = (distribution_mode ? 'Distribution' : 'Developer')
-        certs = `/usr/bin/security -q find-certificate -a`.scan(/"#{platform} #{cert_type}: [^"]+"/).uniq
+        certs = `/usr/bin/security -q find-certificate -a`.scan(/"(#{platform} #{cert_type}: [^"]+)"/).uniq
         if certs.size == 0
           App.fail "Cannot find any #{platform} #{cert_type} certificate in the keychain"
         elsif certs.size > 1
-          App.warn "Found #{certs.size} #{platform} #{cert_type} certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
+          App.warn "Found #{certs.size} #{platform} #{cert_type} certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0][0]}'"
         end
-        certs[0][1..-2] # trim trailing `"` characters
+        certs[0][0]
       end 
     end
 
