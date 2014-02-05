@@ -136,20 +136,24 @@ EOS
   File.open(android_manifest, 'w') do |io|
     io.print <<EOS
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="#{App.config.package}"
-      android:versionCode="1"
-      android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="3" />
-    <application android:label="#{App.config.name}"
-                 android:debuggable="true">
-        <activity android:name="#{App.config.main_activity}"
-                  android:label="#{App.config.name}">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="1" android:versionName="1.0">
+	<uses-sdk android:minSdkVersion="3" />
+	<application android:label="#{App.config.name}" android:debuggable="true">
+        	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
+            		<intent-filter>
+                		<action android:name="android.intent.action.MAIN" />
+                		<category android:name="android.intent.category.LAUNCHER" />
+            		</intent-filter>
+        	</activity>
+EOS
+    (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
+      io.print <<EOS
+		<activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
+			<meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
+		</activity>
+EOS
+    end
+    io.print <<EOS
     </application>
 </manifest> 
 EOS
