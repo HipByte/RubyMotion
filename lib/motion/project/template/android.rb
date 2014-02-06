@@ -133,11 +133,12 @@ EOS
 
   # Generate the Android manifest file.
   android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
+  App.info 'Create', android_manifest
   File.open(android_manifest, 'w') do |io|
     io.print <<EOS
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="1" android:versionName="1.0">
-	<uses-sdk android:minSdkVersion="3" />
+	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
 	<application android:label="#{App.config.name}" android:debuggable="true">
         	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
             		<intent-filter>
