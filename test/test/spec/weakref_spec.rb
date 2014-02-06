@@ -98,6 +98,15 @@ describe "WeakRef" do
     ref.should == rect
     rect.should == ref
   end
+
+  # RM-419
+  it "#new should work with special const" do
+    WeakRef.new(nil).should == nil
+    WeakRef.new(42).should == 42
+    WeakRef.new(1.0).should == 1.0
+    WeakRef.new(true).should == true
+    WeakRef.new(false).should == false
+  end
 end
 
 describe "Proc#weak!" do
