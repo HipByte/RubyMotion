@@ -6,6 +6,8 @@
   * Made the REPL for a OS X application work in development mode when it is
     sandboxed.
   * Fixed a regression with specifying external templates to `motion create'.
+  * Fixed a bug which WeakRef.new would cause a crash when passed nil, true,
+    false, Fixnum or Float object.
 
 = RubyMotion 2.22 =
 
