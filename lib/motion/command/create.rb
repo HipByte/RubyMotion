@@ -50,7 +50,7 @@ module Motion; class Command
 
     def self.options
       [
-        ['--template=NAME', "One of #{templates_description}."],
+        ['--template=[NAME|URL]', "A built-in template or from a file/git URL"],
       ].concat(super)
     end
 
