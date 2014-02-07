@@ -8,6 +8,8 @@
   * Fixed a regression with specifying external templates to `motion create'.
   * Fixed a bug which WeakRef.new would cause a crash when passed nil, true,
     false, Fixnum or Float object.
+  * Fixed issue where `vendor_project' with `:static' did not reuse `:cflags'
+    for the BridgeSupport generation.
 
 = RubyMotion 2.22 =
 
