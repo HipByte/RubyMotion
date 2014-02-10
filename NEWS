@@ -11,6 +11,9 @@
   * Fixed issue where `vendor_project' with `:static' did not reuse `:cflags'
     for the BridgeSupport generation.
   * Improved String#to_sym performance. ~40% faster.
+  * Fixed issue where manually created BridgeSupport metadata files were no
+    longer being used by the compiler. Now if one exists in the root of the lib
+    dir, that will be used instead of one in the platform-specific build dir.
 
 = RubyMotion 2.22 =
 
