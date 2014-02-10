@@ -10,6 +10,7 @@
     false, Fixnum or Float object.
   * Fixed issue where `vendor_project' with `:static' did not reuse `:cflags'
     for the BridgeSupport generation.
+  * Improved String#to_sym performance. ~40% faster.
 
 = RubyMotion 2.22 =
 
