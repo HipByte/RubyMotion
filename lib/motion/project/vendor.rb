@@ -131,7 +131,7 @@ EOS
         headers = source_files.select { |p| File.extname(p) == '.h' }
         bs_files = []
         unless headers.empty?
-          bs_file = File.join(build_dir, File.basename(@path) + '.bridgesupport')
+          bs_file = bridgesupport_build_path(build_dir)
           if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
             FileUtils.mkdir_p File.dirname(bs_file)
             bs_cflags = (opts.delete(:bridgesupport_cflags) or cflags)
@@ -207,7 +207,7 @@ EOS
         end
 
         # Generate the bridgesupport file if we need to.
-        bs_file = File.join(build_dir, File.basename(@path) + '.bridgesupport')
+        bs_file = bridgesupport_build_path(build_dir)
         headers_dir = opts.delete(:headers_dir)
         if headers_dir
           project_dir = File.expand_path(@config.project_dir)
@@ -231,6 +231,17 @@ EOS
       method = "#{prefix}_#{@type.to_s}".intern
       raise "Invalid vendor project type: #{@type}" unless respond_to?(method)
       method
+    end
+
+    # First check if an explicit metadata file exists and, if so, write
+    # the new file to that same location. Otherwise fall back to the
+    # platform-specific build dir.
+    def bridgesupport_build_path(build_dir)
+      bs_file = File.basename(@path) + '.bridgesupport'
+      unless File.exist?(bs_file)
+        bs_file = File.join(build_dir, bs_file)
+      end
+      bs_file
     end
   end
 end; end
