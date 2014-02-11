@@ -19,6 +19,7 @@
   * Improved performance in dispatcher. ~20% faster.
   * Improved performance where allocates internal memory of String objects.
     ~10% faster.
+  * Improved performance of methods where accepts Regexp object. ~20% faster.
 
 = RubyMotion 2.22 =
 
