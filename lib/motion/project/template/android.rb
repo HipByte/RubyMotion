@@ -79,12 +79,6 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     }
     assert(env != NULL);
     rb_vm_init("#{App.config.package.gsub('.', '/')}", env);
-    // XXX
-    rb_vm_register_method((*env)->FindClass(env, "android/app/Activity"), "onCreate", false, "(Landroid/os/Bundle;)V");
-    rb_vm_register_method((*env)->FindClass(env, "android/app/Activity"), "setContentView", false, "(Landroid/view/View;)V");
-    rb_vm_register_method((*env)->FindClass(env, "android/widget/TextView"), "<init>", false, "(Landroid/content/Context;)V");
-    rb_vm_register_method((*env)->FindClass(env, "android/widget/TextView"), "setText", false, "(Ljava/lang/CharSequence;)V");
-    // XXX
 EOS
   ruby_objs.each do |_, init_func|
     payload_c_txt << "    #{init_func}(NULL, NULL);\n"
