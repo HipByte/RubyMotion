@@ -459,9 +459,9 @@ task :android do
 EOS
         txt = File.read(javap_tmp_path)
         txt.scan(/([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/).each do |klass, body_txt|
-          klass = klass.gsub(/\./, '/')
+          class_path = klass.gsub(/\./, '/')
           bs_data << <<EOS
-  <class name=\"#{klass}\">
+  <class name=\"#{class_path}\">
 EOS
           body_txt.strip.split(/\n/).each_cons(2) do |elem_line, signature_line|
             signature_line = signature_line.strip
