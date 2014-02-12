@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def string_slice(x)
   range = 34..40
   regexp = /[aeiou](.)\1/

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def string_chomp(x)
   multiple_eol = "The quick brown fox jumps over the lazy dog.\r\n\r\n\n\n\r\n"
   no_eol       = "The quick brown fox jumps over the lazy dog."

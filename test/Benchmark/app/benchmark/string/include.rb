@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def string_include(x)
   x.report "include? with ASCII match" do
     100000.times do

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def string_concat(x)
   ascii = "hello"
   utf8  = "こんにちは"

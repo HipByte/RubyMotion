@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def string_index(x)
   string = "the"
   string_utf8 = "そして"

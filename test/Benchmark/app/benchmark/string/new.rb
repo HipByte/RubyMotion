@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def string_new(x)
   ascii = "The quick brown fox jumps over the lazy dog."
   utf8  = "飛べねぇ豚はタダの豚だ...................."

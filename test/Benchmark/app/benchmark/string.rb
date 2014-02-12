@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def bm_string
   Benchmark.benchmark("", 30, "%r\n") do |x|
     string_chomp(x)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def string_equal(x)
   string_a = "#{'a' * 1_001}"
   first_char_different = "b#{'a' * 1_000}"
