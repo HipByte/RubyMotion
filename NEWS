@@ -21,6 +21,7 @@
     ~10% faster.
   * Improved performance of methods where accepts Regexp object. ~20% faster.
   * Improved String literals performance. ~60% faster.
+  * Improved String#{strip, rstrip, lstrip} performance. ~70% faster.
 
 = RubyMotion 2.22 =
 
