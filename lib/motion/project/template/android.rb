@@ -187,9 +187,11 @@ EOS
     resource_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{android_jar}\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
-      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\" > /dev/null"
-      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{libpayload_subpath} > /dev/null"
-      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{gdbserver_subpath} > /dev/null"
+      [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
+        line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{file}\""
+        line << " > /dev/null" unless Rake.application.options.trace
+        sh line
+      end
     end
 
     # Create the debug keystore if needed.
@@ -225,19 +227,23 @@ end
 
 def install_apk(mode)
   App.info 'Install', App.config.apk_path
-  sh "\"#{adb_path}\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
+  line = "\"#{adb_path}\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
+  line << " > /dev/null" unless Rake.application.options.trace
+  sh line
 end
 
 def run_apk(mode)
   if ENV['debug']
     Dir.chdir(App.config.build_dir) do
       App.info 'Debug', App.config.apk_path
-      sh "\"#{App.config.ndk_path}/ndk-gdb\" -e --adb=\"#{adb_path}\" --start"
+      sh "\"#{App.config.ndk_path}/ndk-gdb\" #{adb_mode_flag(mode)} --adb=\"#{adb_path}\" --start"
     end
   else
     activity_path = "#{App.config.package}/.#{App.config.main_activity}"
     App.info 'Start', activity_path
-    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
+    line = "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
+    line << " > /dev/null" unless Rake.application.options.trace
+    sh line
   end
 end
 
