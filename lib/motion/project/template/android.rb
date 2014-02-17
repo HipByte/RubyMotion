@@ -181,6 +181,28 @@ EOS
   end
 end
 
+def adb_mode_flag(mode)
+  case mode
+    when :emulator
+      '-e'
+    when :device
+      '-d'
+    else
+      raise
+  end
+end
+
+def install_apk(mode)
+  App.info 'Install', App.config.apk_path
+  sh "\"#{App.config.sdk_path}/platform-tools/adb\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
+end
+
+def run_apk(mode)
+  activity_path = "#{App.config.package}/.#{App.config.main_activity}"
+  App.info 'Start', activity_path
+  sh "\"#{App.config.sdk_path}/platform-tools/adb\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
+end
+
 namespace 'emulator' do
   desc "Create the Android Virtual Device for the emulator"
   task :create_avd do
@@ -201,30 +223,24 @@ namespace 'emulator' do
 
   desc "Install the app in the emulator"
   task :install do
-    App.info 'Install', App.config.apk_path
-    sh "\"#{App.config.sdk_path}/platform-tools/adb\" -e install -r \"#{App.config.apk_path}\""
+    install_apk(:emulator)
   end
 
   desc "Start the app's main intent in the emulator"
   task :start => ['build', 'emulator:start_avd', 'emulator:install'] do
-    activity_path = "#{App.config.package}/.#{App.config.main_activity}"
-    App.info 'Start', activity_path
-    sh "\"#{App.config.sdk_path}/platform-tools/adb\" -e shell am start -a android.intent.action.MAIN -n #{activity_path}"
+    run_apk(:emulator)
   end
 end
 
 namespace 'device' do
   desc "Install the app in the device"
   task :install do
-    App.info 'Install', App.config.apk_path
-    sh "\"#{App.config.sdk_path}/platform-tools/adb\" -d install -r \"#{App.config.apk_path}\""
+    install_apk(:device)
   end
 
   desc "Start the app's main intent in the device"
   task :start do
-    activity_path = "#{App.config.package}/.#{App.config.main_activity}"
-    App.info 'Start', activity_path
-    sh "\"#{App.config.sdk_path}/platform-tools/adb\" -d shell am start -a android.intent.action.MAIN -n #{activity_path}"
+    run_apk(:device)
   end
 end
 
