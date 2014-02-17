@@ -107,6 +107,9 @@ EOS
   # Create a build/libs -> build/lib symlink (important for ndk-gdb).
   Dir.chdir(App.config.build_dir) { ln_s 'lib', 'libs' unless File.exist?('libs') }
 
+  # Create a build/jni/Android.mk file (important for ndk-gdb).
+  File.open("#{App.config.build_dir}/jni/Android.mk", 'w') { |io| }
+
   # Copy the gdb server.
   gdbserver_subpath = "#{libs_abi_subpath}/gdbserver"
   gdbserver_path = "#{App.config.build_dir}/#{gdbserver_subpath}" 
