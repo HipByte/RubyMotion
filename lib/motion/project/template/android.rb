@@ -39,7 +39,7 @@ task :build do
   ruby_objs = []
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
-  Dir.glob("app/**/*.rb").each do |ruby_path|
+  Dir.glob("./app/**/*.rb").each do |ruby_path|
     App.info 'Compile', ruby_path
     init_func = "InitRubyFile#{init_func_n += 1}"
 
@@ -55,6 +55,7 @@ task :build do
 
   # Generate payload main file.
   payload_c_txt = <<EOS
+// This file has been generated. Do not modify by hands.
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
@@ -89,15 +90,37 @@ EOS
     return JNI_VERSION_1_6;
 }
 EOS
-  payload_c = File.join(App.config.build_dir, 'payload.c')
+  payload_c = File.join(App.config.build_dir, 'jni/payload.c')
+  mkdir_p File.dirname(payload_c)
   File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
 
   # Compile and link payload library.
-  libpayload_subpath = "lib/armeabi/#{App.config.payload_library_name}"
-  App.info 'Create', libpayload_subpath
-  sh "#{App.config.cc} #{App.config.cflags} -c #{App.config.build_dir}/payload.c -o #{App.config.build_dir}/payload.o"
-  FileUtils.mkdir_p("#{App.config.build_dir}/#{File.dirname(libpayload_subpath)}")
-  sh "#{App.config.cxx} #{App.config.ldflags} #{App.config.build_dir}/payload.o #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o #{App.config.build_dir}/#{libpayload_subpath} #{App.config.ldlibs}"
+  libs_abi_subpath = "lib/armeabi"
+  libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_name}"
+  libpayload_path = "#{App.config.build_dir}/#{libpayload_subpath}" 
+  payload_o = File.join(File.dirname(payload_c), 'payload.o')
+  App.info 'Create', libpayload_path
+  sh "#{App.config.cc} #{App.config.cflags} -c \"#{payload_c}\" -o \"#{payload_o}\""
+  FileUtils.mkdir_p(File.dirname(libpayload_path))
+  sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs}"
+
+  # Create a build/libs -> build/lib symlink (important for ndk-gdb).
+  Dir.chdir(App.config.build_dir) { ln_s 'lib', 'libs' unless File.exist?('libs') }
+
+  # Copy the gdb server.
+  gdbserver_subpath = "#{libs_abi_subpath}/gdbserver"
+  gdbserver_path = "#{App.config.build_dir}/#{gdbserver_subpath}" 
+  App.info 'Create', gdbserver_path
+  sh "/usr/bin/install -p #{App.config.ndk_path}/prebuilt/android-arm/gdbserver/gdbserver #{File.dirname(gdbserver_path)}"
+
+  # Create the gdb config file.
+  gdbconfig_path = "#{App.config.build_dir}/#{libs_abi_subpath}/gdb.setup"
+  App.info 'Create', gdbconfig_path
+  File.open(gdbconfig_path, 'w') do |io|
+    io.puts <<EOS
+set solib-search-path #{libs_abi_subpath}
+EOS
+  end
 
   # Compile java files.
   android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
@@ -156,13 +179,14 @@ EOS
 
   # Generate the APK file.
   archive = App.config.apk_path
-  if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(File.join(App.config.build_dir, libpayload_subpath)) > File.mtime(archive)
+  if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(libpayload_path) > File.mtime(archive)
     App.info 'Create', archive
     resource_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{android_jar}\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
       sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{File.basename(dex_classes)}\" > /dev/null"
       sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{libpayload_subpath} > /dev/null"
+      sh "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" #{gdbserver_subpath} > /dev/null"
     end
 
     # Create the debug keystore if needed.
@@ -192,15 +216,26 @@ def adb_mode_flag(mode)
   end
 end
 
+def adb_path
+  "#{App.config.sdk_path}/platform-tools/adb"
+end
+
 def install_apk(mode)
   App.info 'Install', App.config.apk_path
-  sh "\"#{App.config.sdk_path}/platform-tools/adb\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
+  sh "\"#{adb_path}\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
 end
 
 def run_apk(mode)
-  activity_path = "#{App.config.package}/.#{App.config.main_activity}"
-  App.info 'Start', activity_path
-  sh "\"#{App.config.sdk_path}/platform-tools/adb\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
+  if ENV['debug']
+    Dir.chdir(App.config.build_dir) do
+      App.info 'Debug', App.config.apk_path
+      sh "\"#{App.config.ndk_path}/ndk-gdb\" -e --adb=\"#{adb_path}\" --start"
+    end
+  else
+    activity_path = "#{App.config.package}/.#{App.config.main_activity}"
+    App.info 'Start', activity_path
+    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
+  end
 end
 
 namespace 'emulator' do
