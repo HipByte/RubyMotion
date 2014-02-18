@@ -52,53 +52,6 @@ task :build do
     ruby_objs << [obj_path, init_func]
   end
 
-  # Create java files.
-  java_classes = {}
-  Dir.glob(objs_build_dir + '/**/*.map') do |map|
-    txt = File.read(map)
-    current_class = nil
-    txt.each_line do |line|
-      if md = line.match(/^([^\s]+)\s*:\s*([^\s]+)$/)
-        current_class = java_classes[md[1]]
-        if current_class
-          if current_class[:super] != md[2]
-            $stderr.puts "Class `#{md[1]}' already defined with a different super class (`#{current_class[:super]}')"
-            exit 1
-          end
-        else
-          current_class = {:super => md[2], :methods => []}
-          java_classes[md[1]] = current_class
-        end
-      elsif md = line.match(/^\t(.+)$/)
-        if current_class == nil
-          $stderr.puts "Method definition outside class definition"
-          exit 1
-        end
-        current_class[:methods] << md[1]
-      else
-        $stderr.puts "Ignoring line: #{line}"
-      end
-    end
-  end
-  java_dir = File.join(App.config.build_dir, 'java')
-  rm_rf java_dir
-  java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
-  mkdir_p java_app_package_dir
-  java_classes.each do |name, klass|
-    File.open(File.join(java_app_package_dir, name + '.java'), 'w') do |io|
-      io.puts "// This file has been generated. Do not edit by hands."
-      io.puts "package #{App.config.package};"
-      io.puts "public class #{name} extends #{klass[:super]} {"
-      klass[:methods].each do |method|
-        io.puts "\t#{method};"
-      end
-      if name == App.config.main_activity
-        io.puts "\tstatic {\n\t\tSystem.load(\"#{App.config.payload_library_name}\");\n\t}"
-      end
-      io.puts "}"
-    end
-  end
-
   # Generate payload main file.
   payload_c_txt = <<EOS
 // This file has been generated. Do not modify by hands.
@@ -169,6 +122,55 @@ EOS
     io.puts <<EOS
 set solib-search-path #{libs_abi_subpath}
 EOS
+  end
+
+  # Create java files.
+  java_classes = {}
+  Dir.glob(objs_build_dir + '/**/*.map') do |map|
+    txt = File.read(map)
+    current_class = nil
+    txt.each_line do |line|
+      if md = line.match(/^([^\s]+)\s*:\s*([^\s]+)$/)
+        current_class = java_classes[md[1]]
+        if current_class
+          if current_class[:super] != md[2]
+            $stderr.puts "Class `#{md[1]}' already defined with a different super class (`#{current_class[:super]}')"
+            exit 1
+          end
+        else
+          current_class = {:super => md[2], :methods => []}
+          java_classes[md[1]] = current_class
+        end
+      elsif md = line.match(/^\t(.+)$/)
+        if current_class == nil
+          $stderr.puts "Method definition outside class definition"
+          exit 1
+        end
+        current_class[:methods] << md[1]
+      else
+        $stderr.puts "Ignoring line: #{line}"
+      end
+    end
+  end
+  java_dir = File.join(App.config.build_dir, 'java')
+  rm_rf java_dir
+  java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
+  mkdir_p java_app_package_dir
+  java_classes.each do |name, klass|
+    java_file = File.join(java_app_package_dir, name + '.java')
+    App.info 'Create', java_file
+    File.open(java_file, 'w') do |io|
+      io.puts "// This file has been generated. Do not edit by hands."
+      io.puts "package #{App.config.package};"
+      io.puts "public class #{name} extends #{klass[:super]} {"
+      klass[:methods].each do |method|
+        io.puts "\t#{method};"
+      end
+      if name == App.config.main_activity
+        io.puts "\tstatic {\n\t\tSystem.load(\"#{App.config.payload_library_name}\");\n\t}"
+      end
+      io.puts "}"
+    end
   end
 
   # Compile java files.
