@@ -32,25 +32,71 @@ require 'motion/project/template/android/config'
 desc "Create an application package file (.apk)"
 task :build do
   # Compile Ruby files.
-  java_dir = File.join(App.config.build_dir, 'java')
-  FileUtils.mkdir_p(java_dir)
   ruby = File.join(App.config.motiondir, 'bin/ruby')
   init_func_n = 0
   ruby_objs = []
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
+  objs_build_dir = File.join(App.config.build_dir, App.config.arch)
   Dir.glob("./app/**/*.rb").each do |ruby_path|
     App.info 'Compile', ruby_path
     init_func = "InitRubyFile#{init_func_n += 1}"
 
-    as_path = File.join(App.config.build_dir, App.config.arch, ruby_path + '.s')
+    as_path = File.join(objs_build_dir, ruby_path + '.s')
     FileUtils.mkdir_p(File.dirname(as_path))
-    sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{as_path}\" #{init_func} \"#{java_dir}\" \"#{ruby_path}\""
+    sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{as_path}\" #{init_func} \"#{ruby_path}\""
 
     obj_path = File.join(App.config.build_dir, App.config.arch, ruby_path + '.o')
     sh "#{App.config.cc} #{App.config.asflags} -c \"#{as_path}\" -o \"#{obj_path}\""
 
     ruby_objs << [obj_path, init_func]
+  end
+
+  # Create java files.
+  java_classes = {}
+  Dir.glob(objs_build_dir + '/**/*.map') do |map|
+    txt = File.read(map)
+    current_class = nil
+    txt.each_line do |line|
+      if md = line.match(/^([^\s]+)\s*:\s*([^\s]+)$/)
+        current_class = java_classes[md[1]]
+        if current_class
+          if current_class[:super] != md[2]
+            $stderr.puts "Class `#{md[1]}' already defined with a different super class (`#{current_class[:super]}')"
+            exit 1
+          end
+        else
+          current_class = {:super => md[2], :methods => []}
+          java_classes[md[1]] = current_class
+        end
+      elsif md = line.match(/^\t(.+)$/)
+        if current_class == nil
+          $stderr.puts "Method definition outside class definition"
+          exit 1
+        end
+        current_class[:methods] << md[1]
+      else
+        $stderr.puts "Ignoring line: #{line}"
+      end
+    end
+  end
+  java_dir = File.join(App.config.build_dir, 'java')
+  rm_rf java_dir
+  java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
+  mkdir_p java_app_package_dir
+  java_classes.each do |name, klass|
+    File.open(File.join(java_app_package_dir, name + '.java'), 'w') do |io|
+      io.puts "// This file has been generated. Do not edit by hands."
+      io.puts "package #{App.config.package};"
+      io.puts "public class #{name} extends #{klass[:super]} {"
+      klass[:methods].each do |method|
+        io.puts "\t#{method};"
+      end
+      if name == App.config.main_activity
+        io.puts "\tstatic {\n\t\tSystem.load(\"#{App.config.payload_library_name}\");\n\t}"
+      end
+      io.puts "}"
+    end
   end
 
   # Generate payload main file.
