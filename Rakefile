@@ -174,6 +174,18 @@ task :install do
       end
     end
   end
+  ship_android_support = ENV['SHIP_ANDROID_SUPPORT']
+  if ship_android_support
+    [['android', ANDROID_API_VERSIONS]].each do |name, sdk_versions|
+      data.concat(Dir.glob("./data/#{name}/*.dylib"))
+      sdk_versions.each do |sdk_version|
+        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
+        ANDROID_ARCHS.each do |arch|
+          data.concat(Dir.glob("./data/#{name}/#{sdk_version}/#{arch}/*"))
+        end
+      end
+    end
+  end 
 
   # Include the CLAide gem.
   data.concat(FileList["./vendor/CLAide/{LICENSE,lib/**/*.rb}"])
@@ -183,7 +195,9 @@ task :install do
   data.concat(FileList["./vendor/XCPretty/{LICENSE.txt,lib/**/*.rb}"])
 
   # Android support is not ready yet.
-  data.delete_if { |x| x.match(/^.\/lib\/motion\/project\/template\/android/) }
+  unless ship_android_support
+    data.delete_if { |x| x.match(/^.\/lib\/motion\/project\/template\/android/) }
+  end
 
   # Delete temporary VIM files.
   data.delete_if { |x| base = File.basename(x); base.match(/^\./) and base.match(/\.sw.$/) }
