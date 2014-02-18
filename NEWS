@@ -26,6 +26,8 @@
   * Improved String#{strip, rstrip, lstrip} performance. ~70% faster.
   * Improved String#{[], []=, +} and Array#+ performance. ~20% faster.
   * Improved String#{==, !=} performance. ~50% faster.
+  * Improved Array#{==, !=} performance. ~25% faster.
+  * Improved Hash#{==, !=} performance. ~50% faster.
 
 = RubyMotion 2.22 =
 
