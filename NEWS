@@ -17,6 +17,7 @@
     `gitignore' file. Thanks to Mark Rickert for the patch (pull request #150).
   * Added to support "value of def-expr" feature.
   * Fixed a bug which NSDate.distantFuture returns wrong value.
+  * Fixed a memory leak where an exception message would be created.
   * Improved String#to_sym performance. ~40% faster.
   * Improved performance in dispatcher. ~20% faster.
   * Improved performance where allocates internal memory of String objects.
