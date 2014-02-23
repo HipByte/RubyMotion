@@ -34,6 +34,7 @@
   * Improved Time#+ with float performance. ~80% faster.
   * Improved Array#{==, !=} performance. ~25% faster.
   * Improved Hash#{==, !=} performance. ~50% faster.
+  * Improved Range literals performance. ~20% faster.
 
 = RubyMotion 2.22 =
 
