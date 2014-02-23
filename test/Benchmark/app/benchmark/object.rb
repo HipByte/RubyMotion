@@ -3,6 +3,9 @@ class User
     @name = "foo"
     @age  = 20
   end
+
+  def method_missing(*)
+  end
 end
 
 def bm_object
@@ -12,6 +15,8 @@ def bm_object
     object_instance_variable_get(x)
     object_instance_variable_set(x)
     object_is_a(x)
+    object_method(x)
+    object_method_missing(x)
     object_respond_to(x)
     object_send(x)
   end

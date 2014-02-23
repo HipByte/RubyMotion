@@ -9,6 +9,7 @@ def bm_string
     string_include(x)
     string_index(x)
     string_length(x)
+    string_match(x)
     string_new(x)
     string_reverse(x)
     string_slice(x)
