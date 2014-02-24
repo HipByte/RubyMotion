@@ -26,7 +26,7 @@
   * Improved String literals performance. ~60% faster.
   * Improved String performance where it handles short strings. ~25% faster.
   * Improved String#{strip, rstrip, lstrip} performance. ~70% faster.
-  * Improved String#{[], []=, +} and Array#+ performance. ~20% faster.
+  * Improved String#{[], []=, +, =~} and Array#+ performance. ~20% faster.
   * Improved String#{==, !=} performance. ~50% faster.
   * Improved String#include? with UTF-8 strings performance. ~15% faster.
   * Improved String#{==, <=>}, NSString#== and Hash#== performance if it would
