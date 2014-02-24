@@ -37,6 +37,7 @@
   * Improved Array#{==, !=} performance. ~25% faster.
   * Improved Hash#{==, !=} performance. ~50% faster.
   * Improved Range literals performance. ~20% faster.
+  * Jim Weirich, 1956 - 2014. Without you I would not exist. Rest in Peace.
 
 = RubyMotion 2.22 =
 
