@@ -32,6 +32,7 @@
   * Improved String#{==, <=>}, NSString#== and Hash#== performance if it would
     compare other class object. ~8 times faster.
   * Improved Time#{+, -} performance. ~25% faster.
+  * Improved Time#{==, !=, <, <=, >, >=} performance. ~2 times faster.
   * Improved Time#+ with float performance. ~80% faster.
   * Improved Array#{==, !=} performance. ~25% faster.
   * Improved Hash#{==, !=} performance. ~50% faster.
