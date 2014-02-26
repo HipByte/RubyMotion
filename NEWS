@@ -1,5 +1,7 @@
 = RubyMotion 2.23 =
 
+  * Removed backtrace symbolication when an application is sandboxed and print
+    the command to allow the user to symbolicate themselves instead.
   * [iOS] Improved error reporting when specifying the rake `target' option
     with a version lower than the configured deployment target and when
     specifying `retina=false' when targeting iOS 7.
