@@ -22,6 +22,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/app'
+require 'motion/util/version'
 
 App = Motion::Project::App
 App.template = :ios
@@ -59,11 +60,16 @@ end
 
 desc "Run the simulator"
 task :simulator do
+  target = ENV['target']
+  if target && Motion::Util::Version.new(target) < Motion::Util::Version.new(App.config.deployment_target)
+    App.fail "It is not possible to simulate an SDK version (#{target}) lower than the app’s deployment target (#{App.config.deployment_target})"
+  end
+  target ||= App.config.sdk_version
+
   unless ENV["skip_build"]
     Rake::Task["build:simulator"].invoke
   end
   app = App.config.app_bundle('iPhoneSimulator')
-  target = ENV['target'] || App.config.sdk_version
 
   if ENV['TMUX']
     tmux_default_command = `tmux show-options -g default-command`.strip
@@ -87,7 +93,7 @@ END
       if File.basename(app_bundle) == File.basename(app)
         rm_rf File.dirname(app_bundle)
         break
-      end  
+      end
     end
   end
 
