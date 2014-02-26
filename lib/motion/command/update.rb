@@ -22,12 +22,11 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/builder'
+require 'motion/util/version'
 
 module Motion; class Command
   class Update < Command
     self.summary = 'Update the software.'
-    # TODO make more elaborate
-    # self.description = '...'
 
     def self.options
       [
@@ -65,12 +64,6 @@ module Motion; class Command
       Motion::Version
     end
 
-    def latest_version?(product, latest)
-      product = product.split(".")
-      latest  = latest.split(".")
-      (product[0].to_i >= latest[0].to_i) && (product[1].to_i >= latest[1].to_i)
-    end
-
     def curl(cmd)
       resp = `/usr/bin/curl --connect-timeout 60 #{cmd}`
       if $?.exitstatus != 0
@@ -89,7 +82,7 @@ module Motion; class Command
 
       latest_version, message = File.read(update_check_file).split('|', 2)
       message ||= ''
-      unless latest_version?(product_version, latest_version)
+      if Util::Version.new(latest_version) > Util::Version.new(product_version)
         message = "A new version of RubyMotion is available. Run `sudo motion update' to upgrade.\n" + message
       end
       message.strip!
