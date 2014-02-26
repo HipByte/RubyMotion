@@ -18,6 +18,8 @@
   * Added to support "value of def-expr" feature.
   * Fixed a bug which NSDate.distantFuture returns wrong value.
   * Fixed a memory leak where an exception message would be created.
+  * Fixed a bug where cycle detector works in asynchronous Dispatch::Queue even
+    if it set ARR_CYCLES_DISABLE.
   * Optimized where it would convert type implicit using #to_str etc.
   * Improved String#to_sym performance. ~40% faster.
   * Improved performance in dispatcher. ~20% faster.
