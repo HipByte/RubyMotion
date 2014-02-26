@@ -60,11 +60,29 @@ end
 
 desc "Run the simulator"
 task :simulator do
+  deployment_target = Motion::Util::Version.new(App.config.deployment_target)
+
   target = ENV['target']
-  if target && Motion::Util::Version.new(target) < Motion::Util::Version.new(App.config.deployment_target)
-    App.fail "It is not possible to simulate an SDK version (#{target}) lower than the app’s deployment target (#{App.config.deployment_target})"
+  if target && Motion::Util::Version.new(target) < deployment_target
+    App.fail "It is not possible to simulate an SDK version (#{target}) " \
+             "lower than the app’s deployment target (#{deployment_target})"
   end
   target ||= App.config.sdk_version
+
+  retina = ENV['retina']
+  if retina && retina.strip.downcase == 'false'
+    ios_7 = Motion::Util::Version.new('7')
+    if Motion::Util::Version.new(target) >= ios_7
+      if deployment_target < ios_7
+        App.fail "In order to simulate on a non-retina device, please use " \
+                 "the `target' option to specify the simulated SDK version. " \
+                 "E.g.: rake target=#{deployment_target} retina=false"
+      else
+        App.fail "It is not possible to simulate on a non-retina device " \
+                 "when not deploying to iOS < 7."
+      end
+    end
+  end
 
   unless ENV["skip_build"]
     Rake::Task["build:simulator"].invoke
@@ -104,7 +122,6 @@ END
     else
       App.config.device_family_ints[0]
     end
-  retina = ENV['retina']
   simulate_device = App.config.device_family_string(family_int, target, retina)
 
   # Launch the simulator.
