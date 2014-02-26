@@ -1,0 +1,6 @@
+desc "Run all tests"
+task :spec do
+  sh "bacon **/*_spec.rb"
+end
+
+task :default => :spec
