@@ -1,5 +1,7 @@
 = RubyMotion 2.23 =
 
+  * [iOS] Added support for launching an application for background fetch in
+    the iOS Simulator with the `background_fetch=1' rake option.
   * No longer query the (iOS Simulator) application for its window metrics when
     it is connected to a REPL but not the active application.
   * Improved the automatic selection of codesign certificates.

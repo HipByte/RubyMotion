@@ -1213,6 +1213,7 @@ lldb_commands_file(int pid, NSString *app_path)
 	    @"com.apple.iphonesimulator"];
 	if ([ary count] == 1) {
 	    running_app = [ary[0] retain];
+	    // TODO activate when launching with background_fetch=1 ?
 	    [running_app activateWithOptions:
 		NSApplicationActivateIgnoringOtherApps];
 	}
@@ -1427,6 +1428,9 @@ main(int argc, char **argv)
     ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
 	@selector(setSimulatedApplicationShouldWaitForDebugger:),
 	(debug_mode == DEBUG_GDB || getenv("SIM_WAIT_FOR_DEBUGGER") != NULL));
+    ((void (*)(id, SEL, BOOL))objc_msgSend)(config,
+	@selector(setLaunchForBackgroundFetch:),
+	getenv("background_fetch") != NULL);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedDeviceFamily:), device_family);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
@@ -1500,6 +1504,14 @@ main(int argc, char **argv)
 	delegate = [[Delegate alloc] init];
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
 	    toTarget:delegate withObject:nil];
+
+	if (getenv("background_fetch") != NULL) {
+	    // TODO this is apperantly always the case when making the app
+	    // inactive. So print this warning when making the app inactive from
+	    // the REPL code instead?
+	    fprintf(stderr, "*** You will not be able to be use the REPL " \
+			    "until the application is activated.\n");
+	}
 
 	osx_task = [[NSTask alloc] init];
 	[osx_task setEnvironment:appEnvironment];
