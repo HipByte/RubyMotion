@@ -19,7 +19,7 @@ module Motion; module Util
       #
       def identities(valid_only)
         output = query_security_db_for_identities(valid_only)
-        Hash[*output.scan(/([0-9A-F]{40})\s"(.+?)"/).flatten]
+        Hash[*output.scan(/(\h{40})\s"(.+?)"/).flatten]
       end
 
       # @param Boolean valid_only  Whether or not to include only valid code
