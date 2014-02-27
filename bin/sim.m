@@ -38,6 +38,7 @@ static int debug_mode = -1;
 
 static Delegate *delegate = nil;
 static NSArray *app_windows_ids = nil;
+static NSRunningApplication *running_app = nil;
 #if defined(SIMULATOR_IOS)
 static RMTask *gdb_task = nil;
 static id current_session = nil;
@@ -345,6 +346,12 @@ get_app_windows_bounds(void)
     if (app_windows_ids == nil) {
 	locate_app_windows_ids();
 	if (app_windows_ids == nil) return nil;
+    }
+
+    // TODO if need be, we can use KVO on -[NSRunningApplication active] to
+    // completely disable getting these events when the app is inactive.
+    if (running_app == nil || !running_app.isActive) {
+	return nil;
     }
 
     NSMutableArray *app_windows_bounds = [NSMutableArray arrayWithCapacity:app_windows_ids.count];
@@ -1204,8 +1211,9 @@ lldb_commands_file(int pid, NSString *app_path)
     if (!spec_mode) {
 	NSArray *ary = [NSRunningApplication runningApplicationsWithBundleIdentifier:
 	    @"com.apple.iphonesimulator"];
-	if (ary != nil && [ary count] == 1) {
-	    [[ary objectAtIndex:0] activateWithOptions:
+	if ([ary count] == 1) {
+	    running_app = [ary[0] retain];
+	    [running_app activateWithOptions:
 		NSApplicationActivateIgnoringOtherApps];
 	}
     }
@@ -1499,11 +1507,17 @@ main(int argc, char **argv)
 	[osx_task setArguments:app_args];
 	[osx_task launch];
 
-	// move to the foreground.
-	usleep(0.1 * 1000000);
-	ProcessSerialNumber psn;
-	GetProcessForPID([osx_task processIdentifier], &psn);
-	SetFrontProcess(&psn);
+	// Capture running_app and move to the foreground.
+	while (osx_task.isRunning) {
+	    usleep(0.1 * 1000000);
+	    running_app = [[NSRunningApplication runningApplicationWithProcessIdentifier:
+		[osx_task processIdentifier]] retain];
+	    if (running_app) {
+		[running_app activateWithOptions:
+		    NSApplicationActivateIgnoringOtherApps];
+		break;
+	    }
+	}
 
 	start_capture(delegate);
 	[osx_task waitUntilExit];

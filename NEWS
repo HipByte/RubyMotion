@@ -1,5 +1,7 @@
 = RubyMotion 2.23 =
 
+  * No longer query the (iOS Simulator) application for its window metrics when
+    it is connected to a REPL but not the active application.
   * Improved the automatic selection of codesign certificates.
   * Removed backtrace symbolication when an application is sandboxed and print
     the command to allow the user to symbolicate themselves instead.
