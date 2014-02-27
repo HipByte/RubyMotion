@@ -21,6 +21,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'motion/project/config'
+require 'motion/util/code_sign'
+
 module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
@@ -47,7 +50,7 @@ module Motion; module Project;
         xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
 
         # First, honor /usr/bin/xcode-select
-	xcodeselect = '/usr/bin/xcode-select'
+        xcodeselect = '/usr/bin/xcode-select'
         if File.exist?(xcodeselect)
           path = `#{xcodeselect} -print-path`.strip
           if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
@@ -331,14 +334,15 @@ EOS
     def codesign_certificate(platform)
       @codesign_certificate ||= begin
         cert_type = (distribution_mode ? 'Distribution' : 'Developer')
-        certs = `/usr/bin/security -q find-certificate -a`.scan(/"#{platform} #{cert_type}: [^"]+"/).uniq
+        certs = Util::CodeSign.identity_names(release?).grep(/#{platform} #{cert_type}/)
         if certs.size == 0
           App.fail "Cannot find any #{platform} #{cert_type} certificate in the keychain"
         elsif certs.size > 1
-          App.warn "Found #{certs.size} #{platform} #{cert_type} certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
+          # TODO list all the values for the user's convenience.
+          App.warn "Found #{certs.size} #{platform} #{cert_type} certificates in the keychain. Set the `codesign_certificate' project setting to explicitely use one of (defaults to the first): #{certs.join(', ')}"
         end
-        certs[0][1..-2] # trim trailing `"` characters
-      end 
+        certs.first
+      end
     end
 
     def gen_bridge_metadata(platform, headers, bs_file, c_flags, exceptions=[])
