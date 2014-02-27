@@ -107,3 +107,4 @@ ReturnsIntBlock KreateGlobalBlock();
 - (BOOL)isEqualTo:(id)other;
 @end
 #endif
+

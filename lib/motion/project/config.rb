@@ -21,9 +21,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'motion/project/app'
+
 module Motion; module Project
   class Config
-    include Rake::DSL if Rake.const_defined?(:DSL)
+    include Rake::DSL if defined?(Rake) && Rake.const_defined?(:DSL)
 
     VARS = []
 

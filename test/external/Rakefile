@@ -1,6 +1,6 @@
 desc "Run all tests"
 task :spec do
-  sh "bacon **/*_spec.rb"
+  sh "bundle exec bacon #{FileList['**/*_spec.rb'].join(' ')}"
 end
 
 task :default => :spec

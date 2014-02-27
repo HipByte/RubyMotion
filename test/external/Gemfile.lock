@@ -1,0 +1,17 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    bacon (1.2.0)
+    metaclass (0.0.4)
+    mocha (1.0.0)
+      metaclass (~> 0.0.1)
+    mocha-on-bacon (0.2.2)
+      mocha (>= 0.13.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bacon
+  mocha
+  mocha-on-bacon

@@ -1,6 +1,4 @@
-require 'bacon'
-
-$:.unshift File.expand_path('../../../../lib', __FILE__)
+require File.expand_path('../../../spec_helper', __FILE__)
 require 'motion/util/version'
 
 module Motion; module Util
