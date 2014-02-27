@@ -1,5 +1,6 @@
 = RubyMotion 2.23 =
 
+  * Improved the automatic selection of codesign certificates.
   * Removed backtrace symbolication when an application is sandboxed and print
     the command to allow the user to symbolicate themselves instead.
   * [iOS] Improved error reporting when specifying the rake `target' option
