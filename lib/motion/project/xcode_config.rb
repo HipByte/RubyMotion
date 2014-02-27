@@ -333,13 +333,17 @@ EOS
 
     def codesign_certificate(platform)
       @codesign_certificate ||= begin
-        cert_type = (distribution_mode ? 'Distribution' : 'Developer')
-        certs = Util::CodeSign.identity_names(release?).grep(/#{platform} #{cert_type}/)
+        type = (distribution_mode ? 'Distribution' : 'Developer')
+        certs = Util::CodeSign.identity_names(release?)
+        certs = certs.grep(/#{platform} #{type}/)
         if certs.size == 0
-          App.fail "Cannot find any #{platform} #{cert_type} certificate in the keychain"
+          App.fail "Cannot find any #{platform} #{type} certificate in the" \
+                   "keychain"
         elsif certs.size > 1
-          # TODO list all the values for the user's convenience.
-          App.warn "Found #{certs.size} #{platform} #{cert_type} certificates in the keychain. Set the `codesign_certificate' project setting to explicitely use one of (defaults to the first): #{certs.join(', ')}"
+          App.warn "Found #{certs.size} #{platform} #{type} certificates in " \
+                   "the keychain. Set the `codesign_certificate' project " \
+                   "setting to explicitely use one of (defaults to the " \
+                   "first): #{certs.join(', ')}"
         end
         certs.first
       end

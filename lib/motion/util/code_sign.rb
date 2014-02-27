@@ -7,7 +7,9 @@ module Motion; module Util
       # @returns String  The raw output from querying the `security` DB.
       #
       def query_security_db_for_identities(valid_only)
-        `/usr/bin/security -q find-identity -p codesigning#{' -v' if valid_only}`.strip
+        command = '/usr/bin/security -q find-identity -p codesigning'
+        command << ' -v' if valid_only
+        `#{command}`.strip
       end
 
       # @param Boolean valid_only  Whether or not to include only valid code
