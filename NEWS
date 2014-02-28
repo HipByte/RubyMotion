@@ -30,6 +30,8 @@
   * Fixed a memory leak where an exception message would be created.
   * Fixed a bug where cycle detector works in asynchronous Dispatch::Queue even
     if it set ARR_CYCLES_DISABLE.
+  * Fixed a bug which #send would freeze app when passed method name which
+    accepts a bool type value if the method would be used with #send only.
   * Optimized where it would convert type implicit using #to_str etc.
   * Improved String#to_sym performance. ~40% faster.
   * Improved performance in dispatcher. ~20% faster.
