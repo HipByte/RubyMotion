@@ -1505,14 +1505,6 @@ main(int argc, char **argv)
 	[NSThread detachNewThreadSelector:@selector(readEvalPrintLoop)
 	    toTarget:delegate withObject:nil];
 
-	if (getenv("background_fetch") != NULL) {
-	    // TODO this is apperantly always the case when making the app
-	    // inactive. So print this warning when making the app inactive from
-	    // the REPL code instead?
-	    fprintf(stderr, "*** You will not be able to be use the REPL " \
-			    "until the application is activated.\n");
-	}
-
 	osx_task = [[NSTask alloc] init];
 	[osx_task setEnvironment:appEnvironment];
 	[osx_task setLaunchPath:app_path];
