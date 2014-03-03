@@ -69,8 +69,15 @@ task :simulator do
   end
   target ||= App.config.sdk_version
 
+  family_int =
+    if family = ENV['device_family']
+      App.config.device_family_int(family.downcase.intern)
+    else
+      App.config.device_family_ints[0]
+    end
+
   retina = ENV['retina']
-  if retina && retina.strip.downcase == 'false'
+  if retina && retina.strip.downcase == 'false' && family_int == 1 # iPhone only
     ios_7 = Motion::Util::Version.new('7')
     if Motion::Util::Version.new(target) >= ios_7
       if deployment_target < ios_7
@@ -115,13 +122,6 @@ END
     end
   end
 
-  # Prepare the device info.
-  family_int =
-    if family = ENV['device_family']
-      App.config.device_family_int(family.downcase.intern)
-    else
-      App.config.device_family_ints[0]
-    end
   simulate_device = App.config.device_family_string(family_int, target, retina)
 
   # Launch the simulator.
