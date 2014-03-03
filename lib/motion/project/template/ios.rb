@@ -91,6 +91,15 @@ task :simulator do
     end
   end
 
+  if ENV['background_fetch']
+    modes = App.config.info_plist['UIBackgroundModes']
+    if modes.nil? || !modes.include?('fetch')
+      App.fail "In order to launch the application in `background fetch' " \
+               "mode, you will need to configure your application to enable " \
+               "it by adding: app.info_plist['UIBackgroundModes'] = ['fetch']"
+    end
+  end
+
   unless ENV["skip_build"]
     Rake::Task["build:simulator"].invoke
   end
