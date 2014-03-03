@@ -1213,9 +1213,13 @@ lldb_commands_file(int pid, NSString *app_path)
 	    @"com.apple.iphonesimulator"];
 	if ([ary count] == 1) {
 	    running_app = [ary[0] retain];
-	    // TODO activate when launching with background_fetch=1 ?
-	    [running_app activateWithOptions:
-		NSApplicationActivateIgnoringOtherApps];
+	    // When launching in ‘background fetch’ mode, most users will log
+	    // debug output, only a few apps will update the UI (icon badge
+	    // or local notification).
+	    if (getenv("background_fetch") == NULL) {
+		[running_app activateWithOptions:
+		    NSApplicationActivateIgnoringOtherApps];
+	    }
 	}
     }
 
