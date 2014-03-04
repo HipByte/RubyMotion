@@ -349,7 +349,9 @@ module Bacon
         from, to = _extract_start_and_end_points(view, options)
         duration = options[:duration] || Functional.default_duration
 
-        _event_generator.sendFlickWithStartPoint(from, endPoint:to, duration:duration)
+        EventDispatcher.dispatch(duration) do
+          _event_generator.sendFlickWithStartPoint(from, endPoint:to, duration:duration)
+        end
         proper_wait(duration)
 
         view
@@ -455,7 +457,7 @@ module Bacon
         end
       end
 
-      LOCATION_TO_POINT_INSET = 5
+      LOCATION_TO_POINT_INSET = 8
 
       def _location_to_point(view, location, raise_if_invalid = true)
         frame = view.frame
