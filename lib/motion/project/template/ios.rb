@@ -65,7 +65,7 @@ task :simulator do
   target = ENV['target']
   if target && Motion::Util::Version.new(target) < deployment_target
     App.fail "It is not possible to simulate an SDK version (#{target}) " \
-             "lower than the app’s deployment target (#{deployment_target})"
+             "lower than the app's deployment target (#{deployment_target})"
   end
   target ||= App.config.sdk_version
 
@@ -255,7 +255,7 @@ namespace :profile do
   task :device do
     ENV['__USE_DEVICE_INT__'] = '1'
 
-    # Create a build that allows debugging but doesn’t start a debugger on deploy.
+    # Create a build that allows debugging but doesn't start a debugger on deploy.
     App.config.entitlements['get-task-allow'] = true
     ENV['install_only'] = '1'
     Rake::Task['device'].invoke

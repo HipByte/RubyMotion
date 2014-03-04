@@ -17,7 +17,7 @@ module Motion; module Util
       @segments ||= @version.split('.').map(&:to_i)
     end
 
-    # This is pretty much vendored straight from RubyGems, except we don’t
+    # This is pretty much vendored straight from RubyGems, except we don't
     # care about string segments for our purposes.
     #
     # https://github.com/rubygems/rubygems/blob/81d806d818baeb5dcb6398ca631d772a003d078e/lib/rubygems/version.rb
