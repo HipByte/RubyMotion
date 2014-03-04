@@ -1,5 +1,7 @@
 = RubyMotion 2.23 =
 
+  * [iOS] Fixed a bug withe the `flick' UI test helper not working with
+    `UISwitch' on iOS 7.
   * Added support for objects conforming to the Subscripting interface
     (Objective-C Literals).
   * Fixed a bug with the `motion activate' CLI command. Thanks to Joffrey
