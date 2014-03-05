@@ -1,6 +1,9 @@
 = RubyMotion 2.24 =
 
-  * Fix a bug where cycle detector does not work for Array/Hash objects.
+  * Fixed a regression introduced by the last build where environments running
+    versions of Ruby not handling source files as unicode by default would be
+    broken due to the presence of a unicode character in one of the files.
+  * Fixed a bug where the cycle detector did not work for Array/Hash objects.
 
 = RubyMotion 2.23 =
 
