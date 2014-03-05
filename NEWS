@@ -1,3 +1,7 @@
+= RubyMotion 2.25 =
+
+  * Fixed a bug where the cycle detector did not work for Array/Hash objects.
+
 = RubyMotion 2.24 =
 
   * Fixed a regression introduced by the last build where environments running
