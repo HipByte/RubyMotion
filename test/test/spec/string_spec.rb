@@ -27,3 +27,18 @@ describe "String#<< with a codepoint" do
     s.should == "\x03\x03\x03"
   end
 end
+
+# TODO should be part of RubySpec
+describe "Strings with multibyte characters" do
+  it "finds the index of a character" do
+    "..€€……".index(".").should == 0
+    "..€€……".index("€").should == 2
+    "..€€……".index("…").should == 4
+  end
+
+  it "finds the most right-side index of a character" do
+    "..€€……".rindex(".").should == 1
+    "..€€……".rindex("€").should == 3
+    "..€€……".rindex("…").should == 5
+  end
+end
