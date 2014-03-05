@@ -1,3 +1,7 @@
+= RubyMotion 2.24 =
+
+  * Fix a bug where cycle detector does not work for Array/Hash objects.
+
 = RubyMotion 2.23 =
 
   * Added support for objects conforming to the Subscripting interface
