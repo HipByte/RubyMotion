@@ -8,6 +8,8 @@ task :all => [:version_file]
 task :version_file do
   File.open('motion/version.rb', 'w') do |io|
     io.puts <<EOS
+# encoding: utf-8
+
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
 # 
