@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module I18n
     # Acts as a container for {Message} objects.

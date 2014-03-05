@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Templates
     # Abstracts the structure for a section and its subsections into an ordered

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Parses comments
 class YARD::Handlers::C::OverrideCommentHandler < YARD::Handlers::C::Base
   handles %r{.}

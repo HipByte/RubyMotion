@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class Module
   # Returns the class name of a full module namespace path
   #

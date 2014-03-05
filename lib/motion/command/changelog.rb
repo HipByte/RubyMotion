@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Copyright (c) 2013, HipByte SPRL and contributors
 # All rights reserved.
 # 

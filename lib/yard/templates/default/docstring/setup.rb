@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 def init
   return if object.docstring.blank? && !object.has_tag?(:api)
   sections :index, [:private, :deprecated, :abstract, :todo, :note, :returns_void, :text], T('tags')

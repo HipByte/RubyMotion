@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module I18n
     # +Locale+ is a unit of translation. It has {#name} and a set of

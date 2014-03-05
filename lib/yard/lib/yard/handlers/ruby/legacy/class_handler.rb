@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::ClassHandler)
 class YARD::Handlers::Ruby::Legacy::ClassHandler < YARD::Handlers::Ruby::Legacy::Base
   include YARD::Handlers::Ruby::StructHandlerMethods

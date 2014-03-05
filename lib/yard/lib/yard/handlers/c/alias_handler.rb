@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class YARD::Handlers::C::AliasHandler < YARD::Handlers::C::Base
   MATCH = %r{rb_define_alias
              \s*\(\s*([\w\.]+),

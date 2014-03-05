@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Motion; module Project; class Vendor;
   class XCPrettyPrinter
     include XCPretty::Printer

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::ClassVariableHandler)
 class YARD::Handlers::Ruby::Legacy::ClassVariableHandler < YARD::Handlers::Ruby::Legacy::Base
   HANDLER_MATCH = /\A@@\w+\s*=\s*/m

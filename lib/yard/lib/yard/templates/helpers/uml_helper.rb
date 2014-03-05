@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Templates::Helpers
     # Helpers for UML template format

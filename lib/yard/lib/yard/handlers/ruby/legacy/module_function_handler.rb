@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::ModuleFunctionHandler)
 class YARD::Handlers::Ruby::Legacy::ModuleFunctionHandler < YARD::Handlers::Ruby::Legacy::Base
   handles /\A(module_function)(\s|\(|$)/

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 def init
   tags = Tags::Library.visible_tags - [:abstract, :deprecated, :note, :todo]
   create_tag_methods(tags - [:example, :option, :overload, :see])

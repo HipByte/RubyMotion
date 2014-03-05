@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Motion; module Util
   class Version
     include Comparable

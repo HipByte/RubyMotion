@@ -267,6 +267,12 @@ task :install do
 =end
 end
 
+desc "Add magic encoding to all source files in the project"
+task :magic do
+  require './magic_encoding.rb'
+  MagicEncoding.apply
+end
+
 desc "Generate .pkg"
 task :package do
   destdir = '/tmp/Motion'

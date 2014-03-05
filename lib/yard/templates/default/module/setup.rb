@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 include Helpers::ModuleHelper
 
 def init

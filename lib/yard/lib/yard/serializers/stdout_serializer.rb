@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Serializers
     # A serializer that writes data to standard output.

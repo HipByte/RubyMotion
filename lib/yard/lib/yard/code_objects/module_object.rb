@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD::CodeObjects
   # Represents a Ruby module.
   class ModuleObject < NamespaceObject

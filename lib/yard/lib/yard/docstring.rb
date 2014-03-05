@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   # A documentation string, or "docstring" for short, encapsulates the
   # comments and metadata, or "tags", of an object. Meta-data is expressed

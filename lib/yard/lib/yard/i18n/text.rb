@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module I18n
     # Provides some convenient features for translating a text.

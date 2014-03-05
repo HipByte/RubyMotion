@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module CLI
     # @since 0.6.0

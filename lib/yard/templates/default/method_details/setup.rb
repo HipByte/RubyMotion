@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 def init
   sections :header, [:method_signature, T('docstring'), :source]
 end

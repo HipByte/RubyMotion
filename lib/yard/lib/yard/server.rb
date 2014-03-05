@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Server
     # Registers a static path to be used in static asset lookup.

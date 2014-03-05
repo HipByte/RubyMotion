@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require "e2mmap"
 require "irb/slex"
 

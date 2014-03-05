@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles class declarations
 class YARD::Handlers::Ruby::ClassHandler < YARD::Handlers::Ruby::Base
   include YARD::Handlers::Ruby::StructHandlerMethods

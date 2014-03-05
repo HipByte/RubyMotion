@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   # Similar to a Proc, but runs a set of Ruby expressions using a small
   # DSL to make tag lookups easier.

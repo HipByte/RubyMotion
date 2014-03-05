@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   # Stubs marshal dumps and acts a delegate class for an object by path
   #

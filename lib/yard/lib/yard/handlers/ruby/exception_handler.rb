@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles 'raise' calls inside methods
 class YARD::Handlers::Ruby::ExceptionHandler < YARD::Handlers::Ruby::Base
   handles method_call(:raise)

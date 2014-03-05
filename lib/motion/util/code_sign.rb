@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Motion; module Util
   module CodeSign
     class << self

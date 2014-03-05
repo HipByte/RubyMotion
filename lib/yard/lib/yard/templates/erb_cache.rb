@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Templates
     # @since 0.5.4

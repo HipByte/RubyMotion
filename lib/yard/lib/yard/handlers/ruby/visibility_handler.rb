@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles 'private', 'protected', and 'public' calls.
 class YARD::Handlers::Ruby::VisibilityHandler < YARD::Handlers::Ruby::Base
   handles method_call(:private)

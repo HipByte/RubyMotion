@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles the Init_Libname() method
 class YARD::Handlers::C::InitHandler < YARD::Handlers::C::Base
   MATCH = %r{\A\s*(?:static\s+)?void\s+(?:[Ii]nit_)?(\w+)\s*}

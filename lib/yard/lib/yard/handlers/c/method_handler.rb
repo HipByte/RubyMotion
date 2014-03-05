@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class YARD::Handlers::C::MethodHandler < YARD::Handlers::C::Base
   MATCH1 = %r{rb_define_
                  (

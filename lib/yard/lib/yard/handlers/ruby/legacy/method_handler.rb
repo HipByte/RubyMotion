@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::MethodHandler)
 class YARD::Handlers::Ruby::Legacy::MethodHandler < YARD::Handlers::Ruby::Legacy::Base
   handles TkDEF
