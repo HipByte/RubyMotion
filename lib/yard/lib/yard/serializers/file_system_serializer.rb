@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Serializers
     # Implements a serializer that reads from and writes to the filesystem.

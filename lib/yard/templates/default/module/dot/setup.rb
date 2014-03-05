@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 def init
   @modules = object.children.select {|o| o.type == :module }
   @classes = object.children.select {|o| o.type == :class }

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD::CodeObjects
   # Represents an instance method of a module that was mixed into the class
   # scope of another namespace.

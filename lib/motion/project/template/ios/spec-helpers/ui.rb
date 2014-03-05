@@ -1,6 +1,8 @@
+# encoding: utf-8
+
 # macbacon-ui extensions.
 #
-# Copyright (C) 2012 Eloy Durán eloy.de.enige@gmail.com
+# Copyright (C) 2012 Eloy Duran eloy.de.enige@gmail.com
 #
 # Bacon is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.

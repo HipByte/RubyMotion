@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::AliasHandler)
 class YARD::Handlers::Ruby::Legacy::AliasHandler < YARD::Handlers::Ruby::Legacy::Base
   handles /\Aalias(_method)?(\s|\()/

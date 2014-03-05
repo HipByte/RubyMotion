@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::ClassConditionHandler)
 # @since 0.5.4
 class YARD::Handlers::Ruby::Legacy::ClassConditionHandler < YARD::Handlers::Ruby::Legacy::Base

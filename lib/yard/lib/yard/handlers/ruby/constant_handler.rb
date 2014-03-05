@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles any constant assignment
 class YARD::Handlers::Ruby::ConstantHandler < YARD::Handlers::Ruby::Base
   include YARD::Handlers::Ruby::StructHandlerMethods

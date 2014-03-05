@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module CodeObjects
     # Represents the root namespace object (the invisible Ruby module that

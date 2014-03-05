@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD::Templates::Helpers
   # The base helper module included in all templates.
   module BaseHelper

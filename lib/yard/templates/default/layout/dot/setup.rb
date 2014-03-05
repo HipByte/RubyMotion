@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 attr_reader :contents
 
 def init

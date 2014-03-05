@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Matches if/unless conditions inside classes and attempts to process only
 # one branch (by evaluating the condition if possible).
 #

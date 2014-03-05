@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # The Insertion class inserts a value before or after another
 # value in a list.
 #

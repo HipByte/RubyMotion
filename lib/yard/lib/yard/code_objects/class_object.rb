@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD::CodeObjects
   # A ClassObject represents a Ruby class in source code. It is a {ModuleObject}
   # with extra inheritance semantics through the superclass.

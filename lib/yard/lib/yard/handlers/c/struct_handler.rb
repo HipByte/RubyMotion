@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class YARD::Handlers::C::StructHandler < YARD::Handlers::C::Base
   MATCH = /([\w\.]+)\s*=\s*(?:rb_struct_define_without_accessor)\s*
            \(\s*"([\w:]+)"\s*,\s*(\w+)\s*/mx

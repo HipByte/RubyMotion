@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module CodeObjects
     # A list of code objects. This array acts like a set (no unique items)

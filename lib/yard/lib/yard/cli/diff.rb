@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require 'tmpdir'
 require 'fileutils'
 require 'open-uri'

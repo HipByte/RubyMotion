@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # @group Global Convenience Methods
 
 # Shortcut for creating a YARD::CodeObjects::Proxy via a path

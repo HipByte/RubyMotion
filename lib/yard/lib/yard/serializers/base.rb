@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Serializers
     # The abstract base serializer. Serializers allow templates to be

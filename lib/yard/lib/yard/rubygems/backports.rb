@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 begin
   require 'rubygems'
   if defined?(Gem::VERSION) && Gem::VERSION >= '1.8.0'

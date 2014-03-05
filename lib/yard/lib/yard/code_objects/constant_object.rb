@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD::CodeObjects
   # A +ConstantObject+ represents a Ruby constant (not a module or class).
   # To access the constant's (source code) value, use {#value}.

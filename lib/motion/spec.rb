@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Bacon -- small RSpec clone.
 #
 # "Truth will sooner come out from error than from confusion." ---Francis Bacon

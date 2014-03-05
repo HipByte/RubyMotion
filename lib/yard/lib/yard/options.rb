@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   # Generalized options class for passing around large amounts of options between objects.
   #

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::CommentHandler)
 class YARD::Handlers::Ruby::Legacy::CommentHandler < YARD::Handlers::Ruby::Legacy::Base
   handles TkCOMMENT

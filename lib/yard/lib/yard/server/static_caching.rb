@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Server
     # Implements static caching for requests.

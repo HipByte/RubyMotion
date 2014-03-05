@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class String
   # Splits text into tokens the way a shell would, handling quoted
   # text as a single token. Use '\"' and "\'" to escape quotes and
