@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
 # 
