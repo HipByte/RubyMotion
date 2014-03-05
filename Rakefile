@@ -270,7 +270,7 @@ end
 desc "Add magic encoding to all source files in the project"
 task :magic do
   require './magic_encoding.rb'
-  MagicEncoding.apply
+  MagicEncoding.apply('./lib')
 end
 
 desc "Generate .pkg"
@@ -281,6 +281,16 @@ task :package do
     ENV['DESTDIR'] = destdir
     rm_rf destdir
     Rake::Task[:install].invoke
+
+    Dir.glob(destdir + '/**/*.rb').each do |path|
+      next if path.match(/\/template\/.+\/files\//)
+      if File.read(path).match(/^# encoding: utf-8/)
+        puts "#{path}: magic encoding comment OK"
+      else
+        puts "#{path}: does not include the magic utf8 encoding comment - aborting"
+        exit 1
+      end
+    end
 
     sh "/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{PROJECT_VERSION}.pkg\" --version #{PROJECT_VERSION}"
   #end

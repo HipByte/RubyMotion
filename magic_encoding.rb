@@ -6,10 +6,6 @@ class MagicEncoding
   MAGIC_ENCODING = "# encoding: utf-8\n\n"
   SOURCE_FILE_RE = /\.(rb|rake)$/
 
-  def self.root
-    File.expand_path('lib')
-  end
-
   def self.fix(content)
     MAGIC_ENCODING + content.lstrip
   end
@@ -27,12 +23,13 @@ class MagicEncoding
     "#{count} #{count == 1 ? 'file' : 'files'}"
   end
 
-  def self.apply
+  def self.apply(root)
     ignored = 0
     fixed = 0
 
     Find.find(root) do |filename|
       if File.file?(filename)
+        next if filename.match(/\/template\/.+\/files\//)
         if filename =~ SOURCE_FILE_RE
           if content = change?(filename)
             File.open(filename, 'w') do |file|
