@@ -89,6 +89,13 @@ describe "Bacon::Functional::API, concerning one-shot gestures" do
     controller.switch.isOn.should == false
   end
 
+  it "taps a switch" do
+    tap "Switch control", :at => :right
+    controller.switch.isOn.should == true
+    tap "Switch control", :at => :left
+    controller.switch.isOn.should == false
+  end
+
   it "by default taps at the center of a view" do
     highlight_touches!
     view = tap("Tappable view")

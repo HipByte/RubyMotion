@@ -1,5 +1,6 @@
 = RubyMotion 2.25 =
 
+  * [iOS] Made `tap' test helper work with `UISwitch'.
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
 
 = RubyMotion 2.24 =
