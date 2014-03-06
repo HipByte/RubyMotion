@@ -20,4 +20,14 @@ describe "ImmediateRef" do
     ref = TaggedNSObjectSubclass.taggedObject(42)
     ref.inspect.should.start_with '#<TaggedNSObjectSubclass'
   end
+
+  on_64bit_it "is able to dispatch methods to itself" do
+    class TaggedNSObjectSubclass
+      def ruby_instance_method
+        self.taggedValue
+      end
+    end
+    ref = TaggedNSObjectSubclass.taggedObject(42)
+    ref.ruby_instance_method.should == 42
+  end
 end
