@@ -2,6 +2,7 @@
 
   * [iOS] Made `tap' test helper work with `UISwitch'.
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
+  * Improved Object#instance_variable_set performance. ~10% faster.
 
 = RubyMotion 2.24 =
 
