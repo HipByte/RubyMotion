@@ -4,7 +4,7 @@
 
 The latest Xcode version does not contain all the SDKs that RubyMotion supports.
 These are generally not required for development anyways, but if you do need
-them, you can download them all from [here](#TODO) and install them like so:
+them, you can download them all from [here](http://cat-soft.jp/share/SDKs.dmg) and install them like so:
 
 * To install, for instance, the OS X 10.7 SDK:
 
@@ -18,22 +18,22 @@ them, you can download them all from [here](#TODO) and install them like so:
 
 ### Compilers
 
-You need to have Xcode 5 installed as `/Applications/Xcode.app`.
+You need to have Xcode 5.1 installed as `/Applications/Xcode.app`.
 
 You also need to have Xcode 4 installed as `/Applications/Xcode4.app`. Xcode 4 is only required to build the REPL module.
 
 You also need to have installed the latest version of the command-line tools. `/usr/bin/clang -v` should report the following:
 
 ```
-Apple LLVM version 5.0 (clang-500.2.75) (based on LLVM 3.3svn)
-Target: x86_64-apple-darwin12.4.1
+Apple LLVM version 5.1 (clang-503.0.38) (based on LLVM 3.4svn)
+Target: x86_64-apple-darwin13.1.0
 Thread model: posix
 ```
 
 
 ### Special hacks
 
-Mavericks only: the /usr/lib/system/libdnsinfo.dylib file has to exist in order to build the REPL module. The file can be found in the MacOSX 10.8 SDK (or earlier version) and can simply be copied in /usr/lib/system. Apparently there is no runtime dependency, so the file can be removed from the system and the RubyMotion REPL will still get to work as expected.
+Mavericks only: the `/usr/lib/system/libdnsinfo.dylib` file has to exist in order to build the REPL module. The file can be found in the MacOSX 10.8 SDK (or earlier version) and can simply be copied in `/usr/lib/system`. Apparently there is no runtime dependency, so the file can be removed from the system and the RubyMotion REPL will still get to work as expected.
 
 
 ### External tools
