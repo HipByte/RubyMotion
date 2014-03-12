@@ -74,7 +74,7 @@ bool rb_vm_init(const char *app_package, JNIEnv *env);
 jint
 JNI_OnLoad(JavaVM *vm, void *reserved)
 {
-    __android_log_write(ANDROID_LOG_INFO, "INFO", "loading payload");
+    __android_log_write(ANDROID_LOG_DEBUG, "#{App.config.package_path}", "Loading payload");
     JNIEnv *env = NULL;
     if ((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_6) != JNI_OK) {
 	return -1;
@@ -87,7 +87,7 @@ EOS
   end
   payload_c_txt << <<EOS
     rb_vm_register_native_methods();
-    __android_log_write(ANDROID_LOG_INFO, "INFO", "Loaded payload");
+    __android_log_write(ANDROID_LOG_DEBUG, "#{App.config.package_path}", "Loaded payload");
     return JNI_VERSION_1_6;
 }
 EOS
