@@ -289,15 +289,16 @@ def run_apk(mode)
       sh "\"#{App.config.ndk_path}/ndk-gdb\" #{adb_mode_flag(mode)} --adb=\"#{adb_path}\" --start"
     end
   else
+    # Clear log.
+    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -c"
+    # Start main activity.
     activity_path = "#{App.config.package}/.#{App.config.main_activity}"
     App.info 'Start', activity_path
     line = "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
     line << " > /dev/null" unless Rake.application.options.trace
     sh line
-
-    # Show log.
-    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -c"
-    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat #{App.config.package_path}:I"
+    # Show logs.
+    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.package_path}:I"
   end
 end
 
