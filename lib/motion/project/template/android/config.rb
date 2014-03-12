@@ -55,6 +55,10 @@ module Motion; module Project;
       @package ||= 'com.yourcompany' + '.' + name.downcase.gsub(/\s/, '')
     end
 
+    def package_path
+      App.config.package.gsub('.', '/')
+    end
+
     def api_version
       @api_version ||= begin
         versions = Dir.glob(sdk_path + '/platforms/android-*').map do |path|

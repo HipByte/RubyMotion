@@ -80,7 +80,7 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
 	return -1;
     }
     assert(env != NULL);
-    rb_vm_init("#{App.config.package.gsub('.', '/')}", env);
+    rb_vm_init("#{App.config.package_path}", env);
 EOS
   ruby_objs.each do |_, init_func|
     payload_c_txt << "    #{init_func}(NULL, NULL);\n"
@@ -294,6 +294,10 @@ def run_apk(mode)
     line = "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
     line << " > /dev/null" unless Rake.application.options.trace
     sh line
+
+    # Show log.
+    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -c"
+    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat #{App.config.package_path}:I"
   end
 end
 
