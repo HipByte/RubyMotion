@@ -449,7 +449,7 @@ task :android do
         bs_path = "#{data_dir}/android/#{api_vers}/BridgeSupport/#{package}.bridgesupport"
         next if File.exist?(bs_path)
         mkdir_p File.dirname(bs_path)
-        classes = Dir.glob("#{package}/**/*.class").map { |x| x.gsub('/', '.').sub(/\.class$/, '') }.select { |x| !x.include?('$') }
+        classes = Dir.glob("#{package}/**/*.class").map { |x| x.gsub('/', '.').gsub('$', '.').sub(/\.class$/, '') }
         javap_tmp_path = "/tmp/rm_android_#{api_vers}_#{package}.txt"
         sh "/usr/bin/javap -s #{classes.join(' ')} > \"#{javap_tmp_path}\""
         bs_data = ''
