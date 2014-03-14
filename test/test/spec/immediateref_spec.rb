@@ -6,9 +6,13 @@ describe "ImmediateRef" do
 
   on_64bit_it "forwards messages to the wrapped tagged pointer object" do
     ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.class.should == TaggedNSObjectSubclass
     ref.taggedValue.should == 42
     ref.should == TaggedNSObjectSubclass.taggedObject(42)
+  end
+
+  on_64bit_it "returns the tagged pointer object's class" do
+    ref = TaggedNSObjectSubclass.taggedObject(42)
+    ref.class.should == TaggedNSObjectSubclass
   end
 
   on_64bit_it "returns the tagged pointer object's methods" do
@@ -18,7 +22,17 @@ describe "ImmediateRef" do
 
   on_64bit_it "returns the tagged pointer object's description" do
     ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.inspect.should.start_with '#<TaggedNSObjectSubclass'
+    ref.inspect.should.start_with '#<ImmediateRef:TaggedNSObjectSubclass: 0x2af>'
+  end
+
+  on_64bit_it "stays an ImmediateRef when calling a Ruby method on it" do
+    class TaggedNSObjectSubclass
+      def ruby_instance_method
+        self
+      end
+    end
+    ref = TaggedNSObjectSubclass.taggedObject(42)
+    ref.ruby_instance_method.should.eql ref
   end
 
   on_64bit_it "is able to dispatch methods to itself" do
