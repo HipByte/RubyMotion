@@ -180,33 +180,3 @@ ReturnsIntBlock KreateGlobalBlock()
   return ^{ return 42; };
 }
 
-#ifdef __LP64__
-void _objc_insert_tagged_isa(unsigned char slotNumber, Class isa);
-#define SLOT_NUMBER 7
-
-@implementation TaggedNSObjectSubclass
-
-+ (void)load;
-{
-    _objc_insert_tagged_isa(SLOT_NUMBER, [TaggedNSObjectSubclass class]);
-}
-
-+ (id)taggedObject:(uintptr_t)value;
-{
-    return (id)(1UL | ((uintptr_t)SLOT_NUMBER << 1) | (value << 4));
-}
-
-- (uintptr_t)taggedValue
-{
-    return (uintptr_t)self >> 4;
-}
-
-- (BOOL)isEqualTo:(id)other;
-{
-    return [other isKindOfClass:[TaggedNSObjectSubclass class]] &&
-	    [self taggedValue] == [other taggedValue];
-}
-
-@end
-#endif
-

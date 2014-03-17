@@ -5,43 +5,43 @@ describe "ImmediateRef" do
   end
 
   on_64bit_it "forwards messages to the wrapped tagged pointer object" do
-    ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.taggedValue.should == 42
-    ref.should == TaggedNSObjectSubclass.taggedObject(42)
+    ref = NSIndexPath.indexPathWithIndex(42)
+    ref.indexAtPosition(0).should == 42
+    ref.should == NSIndexPath.indexPathWithIndex(42)
   end
 
   on_64bit_it "returns the tagged pointer object's class" do
-    ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.class.should == TaggedNSObjectSubclass
+    ref = NSIndexPath.indexPathWithIndex(42)
+    ref.class.should == NSIndexPath
   end
 
   on_64bit_it "returns the tagged pointer object's methods" do
-    ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.methods(false).should == [:taggedValue, :'isEqualTo:']
+    ref = NSIndexPath.indexPathWithIndex(42)
+    ref.methods(false).should == NSIndexPath.public_instance_methods(false)
   end
 
   on_64bit_it "returns the tagged pointer object's description" do
-    ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.inspect.should.match /#<ImmediateRef:0x\h+ <TaggedNSObjectSubclass: 0x2af>>/
+    ref = NSIndexPath.indexPathWithIndex(42)
+    ref.inspect.should.match /#<ImmediateRef:0x\h+ <NSIndexPath: 0x\h+> \{length = 1, path = 42\}>/
   end
 
   on_64bit_it "stays an ImmediateRef when calling a Ruby method on it" do
-    class TaggedNSObjectSubclass
+    class NSIndexPath
       def ruby_instance_method
         self
       end
     end
-    ref = TaggedNSObjectSubclass.taggedObject(42)
+    ref = NSIndexPath.indexPathWithIndex(42)
     ref.ruby_instance_method.should.eql ref
   end
 
   on_64bit_it "is able to dispatch methods to itself" do
-    class TaggedNSObjectSubclass
+    class NSIndexPath
       def ruby_instance_method
-        self.taggedValue
+        self.indexAtPosition(0)
       end
     end
-    ref = TaggedNSObjectSubclass.taggedObject(42)
+    ref = NSIndexPath.indexPathWithIndex(42)
     ref.ruby_instance_method.should == 42
   end
 end
