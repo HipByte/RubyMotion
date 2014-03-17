@@ -17,12 +17,12 @@ describe "ImmediateRef" do
 
   on_64bit_it "returns the tagged pointer object's methods" do
     ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.public_methods(false).should == [:taggedValue, :'isEqualTo:']
+    ref.methods(false).should == [:taggedValue, :'isEqualTo:']
   end
 
   on_64bit_it "returns the tagged pointer object's description" do
     ref = TaggedNSObjectSubclass.taggedObject(42)
-    ref.inspect.should.start_with '#<ImmediateRef:TaggedNSObjectSubclass: 0x2af>'
+    ref.inspect.should.match /#<ImmediateRef:0x\h+ <TaggedNSObjectSubclass: 0x2af>>/
   end
 
   on_64bit_it "stays an ImmediateRef when calling a Ruby method on it" do
