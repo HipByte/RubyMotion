@@ -15,7 +15,7 @@ class Foo < Base
   end
 end
 
-class B < UIView
+class B < (defined?(UIView) ? UIView : NSView)
   def frame=(value)
     NSLog "Calling B with #{value}"
     super

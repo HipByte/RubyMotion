@@ -14,6 +14,8 @@
 {
   if ((self = [super init])) {
     _array = [NSMutableArray new];
+    // Otherwise replaceObjectAtIndex:withObject: won't work.
+    [_array addObject:[NSNull null]];
     _dictionary = [NSMutableDictionary new];
   }
   return self;

@@ -1,9 +1,5 @@
+# Tagged pointers are only available on 64-bit platforms.
 describe "ImmediateRef" do
-  class << self
-    # Tagged pointers are only available on 64-bit platforms.
-    alias_method :on_64bit_it, RUBY_ARCH =~ /64/ ? :it : :xit
-  end
-
   on_64bit_it "forwards messages to the wrapped tagged pointer object" do
     ref = NSIndexPath.indexPathWithIndex(42)
     ref.indexAtPosition(0).should == 42

@@ -31,6 +31,12 @@ module Bacon
         it(description) { Bacon.running_disabled_spec = true; true.should == true }
       end
     end
+
+    alias_method :on_64bit_it, RUBY_ARCH =~ /64/ ? :it : :xit
+
+    alias_method :broken_on_32bit_it, :on_64bit_it
+
+    alias_method :on_ios_it, defined?(UIView) ? :it : :xit
   end
 
   # Overrides the SpecDoxzRtput to provide colored output by default

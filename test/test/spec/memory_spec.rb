@@ -73,9 +73,9 @@ class DeallocTest
   end
 end
 
-class DeallocTest2 < UIViewController
+class DeallocTest2 < NSURL
   def initialize(*args)
-    initWithNibName(nil, bundle:nil)
+    initWithString('')
     1 + 2
     "test"
   end
@@ -113,7 +113,7 @@ describe "dealloc" do
     $dealloc_test.should == true
   end
 
-  it "should work with nested initialize" do
+  xit "should work with nested initialize" do
     DeallocTest2.performSelectorOnMainThread(:'test_nested_initialize', withObject:nil, waitUntilDone:false)
     NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))
     $dealloc_test.should == true
@@ -226,7 +226,7 @@ class Proc
 end
 
 describe "C functions that return retained objects" do
-  it "returns an autoreleased object if the function name contains 'Create'" do
+  broken_on_32bit_it "returns an autoreleased object if the function name contains 'Create'" do
     lambda {
       CFStringCreateWithFormat(nil, {}, '%@', 42)
     }.should.be.autoreleased
@@ -468,7 +468,7 @@ describe "Hash" do
   end
 
   # RM-350
-  it "#[]= should not released the object" do
+  it "#[]= should not release the object" do
     @foo = TestHash.new
 
     5.times do 
@@ -481,7 +481,7 @@ describe "Hash" do
   end
 
   # RM-351
-  it "#clear should not released the object" do
+  it "#clear should not release the object" do
     @foo = TestHash.new
 
     5.times do 
@@ -494,7 +494,7 @@ describe "Hash" do
   end
 
   # RM-352
-  it "#removeObjectForKey should not released the object" do
+  it "#removeObjectForKey should not release the object" do
     @foo = TestHash.new
 
     5.times do 
@@ -534,7 +534,7 @@ describe "Array" do
   end
 
   # RM-354
-  it "#delete should not released the object" do
+  it "#delete should not release the object" do
     @foo = TestArray.new
 
     5.times do 
@@ -547,7 +547,7 @@ describe "Array" do
   end
 
   # RM-368
-  it "#clear should not released the object" do
+  it "#clear should not release the object" do
     @foo = TestArray.new
 
     5.times do 

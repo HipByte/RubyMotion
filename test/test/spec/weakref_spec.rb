@@ -65,7 +65,7 @@ describe "WeakRef" do
     end
   end
 
-  it "raises a WeakRef::RefError if messaged when the reference is no longer alive" do
+  broken_on_32bit_it "raises a WeakRef::RefError if messaged when the reference is no longer alive" do
     autorelease_pool do
       @ref = WeakRef.new(Object.new)
       lambda { @ref.to_s }.should.not.raise
@@ -86,10 +86,10 @@ describe "WeakRef" do
   end
 
   it "is resolved by NSObject#==" do
-    vc = UIViewController.new
-    ref = WeakRef.new(vc)
-    ref.should == vc
-    vc.should == ref
+    obj = Object.new
+    ref = WeakRef.new(obj)
+    ref.should == obj
+    obj.should == ref
   end
 
   it "is resolved by Boxed#==" do

@@ -9,9 +9,9 @@ class TestConformsToProtocolObject2
   def optionalMethod3; 42; end
 end
 
-class TestObjCSubclassConformsToProtocolObject < UIViewController
-  def tableView(tableView, cellForRowAtIndexPath:indexPath); end
-  def tableView(tableView, numberOfRowsInSection:section); end
+class TestObjCSubclassConformsToProtocolObject < CALayer
+  def requiredMethod1; 42; end
+  def requiredMethod2; 42; end
 end
 
 describe "conformsToProtocol:" do
@@ -24,7 +24,7 @@ describe "conformsToProtocol:" do
   end
 
   it "works on Ruby subclasses of pure Objective-C classes" do
-    TestObjCSubclassConformsToProtocolObject.conformsToProtocol(NSProtocolFromString('UITableViewDataSource')).should == true
-    TestObjCSubclassConformsToProtocolObject.new.conformsToProtocol(NSProtocolFromString('UITableViewDataSource')).should == true
+    TestObjCSubclassConformsToProtocolObject.conformsToProtocol(NSProtocolFromString('TestConformsToProtocol')).should == true
+    TestObjCSubclassConformsToProtocolObject.new.conformsToProtocol(NSProtocolFromString('TestConformsToProtocol')).should == true
   end
 end

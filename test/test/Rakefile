@@ -23,7 +23,7 @@ end
 
 task :clean do
   if ENV['ARCH']
-    dir = "./vendor/code/build-#{ENV['ARCH']}"
+    dir = "./vendor/code/build-#{App.config.local_platform}"
     if File.exist?(dir)
       App.info 'Delete', dir
       FileUtils.rm_rf dir

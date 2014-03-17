@@ -1,5 +1,5 @@
 describe "NSExceptions" do
-  it "can be caught (1)" do
+  xit "can be caught (1)" do
     exc_name = 'TestException'
     exc_reason = 'some reason'
     exc_userInfo = { 'One' => 1, 'Two' => 2, 'Three' => 3}
@@ -12,7 +12,7 @@ describe "NSExceptions" do
     end
   end
 
-  it "can be caught (2)" do
+  xit "can be caught (2)" do
     begin
       NSString.stringWithString(42)
     rescue => e
@@ -21,7 +21,7 @@ describe "NSExceptions" do
     end
   end
 
-  it "should be raised with Kernel.raise" do
+  xit "should be raised with Kernel.raise" do
     begin
       raise NSException.exceptionWithName('NSInvalidArgumentException', reason:'Woops!', userInfo:nil)
     rescue => e

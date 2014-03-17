@@ -27,8 +27,12 @@ describe "cycles" do
       super
     end
   end
-  xit "created by Proc->self are solved" do
+
+  before do
     $test_dealloc = false
+  end
+
+  xit "created by Proc->self are solved" do
     autorelease_pool { TestObjectCycle.new.test_block_retain }
     $test_dealloc.should == true
 
@@ -39,25 +43,21 @@ describe "cycles" do
   end
 
   it "created by Array are solved" do
-    $test_dealloc = false
     autorelease_pool { TestObjectCycle.new.test_array_retain }
     $test_dealloc.should == true
   end
 
   it "created by Hash keys are solved" do
-    $test_dealloc = false
     autorelease_pool { TestObjectCycle.new.test_hash_key_retain }
     $test_dealloc.should == true
   end
 
   it "created by Hash values are solved" do
-    $test_dealloc = false
     autorelease_pool { TestObjectCycle.new.test_hash_value_retain }
     $test_dealloc.should == true
   end
 
   it "created by Hash->ifnone are solved" do
-    $test_dealloc = false
     autorelease_pool { TestObjectCycle.new.test_hash_ifnone_retain }
     $test_dealloc.should == true
   end
@@ -69,8 +69,12 @@ describe "cycles" do
       super
     end
   end
- it "created by 2 objects are solved when they are the only thing retaining each other" do
+
+  before do
     $test_dealloc = {}
+  end
+
+  it "created by 2 objects are solved when they are the only thing retaining each other" do
     obj1id = obj2id = nil
     autorelease_pool do
       obj1 = TestObjectCircle.new
@@ -85,7 +89,6 @@ describe "cycles" do
   end
 
   it "created by 2 objects are not solved if retained by something other than each other" do
-    $test_dealloc = {}
     obj1id = obj2id = nil
     autorelease_pool do; autorelease_pool do
       @obj1 = TestObjectCircle.new
@@ -126,10 +129,9 @@ describe "cycles" do
   end
 =end
 
-  class TestDeallocViewController < UIViewController
+  class TestDeallocViewController
     attr_accessor :mode
-    def viewDidLoad
-      super
+    def initialize
       foo {}
     end
     def foo(&b)
@@ -143,8 +145,7 @@ describe "cycles" do
   it "created on a view controller by a Proc are solved" do
     $test_dealloc = false
     autorelease_pool do
-      x = TestDeallocViewController.alloc.init
-      x.view
+      TestDeallocViewController.new
     end
     $test_dealloc.should == true
   end
