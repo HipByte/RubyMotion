@@ -55,8 +55,8 @@ $ git clone git@github.com:lrz/RubyMotion.git
 ### Set up LLVM
 
 ```
-$ svn checkout https://llvm.org/svn/llvm-project/llvm/branches/release_34 llvm-3.4
-$ cd llvm-3.4
+$ svn checkout https://llvm.org/svn/llvm-project/llvm/branches/release_33 llvm-3.3
+$ cd llvm-3.3 
 $ patch -p0 < /path/to/RubyMotionRepository/llvm.patch
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ MACOSX_DEPLOYMENT_TARGET=10.6 ./configure --enable-bindings=none --enable-optimized --with-llvmgccdir=/tmp
 $ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ MACOSX_DEPLOYMENT_TARGET=10.6 make
