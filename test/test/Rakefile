@@ -38,7 +38,7 @@ namespace :spec do
   platforms.each do |platform|
     namespace platform do
       archs.each do |bit, arch|
-        desc "Run tests on #{platform} (#{bit}-bit)"
+        desc "Run tests on #{platform} with arch #{bit}-bit"
         task bit => :install_aggregate_test_handler do
           App.info "TESTING", "Running test suite on platform: #{platform} (#{bit}-bit)"
           begin
@@ -52,16 +52,16 @@ namespace :spec do
   end
 
   platforms.each do |platform|
-    desc "Run tests on #{platform} for all archs"
+    desc "Run tests on #{platform} with all archs"
     task platform => archs.keys.map { |arch| "spec:#{platform}:#{arch}" }
   end
 
   archs.keys.each do |arch|
-    desc "Run tests on all platforms for arch #{arch}"
+    desc "Run tests on all platforms with arch #{arch}-bit"
     task arch => platforms.map { |platform| "spec:#{platform}:#{arch}" }
   end
 
-  desc 'Run tests on iOS and OS X'
+  desc 'Run tests on all platforms and with all archs'
   task :all => [:ios, :osx]
 end
 
