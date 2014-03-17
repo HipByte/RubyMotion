@@ -20,16 +20,37 @@ end
 namespace :spec do
   task :clean_run => [:clean, :spec]
 
+  test_fail_count = []
+
+  task :install_aggregate_test_handler do
+    at_exit do
+      count = test_fail_count.inject(0) { |i, sum| sum + i }
+      if test_fail_count.size > 1
+        App.info "TESTING", "A total of #{count} failures/errors occurred"
+      end
+      exit count
+    end
+  end
+
+  archs = { '32' => 'i386', '64' => 'x86_64' }
+
   [:ios, :osx].each do |platform|
     namespace platform do
-      { '32' => 'i386', '64' => 'x86_64' }.each do |bit, arch|
+      archs.each do |bit, arch|
         desc "Run tests on #{platform} (#{bit}-bit)"
-        task bit do
+        task bit => :install_aggregate_test_handler do
           App.info "TESTING", "Running test suite on platform: #{platform} (#{bit}-bit)"
-          sh "env PLATFORM=#{platform} ARCH=#{arch} rake spec:clean_run"
+          begin
+            sh "env PLATFORM=#{platform} ARCH=#{arch} rake spec:clean_run"
+          rescue RuntimeError
+            test_fail_count << $?.exitstatus
+          end
         end
       end
     end
+
+    desc "Run tests on #{platform} for all archs"
+    task platform => archs.keys.map { |arch| "spec:#{platform}:#{arch}" }
   end
 
   desc 'Run tests on iOS and OS X'
