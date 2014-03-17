@@ -32,9 +32,10 @@ namespace :spec do
     end
   end
 
+  platforms = [:ios, :osx]
   archs = { '32' => 'i386', '64' => 'x86_64' }
 
-  [:ios, :osx].each do |platform|
+  platforms.each do |platform|
     namespace platform do
       archs.each do |bit, arch|
         desc "Run tests on #{platform} (#{bit}-bit)"
@@ -48,9 +49,16 @@ namespace :spec do
         end
       end
     end
+  end
 
+  platforms.each do |platform|
     desc "Run tests on #{platform} for all archs"
     task platform => archs.keys.map { |arch| "spec:#{platform}:#{arch}" }
+  end
+
+  archs.keys.each do |arch|
+    desc "Run tests on all platforms for arch #{arch}"
+    task arch => platforms.map { |platform| "spec:#{platform}:#{arch}" }
   end
 
   desc 'Run tests on iOS and OS X'
