@@ -7,6 +7,9 @@
 
 @implementation TestSubscripting
 
+@synthesize array = _array;
+@synthesize dictionary = _dictionary;
+
 - (instancetype)init;
 {
   if ((self = [super init])) {
@@ -18,22 +21,22 @@
 
 - (id)objectAtIndexedSubscript:(NSUInteger)index;
 {
-  return self.array[index];
+  return [self.array objectAtIndex:index];
 }
 
 - (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index;
 {
-  self.array[index] = object;
+  [self.array replaceObjectAtIndex:index withObject:object];
 }
 
 - (id)objectForKeyedSubscript:(id)key;
 {
-  return self.dictionary[key];
+  return [self.dictionary objectForKey:key];
 }
 
 - (void)setObject:(id)object forKeyedSubscript:(id<NSCopying>)key;
 {
-  self.dictionary[key] = object;
+  [self.dictionary setObject:object forKey:key];
 }
 
 @end

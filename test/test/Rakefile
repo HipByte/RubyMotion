@@ -1,7 +1,6 @@
 $:.unshift("../../lib")
 
-platform = ENV['PLATFORM'] || 'ios'
-require "motion/project/template/#{platform}"
+require "motion/project/template/#{ENV['PLATFORM'] || 'ios'}"
 
 ENV['output'] ||= 'pretty_spec_dox'
 
@@ -15,6 +14,21 @@ Motion::Project::App.setup do |app|
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
 
   app.archs[app.local_platform] = [ENV['ARCH']] if ENV['ARCH']
+
+  # 10.8 and 10.9 are 64-bit only.
+  if ENV['PLATFORM'] == 'osx' && ENV['ARCH'] == 'i386'
+    app.deployment_target = '10.7'
+  end
+end
+
+task :clean do
+  if ENV['ARCH']
+    dir = "./vendor/code/build-#{ENV['ARCH']}"
+    if File.exist?(dir)
+      App.info 'Delete', dir
+      FileUtils.rm_rf dir
+    end
+  end
 end
 
 namespace :spec do
