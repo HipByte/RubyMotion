@@ -1,14 +1,16 @@
-#import "subscripting.h"
+#import "helper_selectors.h"
 
-@interface TestSubscripting ()
+@interface TestHelperSelectors ()
 @property (strong) NSMutableArray *array;
 @property (strong) NSMutableDictionary *dictionary;
 @end
 
-@implementation TestSubscripting
+@implementation TestHelperSelectors
 
+// To be able to build on 32-bit (OS X 10.7) we need to synthesize properties.
 @synthesize array = _array;
 @synthesize dictionary = _dictionary;
+@synthesize aSetter = _aSetter;
 
 - (instancetype)init;
 {
@@ -17,6 +19,7 @@
     // Otherwise replaceObjectAtIndex:withObject: won't work.
     [_array addObject:[NSNull null]];
     _dictionary = [NSMutableDictionary new];
+    _aSetter = nil;
   }
   return self;
 }
@@ -39,6 +42,11 @@
 - (void)setObject:(id)object forKeyedSubscript:(id<NSCopying>)key;
 {
   [self.dictionary setObject:object forKey:key];
+}
+
+- (BOOL)isPredicate:(NSNumber *)aSetterValue;
+{
+    return aSetterValue.integerValue == self.aSetter.integerValue;
 }
 
 @end
