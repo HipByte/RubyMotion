@@ -5,9 +5,11 @@
     NSMutableArray *_array;
     NSMutableDictionary *_dictionary;
     NSNumber *_aSetter;
+    NSNumber *_propertyForKVCValidation;
 }
 
 @property (strong) NSNumber *aSetter;
+@property (assign) NSNumber *propertyForKVCValidation;
 
 - (id)objectAtIndexedSubscript:(NSUInteger)index;
 - (void)setObject:(id)object atIndexedSubscript:(NSUInteger)index;
@@ -16,5 +18,7 @@
 - (void)setObject:(id)object forKeyedSubscript:(id<NSCopying>)key;
 
 - (BOOL)isPredicate:(NSNumber *)aSetterValue;
+
+- (BOOL)__validate__:(NSError **)error;
 
 @end

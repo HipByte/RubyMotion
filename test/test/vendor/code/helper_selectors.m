@@ -11,6 +11,7 @@
 @synthesize array = _array;
 @synthesize dictionary = _dictionary;
 @synthesize aSetter = _aSetter;
+@synthesize propertyForKVCValidation = _propertyForKVCValidation;
 
 - (instancetype)init;
 {
@@ -47,6 +48,13 @@
 - (BOOL)isPredicate:(NSNumber *)aSetterValue;
 {
     return aSetterValue.integerValue == self.aSetter.integerValue;
+}
+
+- (BOOL)__validate__:(NSError **)error;
+{
+    return [self validateValue:&_propertyForKVCValidation
+			forKey:@"propertyForKVCValidation"
+			 error:error];
 }
 
 @end
