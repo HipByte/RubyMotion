@@ -226,7 +226,7 @@ class Proc
 end
 
 describe "C functions that return retained objects" do
-  broken_on_32bit_it "returns an autoreleased object if the function name contains 'Create'" do
+  it "returns an autoreleased object if the function name contains 'Create'" do
     lambda {
       CFStringCreateWithFormat(nil, {}, '%@', 42)
     }.should.be.autoreleased

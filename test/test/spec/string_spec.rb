@@ -36,7 +36,7 @@ describe "Strings with multibyte characters" do
     "..€€……".index("…").should == 4
   end
 
-  broken_on_32bit_it "finds the most right-side index of a character" do
+  it "finds the most right-side index of a character" do
     "..€€……".rindex(".").should == 1
     "..€€……".rindex("€").should == 3
     "..€€……".rindex("…").should == 5

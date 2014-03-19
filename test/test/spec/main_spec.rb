@@ -16,7 +16,7 @@ describe 'A method accepting a 32-bit struct' do
 end
 
 describe 'A method returning a 64-bit struct' do
-  broken_on_32bit_it "can be called" do
+  it "can be called" do
     o = TestMethod.new
     o.methodReturningCGSize.should == CGSize.new(1, 2)
   end
@@ -28,7 +28,7 @@ describe 'A method returning a 64-bit struct' do
 end
 
 describe 'A method returning a 128-bit struct' do
-  broken_on_32bit_it "can be called" do
+  it "can be called" do
     o = TestMethod.new
     o.methodReturningCGRect.should == CGRect.new(CGPoint.new(1, 2), CGSize.new(3, 4))
   end
@@ -161,7 +161,7 @@ class TestPrivateMethod
 end
 
 describe "A private method" do
-  broken_on_32bit_it "cannot be called with #public_send" do
+  it "cannot be called with #public_send" do
     o = TestPrivateMethod.new
     o.foo.should == 42
     o.send(:foo).should == 42

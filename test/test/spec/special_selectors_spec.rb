@@ -23,24 +23,24 @@ describe "Objective-C predicate" do
 end
 
 describe "Objective-C subscripting" do
-  broken_on_32bit_it "is available in its Ruby `#[]` getter form" do
+  it "is available in its Ruby `#[]` getter form" do
     obj = TestSpecialSelectors.new
     obj.should.respond_to :[]
   end
 
-  broken_on_32bit_it "is available in its Ruby `#[]=` setter form" do
+  it "is available in its Ruby `#[]=` setter form" do
     obj = TestSpecialSelectors.new
     obj.should.respond_to :[]=
   end
 
-  broken_on_32bit_it "works with indexed-subscripting" do
+  it "works with indexed-subscripting" do
     obj = TestSpecialSelectors.new
     o = obj[0] = 42
     obj[0].should == 42
     o.should == 42
   end
 
-  broken_on_32bit_it "works with keyed-subscripting" do
+  it "works with keyed-subscripting" do
     obj = TestSpecialSelectors.new
     o = obj['a'] = 'foo'
     obj['a'].should == 'foo'

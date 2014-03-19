@@ -65,7 +65,7 @@ describe "WeakRef" do
     end
   end
 
-  broken_on_32bit_it "raises a WeakRef::RefError if messaged when the reference is no longer alive" do
+  it "raises a WeakRef::RefError if messaged when the reference is no longer alive" do
     autorelease_pool do
       @ref = WeakRef.new(Object.new)
       lambda { @ref.to_s }.should.not.raise
