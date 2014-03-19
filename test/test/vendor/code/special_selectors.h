@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-@interface TestHelperSelectors : NSObject {
+@interface TestSpecialSelectors : NSObject {
     // To be able to build on 32-bit (OS X 10.7) we need to specify ivars.
     NSMutableArray *_array;
     NSMutableDictionary *_dictionary;

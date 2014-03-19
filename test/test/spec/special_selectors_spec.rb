@@ -1,10 +1,10 @@
 describe "Objective-C setter" do
   it "is available in its Ruby `#setter=` form" do
-    TestHelperSelectors.new.should.respond_to :aSetter=
+    TestSpecialSelectors.new.should.respond_to :aSetter=
   end
 
   it "is callable in its Ruby `#setter=` form" do
-    obj = TestHelperSelectors.new
+    obj = TestSpecialSelectors.new
     obj.aSetter = 42
     obj.aSetter.should == 42
   end
@@ -12,11 +12,11 @@ end
 
 describe "Objective-C predicate" do
   it "is available in its Ruby `#predicate?` form" do
-    TestHelperSelectors.new.should.respond_to :predicate?
+    TestSpecialSelectors.new.should.respond_to :predicate?
   end
 
   it "is callable in its Ruby `#predicate?` form" do
-    obj = TestHelperSelectors.new
+    obj = TestSpecialSelectors.new
     obj.aSetter = 42
     obj.predicate?(42).should == true
   end
@@ -24,31 +24,31 @@ end
 
 describe "Objective-C subscripting" do
   broken_on_32bit_it "is available in its Ruby `#[]` getter form" do
-    obj = TestHelperSelectors.new
+    obj = TestSpecialSelectors.new
     obj.should.respond_to :[]
   end
 
   broken_on_32bit_it "is available in its Ruby `#[]=` setter form" do
-    obj = TestHelperSelectors.new
+    obj = TestSpecialSelectors.new
     obj.should.respond_to :[]=
   end
 
   broken_on_32bit_it "works with indexed-subscripting" do
-    obj = TestHelperSelectors.new
+    obj = TestSpecialSelectors.new
     o = obj[0] = 42
     obj[0].should == 42
     o.should == 42
   end
 
   broken_on_32bit_it "works with keyed-subscripting" do
-    obj = TestHelperSelectors.new
+    obj = TestSpecialSelectors.new
     o = obj['a'] = 'foo'
     obj['a'].should == 'foo'
     o.should == 'foo'
   end
 end
 
-class TestHelperSelectors
+class TestSpecialSelectors
   attr_accessor :validation_handler
 
   def validatePropertyForKVCValidation(value, error:error)
@@ -63,7 +63,7 @@ end
 
 describe "KVC (and Core Data) property validation" do
   before do
-    @obj = TestHelperSelectors.new
+    @obj = TestSpecialSelectors.new
     @obj.propertyForKVCValidation = 42
   end
 

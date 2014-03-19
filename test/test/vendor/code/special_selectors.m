@@ -1,11 +1,11 @@
-#import "helper_selectors.h"
+#import "special_selectors.h"
 
-@interface TestHelperSelectors ()
+@interface TestSpecialSelectors ()
 @property (strong) NSMutableArray *array;
 @property (strong) NSMutableDictionary *dictionary;
 @end
 
-@implementation TestHelperSelectors
+@implementation TestSpecialSelectors
 
 // To be able to build on 32-bit (OS X 10.7) we need to synthesize properties.
 @synthesize array = _array;
