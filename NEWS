@@ -1,5 +1,7 @@
 = RubyMotion 2.25 =
 
+  * Fixed a bug where KVC property validation methods defined in Ruby would not
+    be compiled with the appropriate (Pointer) types.
   * Added some introspection support to `ImmediateRef'. It can now report the
     actual class, its methods, and a inspect description string.
   * Fixed a bug where Ruby methods defined on Objective-C tagged pointer
