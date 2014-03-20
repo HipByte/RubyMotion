@@ -1,5 +1,8 @@
 = RubyMotion 2.25 =
 
+  * Improved use of `WeakRef' to raise an exception when trying to create a
+    weak reference to one of the unsupported classes. For more information, see
+    `Which classes don’t support weak references?' at http://bit.ly/1iiSOaU.
   * Fixed a bug where KVC property validation methods defined in Ruby would not
     be compiled with the appropriate (Pointer) types.
   * Added some introspection support to `ImmediateRef'. It can now report the

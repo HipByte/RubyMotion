@@ -107,6 +107,11 @@ describe "WeakRef" do
     WeakRef.new(true).should == true
     WeakRef.new(false).should == false
   end
+
+  it "raises with classes that do not support weak references" do
+    obj = NSMutableParagraphStyle.new
+    lambda { WeakRef.new(obj) }.should.raise(WeakRef::RefError)
+  end
 end
 
 describe "Proc#weak!" do
