@@ -1,5 +1,8 @@
 = RubyMotion 2.25 =
 
+  * Fixed a bug where an application could not be installed and launched on the
+    Simulator or a device due to the application bundle containing a directory
+    called `Resources'. This will now fail the build with a descriptive error.
   * Improved use of `WeakRef' to raise an exception when trying to create a
     weak reference to one of the unsupported classes. For more information, see
     `Which classes don’t support weak references?' at http://bit.ly/1iiSOaU.
