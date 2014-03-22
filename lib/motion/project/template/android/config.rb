@@ -33,7 +33,7 @@ module Motion; module Project;
     def initialize(project_dir, build_mode)
       super
       @avd_config = { :name => 'RubyMotion', :target => '1', :abi => 'armeabi-v7a' }
-      @main_activity = '.Main'
+      @main_activity = 'MainActivity'
       @sub_activities = []
       @arch = 'armv5te'
       @vendored_jars = []
