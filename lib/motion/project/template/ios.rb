@@ -47,7 +47,7 @@ namespace :build do
 
     # TODO this should go into a iOS specific Builder class which performs this
     # check before building.
-    App.config.resources_dirs.each do |dir|
+    App.config.resources_dirs.flatten.each do |dir|
       next unless Dir.exists?(dir)
       Dir.entries(dir).grep(/Resources/i).each do |basename|
         path = File.join(dir, basename)
