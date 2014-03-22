@@ -458,7 +458,9 @@ task :android do
 <signatures version='1.0'>
 EOS
         txt = File.read(javap_tmp_path)
-        txt.scan(/([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/).each do |klass, body_txt|
+        res = txt.scan(/class\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
+        res += txt.scan(/class\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
+        res.each do |klass, body_txt|
           class_path = klass.gsub(/\./, '/')
           bs_data << <<EOS
   <class name=\"#{class_path}\">
