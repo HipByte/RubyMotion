@@ -895,6 +895,7 @@ start_debug_server(am_device_t dev)
 	strncpy(name.sun_path, lldb_socket_path,
 		sizeof(name.sun_path));
 
+	int retry_count = 0;
 	while (true) {
 	    if (connect(lldb_socket, (struct sockaddr *)&name, SUN_LEN(&name))
 		    == -1) {
@@ -902,6 +903,12 @@ start_debug_server(am_device_t dev)
 		    perror("connect()");
 		    return;
 		}
+		if (retry_count >= 50) {
+		    // After 10 seconds (200000 usec * 50), give up to retry
+		    perror("connect()");
+		    goto exit;
+		}
+		retry_count++;
 	    }
 	    else {
 		break;
@@ -957,6 +964,7 @@ start_debug_server(am_device_t dev)
 	}
     }
 
+  exit:
     [gdb_task waitUntilExit];
 }
 
