@@ -95,7 +95,7 @@ module Motion; module Project;
     def asflags
       archflags = case arch
         when 'armv5te'
-          "-march=armv5te -mtune=xscale"
+          "-march=armv5te"
         when 'armv7'
           "-march=armv7a -mfpu=vfpv3-d16"
         else
@@ -105,7 +105,11 @@ module Motion; module Project;
     end
 
     def cflags
-      "#{asflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -Wformat -Werror=format-security"
+      archflags = case arch
+        when 'armv5te'
+          "-mtune=xscale"
+      end
+      "#{asflags} #{archflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -Wformat -Werror=format-security"
     end
 
     def cxxflags
