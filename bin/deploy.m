@@ -838,8 +838,11 @@ start_debug_server(am_device_t dev)
 
 	// Prepare lldb commands file.
        NSString *py_cmds = [NSString stringWithFormat:@""\
+   	"import socket\n"\
    	"import sys\n"\
    	"import lldb\n"\
+   	"sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)\n"\
+   	"sock.connect(\"%s\")\n"\
    	"debugger = lldb.debugger\n"\
 	"debugger.SetAsync(False)\n"\
         "error = lldb.SBError()\n"\
@@ -850,15 +853,15 @@ start_debug_server(am_device_t dev)
 	"lldb.debugger.HandleCommand(\"target modules search-paths add /usr '%@/Symbols/usr' /System '%@/Symbols/System' /Developer '%@/Symbols/Developer'\")\n"\
         "error = lldb.SBError()\n"\
 	"listener = lldb.debugger.GetListener()\n"\
-   	"process = target.ConnectRemote(listener, \"unix-accept://%s\", None, error)\n"\
+   	"process = target.ConnectRemote(listener, \"fd://%%s\" %% sock.fileno(), None, error)\n"\
 	"lldb.debugger.HandleCommand(\"process plugin packet send 'QSetEnableAsyncProfiling;enable:1;interval_usec:1000000;scan_type:0xfffffeff;'\")\n"\
         "error = lldb.SBError()\n"\
         "process.RemoteLaunch(None, None, None, None, None, None, 0, False, error)\n"\
         "process.Continue()\n"\
         "",
+   	     lldb_socket_path,
    	     app_path, app_remote_path,
-	     device_support_path, device_support_path, device_support_path,
-	     lldb_socket_path];
+	     device_support_path, device_support_path, device_support_path];
 	NSString *py_cmds_path = [NSString pathWithComponents:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
 	    @"_deploylldbcmds.py", nil]];
@@ -884,37 +887,29 @@ start_debug_server(am_device_t dev)
 	const int lldb_socket = socket(PF_LOCAL, SOCK_STREAM, 0);
 	if (lldb_socket == -1) {
 	    perror("socket()");
-	    return;
+	    goto exit;
+	}
+	struct sockaddr_un sa = {0};
+	sa.sun_family = AF_UNIX;
+	strncpy(sa.sun_path, lldb_socket_path, sizeof(sa.sun_path));
+	if (bind(lldb_socket, (struct sockaddr*)&sa, sizeof(struct sockaddr_un)) == -1) {
+	    perror("bind()");
+	    goto exit;
 	}
 
-	fcntl(lldb_socket, F_SETFL, O_NONBLOCK);
+	if (listen(lldb_socket, 5) == -1) {
+	    perror("listen()");
+	    goto exit;
+	}
+
+	int lldb_fd;
+	if ((lldb_fd = accept(lldb_socket, NULL, NULL)) == -1) {
+	    perror("connect()");
+	    goto exit;
+	}
+
+	fcntl(lldb_fd, F_SETFL, O_NONBLOCK);
 	fcntl(gdb_fd, F_SETFL, O_NONBLOCK);
-
-	struct sockaddr_un name;
-	name.sun_family = PF_LOCAL;
-	strncpy(name.sun_path, lldb_socket_path,
-		sizeof(name.sun_path));
-
-	int retry_count = 0;
-	while (true) {
-	    if (connect(lldb_socket, (struct sockaddr *)&name, SUN_LEN(&name))
-		    == -1) {
-		if (errno != ENOENT) {
-		    perror("connect()");
-		    return;
-		}
-		if (retry_count >= 50) {
-		    // After 10 seconds (200000 usec * 50), give up to retry
-		    perror("connect()");
-		    goto exit;
-		}
-		retry_count++;
-	    }
-	    else {
-		break;
-	    }
-	    usleep(200000);
-	}
 
 	// We are connected, start redirecting input to/from the debug server.
 	char buf[2048];
@@ -923,19 +918,19 @@ start_debug_server(am_device_t dev)
 	    fd_set read_fds;
 	    FD_ZERO(&read_fds);
 	    FD_SET(gdb_fd, &read_fds);
-	    FD_SET(lldb_socket, &read_fds);
+	    FD_SET(lldb_fd, &read_fds);
 
 	    struct timeval tv;
 	    tv.tv_sec = 0;
 	    tv.tv_usec = 10000;
-	    int n = select(lldb_socket + 1, &read_fds, NULL, NULL, &tv);
+	    int n = select(lldb_fd + 1, &read_fds, NULL, NULL, &tv);
 	    if (n == -1 && errno != EINTR) {
 		perror("select()");
 		break;
 	    }
 	    if (n > 0) {
-		if (FD_ISSET(lldb_socket, &read_fds)) {
-		    len = read(lldb_socket, buf, sizeof buf);
+		if (FD_ISSET(lldb_fd, &read_fds)) {
+		    len = read(lldb_fd, buf, sizeof buf);
 		    if (len > 0) {
 #if 0
 			buf[len] = '\0';
@@ -954,7 +949,7 @@ start_debug_server(am_device_t dev)
 			buf[len] = '\0';
 			printf("device -> lldb: %ld bytes: %s\n", len, buf);
 #endif
-			write(lldb_socket, buf, len);
+			write(lldb_fd, buf, len);
 		    }
 		    else {
 			break;
