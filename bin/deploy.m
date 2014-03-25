@@ -837,30 +837,30 @@ start_debug_server(am_device_t dev)
 	assert(mktemp(lldb_socket_path) != NULL);
 
 	// Prepare lldb commands file.
-       NSString *py_cmds = [NSString stringWithFormat:@""\
-   	"import socket\n"\
-   	"import sys\n"\
-   	"import lldb\n"\
-   	"sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)\n"\
-   	"sock.connect(\"%s\")\n"\
-   	"debugger = lldb.debugger\n"\
+	NSString *py_cmds = [NSString stringWithFormat:@""\
+	"import socket\n"\
+	"import sys\n"\
+	"import lldb\n"\
+	"sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)\n"\
+	"sock.connect(\"%s\")\n"\
+	"debugger = lldb.debugger\n"\
 	"debugger.SetAsync(False)\n"\
-        "error = lldb.SBError()\n"\
-   	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", False, error)\n"\
-   	"module = target.FindModule(target.GetExecutable())\n"\
-   	"filespec = lldb.SBFileSpec(\"%@\", False)\n"\
-   	"module.SetPlatformFileSpec(filespec)\n"\
+	"error = lldb.SBError()\n"\
+	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", False, error)\n"\
+	"module = target.FindModule(target.GetExecutable())\n"\
+	"filespec = lldb.SBFileSpec(\"%@\", False)\n"\
+	"module.SetPlatformFileSpec(filespec)\n"\
 	"lldb.debugger.HandleCommand(\"target modules search-paths add /usr '%@/Symbols/usr' /System '%@/Symbols/System' /Developer '%@/Symbols/Developer'\")\n"\
-        "error = lldb.SBError()\n"\
+	"error = lldb.SBError()\n"\
 	"listener = lldb.debugger.GetListener()\n"\
-   	"process = target.ConnectRemote(listener, \"fd://%%s\" %% sock.fileno(), None, error)\n"\
+	"process = target.ConnectRemote(listener, \"fd://%%s\" %% sock.fileno(), None, error)\n"\
 	"lldb.debugger.HandleCommand(\"process plugin packet send 'QSetEnableAsyncProfiling;enable:1;interval_usec:1000000;scan_type:0xfffffeff;'\")\n"\
-        "error = lldb.SBError()\n"\
-        "process.RemoteLaunch(None, None, None, None, None, None, 0, False, error)\n"\
-        "process.Continue()\n"\
-        "",
-   	     lldb_socket_path,
-   	     app_path, app_remote_path,
+	"error = lldb.SBError()\n"\
+	"process.RemoteLaunch(None, None, None, None, None, None, 0, False, error)\n"\
+	"process.Continue()\n"\
+	"",
+	     lldb_socket_path,
+	     app_path, app_remote_path,
 	     device_support_path, device_support_path, device_support_path];
 	NSString *py_cmds_path = [NSString pathWithComponents:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
