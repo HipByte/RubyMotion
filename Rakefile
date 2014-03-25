@@ -31,7 +31,7 @@ end
 
 # Android support - experimental
 ANDROID_SDK = File.join(ENV['HOME'], 'src/android-sdk-macosx')
-ANDROID_NDK = File.join(ENV['HOME'], 'src/android-ndk-r9b')
+ANDROID_NDK = File.join(ENV['HOME'], 'src/android-ndk-r9d')
 ANDROID_API_VERSIONS =
   if File.exist?(ANDROID_SDK)
     Dir.glob(File.join(ANDROID_SDK, 'platforms/android-*')).map do |platform_dir|
