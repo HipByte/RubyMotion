@@ -39,7 +39,7 @@ task :build do
   ruby_objs = []
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
-  objs_build_dir = File.join(App.config.build_dir, App.config.arch)
+  objs_build_dir = File.join(App.config.build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   Dir.glob("./app/**/*.rb").each do |ruby_path|
     App.info 'Compile', ruby_path
     init_func = "InitRubyFile#{init_func_n += 1}"
@@ -48,7 +48,7 @@ task :build do
     FileUtils.mkdir_p(File.dirname(as_path))
     sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{as_path}\" #{init_func} \"#{ruby_path}\""
 
-    obj_path = File.join(App.config.build_dir, App.config.arch, ruby_path + '.o')
+    obj_path = File.join(objs_build_dir, ruby_path + '.o')
     sh "#{App.config.cc} #{App.config.asflags} -c \"#{as_path}\" -o \"#{obj_path}\""
 
     ruby_objs << [obj_path, init_func]
