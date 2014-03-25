@@ -132,5 +132,16 @@ module Motion; module Project;
       # The order of the libraries matters here.
       "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir}\" -lrubymotion-static -L#{ndk_path}/sources/cxx-stl/stlport/libs/armeabi -lstlport_static"
     end
+
+    def armeabi_directory_name
+      case arch
+        when 'armv5te'
+          'armeabi'
+        when 'armv7'
+          'armeabi-v7a'
+        else
+          raise "Invalid arch `#{arch}'"
+      end 
+    end
   end
 end; end

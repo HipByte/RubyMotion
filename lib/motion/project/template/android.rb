@@ -96,7 +96,8 @@ EOS
   File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
 
   # Compile and link payload library.
-  libs_abi_subpath = "lib/armeabi"
+  rm_rf "#{App.config.build_dir}/lib"
+  libs_abi_subpath = "lib/#{App.config.armeabi_directory_name}"
   libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_name}"
   libpayload_path = "#{App.config.build_dir}/#{libpayload_subpath}" 
   payload_o = File.join(File.dirname(payload_c), 'payload.o')
