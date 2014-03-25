@@ -93,11 +93,19 @@ module Motion; module Project;
     end
 
     def asflags
-      "-no-canonical-prefixes -target #{arch}-none-linux-androideabi -march=#{arch} -msoft-float -mthumb -marm -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -Wa,--noexecstack"
+      archflags = case arch
+        when 'armv5te'
+          "-march=armv5te -mtune=xscale"
+        when 'armv7'
+          "-march=armv7a -mfpu=vfpv3-d16"
+        else
+          raise "Invalid arch `#{arch}'"
+      end
+      "-no-canonical-prefixes -target #{arch}-none-linux-androideabi #{archflags} -mthumb -msoft-float -marm -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\""
     end
 
     def cflags
-      "#{asflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fstack-protector -mtune=xscale -fno-rtti -fno-strict-aliasing -O0 -g -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -Wformat -Werror=format-security"
+      "#{asflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -Wformat -Werror=format-security"
     end
 
     def cxxflags
