@@ -1,5 +1,6 @@
 = RubyMotion 2.25 =
 
+  * Fix a bug which `rake device debug=1' does not work with Xcode 5.1.
   * Fixed a bug where an application could not be installed and launched on the
     Simulator or a device due to the application bundle containing a directory
     called `Resources'. This will now fail the build with a descriptive error.
