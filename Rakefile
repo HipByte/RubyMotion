@@ -40,7 +40,7 @@ ANDROID_API_VERSIONS =
   else
     []
   end
-ANDROID_ARCHS = ['armv5te']
+ANDROID_ARCHS = ['armv5te', 'armv7']
 
 verbose(true)
 
