@@ -44,14 +44,11 @@ task :build do
     App.info 'Compile', ruby_path
     init_func = "InitRubyFile#{init_func_n += 1}"
 
-    as_path = File.join(objs_build_dir, ruby_path + '.s')
-    FileUtils.mkdir_p(File.dirname(as_path))
-    sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{as_path}\" #{init_func} \"#{ruby_path}\""
+    bc_path = File.join(objs_build_dir, ruby_path + '.bc')
+    FileUtils.mkdir_p(File.dirname(bc_path))
+    sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{bc_path}\" #{init_func} \"#{ruby_path}\""
 
-    obj_path = File.join(objs_build_dir, ruby_path + '.o')
-    sh "#{App.config.cc} #{App.config.asflags} -c \"#{as_path}\" -o \"#{obj_path}\""
-
-    ruby_objs << [obj_path, init_func]
+    ruby_objs << [bc_path, init_func]
   end
 
   # Generate payload main file.
