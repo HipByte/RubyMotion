@@ -296,7 +296,9 @@ def run_apk(mode)
     sh line
     Signal.trap('INT') do
       # Kill the app on ^C.
-      sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
+      if `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
+        sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
+      end
       exit 0
     end
     # Show logs.
