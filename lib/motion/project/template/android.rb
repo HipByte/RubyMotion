@@ -68,7 +68,6 @@ EOS
     payload_c_txt << "void #{init_func}(void *rcv, void *sel);\n" 
   end
   payload_c_txt << <<EOS
-void rb_vm_register_method(jclass klass, const char *sel, bool class_method, const char *signature);
 void rb_vm_register_native_methods(void);
 bool rb_vm_init(const char *app_package, JNIEnv *env);
 jint
