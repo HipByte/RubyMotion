@@ -838,6 +838,7 @@ start_debug_server(am_device_t dev)
 
 	// Prepare lldb commands file.
 	NSString *py_cmds = [NSString stringWithFormat:@""\
+	"# -*- coding: utf-8 -*-\n"\
 	"import socket\n"\
 	"import sys\n"\
 	"import lldb\n"\
