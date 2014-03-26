@@ -297,6 +297,11 @@ def run_apk(mode)
     line = "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
     line << " > /dev/null" unless Rake.application.options.trace
     sh line
+    Signal.trap('INT') do
+      # Kill the app on ^C.
+      sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
+      exit 0
+    end
     # Show logs.
     sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.package_path}:I"
   end
