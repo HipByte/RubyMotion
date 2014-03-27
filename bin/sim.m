@@ -1347,7 +1347,7 @@ main(int argc, char **argv)
 	environment] mutableCopy];
     if (debug_mode != DEBUG_NOTHING) {
 	// Prepare repl socket path.
-	replSocketPath = [appEnvironment[@"REPL_SOCKET_PATH"] retain];
+	replSocketPath = [[appEnvironment objectForKey:@"REPL_SOCKET_PATH"] retain];
 	if (replSocketPath == nil) {
 	    NSString *tmpdir = NSTemporaryDirectory();
 	    assert(tmpdir != nil);
