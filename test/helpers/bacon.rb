@@ -35,6 +35,15 @@ module Bacon
     alias_method :on_64bit_it, RUBY_ARCH =~ /64/ ? :it : :xit
 
     alias_method :on_ios_it, defined?(UIView) ? :it : :xit
+
+    def capture_warning
+      $last_rb_warn = nil
+      ENV['RM_CAPTURE_WARNINGS'] = '1'
+      yield
+      $last_rb_warn
+    ensure
+      ENV.delete('RM_CAPTURE_WARNINGS')
+    end
   end
 
   # Overrides the SpecDoxzRtput to provide colored output by default

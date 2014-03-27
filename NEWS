@@ -1,5 +1,8 @@
 = RubyMotion 2.25 =
 
+  * Improved user feedback by printing a warning when overriding a protocol
+    method that was previously defined with one of the `attr_*' methods. This
+    may print false positives.
   * Fixed a bug which `rake device debug=1' does not work with Xcode 5.1.
   * Fixed an error in `rake device debug=1' if it would use UTF-8 as app name.
   * Fixed a bug where an application could not be installed and launched on the
