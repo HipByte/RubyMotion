@@ -20,6 +20,8 @@ them, you can download them all from [here](http://cat-soft.jp/share/SDKs.dmg) a
 
 You need to have Xcode 5.1 installed as `/Applications/Xcode.app`.
 
+You also need to have Xcode 5 installed as `/Applications/Xcode5.app`. Xcode 5 is only required to build kernel.c.
+
 You also need to have Xcode 4 installed as `/Applications/Xcode4.app`. Xcode 4 is only required to build the REPL module.
 
 You also need to have installed the latest version of the command-line tools. `/usr/bin/clang -v` should report the following:
