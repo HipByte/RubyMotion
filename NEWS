@@ -19,7 +19,6 @@
   * Fixed a bug where Ruby methods defined on Objective-C tagged pointer
     objects could not call methods on itself.
   * Added support for Xcode 5.1 and iOS 7.1 final.
-  * Upgraded the compiler to LLVM 3.4.
   * [iOS] Made `tap' test helper work with `UISwitch'.
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
   * Improved Object#instance_variable_set performance. ~20% faster.
