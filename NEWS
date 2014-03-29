@@ -23,7 +23,7 @@
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
   * Improved Object#instance_variable_set performance. ~20% faster.
   * Improved method dispatcher performance. ~5% faster.
-  * Improved fine-grained lock performance. ~40% faster.
+  * Improved fine-grained lock performance. ~20% faster.
 
 = RubyMotion 2.24 =
 
