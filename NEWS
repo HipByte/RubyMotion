@@ -21,6 +21,8 @@
   * Added support for Xcode 5.1 and iOS 7.1 final.
   * [iOS] Made `tap' test helper work with `UISwitch'.
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
+  * Fixed a memory leak in Object#{method, public_method, instance_method, 
+    public_instance_method}.
   * Improved Object#instance_variable_set performance. ~20% faster.
   * Improved method dispatcher performance. ~5% faster.
   * Improved fine-grained lock performance. ~20% faster.
