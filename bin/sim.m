@@ -712,6 +712,18 @@ receive_string(void)
     NSMutableString *res = [NSMutableString new];
     bool received_something = false;
     while (true) {
+	fd_set read_fds;
+	FD_ZERO(&read_fds);
+	FD_SET(repl_fd, &read_fds);
+
+	struct timeval tv;
+	tv.tv_sec = 0;
+	tv.tv_usec = 50000;
+	if (select(repl_fd + 1, &read_fds, NULL, NULL, &tv) == -1) {
+	    perror("select()");
+	    break;
+	}
+
 	char buf[1024 + 1];
 	ssize_t len = recv(repl_fd, buf, sizeof buf, 0);
 	if (len == -1) {
