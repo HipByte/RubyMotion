@@ -25,6 +25,8 @@
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
   * Fixed a memory leak in Object#{method, public_method, instance_method,
     public_instance_method}.
+  * Fixed a bug which simulator would use high CPU usage if app could not
+    respond with heavy work load.
   * Improved Object#instance_variable_set performance. ~20% faster.
   * Improved Object#method performance. ~50% faster.
   * Improved method dispatcher performance. ~5% faster.
