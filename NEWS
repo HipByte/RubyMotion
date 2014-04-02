@@ -32,6 +32,7 @@
   * Improved Object#method performance. ~50% faster.
   * Improved method dispatcher performance. ~5% faster.
   * Improved fine-grained lock performance. ~20% faster.
+  * Improved memory management performance. ~25% faster.
 
 = RubyMotion 2.24 =
 
