@@ -33,8 +33,8 @@
   * Improved method dispatcher performance. ~5% faster.
   * Improved fine-grained lock performance. ~20% faster.
   * Improved memory management performance. ~25% faster.
-  * Added handling the app's source codes with `rake ctags'. Thanks to
-    Hwee-Boon Yar for the patch (pull request #152).
+  * Added the handling app's codes with `rake ctags'. Thanks to Hwee-Boon Yar
+    for the patch (pull request #152).
   * Added gemspec call to Gemfile for gem template. Thanks to Mark Rickert for
     the patch (pull request #151).
 
