@@ -42,6 +42,12 @@ ANDROID_API_VERSIONS =
   end
 ANDROID_ARCHS = ['armv5te', 'armv7']
 
+if false
+  # DEBUG
+  ANDROID_API_VERSIONS.clear; ANDROID_API_VERSIONS << 18
+  ANDROID_ARCHS.clear; ANDROID_ARCHS << 'armv5te'
+end
+
 verbose(true)
 
 def rake(dir, cmd='all')
