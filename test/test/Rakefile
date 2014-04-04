@@ -17,7 +17,7 @@ Motion::Project::App.setup do |app|
 
   # 10.8 and 10.9 are 64-bit only.
   if ENV['PLATFORM'] == 'osx' && ENV['ARCH'] == 'i386'
-    app.deployment_target = '10.7'
+    app.deployment_target = '10.7' # TODO 10.6?
   end
 end
 
