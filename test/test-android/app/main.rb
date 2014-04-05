@@ -99,6 +99,11 @@ class MainActivity < Android::App::Activity
     test 'Array#== returns false if operand is a wrong string', ([1, 2, 3] == [1, 2, 4]) == false
     test 'Array#== returns false if operand is not a string', ([1, 2, 3] == 42) == false
 
+    a = [1, 2, 3]
+    sum = 0
+    a.each { |x| sum += x }
+    test 'Array#each yields the block with each element', sum == 6
+
     test '!array returns false', (![42]) == false
   end
 end
