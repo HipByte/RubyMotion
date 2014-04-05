@@ -175,6 +175,7 @@ EOS
   # Compile java files.
   android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
   vendored_jars = App.config.vendored_jars
+  vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
   classes_dir = File.join(App.config.build_dir, 'classes')
   FileUtils.mkdir_p(classes_dir)
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
