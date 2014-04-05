@@ -160,7 +160,7 @@ task :install do
     './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd', './bin/gen_bridge_metadata',
     './bin/instruments', 'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri',
     './lldb/lldb.py'])
-  data = ['./NEWS']
+  data = ['./NEWS', './LEGAL']
   data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH) - ['./lib/Rakefile'])
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
   [['ios', IOS_SDK_VERSIONS + ['7.1']]].each do |name, sdk_versions|

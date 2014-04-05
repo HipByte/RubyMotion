@@ -1,0 +1,19 @@
+Portions of RubyMotion include third-party opensource software.
+
+MacRuby:
+	https://github.com/MacRuby/MacRuby/blob/master/COPYING
+	MacRuby is copyrighted free software by the MacRuby Team.
+	MacRuby contains code from the Ruby project, copyrighted free software
+	by Yukihiro Matsumoto <matz@netlab.jp>.
+ 	Copyright (C) 2012, The MacRuby Team. All rights reserved.
+ 	Copyright (C) 2010-2011, Apple Inc. All rights reserved.
+
+LLVM:
+	http://llvm.org/releases/3.3/LICENSE.TXT
+	Copyright (c) 2003-2010 University of Illinois at Urbana-Champaign.
+	All rights reserved.
+
+libdwarf (part of elftoolchain):
+	http://sourceforge.net/p/elftoolchain/code/HEAD/tree/trunk/README
+	Copyright (c) 2009 Kai Wang
+ 	All rights reserved.
