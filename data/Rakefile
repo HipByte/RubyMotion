@@ -437,6 +437,9 @@ task :android do
       cp "#{vm_objs_dir}/kernel-#{arch}.bc", dest_lib_path
     end
 
+    # Copy runtime jar. 
+    cp "../vm/android-#{api_vers}-classes/rubymotion.jar", "android/#{api_vers}"
+
     # Generate .bridgesupport files
     jar_path = File.join(ANDROID_SDK, 'platforms', "android-#{api_vers}", 'android.jar')
     tmp_path = File.join("/tmp/rm_android_#{api_vers}")
