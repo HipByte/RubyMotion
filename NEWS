@@ -26,6 +26,7 @@
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
   * Fixed a memory leak in Object#{method, public_method, instance_method,
     public_instance_method}.
+  * Fixed a bug where Boxed#copy would cause a crash.
   * Fixed a bug where Range#copy would cause a malloc_error_break error.
   * Fixed a bug which simulator would use high CPU usage if app could not
     respond with heavy work load.
