@@ -252,7 +252,7 @@ module Bacon
     module API
       include RunLoopHelpers
 
-      attr_accessor :window
+      attr_writer :window
 
       # Gets overriden by ContextExt#window when the spec context is configured
       # to run against a specific controller.
