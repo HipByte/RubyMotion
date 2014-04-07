@@ -1,44 +1,41 @@
 = RubyMotion 2.25 =
 
+  * Added support for Xcode 5.1 and iOS 7.1 final.
+  * Added support for OSX 10.6 as deployment target (experimental).
   * Improved user feedback by printing a warning when overriding a protocol
     method that was previously defined with one of the `attr_*' methods. This
     may print false positives.
-  * Fixed a bug which `rake device debug=1' does not work with Xcode 5.1.
+  * Improved `rake ctags' to index the application's .rb files. Thanks to
+    Hwee-Boon Yar for the patch (pull request #152).
+  * Improved use of `WeakRef' to raise an exception when trying to create a
+    weak reference to one of the unsupported classes. For more information, see
+    `Which classes don’t support weak references?' at http://bit.ly/1iiSOaU.
+  * Added some introspection support to `ImmediateRef'. It can now report the
+    actual class, its methods, and a inspect description string.
+  * Added gemspec call to Gemfile for gem template. Thanks to Mark Rickert for
+    the patch (pull request #151).
+  * Fixed a bug where `rake device debug=1' did not work with Xcode 5.1.
   * Fixed an error in `rake device debug=1' if it would use UTF-8 as app name.
   * Fixed a bug where an application could not be installed and launched on the
     Simulator or a device due to the application bundle containing a directory
     called `Resources'. This will now fail the build with a descriptive error.
-  * Fixed a bug which OSX simulator does not work on 10.7 Lion.
-  * Improved use of `WeakRef' to raise an exception when trying to create a
-    weak reference to one of the unsupported classes. For more information, see
-    `Which classes don’t support weak references?' at http://bit.ly/1iiSOaU.
+  * Fixed a bug where the OS X REPL did not work on 10.7 Lion.
   * Fixed a bug where KVC property validation methods defined in Ruby would not
     be compiled with the appropriate (Pointer) types.
-  * Added some introspection support to `ImmediateRef'. It can now report the
-    actual class, its methods, and a inspect description string.
   * Fixed a bug where Ruby methods defined on Objective-C tagged pointer
     objects could not call methods on itself.
-  * Added support for Xcode 5.1 and iOS 7.1 final.
-  * Added support for OSX 10.6 as deployment target (experimental).
   * [iOS] Made `tap' test helper work with `UISwitch'.
-  * Fixed a bug which it would not handle the method with bool type argument
-    properly.
+  * Fixed a bug where methods with BOOL arguments would not be handled properly.
   * Fixed a bug where the cycle detector did not work for Array/Hash objects.
   * Fixed a memory leak in Object#{method, public_method, instance_method,
     public_instance_method}.
   * Fixed a bug where Boxed#copy would cause a crash.
   * Fixed a bug where Range#copy would cause a malloc_error_break error.
-  * Fixed a bug which simulator would use high CPU usage if app could not
-    respond with heavy work load.
   * Improved Object#instance_variable_set performance. ~20% faster.
   * Improved Object#method performance. ~50% faster.
   * Improved method dispatcher performance. ~5% faster.
   * Improved fine-grained lock performance. ~20% faster.
   * Improved memory management performance. ~25% faster.
-  * Added the handling app's codes with `rake ctags'. Thanks to Hwee-Boon Yar
-    for the patch (pull request #152).
-  * Added gemspec call to Gemfile for gem template. Thanks to Mark Rickert for
-    the patch (pull request #151).
 
 = RubyMotion 2.24 =
 
