@@ -1,4 +1,4 @@
-PROJECT_VERSION = '2.25'
+PROJECT_VERSION = '2.26'
 XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
 sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
@@ -42,7 +42,7 @@ ANDROID_API_VERSIONS =
   end
 ANDROID_ARCHS = ['armv5te', 'armv7']
 
-if false
+if true
   # DEBUG
   ANDROID_API_VERSIONS.clear; ANDROID_API_VERSIONS << 18
   ANDROID_ARCHS.clear; ANDROID_ARCHS << 'armv5te'
