@@ -108,9 +108,58 @@ describe "WeakRef" do
     WeakRef.new(false).should == false
   end
 
+  # TODO what's the good way to determine if we're running on 10.7?
+  unless defined?(NSView) && ENV['deployment_target'] == '10.7'
+    it "allows weak references to AVFoundation classes" do
+      lambda { WeakRef.new(AVPlayer.new) }.should.not.raise
+    end
+  end
+
   it "raises with classes that do not support weak references" do
-    obj = NSMutableParagraphStyle.new
-    lambda { WeakRef.new(obj) }.should.raise(WeakRef::RefError)
+    # iOS and OS X classes, regardless of SDK version
+    classes = [
+      NSParagraphStyle,
+      NSMutableParagraphStyle,
+    ]
+    # OSX only classes
+    if defined?(NSView)
+      # Some of these are deprecated, so define a stub if necessary.
+      unless defined?(NSSimpleHorizontalTypesetter)
+         class NSSimpleHorizontalTypesetter; end
+      end
+      unless defined?(NSMenuView)
+        class NSMenuView; end
+      end
+      classes.concat([
+        NSSimpleHorizontalTypesetter,
+        NSATSTypesetter,
+        NSColorSpace,
+        NSFont,
+        NSMenuView,
+        NSTextView,
+      ])
+      # In addition, the following classes don't allow weak references on 10.7
+      if ENV['deployment_target'] == '10.7'
+        puts 'TESTING OSX 10.7 CLASSES!'
+        if AVPlayer.new.allowsWeakReference
+          puts 'ERROR: Expected AVPlayer to not allow weak references!!'
+        end
+        classes.concat([
+          AVPlayer,
+          NSFontManager,
+          NSFontPanel,
+          NSImage,
+          NSTableCellView,
+          NSViewController,
+          NSWindow,
+          NSWindowController,
+        ])
+      end
+    end
+    classes.each do |klass|
+      puts "Testing whether allows weak references: #{klass.name}"
+      lambda { WeakRef.new(klass.new) }.should.raise(WeakRef::RefError)
+    end
   end
 end
 

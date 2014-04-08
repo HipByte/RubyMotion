@@ -7,7 +7,7 @@ ENV['output'] ||= 'pretty_spec_dox'
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'test'
-  app.frameworks += ['AddressBook', 'AddressBookUI', 'CoreData', 'CoreMIDI', 'GameKit', 'AudioToolbox']
+  app.frameworks += ['AddressBook', 'AddressBookUI', 'AudioToolbox', 'AVFoundation', 'CoreData', 'CoreMIDI', 'GameKit']
   app.vendor_project('vendor/code', :static)
 
   app.spec_files.insert(1, *FileList['../helpers/*.rb'])
