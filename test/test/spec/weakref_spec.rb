@@ -123,10 +123,6 @@ describe "WeakRef" do
     ]
     # OSX only classes
     if defined?(NSView)
-      # Some of these are deprecated, so define a stub if necessary.
-      unless defined?(NSSimpleHorizontalTypesetter)
-         class NSSimpleHorizontalTypesetter; end
-      end
       unless defined?(NSMenuView)
         class NSMenuView; end
       end
