@@ -127,7 +127,6 @@ describe "WeakRef" do
         class NSMenuView; end
       end
       classes.concat([
-        NSSimpleHorizontalTypesetter,
         NSATSTypesetter,
         NSColorSpace,
         NSFont,
