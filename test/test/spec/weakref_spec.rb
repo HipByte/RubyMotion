@@ -135,10 +135,6 @@ describe "WeakRef" do
       ])
       # In addition, the following classes don't allow weak references on 10.7
       if ENV['deployment_target'] == '10.7'
-        puts 'TESTING OSX 10.7 CLASSES!'
-        if AVPlayer.new.allowsWeakReference
-          puts 'ERROR: Expected AVPlayer to not allow weak references!!'
-        end
         classes.concat([
           AVPlayer,
           NSFontManager,
@@ -152,7 +148,6 @@ describe "WeakRef" do
       end
     end
     classes.each do |klass|
-      puts "Testing whether allows weak references: #{klass.name}"
       lambda { WeakRef.new(klass.new) }.should.raise(WeakRef::RefError)
     end
   end
