@@ -71,6 +71,16 @@ class MainActivity < Android::App::Activity
     test 'Fixnum#* returns the multiplication of the receiver and the operand', 21 * 2 == 42
     test 'Fixnum#* returns the division of the receiver and the operand', 84 / 2 == 42
 
+    test 'Fixnum#> returns true if the receiver is greater than the operand', 42 > 41
+    test 'Fixnum#> returns false if the receiver is not greater than the operand', (41 > 42) == false
+    test 'Fixnum#>= returns true if the receiver is greater or equal than the operand', 42 >= 42
+    test 'Fixnum#>= returns false if the receiver is not greater or equal than the operand', (41 >= 42) == false
+
+    test 'Fixnum#< returns true if the receiver is lesser than the operand', 41 < 42
+    test 'Fixnum#< returns false if the receiver is not lesser than the operand', (42 < 41) == false
+    test 'Fixnum#<= returns true if the receiver is lesser or equal than the operand', 42 <= 42
+    test 'Fixnum#<= returns false if the receiver is not lesser or equal than the operand', (42 <= 41) == false
+
     test '!fixnum returns false', (!42) == false
   end
 
