@@ -1,6 +1,7 @@
 = RubyMotion 2.26 =
 
-  * Fixed a bug when checking if a class supports weak references on iOS 6.
+  * Fixed a regression introduced in the previous release that was causing a
+    crash when checking if a class supports weak references on iOS 6.
 
 = RubyMotion 2.25 =
 
