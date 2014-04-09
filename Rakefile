@@ -78,46 +78,6 @@ end
 desc "Build all targets"
 task :build => targets.map { |x| "build:#{x}" }
 
-TEST_SUITES = %w{ test TestTime TestSuite bacon-ui }
-
-namespace :spec do
-  def available_ios_sdk_versions
-    Dir.glob("/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk").map do |path|
-      File.basename(path).scan(/iPhoneSimulator(.*)\.sdk/)[0][0]
-    end
-  end
-
-  available_ios_sdk_versions.each do |sdk_version|
-    desc "Run test suites on the iOS #{sdk_version} SDK"
-    task sdk_version do
-      TEST_SUITES.each do |suite|
-        sh "cd test/#{suite} && rake spec deployment_target=#{sdk_version} target=#{sdk_version}"
-      end
-    end
-  end
-
-  desc "Run test suites on all available iOS SDKs"
-  task :all do
-    counter = 0
-    available_ios_sdk_versions.each do |sdk_version|
-      TEST_SUITES.each do |suite|
-        #App.info "Info", "Running `#{suite}' specs on iOS `#{sdk_version}' SDK."
-        puts "\e[1m" + 'Info'.rjust(10) + "\e[0m" + " Running `#{suite}' specs on iOS `#{sdk_version}' SDK."
-        begin
-          sh "cd test/#{suite} && rake spec deployment_target=#{sdk_version} target=#{sdk_version}"
-        rescue RuntimeError
-          counter += $?.exitstatus
-        end
-      end
-    end
-    if counter > 0
-      #App.info "Failed", "A total of #{counter} failures occurred."
-      puts "\e[1m" + 'Failed'.rjust(10) + "\e[0m" + " A total of #{counter} failures occurred."
-      exit counter
-    end
-  end
-end
-
 desc "Run the clang static analyzer against the source"
 task :analyze do
   options = []

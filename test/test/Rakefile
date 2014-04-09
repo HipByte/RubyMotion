@@ -16,8 +16,9 @@ Motion::Project::App.setup do |app|
   app.archs[app.local_platform] = [ENV['ARCH']] if ENV['ARCH']
 
   # 10.8 and 10.9 are 64-bit only.
-  if ENV['PLATFORM'] == 'osx' && ENV['ARCH'] == 'i386'
-    app.deployment_target = '10.7' # TODO 10.6?
+  if ENV['PLATFORM'] == 'osx' && ENV['ARCH'] == 'i386' && %w{ 10.8 10.9 }.include?(ENV['deployment_target'])
+    $stderr.puts "There is no 32-bit support for OS X #{ENV['deployment_target']}."
+    exit 1
   end
 end
 
@@ -29,6 +30,30 @@ task :clean do
       FileUtils.rm_rf dir
     end
   end
+end
+
+XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
+
+sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
+  File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
+end
+ios_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk')).map do |path|
+  File.basename(path).scan(/^iPhoneOS(.+)\.sdk$/)[0][0]
+end
+IOS_SDK_VERSIONS = (sim_sdks & ios_sdks)
+
+if IOS_SDK_VERSIONS.empty?
+  $stderr.puts "Can't locate any iOS SDK"
+  exit 1
+end
+
+OSX_SDK_VERSIONS = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'MacOSX.platform/Developer/SDKs/MacOSX*.sdk')).map do |path|
+  File.basename(path).scan(/^MacOSX(.+)\.sdk$/)[0][0]
+end
+
+if OSX_SDK_VERSIONS.empty?
+  $stderr.puts "Can't locate any OSX SDK"
+  exit 1
 end
 
 namespace :spec do
@@ -46,37 +71,63 @@ namespace :spec do
     end
   end
 
-  platforms = [:ios, :osx]
   archs = { '32' => 'i386', '64' => 'x86_64' }
 
-  platforms.each do |platform|
+  require 'motion/util/version'
+  ios7 = Motion::Util::Version.new('7')
+  osx108 = Motion::Util::Version.new('10.8')
+
+  variants = {
+    'ios' => {
+      '32' => IOS_SDK_VERSIONS,
+      # 64-bit support was introduced in iOS 7.
+      '64' => IOS_SDK_VERSIONS.select { |v| Motion::Util::Version.new(v) >= ios7 },
+    },
+    'osx' => {
+      # 32-bit support was dropped in OS X 10.8.
+      '32' => OSX_SDK_VERSIONS.select { |v| Motion::Util::Version.new(v) < osx108 },
+      '64' => OSX_SDK_VERSIONS
+    },
+  }
+
+  variant_tasks = []
+
+  variants.each do |platform, bits|
     namespace platform do
-      archs.each do |bit, arch|
-        desc "Run tests on #{platform} with arch #{bit}-bit"
-        task bit => :install_aggregate_test_handler do
-          App.info "TESTING", "Running test suite on platform: #{platform} (#{bit}-bit)"
-          begin
-            sh "env PLATFORM=#{platform} ARCH=#{arch} rake spec:clean_run"
-          rescue RuntimeError
-            test_fail_count << $?.exitstatus
+      bits.each do |bit, sdk_versions|
+        arch = archs[bit]
+        sdk_versions.each do |sdk_version|
+          namespace sdk_version do
+            variant_tasks << "#{platform}:#{sdk_version}:#{bit}"
+
+            desc "Run tests on the #{platform} #{sdk_version} SDK with arch #{bit}-bit"
+            task bit => :install_aggregate_test_handler do
+              App.info "TESTING", "Running test suite on the #{platform} #{sdk_version} SDK with arch #{bit}-bit"
+              begin
+                sh "env PLATFORM=#{platform} ARCH=#{arch} deployment_target=#{sdk_version} rake spec:clean_run"
+              rescue RuntimeError
+                test_fail_count << $?.exitstatus
+              end
+            end
+
           end
         end
       end
     end
+
+    desc "Run tests on #{platform}"
+    task platform => variant_tasks.select { |t| t.include?(platform) }.sort
   end
 
-  platforms.each do |platform|
-    desc "Run tests on #{platform} with all archs"
-    task platform => archs.keys.map { |arch| "spec:#{platform}:#{arch}" }
-  end
+  desc "Run tests on all available SDKs and archs"
+  task :all => variant_tasks
 
-  archs.keys.each do |arch|
-    desc "Run tests on all platforms with arch #{arch}-bit"
-    task arch => platforms.map { |platform| "spec:#{platform}:#{arch}" }
-  end
+  known_to_fail = [
+    'osx:10.6:32', 'osx:10.6:64',
+  ]
 
-  desc 'Run tests on all platforms and with all archs'
-  task :all => [:ios, :osx]
+  desc "Run tests that should pass on continuous integration"
+  task :ci => variant_tasks - known_to_fail
 end
 
 # TODO enable this once full test suite works on OS X.
