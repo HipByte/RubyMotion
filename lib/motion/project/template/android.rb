@@ -40,7 +40,7 @@ task :build do
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(App.config.build_dir, 'obj', 'local', App.config.armeabi_directory_name)
-  Dir.glob("./app/**/*.rb").each do |ruby_path|
+  App.config.files.each do |ruby_path|
     App.info 'Compile', ruby_path
     init_func = "InitRubyFile#{init_func_n += 1}"
 
