@@ -8,4 +8,9 @@ Motion::Project::App.setup do |app|
   app.api_version = '18'
   app.sdk_path = File.expand_path('~/src/android-sdk-macosx')
   app.ndk_path = File.expand_path('~/src/android-ndk-r9d')
+
+  # Make sure the main file is compiled and executed first.
+  ary = app.files
+  ary.delete('./app/main.rb')
+  ary.unshift('./app/main.rb')
 end
