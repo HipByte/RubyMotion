@@ -166,7 +166,14 @@ module Motion; module Project;
 
       # Resolve file dependencies.
       if config.detect_dependencies == true
-        config.dependencies = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
+        deps = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies)
+        deps.cache_path = File.join(objs_build_dir, "dependencies.rb")
+
+        config.dependencies = deps.run
+        unless deps.updated?
+          config.ordered_build_files = deps.ordered_build_files
+        end
+        deps.save_cache(config.ordered_build_files)
       end
 
       parallel = ParallelBuilder.new(objs_build_dir, build_file)
@@ -609,6 +616,7 @@ EOS
       require 'ripper'
     end
 
+    attr_accessor :cache_path
     @file_paths = []
 
     def initialize(paths, dependencies)
@@ -663,7 +671,47 @@ EOS
         end
       end
 
+      @dependencies = dependency
       return dependency
+    end
+
+    def updated?
+      return true unless File.exist?(@cache_path)
+
+      begin
+        require @cache_path
+        if @dependencies != cached_dependencies
+          return true
+        end
+      rescue
+      end
+
+      false
+    end
+
+    def ordered_build_files
+      return nil unless File.exist?(@cache_path)
+
+      begin
+        require @cache_path
+        cached_ordered_build_files
+      rescue
+        nil
+      end
+    end
+
+    def save_cache(ordered_build_files)
+      begin
+        File.open(@cache_path, 'w') { |io|
+          methods =
+          "module Motion; module Project; class Dependency;\n" +
+          "def cached_dependencies; " + @dependencies.inspect + "; end\n" +
+          "def cached_ordered_build_files; " + ordered_build_files.inspect + "; end\n" +
+          "end; end; end"
+          io.write(methods)
+        }
+      rescue
+      end
     end
 
     class Constant < Ripper::SexpBuilder
