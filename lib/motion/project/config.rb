@@ -236,14 +236,17 @@ module Motion; module Project
     end
 
     def file_dependencies(file)
-      deps = @dependencies[file]
-      if deps
-        deps = deps.map { |x| file_dependencies(x) }
-      else
-        deps = []
+      @known_dependencies ||= {}
+      @known_dependencies[file] ||= begin
+        deps = @dependencies[file]
+        if deps
+          deps = deps.map { |x| file_dependencies(x) }
+        else
+          deps = []
+        end
+        deps << file
+        deps
       end
-      deps << file
-      deps
     end
 
     def ordered_build_files
