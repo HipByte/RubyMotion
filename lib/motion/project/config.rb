@@ -236,6 +236,9 @@ module Motion; module Project
     end
 
     def file_dependencies(file)
+      # memorize the calculated file dependencies in order to reduce the time
+      # detecting file dependencies.
+      # http://hipbyte.myjetbrains.com/youtrack/issue/RM-466
       @known_dependencies ||= {}
       @known_dependencies[file] ||= begin
         deps = @dependencies[file]
