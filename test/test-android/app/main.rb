@@ -27,10 +27,34 @@ class Object
     yield
   end
 
-  def should
-    res = ShouldResult.new
-    res.set_object self
-    res
+  def should(condition=nil)
+    if condition
+      condition.call(self)
+    else
+      res = ShouldResult.new
+      res.set_object self
+      res
+    end
+  end
+
+  def be_kind_of(klass)
+    lambda do |obj|
+      if !obj.kind_of?(klass)
+        puts "Expectation failed (expected `#{obj}' to be kind_of? `#{klass}')"
+        $expectations_failures += 1
+      end
+      $expectations_total += 1
+    end
+  end
+
+  def equal(obj2)
+    lambda do |obj|
+      if !(obj.equal?(obj2))
+        puts "Expectation failed (expected `#{obj}' to be equal? `#{klass}')"
+        $expectations_failures += 1
+      end
+      $expectations_total += 1
+    end
   end
 
   def mock(obj)
