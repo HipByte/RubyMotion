@@ -188,16 +188,14 @@ EOS
     if !File.exist?(class_path) or File.mtime(java_path) > File.mtime(class_path)
       App.info 'Compile', java_path
       sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
-      rebuild_dex_classes = true
     end
   end
 
   # Generate the dex file.
   dex_classes = File.join(App.config.build_dir, 'classes.dex')
-  if !File.exist?(dex_classes) or rebuild_dex_classes
-    App.info 'Create', dex_classes
-    sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
-  end
+  rm_rf dex_classes
+  App.info 'Create', dex_classes
+  sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
 
   # Generate the Android manifest file.
   android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
