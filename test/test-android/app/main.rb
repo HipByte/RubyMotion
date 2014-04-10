@@ -9,8 +9,9 @@ class ShouldResult < Java::Lang::Object
   end
 
   def ==(x)
-    if @obj != x
-      puts "Expectation failed (expected `#{self}' == `#{x}')"
+    if @obj == x
+    else
+      puts "Expectation failed (expected `#{@obj}' == `#{x}')"
       $expectations_failures += 1
     end
     $expectations_total += 1
