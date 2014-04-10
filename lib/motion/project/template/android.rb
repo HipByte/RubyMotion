@@ -177,9 +177,9 @@ EOS
   vendored_jars = App.config.vendored_jars
   vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
   classes_dir = File.join(App.config.build_dir, 'classes')
-  FileUtils.mkdir_p(classes_dir)
+  rm_rf classes_dir
+  mkdir_p classes_dir
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
-  rebuild_dex_classes = false
   Dir.glob(File.join(App.config.build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
     paths[paths.index('java')] = 'classes'
