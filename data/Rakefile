@@ -51,12 +51,12 @@ task :vm_files do
   end
 
   if IOS_SDK_VERSIONS.size > 1
-    # Create a fat librubymotion-repl.dylib library for iOS simulator. The i386 slice has a deployment_target for 4.3 and the x86_64 slice has a deployment_target for 7.0.
+    # Create a fat librubymotion-repl.dylib library for iOS simulator. The i386 slice has a deployment_target for 4.3 and the x86_64 slice has a deployment_target for 7.1.
     first_ios_repl = "../vm/iPhoneSimulator#{IOS_SDK_VERSIONS.first}-repl.objs/librubymotion-repl.dylib"
 
-    # FIXME : Need to use latest SDK version instead of '7.0'
-    raise "does not target 7.0?" unless IOS_SDK_VERSIONS.include?('7.0')
-    last_ios_repl = "../vm/iPhoneSimulator7.0-repl.objs/librubymotion-repl.dylib"
+    # FIXME : Need to use latest SDK version instead of '7.1'
+    raise "does not target 7.1?" unless IOS_SDK_VERSIONS.include?('7.1')
+    last_ios_repl = "../vm/iPhoneSimulator7.1-repl.objs/librubymotion-repl.dylib"
 
     sh "/usr/bin/lipo -extract_family x86_64 \"#{last_ios_repl}\" -output /tmp/librubymotion-repl64.dylib"
     sh "/usr/bin/lipo -create \"#{first_ios_repl}\" /tmp/librubymotion-repl64.dylib -output ios/librubymotion-repl.dylib"
