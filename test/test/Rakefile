@@ -107,6 +107,9 @@ namespace :spec do
               rescue RuntimeError
                 test_fail_count << $?.exitstatus
               end
+
+              # for Jenkins CI
+              sh "rake spec:ci_output" if ENV['JENKINS_HOME'] && ENV['PLATFORM'] == 'ios'
             end
 
           end
@@ -126,11 +129,11 @@ end
 # files. So we modify the `spec` task to do this and then print the results.
 #
 # Detect Jenkins CI with env var from:
-# https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-JenkinsSetEnvironmentVariables
+# https://wiki.jenkins-ci.org/display/JENKINS/Administering+Jenkins
 #
-if ENV['JENKINS_URL'] && ENV['PLATFORM'] == 'ios'
+if ENV['JENKINS_HOME'] && ENV['PLATFORM'] == 'ios'
+  stdout, stderr = '/tmp/sim-stdout.log', '/tmp/sim-stderr.log'
   task :create_ci_output_files do
-    stdout, stderr = '/tmp/sim-stdout.log', '/tmp/sim-stderr.log'
     [stdout, stderr].each do |file|
       FileUtils.rm(file) if File.exist?(file)
       FileUtils.touch(file)
@@ -138,11 +141,12 @@ if ENV['JENKINS_URL'] && ENV['PLATFORM'] == 'ios'
     ENV['SIM_STDOUT_PATH'] = stdout
     ENV['SIM_STDERR_PATH'] = stderr
   end
+  task 'spec:simulator' => :create_ci_output_files do; end
 
-  task 'spec:simulator' => :create_ci_output_files do
+  task "spec:ci_output" do
     {
-      ENV['SIM_STDOUT_PATH'] => $stdout,
-      ENV['SIM_STDERR_PATH'] => $stderr,
+      stdout => $stdout,
+      stderr => $stderr,
     }.each do |path, io|
       File.open(path, 'r') do |file|
         file.each_line do |line|
