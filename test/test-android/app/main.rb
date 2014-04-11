@@ -84,6 +84,16 @@ class Object
     end
   end
 
+  def be_nil
+    lambda do |obj, res|
+      if (obj == nil) != res
+        puts "Expectation failed (expected `#{obj}' to be nil')"
+        $expectations_failures += 1
+      end
+      $expectations_total += 1
+    end
+  end
+
   def mock(obj)
     # XXX we probably should be smarter here.
     obj
