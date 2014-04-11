@@ -1,3 +1,9 @@
+class ArraySpec_19_Mock1 < Java::Lang::Object
+  def to_a
+    [2, 3, 4]
+  end
+end
+
 describe "Array literals" do
   it "[] accepts a literal hash without curly braces as its last parameter" do
     ["foo", "bar" => :baz].should == ["foo", {"bar" => :baz}]
@@ -14,13 +20,14 @@ describe "Array literals" do
 end
 
 describe "The unpacking splat operator (*)" do
-=begin 
   it "when applied to a non-Array value attempts to coerce it to Array if the object respond_to?(:to_a)" do
+=begin
     obj = mock("pseudo-array")
     obj.should_receive(:to_a).and_return([2, 3, 4])
+=end
+    obj = ArraySpec_19_Mock1.new
     [1, *obj].should == [1, 2, 3, 4]
   end
-=end
 
   it "when applied to a non-Array value uses it unchanged if it does not respond_to?(:to_a)" do
     obj = Object.new
