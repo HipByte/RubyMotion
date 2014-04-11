@@ -1,5 +1,5 @@
 describe "iOS constants" do
-  on_ios_it "have their values retrieved at demand" do
+  it "have their values retrieved at demand", :if => ios? do
     ABAddressBookCreate()
     KABPersonFirstNameProperty.should != KABPersonLastNameProperty
   end

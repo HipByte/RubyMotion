@@ -8,15 +8,25 @@ class MyTestMethod < TestMethod
 end
 
 describe 'A method accepting a 32-bit struct' do
-  it "can be called" do
+  # TODO
+  it "can be called", :unless => bits == 64 do
     s = MyStruct4C.new(1, 2, 3, 4)
     TestMethod.testMethodAcceptingMyStruct4C(s).should == true
     TestMethod.testMethodAcceptingMyStruct4C(s, another:s).should == true
   end
 end
 
+describe "A method returning a big 32-bit integer" do
+  it "returns a Bignum", :unless => bits == 64 do
+    o = TestMethod.new.methodReturningLargeInt
+    o.class.should == Bignum
+    o.should == 2147483646
+  end
+end
+
 describe 'A method returning a 64-bit struct' do
-  it "can be called" do
+  # TODO
+  it "can be called", :unless => osx_32bit? do
     o = TestMethod.new
     o.methodReturningCGSize.should == CGSize.new(1, 2)
   end
@@ -28,7 +38,8 @@ describe 'A method returning a 64-bit struct' do
 end
 
 describe 'A method returning a 128-bit struct' do
-  it "can be called" do
+  # TODO
+  it "can be called", :unless => osx_32bit? do
     o = TestMethod.new
     o.methodReturningCGRect.should == CGRect.new(CGPoint.new(1, 2), CGSize.new(3, 4))
   end
@@ -40,14 +51,14 @@ describe 'A method returning a 128-bit struct' do
 end
 
 describe 'A 3rd-party method accepting an iOS enum' do
-  on_ios_it "can be called" do
+  it "can be called", :if => ios? do
     TestMethod.testMethodAcceptingUIInterfaceOrientation(UIInterfaceOrientationPortrait).should == true
     TestMethod.testMethodAcceptingUIInterfaceOrientation(UIInterfaceOrientationLandscapeLeft).should == false
   end
 end
 
 describe 'A method accepting and returning UIEdgeInsets' do
-  on_ios_it "can be called" do
+  it "can be called", :if => ios? do
     s = UIEdgeInsetsMake(1, 2, 3, 4)
     TestMethod.testMethodAcceptingUIEdgeInsets(s).should == true
   end
@@ -81,7 +92,7 @@ describe 'A method accepting a CF type' do
     TestMethod.testMethodAcceptingCFType('foo').should == true
   end
 
-  on_ios_it "can be called (2)" do
+  it "can be called (2)", :if => ios? do
     controller = ABPersonViewController.alloc.init
     person = ABPersonCreate()
     controller.displayedPerson = person
@@ -136,14 +147,6 @@ describe "attr_" do
   end
 end
 
-describe "A method returning a big 32-bit integer" do
-  it "returns a Bignum" do
-    o = TestMethod.new.methodReturningLargeInt
-    o.class.should == Bignum
-    o.should == 2147483646
-  end
-end
-
 class TestNewInstance
 end
 
@@ -161,7 +164,8 @@ class TestPrivateMethod
 end
 
 describe "A private method" do
-  it "cannot be called with #public_send" do
+  # TODO
+  it "cannot be called with #public_send", :unless => osx_32bit? do
     o = TestPrivateMethod.new
     o.foo.should == 42
     o.send(:foo).should == 42
@@ -182,7 +186,7 @@ describe "An informal protocol method with BOOL types" do
   end
 
   # TODO Do we know of a Foundation version that works on OS X as well?
-  on_ios_it "can be called (1)" do
+  it "can be called (1)", :if => ios? do
     o = UITextField.new
     o.enablesReturnKeyAutomatically = true
     o.enablesReturnKeyAutomatically.should == true

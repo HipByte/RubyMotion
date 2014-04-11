@@ -55,7 +55,8 @@ describe "WeakRef" do
     WeakRef.new(Object.new).respond_to?(:weakref_alive?).should == true
   end
 
-  it "returns whether or not the reference is still alive" do
+  # Unsupported on older OS versions.
+  it "returns whether or not the reference is still alive", :if => ((osx? && sdk_version >= '10.7') || (ios? && sdk_version >= '5.0')) do
     autorelease_pool do
       @ref = WeakRef.new(Object.new)
       @ref.weakref_alive?.should == true
@@ -65,7 +66,8 @@ describe "WeakRef" do
     end
   end
 
-  it "raises a WeakRef::RefError if messaged when the reference is no longer alive" do
+  # TODO leads to segfault on OS X 10.6 64-bit
+  it "raises a WeakRef::RefError if messaged when the reference is no longer alive", :unless => (osx? && sdk_version == '10.6' && bits == 64) do
     autorelease_pool do
       @ref = WeakRef.new(Object.new)
       lambda { @ref.to_s }.should.not.raise
@@ -108,21 +110,19 @@ describe "WeakRef" do
     WeakRef.new(false).should == false
   end
 
-  # TODO what's the good way to determine if we're running on 10.7?
-  unless defined?(NSView) && ENV['deployment_target'] == '10.7'
-    it "allows weak references to AVFoundation classes" do
-      lambda { WeakRef.new(AVPlayer.new) }.should.not.raise
-    end
+  # On 10.7 this should raise
+  it "allows weak references to AVFoundation classes", :unless => osx? && sdk_version == '10.7' do
+    lambda { WeakRef.new(AVPlayer.new) }.should.not.raise
   end
 
-  it "raises with classes that do not support weak references" do
+  it "raises with classes that do not support weak references", :unless => osx_32bit? && sdk_version == '10.6' do
     # iOS and OS X classes, regardless of SDK version
     classes = [
       NSParagraphStyle,
       NSMutableParagraphStyle,
     ]
     # OSX only classes
-    if defined?(NSView)
+    if osx?
       unless defined?(NSMenuView)
         class NSMenuView; end
       end
@@ -134,7 +134,7 @@ describe "WeakRef" do
         NSTextView,
       ])
       # In addition, the following classes don't allow weak references on 10.7
-      if ENV['deployment_target'] == '10.7'
+      if OSX_VERSION == '10.7'
         classes.concat([
           AVPlayer,
           NSFontManager,

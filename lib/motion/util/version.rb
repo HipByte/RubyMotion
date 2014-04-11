@@ -25,6 +25,7 @@ module Motion; module Util
     # https://github.com/rubygems/rubygems/blob/81d806d818baeb5dcb6398ca631d772a003d078e/lib/rubygems/version.rb
     #
     def <=>(other)
+      other = Version.new(other) if String === other
       return unless Version === other
       return 0 if @version == other.to_s
 

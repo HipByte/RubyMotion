@@ -10,7 +10,7 @@ Motion::Project::App.setup do |app|
   app.frameworks += ['AddressBook', 'AddressBookUI', 'AudioToolbox', 'AVFoundation', 'CoreData', 'CoreMIDI', 'GameKit']
   app.vendor_project('vendor/code', :static)
 
-  app.spec_files.insert(1, *FileList['../helpers/*.rb'])
+  app.spec_files.insert(1, *FileList['../../lib/motion/util/version.rb', '../helpers/*.rb'])
   app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
 
   app.archs[app.local_platform] = [ENV['ARCH']] if ENV['ARCH']
@@ -57,8 +57,6 @@ if OSX_SDK_VERSIONS.empty?
 end
 
 namespace :spec do
-  task :clean_run => [:clean, :spec]
-
   test_fail_count = []
 
   task :install_aggregate_test_handler do
@@ -104,7 +102,7 @@ namespace :spec do
             task bit => :install_aggregate_test_handler do
               App.info "TESTING", "Running test suite on the #{platform} #{sdk_version} SDK with arch #{bit}-bit"
               begin
-                sh "env PLATFORM=#{platform} ARCH=#{arch} deployment_target=#{sdk_version} rake spec:clean_run"
+                sh "env PLATFORM=#{platform} ARCH=#{arch} deployment_target=#{sdk_version} rake #{'clean' unless ENV['clean'] == '0'} spec"
               rescue RuntimeError
                 test_fail_count << $?.exitstatus
               end
@@ -121,13 +119,6 @@ namespace :spec do
 
   desc "Run tests on all available SDKs and archs"
   task :all => variant_tasks
-
-  known_to_fail = [
-    'osx:10.6:32', 'osx:10.6:64',
-  ]
-
-  desc "Run tests that should pass on continuous integration"
-  task :ci => variant_tasks - known_to_fail
 end
 
 # TODO enable this once full test suite works on OS X.

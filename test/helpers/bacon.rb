@@ -1,5 +1,18 @@
-# Adapted from https://github.com/irrationalfab/PrettyBacon
+BITS = RUBY_ARCH.include?('64') ? 64 : 32
 
+if defined?(UIView)
+  IOS_VERSION = Motion::Util::Version.new(ENV['deployment_target'])
+  OSX_VERSION = nil
+elsif defined?(NSView)
+  IOS_VERSION = nil
+  OSX_VERSION = Motion::Util::Version.new(ENV['deployment_target'])
+end
+unless IOS_VERSION || OSX_VERSION
+  NSLog("ERROR: Unable to determin iOS and OS X deployment target version!")
+  exit(1)
+end
+
+# Adapted from https://github.com/irrationalfab/PrettyBacon
 module PrettyBacon
   def self.color(color, string)
     case color
@@ -32,9 +45,39 @@ module Bacon
       end
     end
 
-    alias_method :on_64bit_it, RUBY_ARCH =~ /64/ ? :it : :xit
+    alias_method :__it_before_conditionally, :it
 
-    alias_method :on_ios_it, defined?(UIView) ? :it : :xit
+    def it(*args, &block)
+      if args.last.is_a?(Hash)
+        options = args.pop
+        if options.has_key?(:if) && !options[:if]
+          return xit(*args, &block)
+        else options.has_key?(:unless) && options[:unless]
+          return xit(*args, &block)
+        end
+      end
+      __it_before_conditionally(*args, &block)
+    end
+
+    def bits
+      BITS
+    end
+
+    def sdk_version
+      IOS_VERSION || OSX_VERSION
+    end
+
+    def ios?
+      !IOS_VERSION.nil?
+    end
+
+    def osx?
+      !OSX_VERSION.nil?
+    end
+
+    def osx_32bit?
+      osx? && bits == 32
+    end
 
     def capture_warning
       $last_rb_warn = nil

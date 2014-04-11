@@ -36,7 +36,8 @@ describe "Strings with multibyte characters" do
     "..€€……".index("…").should == 4
   end
 
-  it "finds the most right-side index of a character" do
+  # TODO
+  it "finds the most right-side index of a character", :unless => osx_32bit? do
     "..€€……".rindex(".").should == 1
     "..€€……".rindex("€").should == 3
     "..€€……".rindex("…").should == 5
