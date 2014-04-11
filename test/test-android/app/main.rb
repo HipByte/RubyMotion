@@ -94,6 +94,26 @@ class Object
     end
   end
 
+  def be_true
+    lambda do |obj, res|
+      if (obj == true) != res
+        puts "Expectation failed (expected `#{obj}' to be true')"
+        $expectations_failures += 1
+      end
+      $expectations_total += 1
+    end
+  end
+
+  def be_false
+    lambda do |obj, res|
+      if (obj == false) != res
+        puts "Expectation failed (expected `#{obj}' to be false')"
+        $expectations_failures += 1
+      end
+      $expectations_total += 1
+    end
+  end
+
   def mock(obj)
     # XXX we probably should be smarter here.
     obj
