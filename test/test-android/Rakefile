@@ -12,5 +12,12 @@ Motion::Project::App.setup do |app|
   # Make sure the main file is compiled and executed first.
   ary = app.files
   ary.delete('./app/main.rb')
+  if files = ENV['files']
+    files = files.split(',')
+    ary.delete_if do |path|
+      base = File.basename(path)
+      !files.any? { |x| base.include?(x) }
+    end
+  end
   ary.unshift('./app/main.rb')
 end
