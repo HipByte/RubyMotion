@@ -53,7 +53,6 @@ class Object
     end
   end
 
-
   def be_kind_of(klass)
     lambda do |obj, res|
       if obj.kind_of?(klass) != res
