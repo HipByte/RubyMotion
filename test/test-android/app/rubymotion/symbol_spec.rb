@@ -3,5 +3,11 @@ describe "Symbols" do
     :foo.class.should == Symbol
     :foo.class.inspect.should == 'com.rubymotion.Symbol'
   end
-end
 
+  it "can be passed to Java methods expecting a java.lang.CharSequence" do
+    str_builder = Java::Lang::StringBuilder.new
+    str_builder.append(:hello)
+    str_builder.append(:world)
+    str_builder.toString.should == 'helloworld'
+  end
+end
