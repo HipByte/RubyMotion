@@ -241,12 +241,8 @@ module Motion; module Project
       # http://hipbyte.myjetbrains.com/youtrack/issue/RM-466
       @known_dependencies ||= {}
       @known_dependencies[file] ||= begin
-        deps = @dependencies[file]
-        if deps
-          deps = deps.map { |x| file_dependencies(x) }
-        else
-          deps = []
-        end
+        deps = @dependencies[file] || []
+        deps = deps.map { |x| file_dependencies(x) }.flatten.uniq
         deps << file
         deps
       end
