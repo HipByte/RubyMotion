@@ -254,10 +254,6 @@ module Motion; module Project
       end
     end
 
-    def ordered_build_files=(order)
-      @ordered_build_files ||= order
-    end
-
     def spec_core_files
       @spec_core_files ||= begin
         # Core library + core helpers.
