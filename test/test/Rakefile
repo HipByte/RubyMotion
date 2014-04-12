@@ -109,7 +109,7 @@ namespace :spec do
               end
 
               # for Jenkins CI
-              sh "rake spec:ci_output" if ENV['JENKINS_HOME'] && ENV['PLATFORM'] == 'ios'
+              sh "rake spec:ci_output" if ENV['JENKINS_HOME'] && platform == 'ios'
             end
 
           end
