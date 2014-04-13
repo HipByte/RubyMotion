@@ -14,7 +14,7 @@ class ShouldResult < Java::Lang::Object
 
   def ==(x)
     if (@obj == x) != @res
-      puts "Expectation failed (expected `#{@obj}' == `#{x}')"
+      puts "Expectation failed (expected `#{@obj}' (#{@obj.class}) == `#{x}' (#{x.class}))"
       $expectations_failures += 1
     end
     $expectations_total += 1
