@@ -1,3 +1,4 @@
+$running = false
 $specs = []
 $describe = nil
 $expectations_total = 0
@@ -23,7 +24,14 @@ end
 
 class Object
   def describe(msg, &block)
-    $specs << [msg, block]
+    if $running
+      old_describe = $describe
+      $describe = "#{$describe} #{msg}"
+      block.call
+      $describe = old_describe
+    else
+      $specs << [msg, block]
+    end
   end
  
   def it(msg)
@@ -122,6 +130,7 @@ end
 class MainActivity < Android::App::Activity
   def onCreate(savedInstanceState)
     super
+    $running = true
     $specs.each do |ary|
       $describe = ary[0]
       ary[1].call
