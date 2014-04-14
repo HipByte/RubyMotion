@@ -24,6 +24,15 @@ class ShouldResult < Java::Lang::Object
   end
 end
 
+class ScratchPadClass < Java::Lang::Object
+  def record(obj); @obj = obj; end
+  def <<(x); @obj << x; end
+  def recorded; @obj; end
+  def clear; @obj = nil; end
+end
+
+ScratchPad = ScratchPadClass.new
+
 class Object
   def describe(msg, &block)
     if $running
