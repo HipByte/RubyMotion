@@ -94,6 +94,16 @@ class Object
     end
   end
 
+  def be_an_instance_of(klass)
+    lambda do |obj, res|
+      if obj.instance_of?(klass) != res
+        puts "Expectation failed (expected `#{obj}' to be instance_of? `#{klass}')"
+        $expectations_failures += 1
+      end
+      $expectations_total += 1
+    end
+  end
+
   def equal(obj2)
     lambda do |obj, res|
       if obj.equal?(obj2) != res
