@@ -1,6 +1,8 @@
 $running = false
 $specs = []
 $describe = nil
+$befores = []
+$afters = []
 $expectations_total = 0
 $expectations_failures = 0
 
@@ -34,9 +36,21 @@ class Object
     end
   end
  
+  def before(step, &block)
+    # Assume :each
+    $befores << block
+  end
+
+  def after(step, &block)
+    # Assume :each
+    $afters << block
+  end
+
   def it(msg)
     puts "#{$describe} #{msg}"
+    $befores.each { |x| x.call }
     yield
+    $afters.each { |x| x.call }
   end
 
   def should(condition=nil)
@@ -132,6 +146,8 @@ class MainActivity < Android::App::Activity
     super
     $running = true
     $specs.each do |ary|
+      $befores.clear
+      $afters.clear
       $describe = ary[0]
       ary[1].call
     end
