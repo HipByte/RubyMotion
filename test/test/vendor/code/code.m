@@ -180,3 +180,31 @@ ReturnsIntBlock KreateGlobalBlock()
   return ^{ return 42; };
 }
 
+/* Test for RM-468, RM-457 */
+@implementation TestBoolType : NSObject
+@synthesize value;
+
+- (id)initWithBoolPtr:(BOOL*)ptr
+{
+    self.value = [NSNumber numberWithBool:*ptr];
+    return self;
+}
+
+- (id)initWithStruct:(MyStructHasBool)val
+{
+    self.value = [NSNumber numberWithBool:val.bool_value];
+    return self;
+}
+
+- (id)initWithUnion:(MyUnionHasBool)val
+{
+    self.value = [NSNumber numberWithBool:val.st.bool_value];
+    return self;
+}
+
+- (BOOL)returnBool
+{
+    return YES;
+}
+
+@end

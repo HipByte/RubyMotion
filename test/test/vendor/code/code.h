@@ -100,3 +100,26 @@ void KreateStackBlock(void (^inputBlock)(ReturnsIntBlock));
 ReturnsIntBlock KreateMallocBlock(int input);
 ReturnsIntBlock KreateGlobalBlock();
 
+
+typedef struct MyStructHasBool {
+    BOOL bool_value;
+} MyStructHasBool;
+
+typedef struct MyUnionHasBool {
+    MyStructHasBool st;
+    int value;
+} MyUnionHasBool;
+
+@interface TestBoolType : NSObject
+{
+    NSNumber *_value;
+}
+
+@property (nonatomic, strong) NSNumber *value;
+
+- (id)initWithBoolPtr:(BOOL*)val;
+- (id)initWithStruct:(MyStructHasBool)val;
+- (id)initWithUnion:(MyUnionHasBool)val;
+- (BOOL)returnBool;
+
+@end
