@@ -33,6 +33,7 @@ sample/*/build
 sample/*/.repl_history
 
 test/test/vendor/code/build-iPhoneSimulator/
+test/test/vendor/code/build-MacOSX/
 test/test/vendor/code/code.bridgesupport
 
 test/bacon-ui/build
