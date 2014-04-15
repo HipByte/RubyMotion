@@ -182,7 +182,7 @@ ReturnsIntBlock KreateGlobalBlock()
 
 /* Test for RM-468, RM-457 */
 @implementation TestBoolType : NSObject
-@synthesize value;
+@synthesize value = _value;
 
 - (id)initWithBoolPtr:(BOOL*)ptr
 {
