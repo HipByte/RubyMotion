@@ -79,7 +79,9 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     rb_vm_init("#{App.config.package_path}", env);
 EOS
   ruby_objs.each do |_, init_func|
+    payload_c_txt << "    (*env)->PushLocalFrame(env, 32);\n"
     payload_c_txt << "    #{init_func}(NULL, NULL);\n"
+    payload_c_txt << "    (*env)->PopLocalFrame(env, NULL);\n"
   end
   payload_c_txt << <<EOS
     rb_vm_register_native_methods();
