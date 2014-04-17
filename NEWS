@@ -4,6 +4,7 @@
     build error in environment using Ruby 1.8.
   * Fixed a regression introduced in RubyMotion 2.25 that was causing a 
    'not precompiled' error if the method would handle BOOL pointer in arguments.
+  * Fixed a bug which the boxed class cannot reopen safely.
   * Improved a detecting file dependencies to reduce the build time when an app
     has large file dependencies. Thanks to Ignacio Piantanida for the detective
     work.
