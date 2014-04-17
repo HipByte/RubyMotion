@@ -455,10 +455,12 @@ EOS
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
         dest_path = File.join(app_resources_dir, res)
-        modified = copy_resource(res_path, dest_path)
-        if modified && should_compile_to_binary_plist?(res_path)
-          compile_resource_to_binary_plist(dest_path)
-        end
+        copy_resource(res_path, dest_path)
+      end
+
+      # Compile all .strings files
+      Dir.glob(File.join(app_resources_dir, '{,**/}*.strings')).each do |strings_file|
+        compile_resource_to_binary_plist(strings_file)
       end
 
       # Optional support for #eval (OSX-only).
@@ -515,10 +517,6 @@ EOS
       end
     end
 
-    def should_compile_to_binary_plist?(res_path)
-      File.extname(res_path) == '.strings'
-    end
-
     def compile_resource_to_binary_plist(path)
       App.info 'Compile', path
       sh "/usr/bin/plutil -convert binary1 \"#{path}\""
@@ -529,9 +527,6 @@ EOS
         FileUtils.mkdir_p(File.dirname(dest_path))
         App.info 'Copy', res_path
         FileUtils.cp_r(res_path, dest_path)
-        true
-      else
-        false
       end
     end
 
