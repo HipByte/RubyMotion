@@ -1,5 +1,9 @@
 = RubyMotion 2.27 =
 
+  * Added support for localization `.strings' files which will be compiled as
+    binary files. Thanks to Hwee-Boon Yar for the patch (pull request #154).
+  * Added support for `NSLocalizedString' and friends. These are now available
+    on `Kernel'.
   * Fixed a regression introduced in RubyMotion 2.25 that was causing a
     build error in environment using Ruby 1.8.
   * Fixed a regression introduced in RubyMotion 2.25 that was causing a 
