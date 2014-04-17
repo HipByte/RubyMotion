@@ -454,7 +454,13 @@ EOS
         if reserved_app_bundle_files.include?(res)
           App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
         end
-        copy_resource(res_path, File.join(app_resources_dir, res))
+        dest_path = File.join(app_resources_dir, res)
+        copy_resource(res_path, dest_path)
+      end
+
+      # Compile all .strings files
+      Dir.glob(File.join(app_resources_dir, '{,**/}*.strings')).each do |strings_file|
+        compile_resource_to_binary_plist(strings_file)
       end
 
       # Optional support for #eval (OSX-only).
@@ -509,6 +515,11 @@ EOS
         # (Ruby 2.0 or below, Dir.glob returns "Normalization Form D").
         return string
       end
+    end
+
+    def compile_resource_to_binary_plist(path)
+      App.info 'Compile', path
+      sh "/usr/bin/plutil -convert binary1 \"#{path}\""
     end
 
     def copy_resource(res_path, dest_path)
