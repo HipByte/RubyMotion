@@ -516,7 +516,7 @@ EOS
     end
 
     def should_compile_to_binary_plist?(res_path)
-      File.extname(res_path.split('/').last) == '.strings'
+      File.extname(res_path) == '.strings'
     end
 
     def compile_resource_to_binary_plist(path)
