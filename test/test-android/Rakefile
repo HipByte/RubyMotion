@@ -15,8 +15,7 @@ Motion::Project::App.setup do |app|
   if files = ENV['files']
     files = files.split(',')
     ary.delete_if do |path|
-      base = File.basename(path)
-      !files.any? { |x| base.include?(x) }
+      !files.any? { |x| path.include?(x) }
     end
   end
   ary.unshift('./app/main.rb')
