@@ -3,6 +3,8 @@ $specs = []
 $describe = nil
 $befores = []
 $afters = []
+$specs_total = 0
+$specs_exceptions = 0
 $expectations_total = 0
 $expectations_failures = 0
 
@@ -56,9 +58,16 @@ class Object
   end
 
   def it(msg)
-    puts "#{$describe} #{msg}"
+    spec = "#{$describe} #{msg}"
+    puts spec
     $befores.each { |x| x.call }
-    yield
+    begin
+      yield
+    rescue => exc
+      puts "ERROR: Exception happened: #{exc}"
+      $specs_exceptions += 1
+    end
+    $specs_total += 1
     $afters.each { |x| x.call }
   end
 
@@ -170,6 +179,6 @@ class MainActivity < Android::App::Activity
       $describe = ary[0]
       ary[1].call
     end
-    puts "Spec suite finished: #{$expectations_total} expectations, #{$expectations_failures} failure(s)."
+    puts "Spec suite finished: #{$specs_total} specs, #{$specs_exceptions} exception(s), #{$expectations_total} expectations, #{$expectations_failures} failure(s)"
   end
 end
