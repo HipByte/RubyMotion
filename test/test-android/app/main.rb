@@ -163,6 +163,24 @@ class Object
     end
   end
 
+  def raise_error(klass)
+    lambda do |obj, res|
+      begin
+        obj.call
+        if !res
+          puts "Expectation failed (expected `#{klass}' to be raised, but nothing happened)"
+          $expectations_failures += 1
+        end
+      rescue => e
+        if (e.is_a?(klass)) != res
+          puts "Expectation failed (expected `#{klass}' to be raised, got `#{e}')"
+          $expectations_failures += 1
+        end
+      end
+      $expectations_total += 1
+    end
+  end
+
   def mock(obj)
     # XXX we probably should be smarter here.
     obj
