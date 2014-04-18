@@ -1,14 +1,14 @@
 describe "Literal integers" do
-  it "are based on java.lang.Long" do
-    Fixnum.should == Java::Lang::Long
-    123.class.should == Java::Lang::Long
+  it "are based on java.lang.Integer" do
+    Fixnum.should == Java::Lang::Integer
+    123.class.should == Java::Lang::Integer
   end
 end
 
 describe "Literal floats" do
-  it "are based on java.lang.Double" do
-    Float.should == Java::Lang::Double
-    (3.14).class.should == Java::Lang::Double
+  it "are based on java.lang.Float" do
+    Float.should == Java::Lang::Float
+    (3.14).class.should == Java::Lang::Float
   end
 end
 
