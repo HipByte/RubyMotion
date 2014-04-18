@@ -172,6 +172,7 @@ end
 class MainActivity < Android::App::Activity
   def onCreate(savedInstanceState)
     super
+    Exception.log_exceptions = false
     $running = true
     $specs.each do |ary|
       $befores.clear
