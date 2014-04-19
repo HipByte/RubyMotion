@@ -8,10 +8,6 @@ describe "Fixnum#+" do
   it "returns self plus the given Integer" do
     (491 + 2).should == 493
     (90210 + 10).should == 90220
-
-p 9, bignum_value, 9 + bignum_value
-p 1001 + 5.219
-
     (9 + bignum_value).should == 9223372036854775817
     (1001 + 5.219).should == 1006.219
   end
