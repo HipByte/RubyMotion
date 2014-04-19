@@ -185,6 +185,18 @@ class Object
     # XXX we probably should be smarter here.
     obj
   end
+
+  def nan_value
+    0/0.0
+  end
+
+  def infinity_value
+    1/0.0
+  end
+
+  def bignum_value(plus=0)
+    0x8000_0000_0000_0000 + plus
+  end
 end
 
 class MainActivity < Android::App::Activity
