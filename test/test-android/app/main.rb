@@ -181,6 +181,17 @@ class Object
     end
   end
 
+  TOLERANCE = 0.00003
+  def be_close(expected, tolerance)
+    lambda do |obj, res|
+      if ((obj - expected).abs < tolerance) != res
+        puts "Expectation failed (expected `#{obj}' to be within #{expected} of tolerance #{tolerance}')"
+        $expectations_failures += 1
+      end
+      $expectations_total += 1
+    end
+  end
+
   def mock(obj)
     # XXX we probably should be smarter here.
     obj
