@@ -73,7 +73,7 @@ end
 def apply_bridgesupport_fixes(bs)
   rules = []
   case File.basename(bs, '.bridgesupport')
-    when 'CoreMIDI', 'AudioToolbox'
+    when 'CoreMIDI', 'AudioToolbox', 'AudioUnit'
       rules << [/<cftype /, '<opaque ']
     else
       rules << [/<opaque /, '<cftype ']
@@ -196,6 +196,16 @@ task :bridgesupport_files do
           # In iOS 7.0, NSObject is defined in /usr/include/objc/NSObject.h
           sh "../bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework} -I#{sdk_path}/usr/include \" objc/NSObject.h objc/NSObjCRuntime.h > /tmp/NSObject.bridgesupport"
           merge_bridgesupport dest, '/tmp/NSObject.bridgesupport'
+        end
+
+        if framework == 'AudioToolbox'
+          # Generate AudioUnit.bridgesupport and merge it into AudioToolbox.bridgesupport
+          framework_path = File.join(framework_path, '../AudioUnit.framework')
+          framework = File.basename(framework_path, '.framework')
+          headers_path = File.join(framework_path, 'Headers')
+          sh "../bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -DTARGET_OS_IPHONE -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -framework #{framework} -I#{headers_path}\" #{headers_path}/*.h > /tmp/AudioUnit.bridgesupport"
+          apply_bridgesupport_fixes('/tmp/AudioUnit.bridgesupport')
+          merge_bridgesupport dest, '/tmp/AudioUnit.bridgesupport'          
         end
 
         return dest
