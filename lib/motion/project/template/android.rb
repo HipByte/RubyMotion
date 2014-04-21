@@ -232,7 +232,7 @@ EOS
   archive = App.config.apk_path
   if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(libpayload_path) > File.mtime(archive)
     App.info 'Create', archive
-    resource_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
+    resource_flags = App.config.resources_dirs.map { |x| '-A "' + x + '"' }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{android_jar}\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
       [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
