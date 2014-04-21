@@ -1,7 +1,7 @@
 describe "Strings" do
   it "are based on com.rubymotion.String" do
     'foo'.class.should == String
-    'foo'.class.inspect.should == 'com.rubymotion.String'
+    'foo'.class.getName.should == 'com.rubymotion.String'
   end
 
   it "can be passed to Java methods expecting a java.lang.CharSequence" do

@@ -1,7 +1,7 @@
 describe "Symbols" do
   it "are based on com.rubymotion.Symbol" do
     :foo.class.should == Symbol
-    :foo.class.inspect.should == 'com.rubymotion.Symbol'
+    :foo.class.getName.should == 'com.rubymotion.Symbol'
   end
 
   it "can be passed to Java methods expecting a java.lang.CharSequence" do
