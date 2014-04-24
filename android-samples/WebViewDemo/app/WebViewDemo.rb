@@ -1,4 +1,4 @@
-class WebViewDemo < Android::App::Activity
+class MainActivity < Android::App::Activity
   def onCreate(savedInstanceState)
     super
     @handler = Android::Os::Handler.new
