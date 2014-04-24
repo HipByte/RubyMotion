@@ -4,7 +4,7 @@ class MainActivity < Android::App::Activity
     @handler = Android::Os::Handler.new
 
     @webview = Android::Webkit::WebView.new(self)
-    settings = @webview.getSettings
+    settings = @webview.settings
     settings.savePassword = false
     settings.saveFormData = false
     settings.javaScriptEnabled = true
