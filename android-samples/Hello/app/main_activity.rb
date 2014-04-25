@@ -11,7 +11,7 @@ class MainActivity < Android::App::Activity
 
   def dispatchTouchEvent(event)
     @counter ||= 0
-    case event.getAction
+    case event.action
       when Android::View::MotionEvent::ACTION_UP
         @counter += 1
         @text.text = "Touched #{@counter} times!"
