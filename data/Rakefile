@@ -471,12 +471,13 @@ task :android do
 <signatures version='1.0'>
 EOS
         txt = File.read(javap_tmp_path)
-        res = txt.scan(/class\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
-        res += txt.scan(/class\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
-        res.each do |klass, body_txt|
-          class_path = klass.gsub(/\./, '/')
+        res = txt.scan(/(class)\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
+        res += txt.scan(/(class)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
+        res += txt.scan(/(interface)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab interfaces
+        res.each do |type, elem, body_txt|
+          elem_path = elem.gsub(/\./, '/')
           bs_data << <<EOS
-  <class name=\"#{class_path}\">
+  <#{type} name=\"#{elem_path}\">
 EOS
           body_txt.strip.split(/\n/).each_cons(2) do |elem_line, signature_line|
             signature_line = signature_line.strip
@@ -488,7 +489,7 @@ EOS
             if md = elem_line.match(/\s([^(\s]+)\(/)
               # A method.
               method = md[1]
-              if method == klass
+              if method == elem
                 # An initializer.
                 method = '&lt;init&gt;'
               end
@@ -505,7 +506,7 @@ EOS
             end
           end
           bs_data << <<EOS
-  </class>
+  </#{type}>
 EOS
         end
         bs_data << <<EOS
