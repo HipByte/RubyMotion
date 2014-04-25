@@ -131,7 +131,7 @@ EOS
     txt = File.read(map)
     current_class = nil
     txt.each_line do |line|
-      if md = line.match(/^([^\s]+)\s*:\s*([^\s]+)$/)
+      if md = line.match(/^([^\s]+)\s*:\s*([^\s]+)\s*<([^>]*)>$/)
         current_class = java_classes[md[1]]
         if current_class
           if current_class[:super] != md[2]
@@ -139,7 +139,8 @@ EOS
             exit 1
           end
         else
-          current_class = {:super => md[2], :methods => []}
+          infs = md[3].split(',').map { |x| x.strip }
+          current_class = {:super => md[2], :methods => [], :interfaces => infs}
           java_classes[md[1]] = current_class
         end
       elsif md = line.match(/^\t(.+)$/)
@@ -163,7 +164,11 @@ EOS
     File.open(java_file, 'w') do |io|
       io.puts "// This file has been generated. Do not edit by hands."
       io.puts "package #{App.config.package};"
-      io.puts "public class #{name} extends #{klass[:super]} {"
+      io.print "public class #{name} extends #{klass[:super]}"
+      if klass[:interfaces].size > 0
+        io.print " implements #{klass[:interfaces].join(', ')}"
+      end
+      io.puts " {"
       klass[:methods].each do |method|
         io.puts "\t#{method};"
       end
