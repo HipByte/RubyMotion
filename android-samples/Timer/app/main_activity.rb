@@ -28,7 +28,7 @@ class MainActivity < Android::App::Activity
 
     @label = Android::Widget::TextView.new(self)
     @label.text = 'Tap to start'
-    @label.textSize = 40.0
+    @label.textSize = 80.0
     @label.gravity = Android::View::Gravity::CENTER_HORIZONTAL
     layout.addView(@label)
 
