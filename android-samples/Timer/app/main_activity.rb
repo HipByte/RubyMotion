@@ -1,22 +1,22 @@
-  class TimerButtonListener < Java::Lang::Object
-    def set_activity(activity)
-      @activity = activity
-    end
-
-    def onClick(view)
-      @activity.toggleTimer
-    end
+class TimerButtonListener < Java::Lang::Object
+  def set_activity(activity)
+    @activity = activity
   end
 
-  class TimerTask < Java::Util::TimerTask
-    def set_activity(activity)
-      @activity = activity
-    end
-
-    def run
-      @activity.handler.post -> { @activity.updateTimer }
-    end
+  def onClick(view)
+    @activity.toggleTimer
   end
+end
+
+class TimerTask < Java::Util::TimerTask
+  def set_activity(activity)
+    @activity = activity
+  end
+
+  def run
+    @activity.handler.post -> { @activity.updateTimer }
+  end
+end
 
 class MainActivity < Android::App::Activity
   def onCreate(savedInstanceState)
