@@ -170,7 +170,7 @@ EOS
       end
       io.puts " {"
       klass[:methods].each do |method|
-        io.puts "\t#{method};"
+        io.puts "\t#{method}"
       end
       if name == App.config.main_activity
         io.puts "\tstatic {\n\t\tSystem.load(\"#{App.config.payload_library_name}\");\n\t}"
