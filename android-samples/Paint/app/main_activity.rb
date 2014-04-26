@@ -12,7 +12,7 @@ class PaintView < Android::View::View
         path.moveTo(x, y)
         paint = Android::Graphics::Paint.new
         paint.color = Android::Graphics::Color.rgb(rand(255), rand(255), rand(255))
-        paint.strokeWidth = 5.0
+        paint.strokeWidth = 10.0
         paint.style = Android::Graphics::Paint::Style::STROKE
         paint.antiAlias = true
         @paths << [path, paint]
