@@ -171,7 +171,7 @@ EOS
   java_classes.each do |name, klass|
     java_file_txt = ''
     java_file_txt << <<EOS
-// This file has been generated automatically. Dot not edit.
+// This file has been generated automatically. Do not edit.
 package #{App.config.package};
 EOS
     java_file_txt << "public class #{name} extends #{klass[:super]}"
