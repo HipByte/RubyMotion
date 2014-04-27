@@ -255,6 +255,13 @@ EOS
 EOS
   end
 
+  # Create the debug keystore if needed.
+  debug_keystore = File.expand_path('~/.android/debug.keystore')
+  unless File.exist?(debug_keystore)
+    App.info 'Create', debug_keystore
+    sh "/usr/bin/keytool -genkeypair -alias androiddebugkey -keypass android -keystore \"#{debug_keystore}\" -storepass android -dname \"CN=Android Debug,O=Android,C=US\" -validity 9999"
+  end
+
   # Generate the APK file.
   archive = App.config.apk_path
   if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(libpayload_path) > File.mtime(archive)
@@ -267,13 +274,6 @@ EOS
         line << " > /dev/null" unless Rake.application.options.trace
         sh line
       end
-    end
-
-    # Create the debug keystore if needed.
-    debug_keystore = File.expand_path('~/.android/debug.keystore')
-    unless File.exist?(debug_keystore)
-      App.info 'Create', debug_keystore
-      sh "/usr/bin/keytool -genkeypair -alias androiddebugkey -keypass android -keystore \"#{debug_keystore}\" -storepass android -dname \"CN=Android Debug,O=Android,C=US\" -validity 9999"
     end
 
     App.info 'Sign', archive
