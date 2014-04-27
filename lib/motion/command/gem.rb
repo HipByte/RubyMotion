@@ -26,31 +26,26 @@
 begin
   require 'bundler'
 rescue LoadError
-  abort "Please make sure you have bundler gem installed and try again."
+  abort "Please make sure you have 'bundler' gem installed and try again."
 end
 
 require 'erb'
 require 'fileutils'
-# require 'motion/project/app'
 
 module Motion; class Command
   class Gem < Command
     DefaultOS = 'ios'
     self.summary = 'Create a RubyMotion gem.'
-    # TODO make more elaborate
-    # self.description = '...'
 
-    #    DONE: create a gem with a given name
-    #    DONE: add RM specific Rakefile so it's motion specific
-    #    add the OS specific stuff
-    #        ios
-    #        osx
-    #    add: app/app_delegate.rb
-    #    add: lib/{app}.rb
-    #    add: lib/{app}/
-    #    add: lib/{app}/{app}.rb
-    #    add: spec/main_spec.rb
+    self.description = %q(Create a RubyMotion specific gem.
+You can choose what operating system you wish to targed by
+using the '--os' switch, with the values of either:
 
+  - 'ios' for iOS
+or
+  - 'osx' for OS X
+
+Omitting the value, defaults to iOS.)
 
     def initialize(argv)
       @name = argv.shift_argument
@@ -73,10 +68,6 @@ module Motion; class Command
     end
 
     def run
-      puts "motion gem invoked"
-      puts "name is: #{@name}"
-      puts "os is: #{@os}"
-      puts "motion lib dir: #{$motion_libdir}"
       bundle_gem_create
       add_rubymotion_specifics
     end
@@ -101,9 +92,12 @@ module Motion; class Command
     end
 
     def modify_rakefile
-      template = ERB.new File.read("#{$motion_libdir}motion/gem/templates/Rakefile.erb")
-      rake = template.result(binding)
-      File.open("./#{@name}/Rakefile", 'w') { |file| file.write(rake) }
+      render_and_write "#{$motion_libdir}motion/gem/templates/Rakefile.erb", "#{@name}/Rakefile"
+    end
+
+    def render_and_write template, destination
+      rendered = ERB.new File.read(template)
+      File.open(destination, 'w') { |file| file.write(rendered.result(binding)) }
     end
 
     def copy_rubymotion_gitignore
@@ -130,25 +124,17 @@ module Motion; class Command
       templates_dir = "#{$motion_libdir}motion/gem/templates/#{@os}/"
       lib_file_template = "#{templates_dir}lib/gem_name.rb.erb"
 
-      lib_file = ERB.new File.read(lib_file_template)
-      File.open(lib_file_name, 'w') { |file| file.write(lib_file.result(binding)) }
-
+      render_and_write lib_file_template, lib_file_name
       log lib_file_name
-
-      FileUtils.mkdir_p "#{lib_file_dir}"
-      log lib_file_dir
-
-      FileUtils.mkdir_p "#{lib_file_dir}/.gitkeep"
-      log "#{lib_file_dir}/.gitkeep"
     end
 
     def copy_spec_files
       spec_dir = "#{@name}/spec"
-      spec_file_path = "#{spec_dir}/main_spec.rb"
       FileUtils.mkdir_p spec_dir
+
       template = "#{$motion_libdir}motion/gem/templates/#{@os}/spec/main_spec.rb.erb"
-      spec_file = ERB.new File.read(template)
-      File.open("./#{spec_file_path}", 'w') { |file| file.write(spec_file.result(binding)) }
+      spec_file_path = "#{spec_dir}/main_spec.rb"
+      render_and_write template, spec_file_path
       log spec_file_path
     end
 
