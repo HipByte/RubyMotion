@@ -188,7 +188,6 @@ EOS
     java_file_txt << "}\n"
     java_file = File.join(java_app_package_dir, name + '.java')
     if !File.exist?(java_file) or File.read(java_file) != java_file_txt
-      App.info 'Create', java_file
       File.open(java_file, 'w') { |io| io.write(java_file_txt) }
     end
   end
@@ -215,7 +214,7 @@ EOS
     end
 
     if !File.exist?(class_path) or File.mtime(java_path) > File.mtime(class_path)
-      App.info 'Compile', java_path
+      App.info 'Create', class_path
       sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
     end
   end
