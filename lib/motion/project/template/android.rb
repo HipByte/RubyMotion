@@ -101,7 +101,9 @@ EOS
   libs_abi_subpath = "lib/#{App.config.armeabi_directory_name}"
   libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_name}"
   libpayload_path = "#{App.config.build_dir}/#{libpayload_subpath}"
-  if !File.exist?(libpayload_path) or ruby_objs_changed
+  if !File.exist?(libpayload_path) \
+      or ruby_objs_changed \
+      or File.mtime(File.join(App.config.versioned_arch_datadir, "librubymotion-static.a")) > File.mtime(libpayload_path)
     payload_o = File.join(File.dirname(payload_c), 'payload.o')
     if !File.exist?(payload_o) or File.mtime(payload_c) > File.mtime(payload_o)
       sh "#{App.config.cc} #{App.config.cflags} -c \"#{payload_c}\" -o \"#{payload_o}\""
