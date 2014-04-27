@@ -222,15 +222,16 @@ EOS
 
   # Generate the dex file.
   dex_classes = File.join(App.config.build_dir, 'classes.dex')
-  rm_rf dex_classes
-  App.info 'Create', dex_classes
-  sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
+  if !File.exist?(dex_classes) \
+      or File.mtime(App.config.project_file) > File.mtime(dex_classes) \
+      or File.mtime(classes_dir) > File.mtime(dex_classes)
+    App.info 'Create', dex_classes
+    sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
+  end
 
   # Generate the Android manifest file.
-  android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
-  App.info 'Create', android_manifest
-  File.open(android_manifest, 'w') do |io|
-    io.print <<EOS
+  android_manifest_txt = ''
+  android_manifest_txt << <<EOS
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="1" android:versionName="1.0">
 	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
@@ -242,17 +243,21 @@ EOS
             		</intent-filter>
         	</activity>
 EOS
-    (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
-      io.print <<EOS
+  (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
+    android_manifest_txt << <<EOS
 		<activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
 			<meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
 		</activity>
 EOS
-    end
-    io.print <<EOS
+  end
+  android_manifest_txt << <<EOS
     </application>
 </manifest> 
 EOS
+  android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
+  if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
+    App.info 'Create', android_manifest
+    File.open(android_manifest, 'w') { |io| io.write(android_manifest_txt) }
   end
 
   # Create the debug keystore if needed.
@@ -264,7 +269,11 @@ EOS
 
   # Generate the APK file.
   archive = App.config.apk_path
-  if !File.exist?(archive) or File.mtime(dex_classes) > File.mtime(archive) or File.mtime(libpayload_path) > File.mtime(archive)
+  if !File.exist?(archive) \
+      or File.mtime(dex_classes) > File.mtime(archive) \
+      or File.mtime(libpayload_path) > File.mtime(archive) \
+      or File.mtime(android_manifest) > File.mtime(archive) \
+      or App.config.resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
     App.info 'Create', archive
     resource_flags = App.config.resources_dirs.map { |x| '-A "' + x + '"' }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{android_jar}\" -F \"#{archive}\""
