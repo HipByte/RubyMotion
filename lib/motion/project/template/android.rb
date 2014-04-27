@@ -40,14 +40,16 @@ task :build do
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(App.config.build_dir, 'obj', 'local', App.config.armeabi_directory_name)
+  ruby_objs_changed = false
   App.config.files.each do |ruby_path|
-    App.info 'Compile', ruby_path
-    init_func = "InitRubyFile#{init_func_n += 1}"
-
     bc_path = File.join(objs_build_dir, ruby_path + '.bc')
-    FileUtils.mkdir_p(File.dirname(bc_path))
-    sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{bc_path}\" #{init_func} \"#{ruby_path}\""
-
+    init_func = "InitRubyFile#{init_func_n += 1}"
+    if !File.exist?(bc_path) or File.mtime(ruby_path) > File.mtime(bc_path) or File.mtime(ruby) > File.mtime(bc_path)
+      App.info 'Compile', ruby_path
+      FileUtils.mkdir_p(File.dirname(bc_path))
+      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{bc_path}\" #{init_func} \"#{ruby_path}\""
+      ruby_objs_changed = true
+    end
     ruby_objs << [bc_path, init_func]
   end
 
@@ -91,18 +93,23 @@ EOS
 EOS
   payload_c = File.join(App.config.build_dir, 'jni/payload.c')
   mkdir_p File.dirname(payload_c)
-  File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
+  if !File.exist?(payload_c) or File.read(payload_c) != payload_c_txt
+    File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
+  end
 
   # Compile and link payload library.
-  rm_rf "#{App.config.build_dir}/lib"
   libs_abi_subpath = "lib/#{App.config.armeabi_directory_name}"
   libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_name}"
-  libpayload_path = "#{App.config.build_dir}/#{libpayload_subpath}" 
-  payload_o = File.join(File.dirname(payload_c), 'payload.o')
-  App.info 'Create', libpayload_path
-  sh "#{App.config.cc} #{App.config.cflags} -c \"#{payload_c}\" -o \"#{payload_o}\""
-  FileUtils.mkdir_p(File.dirname(libpayload_path))
-  sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs}"
+  libpayload_path = "#{App.config.build_dir}/#{libpayload_subpath}"
+  if !File.exist?(libpayload_path) or ruby_objs_changed
+    payload_o = File.join(File.dirname(payload_c), 'payload.o')
+    if !File.exist?(payload_o) or File.mtime(payload_c) > File.mtime(payload_o)
+      sh "#{App.config.cc} #{App.config.cflags} -c \"#{payload_c}\" -o \"#{payload_o}\""
+    end
+    App.info 'Create', libpayload_path
+    FileUtils.mkdir_p(File.dirname(libpayload_path))
+    sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs}"
+  end
 
   # Create a build/libs -> build/lib symlink (important for ndk-gdb).
   Dir.chdir(App.config.build_dir) { ln_s 'lib', 'libs' unless File.exist?('libs') }
@@ -112,17 +119,21 @@ EOS
 
   # Copy the gdb server.
   gdbserver_subpath = "#{libs_abi_subpath}/gdbserver"
-  gdbserver_path = "#{App.config.build_dir}/#{gdbserver_subpath}" 
-  App.info 'Create', gdbserver_path
-  sh "/usr/bin/install -p #{App.config.ndk_path}/prebuilt/android-arm/gdbserver/gdbserver #{File.dirname(gdbserver_path)}"
+  gdbserver_path = "#{App.config.build_dir}/#{gdbserver_subpath}"
+  if !File.exist?(gdbserver_path)
+    App.info 'Create', gdbserver_path
+    sh "/usr/bin/install -p #{App.config.ndk_path}/prebuilt/android-arm/gdbserver/gdbserver #{File.dirname(gdbserver_path)}"
+  end
 
   # Create the gdb config file.
   gdbconfig_path = "#{App.config.build_dir}/#{libs_abi_subpath}/gdb.setup"
-  App.info 'Create', gdbconfig_path
-  File.open(gdbconfig_path, 'w') do |io|
-    io.puts <<EOS
+  if !File.exist?(gdbconfig_path)
+    App.info 'Create', gdbconfig_path
+    File.open(gdbconfig_path, 'w') do |io|
+      io.puts <<EOS
 set solib-search-path #{libs_abi_subpath}
 EOS
+    end
   end
 
   # Create java files.
@@ -155,27 +166,30 @@ EOS
     end
   end
   java_dir = File.join(App.config.build_dir, 'java')
-  rm_rf java_dir
   java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
   mkdir_p java_app_package_dir
   java_classes.each do |name, klass|
+    java_file_txt = ''
+    java_file_txt << <<EOS
+// This file has been generated automatically. Dot not edit.
+package #{App.config.package};
+EOS
+    java_file_txt << "public class #{name} extends #{klass[:super]}"
+    if klass[:interfaces].size > 0
+      java_file_txt << " implements #{klass[:interfaces].join(', ')}"
+    end
+    java_file_txt << " {\n"
+    klass[:methods].each do |method|
+      java_file_txt << "\t#{method}\n"
+    end
+    if name == App.config.main_activity
+      java_file_txt << "\tstatic {\n\t\tSystem.load(\"#{App.config.payload_library_name}\");\n\t}\n"
+    end
+    java_file_txt << "}\n"
     java_file = File.join(java_app_package_dir, name + '.java')
-    App.info 'Create', java_file
-    File.open(java_file, 'w') do |io|
-      io.puts "// This file has been generated. Do not edit by hands."
-      io.puts "package #{App.config.package};"
-      io.print "public class #{name} extends #{klass[:super]}"
-      if klass[:interfaces].size > 0
-        io.print " implements #{klass[:interfaces].join(', ')}"
-      end
-      io.puts " {"
-      klass[:methods].each do |method|
-        io.puts "\t#{method}"
-      end
-      if name == App.config.main_activity
-        io.puts "\tstatic {\n\t\tSystem.load(\"#{App.config.payload_library_name}\");\n\t}"
-      end
-      io.puts "}"
+    if !File.exist?(java_file) or File.read(java_file) != java_file_txt
+      App.info 'Create', java_file
+      File.open(java_file, 'w') { |io| io.write(java_file_txt) }
     end
   end
 
@@ -184,7 +198,6 @@ EOS
   vendored_jars = App.config.vendored_jars
   vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
   classes_dir = File.join(App.config.build_dir, 'classes')
-  rm_rf classes_dir
   mkdir_p classes_dir
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
   Dir.glob(File.join(App.config.build_dir, 'java', '**', '*.java')).each do |java_path|
@@ -192,6 +205,15 @@ EOS
     paths[paths.index('java')] = 'classes'
     paths[-1].sub!(/\.java$/, '.class')
     class_path = paths.join('/')
+
+    class_name = File.basename(java_path, '.java')
+    if !java_classes.has_key?(class_name)
+      # This .java file is not referred in the classes map, so it must have been created in the past. We remove it as well as its associated .class file (if any).
+      rm_rf java_path
+      rm_rf class_path
+      next
+    end
+
     if !File.exist?(class_path) or File.mtime(java_path) > File.mtime(class_path)
       App.info 'Compile', java_path
       sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
