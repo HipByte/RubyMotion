@@ -199,6 +199,7 @@ EOS
   classes_dir = File.join(App.config.build_dir, 'classes')
   mkdir_p classes_dir
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
+  classes_changed = false
   Dir.glob(File.join(App.config.build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
     paths[paths.index('java')] = 'classes'
@@ -210,12 +211,14 @@ EOS
       # This .java file is not referred in the classes map, so it must have been created in the past. We remove it as well as its associated .class file (if any).
       rm_rf java_path
       rm_rf class_path
+      classes_changed = true
       next
     end
 
     if !File.exist?(class_path) or File.mtime(java_path) > File.mtime(class_path)
       App.info 'Create', class_path
       sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
+      classes_changed = true
     end
   end
 
@@ -223,7 +226,7 @@ EOS
   dex_classes = File.join(App.config.build_dir, 'classes.dex')
   if !File.exist?(dex_classes) \
       or File.mtime(App.config.project_file) > File.mtime(dex_classes) \
-      or File.mtime(classes_dir) > File.mtime(dex_classes)
+      or classes_changed
     App.info 'Create', dex_classes
     sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
   end
