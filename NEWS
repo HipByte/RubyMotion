@@ -10,6 +10,8 @@
    'not precompiled' error if the method would handle BOOL pointer in arguments.
   * Fixed a bug which the boxed class cannot reopen safely.
   * Fixed a bug which AudioUnit bridgesupport metadata were missing.
+  * Fixed a bug which shortcut for the method which was implemented on Ruby
+    would not respond.
   * Improved a detecting file dependencies to reduce the build time when an app
     has large file dependencies. Thanks to Ignacio Piantanida for the detective
     work.
