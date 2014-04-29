@@ -4,17 +4,18 @@
     binary files. Thanks to Hwee-Boon Yar for the patch (pull request #154).
   * Added support for `NSLocalizedString' and friends. These are now available
     on `Kernel'.
+  * Added missing AudioUnit bridgesupport metadata.
+  * Improved the file dependencies detection code to spend less time when
+    working on a project that has a significant number of dependencies.
+    Thanks to Ignacio Piantanida for the detective work.
   * Fixed a regression introduced in RubyMotion 2.25 that was causing a
     build error in environment using Ruby 1.8.
   * Fixed a regression introduced in RubyMotion 2.25 that was causing a 
-   'not precompiled' error if the method would handle BOOL pointer in arguments.
-  * Fixed a bug which the boxed class cannot reopen safely.
-  * Fixed a bug which AudioUnit bridgesupport metadata were missing.
+    `not precompiled' error if the method would handle a BOOL pointer as an
+    argument.
+  * Fixed a bug where Boxed subclasses could not be re-opened safely.
   * Fixed a bug which shortcut for the method which was implemented on Ruby
     would not respond.
-  * Improved a detecting file dependencies to reduce the build time when an app
-    has large file dependencies. Thanks to Ignacio Piantanida for the detective
-    work.
 
 = RubyMotion 2.26 =
 
