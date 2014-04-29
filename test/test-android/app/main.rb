@@ -18,7 +18,7 @@ class ShouldResult < Java::Lang::Object
   end
 
   def ==(x)
-    __assert__(@obj == x, @res, "Expected `#{@obj}' (of class #{@obj.class}) to be == `#{x}' (of class #{x.class}")
+    __assert__(@obj == x, @res, "Expected `#{@obj}' (of class #{@obj.class}) to be == `#{x}' (of class #{x.class})")
   end
 end
 
