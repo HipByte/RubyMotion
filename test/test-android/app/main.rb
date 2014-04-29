@@ -18,11 +18,7 @@ class ShouldResult < Java::Lang::Object
   end
 
   def ==(x)
-    if (@obj == x) != @res
-      puts "Expectation failed (expected `#{@obj}' (#{@obj.class}) == `#{x}' (#{x.class}))"
-      $expectations_failures += 1
-    end
-    $expectations_total += 1
+    __assert__(@obj == x, @res, "Expected `#{@obj}' (of class #{@obj.class}) to be == `#{x}' (of class #{x.class}")
   end
 end
 
@@ -93,73 +89,53 @@ class Object
     end
   end
 
+  def __assert__(val, res, error_msg)
+    if val != res
+      puts "*** ERROR: Expectation failed: #{error_msg}"
+      $expectations_failures += 1
+    end
+    $expectations_total += 1
+  end
+
   def be_kind_of(klass)
     lambda do |obj, res|
-      if obj.kind_of?(klass) != res
-        puts "Expectation failed (expected `#{obj}' to be kind_of? `#{klass}')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__(obj.kind_of?(klass), res, "Expected `#{obj}' to be kind_of? `#{klass}'")
     end
   end
 
   def be_an_instance_of(klass)
     lambda do |obj, res|
-      if obj.instance_of?(klass) != res
-        puts "Expectation failed (expected `#{obj}' to be instance_of? `#{klass}')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__(obj.instance_of?(klass), res, "Expected `#{obj}' to be instance_of? `#{klass}'")
     end
   end
 
   def equal(obj2)
     lambda do |obj, res|
-      if obj.equal?(obj2) != res
-        puts "Expectation failed (expected `#{obj}' to be equal? `#{klass}')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__(obj.equal?(obj2), res, "Expected `#{obj}' to be equal? `#{obj2}'")
     end
   end
 
   def respond_to(sel)
     lambda do |obj, res|
-      if obj.respond_to?(sel) != res
-        puts "Expectation failed (expected `#{obj}' to respond_to? `#{sel}')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__(obj.respond_to?(sel), res, "Expected `#{obj}' to respond_to? `#{sel}'")
     end
   end
 
   def be_nil
     lambda do |obj, res|
-      if (obj == nil) != res
-        puts "Expectation failed (expected `#{obj}' to be nil')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__(obj == nil, res, "Expected `#{obj}' to be nil'")
     end
   end
 
   def be_true
     lambda do |obj, res|
-      if (obj == true) != res
-        puts "Expectation failed (expected `#{obj}' to be true')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__(obj == true, res, "Expected `#{obj}' to be true'")
     end
   end
 
   def be_false
     lambda do |obj, res|
-      if (obj == false) != res
-        puts "Expectation failed (expected `#{obj}' to be false')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__(obj == false, res, "Expected `#{obj}' to be false'")
     end
   end
 
@@ -167,28 +143,17 @@ class Object
     lambda do |obj, res|
       begin
         obj.call
-        if !res
-          puts "Expectation failed (expected `#{klass}' to be raised, but nothing happened)"
-          $expectations_failures += 1
-        end
+        __assert__(!res, true, "Expected `#{klass}' to be raised, but nothing happened")
       rescue => e
-        if (e.is_a?(klass)) != res
-          puts "Expectation failed (expected `#{klass}' to be raised, got `#{e}')"
-          $expectations_failures += 1
-        end
+        __assert__(e.is_a?(klass), res, "Expected `#{klass}' to be raised, got `#{e}'")
       end
-      $expectations_total += 1
     end
   end
 
   TOLERANCE = 0.00003
   def be_close(expected, tolerance)
     lambda do |obj, res|
-      if ((obj - expected).abs < tolerance) != res
-        puts "Expectation failed (expected `#{obj}' to be within #{expected} of tolerance #{tolerance}')"
-        $expectations_failures += 1
-      end
-      $expectations_total += 1
+      __assert__((obj - expected).abs < tolerance, res, "Expected `#{obj}' to be within `#{expected}' of tolerance `#{tolerance}'")
     end
   end
 
