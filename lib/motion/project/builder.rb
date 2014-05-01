@@ -518,8 +518,10 @@ EOS
     end
 
     def compile_resource_to_binary_plist(path)
-      App.info 'Compile', path
-      sh "/usr/bin/plutil -convert binary1 \"#{path}\""
+      unless File.size(path) == 0
+        App.info 'Compile', path
+        sh "/usr/bin/plutil -convert binary1 \"#{path}\""
+      end
     end
 
     def copy_resource(res_path, dest_path)
