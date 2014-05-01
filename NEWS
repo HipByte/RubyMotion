@@ -1,5 +1,7 @@
 = RubyMotion 2.28 =
 
+  * Fixed a bug with the CoreMIDI BridgeSupport metadata on platforms that have
+    64-bit support where the MIDI types would be unavailable.
   * Fixed a bug where empty `.strings' files would lead to a build failure.
   * Fixed a performance issue in deallocating if many objects would be created.
 
