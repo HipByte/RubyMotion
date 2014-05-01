@@ -1,3 +1,7 @@
+= RubyMotion 2.28 =
+
+  * Fixed a performance issue in deallocating if many objects would be created.
+
 = RubyMotion 2.27 =
 
   * Added support for localization `.strings' files which will be compiled as
