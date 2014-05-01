@@ -526,6 +526,10 @@ task "android" do
     $stderr.puts "Android SDK does not exist or does not have platforms class paths"
     exit 1
   end
+
+  # make sure pass ANDROID macro when build an android miniruby
+  ENV['CFLAGS'] = '-DANDROID'
+
   rake "vm", "android"
   rake "data", "android"
   rake "bin", "all"
