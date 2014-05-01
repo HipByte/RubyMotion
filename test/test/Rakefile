@@ -1,3 +1,7 @@
+# TODO move to functional toolchain/build tests:
+#
+# * resources/Empty.strings: Test that empty .strings files don't lead to build failures.
+
 $:.unshift("../../lib")
 
 ENV['PLATFORM'] ||= 'ios'

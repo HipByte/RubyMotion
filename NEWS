@@ -1,5 +1,6 @@
 = RubyMotion 2.28 =
 
+  * Fixed a bug where empty `.strings' files would lead to a build failure.
   * Fixed a performance issue in deallocating if many objects would be created.
 
 = RubyMotion 2.27 =
