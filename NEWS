@@ -4,6 +4,7 @@
     64-bit support where the MIDI types would be unavailable.
   * Fixed a bug where empty `.strings' files would lead to a build failure.
   * Fixed a performance issue in deallocating if many objects would be created.
+  * Reduced the app boot time. ~15% faster.
 
 = RubyMotion 2.27 =
 
