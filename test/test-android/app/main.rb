@@ -31,6 +31,22 @@ end
 
 ScratchPad = ScratchPadClass.new
 
+class LanguageSpecsClass < Java::Lang::Object
+  def blanks
+    " \t"
+  end
+
+  def white_spaces
+    blanks + "\f\n\r\v"
+  end
+
+  def non_alphanum_non_space
+    '~!@#$%^&*()+-\|{}[]:";\'<>?,./'
+  end
+end
+
+LanguageSpecs = LanguageSpecsClass.new
+
 class Object
   def describe(msg, &block)
     if $running
