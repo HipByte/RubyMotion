@@ -160,7 +160,7 @@ class Object
       begin
         obj.call
         __assert__(!res, true, "Expected `#{klass}' to be raised, but nothing happened")
-      rescue => e
+      rescue Exception => e
         __assert__(e.is_a?(klass), res, "Expected `#{klass}' to be raised, got `#{e}'")
       end
     end
