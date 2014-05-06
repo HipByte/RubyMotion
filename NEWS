@@ -3,8 +3,11 @@
   * Fixed a bug with the CoreMIDI BridgeSupport metadata on platforms that have
     64-bit support where the MIDI types would be unavailable.
   * Fixed a bug where empty `.strings' files would lead to a build failure.
+  * [OSX] Fixed a bug which which it could not retrieve NSNotFound correctly as
+    method return value.
   * Fixed a performance issue in deallocating if many objects would be created.
   * Reduced the app boot time. ~15% faster.
+  * Improved Object#method_missing performance. ~10% faster.
 
 = RubyMotion 2.27 =
 
