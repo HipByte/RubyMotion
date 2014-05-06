@@ -74,9 +74,12 @@ describe "Literal Regexps" do
   end
 =end
 
+=begin
+  FIXME
   it "allows unescaped / to be used with %r" do
     %r[/].to_s.should == /\//.to_s
   end
+=end
 
 
   #############################################################################
