@@ -43,6 +43,10 @@ class LanguageSpecsClass < Java::Lang::Object
   def non_alphanum_non_space
     '~!@#$%^&*()+-\|{}[]:";\'<>?,./'
   end
+
+  def punctuations
+    ",.?"
+  end
 end
 
 LanguageSpecs = LanguageSpecsClass.new
