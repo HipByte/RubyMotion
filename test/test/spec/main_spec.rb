@@ -237,3 +237,11 @@ describe "Properties implemented using forwarders" do
     mr.inviteMessage.should == 'welcome to hell'
   end
 end
+
+describe "NSNotFound" do
+  # RM-491
+  it "can be retrieved with method return value" do
+    num = NSNumber.numberWithUnsignedInteger(NSNotFound)
+    num.unsignedIntegerValue.should == NSNotFound
+  end
+end
