@@ -181,7 +181,7 @@ ReturnsIntBlock KreateGlobalBlock()
 }
 
 /* Test for RM-468, RM-457 */
-@implementation TestBoolType : NSObject
+@implementation TestBoolType
 @synthesize value = _value;
 
 - (id)initWithBoolPtr:(BOOL*)ptr
@@ -207,4 +207,11 @@ ReturnsIntBlock KreateGlobalBlock()
     return YES;
 }
 
+@end
+
+@implementation TestVoidPointer
++ (id)methodWithVoidPointer:(void *)object;
+{
+    return (id)object;
+}
 @end

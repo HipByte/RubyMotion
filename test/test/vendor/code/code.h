@@ -123,3 +123,7 @@ typedef struct MyUnionHasBool {
 - (BOOL)returnBool;
 
 @end
+
+@interface TestVoidPointer : NSObject
++ (id)methodWithVoidPointer:(void *)object;
+@end

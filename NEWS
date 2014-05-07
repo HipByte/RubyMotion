@@ -1,5 +1,7 @@
 = RubyMotion 2.28 =
 
+  * Fixed a bug with Objective-C methods that expect a void-pointer to an object
+    (`id'/`CFTypeRef') and thus a `Pointer'. The object is now passed as-is.
   * Fixed a bug with the CoreMIDI BridgeSupport metadata on platforms that have
     64-bit support where the MIDI types would be unavailable.
   * Fixed a bug where empty `.strings' files would lead to a build failure.
