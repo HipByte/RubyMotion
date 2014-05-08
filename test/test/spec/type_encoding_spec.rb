@@ -30,9 +30,3 @@ describe "BOOL Type Encoding" do
   end
 end
 
-describe "Void-pointers" do
-  it "does not try to convert an object with a type of `void *`" do
-    obj = Object.new
-    TestVoidPointer.methodWithVoidPointer(obj).should == obj
-  end
-end

@@ -125,5 +125,6 @@ typedef struct MyUnionHasBool {
 @end
 
 @interface TestVoidPointer : NSObject
-+ (id)methodWithVoidPointer:(void *)object;
++ (id)methodWithObjectVoidPointer:(void *)object;
++ (int)methodWithCTypeVoidPointer:(void *)val;
 @end

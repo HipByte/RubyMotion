@@ -210,8 +210,15 @@ ReturnsIntBlock KreateGlobalBlock()
 @end
 
 @implementation TestVoidPointer
-+ (id)methodWithVoidPointer:(void *)object;
+
++ (id)methodWithObjectVoidPointer:(void *)object;
 {
     return (id)object;
 }
+
++ (int)methodWithCTypeVoidPointer:(void *)val;
+{
+    return *(int *)val;
+}
+
 @end
