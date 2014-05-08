@@ -289,7 +289,7 @@ EOS
           or File.mtime(librubymotion) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        framework_search_paths = (config.framework_search_paths + (embedded_frameworks + external_frameworks).map { |x| File.dirname(x) }).uniq.map { |x| "-F#{File.expand_path(x)}" }.join(' ')
+        framework_search_paths = (config.framework_search_paths + (embedded_frameworks + external_frameworks).map { |x| File.dirname(x) }).uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
         frameworks = (config.frameworks_dependencies + (embedded_frameworks + external_frameworks).map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
