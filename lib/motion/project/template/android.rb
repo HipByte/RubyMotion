@@ -40,14 +40,18 @@ task :build do
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(App.config.build_dir, 'obj', 'local', App.config.armeabi_directory_name)
+  kernel_bc = File.join(App.config.versioned_arch_datadir, "kernel-#{App.config.arch}.bc")
   ruby_objs_changed = false
   App.config.files.each do |ruby_path|
     bc_path = File.join(objs_build_dir, ruby_path + '.bc')
     init_func = "InitRubyFile#{init_func_n += 1}"
-    if !File.exist?(bc_path) or File.mtime(ruby_path) > File.mtime(bc_path) or File.mtime(ruby) > File.mtime(bc_path)
+    if !File.exist?(bc_path) \
+        or File.mtime(ruby_path) > File.mtime(bc_path) \
+        or File.mtime(ruby) > File.mtime(bc_path) \
+        or File.mtime(kernel_bc) > File.mtime(bc_path)
       App.info 'Compile', ruby_path
       FileUtils.mkdir_p(File.dirname(bc_path))
-      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{App.config.versioned_arch_datadir}/kernel-#{App.config.arch}.bc\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{bc_path}\" #{init_func} \"#{ruby_path}\""
+      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{bc_path}\" #{init_func} \"#{ruby_path}\""
       ruby_objs_changed = true
     end
     ruby_objs << [bc_path, init_func]
