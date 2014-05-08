@@ -313,10 +313,18 @@ describe "Kernel.#block_given?" do
   end
 end
 
-# RM-193
 describe "Method#to_proc" do
+  # RM-193
   it "should return lambda block" do
     method(:test_block_dvars_proc).to_proc.lambda?.should == true
+  end
+
+  # RM-RM-494
+  it "Proc object should be able to call" do
+    @proc = method(:test_block_dvars_proc).to_proc
+    wait(0.2) {
+      @proc.call.call.should == '123456' 
+    }
   end
 end
 
