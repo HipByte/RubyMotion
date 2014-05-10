@@ -450,10 +450,6 @@ it "doesn't match Unicode private-use characters with [[:xdigit:]]" do
   "\u{E001}".match(/[[:xdigit:]]/).should be_nil
 end
 
-end
-
-describe "Regexp with character classes" do
-
 it "matches Unicode lowercase characters with [[:word:]]" do
   "\u{FF41}".match(/[[:word:]]/).to_a.should == ["\u{FF41}"]
   "\u{1D484}".match(/[[:word:]]/).to_a.should == ["\u{1D484}"]

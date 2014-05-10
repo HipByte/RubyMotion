@@ -59,48 +59,36 @@ describe "Ruby character strings" do
   end
 
   it "allow using non-alnum characters as string delimiters" do
-1.times do
     %(hey #{@ip}).should == "hey xxx"
     %[hey #{@ip}].should == "hey xxx"
     %{hey #{@ip}}.should == "hey xxx"
     %<hey #{@ip}>.should == "hey xxx"
     %!hey #{@ip}!.should == "hey xxx"
-end
-1.times do
     %@hey #{@ip}@.should == "hey xxx"
     %#hey hey#.should == "hey hey"
     %%hey #{@ip}%.should == "hey xxx"
     %^hey #{@ip}^.should == "hey xxx"
     %&hey #{@ip}&.should == "hey xxx"
-end
-1.times do
     %*hey #{@ip}*.should == "hey xxx"
     %-hey #{@ip}-.should == "hey xxx"
     %_hey #{@ip}_.should == "hey xxx"
     %=hey #{@ip}=.should == "hey xxx"
     %+hey #{@ip}+.should == "hey xxx"
-end
-1.times do
     %~hey #{@ip}~.should == "hey xxx"
     %:hey #{@ip}:.should == "hey xxx"
     %;hey #{@ip};.should == "hey xxx"
     %"hey #{@ip}".should == "hey xxx"
     %|hey #{@ip}|.should == "hey xxx"
-end
-1.times do
     %?hey #{@ip}?.should == "hey xxx"
     %/hey #{@ip}/.should == "hey xxx"
     %,hey #{@ip},.should == "hey xxx"
     %.hey #{@ip}..should == "hey xxx"
-end
 
-1.times do
     # surprised? huh
     %'hey #{@ip}'.should == "hey xxx"
     %\hey #{@ip}\.should == "hey xxx"
     %`hey #{@ip}`.should == "hey xxx"
     %$hey #{@ip}$.should == "hey xxx"
-end
   end
 
   it "using percent with 'q', stopping interpolation" do
