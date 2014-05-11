@@ -13,6 +13,8 @@
   * Fixed a performance issue in deallocating if many objects would be created.
   * Reduced the app boot time. ~15% faster.
   * Improved Object#method_missing performance. ~10% faster.
+  * Improved Range literal and Module#class_variable_get performance.
+    ~15% faster.
 
 = RubyMotion 2.27 =
 
