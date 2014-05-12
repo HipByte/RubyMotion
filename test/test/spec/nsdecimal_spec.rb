@@ -11,33 +11,59 @@ describe "NSDecimal" do
 end
 
 describe 'BigDecimal' do
+  describe 'concerning initialization' do
+    it 'can be created with a string and ignores space and unexpected input' do
+      bd = BigDecimal.new('  0.123456789123456789END')
+      bd.class.should == BigDecimal
+      bd.inspect.should == '0.123456789123456789'
+    end
+
+    it 'can be created with an integer' do
+      bd = BigDecimal.new(42)
+      bd.class.should == BigDecimal
+      bd.inspect.should == '42'
+    end
+
+    it 'can be created with a float' do
+      # Use 0.0 here because it's the only Float we can trust to not lose precision.
+      number = 0.0
+      number.class.should == Float
+      bd = BigDecimal.new(number)
+      bd.class.should == BigDecimal
+      bd.inspect.should == '0'
+    end
+
+    it 'can be created with a Bignum' do
+      number = 123456789123456789
+      number.class.should == Bignum
+      bd = BigDecimal.new(number)
+      bd.class.should == BigDecimal
+      bd.inspect.should == number.to_s
+    end
+
+    it 'can be created with a BigDecimal' do
+      bd = BigDecimal.new(BigDecimal.new(42))
+      bd.class.should == BigDecimal
+      bd.inspect.should == '42'
+    end
+
+    it 'can be created from any object that can coerce to a String' do
+      o = Object.new
+      def o.to_str; '0.1'; end
+      bd = BigDecimal.new(o)
+      bd.class.should == BigDecimal
+      bd.inspect.should == '0.1'
+    end
+
+    it 'raises in case a BigDecimal cannot be created from the given object' do
+      should.raise TypeError do
+        BigDecimal.new(Object.new)
+      end
+    end
+  end
+
   it 'is an alias for NSDecimalNumber' do
     BigDecimal.should == NSDecimalNumber
-  end
-
-  it 'can be created with a string' do
-    bd = BigDecimal.new('  0.123456789123456789END')
-    #bd = BigDecimal.new('0.123456789123456789')
-    bd.class.should == BigDecimal
-    bd.inspect.should == '0.123456789123456789'
-  end
-
-  xit 'can be created with an integer' do
-    bd = BigDecimal.new(42)
-    bd.class.should == BigDecimal
-    bd.inspect.should == '42'
-  end
-
-  xit 'can be created with a float' do
-    bd = BigDecimal.new(0.1)
-    bd.class.should == BigDecimal
-    bd.inspect.should == '0.1'
-  end
-
-  xit 'can be created with a BigDecimal' do
-    bd = BigDecimal.new(BigDecimal.new(42))
-    bd.class.should == BigDecimal
-    bd.inspect.should == '42'
   end
 
   it 'returns whether or not it is zero' do
@@ -48,45 +74,45 @@ describe 'BigDecimal' do
   end
 
   it 'returns whether or not is a number' do
-    (BigDecimal.new('0') / BigDecimal.new('0')).should.be.nan
-    (BigDecimal.new('1') / BigDecimal.new('1')).should.not.be.nan
+    (BigDecimal.new('0') / 0).should.be.nan
+    (BigDecimal.new('1') / 1).should.not.be.nan
   end
 
   it 'returns wether or not it is infinite' do
-    (BigDecimal.new('1') / BigDecimal.new('0')).infinite?.should == 1
-    (BigDecimal.new('-1') / BigDecimal.new('0')).infinite?.should == -1
-    (BigDecimal.new('1') / BigDecimal.new('1')).infinite?.should == nil
+    (BigDecimal.new('1') / 0).infinite?.should == 1
+    (BigDecimal.new('-1') / 0).infinite?.should == -1
+    (BigDecimal.new('1') / 1).infinite?.should == nil
   end
 
   it 'returns wether or not it is finite' do
-    (BigDecimal.new('1') / BigDecimal.new('1')).should.be.finite
+    (BigDecimal.new('1') / 1).should.be.finite
     # NaN
-    (BigDecimal.new('0') / BigDecimal.new('0')).should.not.be.finite
+    (BigDecimal.new('0') / 0).should.not.be.finite
     # Infinity
-    (BigDecimal.new('1') / BigDecimal.new('0')).should.not.be.finite
-    (BigDecimal.new('-1') / BigDecimal.new('0')).should.not.be.finite
+    (BigDecimal.new('1') / 0).should.not.be.finite
+    (BigDecimal.new('-1') / 0).should.not.be.finite
   end
 
   it 'can sum' do
-    sum = BigDecimal.new('0')
+    sum = BigDecimal.new(0.0)
     10000.times do
       sum = sum + BigDecimal.new('0.0001')
     end
-    sum.inspect.should == '1'
+    sum.should == 1
   end
 
   it 'can subtract' do
-    sum = BigDecimal.new('1')
+    sum = BigDecimal.new(1)
     10000.times do
       sum = sum - BigDecimal.new('0.0001')
     end
-    sum.inspect.should == '0'
+    sum.should == 0.0
   end
 
   it 'can multiply' do
     sum = BigDecimal.new('0.0001')
     10.times do
-      sum = sum * BigDecimal.new('2')
+      sum = sum * 2
     end
     sum.inspect.should == '0.1024'
   end
@@ -94,7 +120,7 @@ describe 'BigDecimal' do
   it 'can divide' do
     sum = BigDecimal.new('0.1024')
     10.times do
-      sum = sum / BigDecimal.new('2')
+      sum = sum / 2
     end
     sum.inspect.should == '0.0001'
   end
