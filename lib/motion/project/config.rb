@@ -278,6 +278,9 @@ module Motion; module Project
           files_filter.map! { |x| File.exist?(x) ? File.expand_path(x) : x }
           specs.delete_if { |x| [File.expand_path(x), File.basename(x, '.rb'), File.basename(x, '_spec.rb')].none? { |p| files_filter.include?(p) } }
         end
+
+        App.fail "There are no spec files to run. Place your spec files in your project under the `spec` directory." if specs.empty?
+
         spec_core_files + helpers + specs
       end
     end
