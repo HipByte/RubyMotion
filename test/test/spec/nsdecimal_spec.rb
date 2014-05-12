@@ -66,98 +66,120 @@ describe 'BigDecimal' do
     BigDecimal.should == NSDecimalNumber
   end
 
-  it 'returns whether or not it is zero' do
-    BigDecimal.new('0.00000000000000000').should.be.zero
-    BigDecimal.new('0.00000000000000000').should.not.be.nonzero
-    BigDecimal.new('0.00000000000000001').should.be.nonzero
-    BigDecimal.new('0.00000000000000001').should.not.be.zero
-  end
-
-  it 'returns whether or not is a number' do
-    (BigDecimal.new('0') / 0).should.be.nan
-    (BigDecimal.new('1') / 1).should.not.be.nan
-  end
-
-  it 'returns wether or not it is infinite' do
-    (BigDecimal.new('1') / 0).infinite?.should == 1
-    (BigDecimal.new('-1') / 0).infinite?.should == -1
-    (BigDecimal.new('1') / 1).infinite?.should == nil
-  end
-
-  it 'returns wether or not it is finite' do
-    (BigDecimal.new('1') / 1).should.be.finite
-    # NaN
-    (BigDecimal.new('0') / 0).should.not.be.finite
-    # Infinity
-    (BigDecimal.new('1') / 0).should.not.be.finite
-    (BigDecimal.new('-1') / 0).should.not.be.finite
-  end
-
-  it 'can sum' do
-    sum = BigDecimal.new(0.0)
-    10000.times do
-      sum = sum + BigDecimal.new('0.0001')
+  describe 'concerning predicate methods' do
+    it 'returns whether or not it is zero' do
+      BigDecimal.new('0.00000000000000000').should.be.zero
+      BigDecimal.new('0.00000000000000000').should.not.be.nonzero
+      BigDecimal.new('0.00000000000000001').should.be.nonzero
+      BigDecimal.new('0.00000000000000001').should.not.be.zero
     end
-    sum.should == 1
-  end
 
-  it 'can subtract' do
-    sum = BigDecimal.new(1)
-    10000.times do
-      sum = sum - BigDecimal.new('0.0001')
+    it 'returns whether or not is a number' do
+      (BigDecimal.new('0') / 0).should.be.nan
+      (BigDecimal.new('1') / 1).should.not.be.nan
     end
-    sum.should == 0.0
-  end
 
-  it 'can multiply' do
-    sum = BigDecimal.new('0.0001')
-    10.times do
-      sum = sum * 2
+    it 'returns wether or not it is infinite' do
+      (BigDecimal.new('1') / 0).infinite?.should == 1
+      (BigDecimal.new('-1') / 0).infinite?.should == -1
+      (BigDecimal.new('1') / 1).infinite?.should == nil
     end
-    sum.inspect.should == '0.1024'
-  end
 
-  it 'can divide' do
-    sum = BigDecimal.new('0.1024')
-    10.times do
-      sum = sum / 2
+    it 'returns wether or not it is finite' do
+      (BigDecimal.new('1') / 1).should.be.finite
+      # NaN
+      (BigDecimal.new('0') / 0).should.not.be.finite
+      # Infinity
+      (BigDecimal.new('1') / 0).should.not.be.finite
+      (BigDecimal.new('-1') / 0).should.not.be.finite
     end
-    sum.inspect.should == '0.0001'
   end
 
-  it 'can raise to the power N' do
-    (BigDecimal.new('0.0003') ** 2).inspect.should == '0.00000009'
+  describe 'concerning operators' do
+    it 'can sum' do
+      sum = BigDecimal.new(0.0)
+      10000.times do
+        sum = sum + BigDecimal.new('0.0001')
+      end
+      sum.should == 1
+    end
+
+    it 'can subtract' do
+      sum = BigDecimal.new(1)
+      10000.times do
+        sum = sum - BigDecimal.new('0.0001')
+      end
+      sum.should == 0.0
+    end
+
+    it 'can multiply' do
+      sum = BigDecimal.new('0.0001')
+      10.times do
+        sum = sum * 2
+      end
+      sum.inspect.should == '0.1024'
+    end
+
+    it 'can divide' do
+      sum = BigDecimal.new('0.1024')
+      10.times do
+        sum = sum / 2
+      end
+      sum.inspect.should == '0.0001'
+    end
+
+    it 'can raise to the power N' do
+      (BigDecimal.new('0.0003') ** 2).inspect.should == '0.00000009'
+    end
+
+    it 'can perform a modulo operation' do
+      (BigDecimal.new('0.1') % '0.2').should == '0.1'
+      (BigDecimal.new('0.2') % '0.2').should == 0
+      (BigDecimal.new('0.3') % '0.2').should == '0.1'
+      (BigDecimal.new('-0.1') % '-0.2').should == '-0.1'
+      (BigDecimal.new('-0.2') % '-0.2').should == -0
+      (BigDecimal.new('-0.3') % '-0.2').should == '-0.1'
+      (BigDecimal.new('0.1') % '-1').should == '-0.9'
+      (BigDecimal.new('-0.1') % '1').should == '0.9'
+    end
+
+    it 'returns the absolute value' do
+      BigDecimal.new(5).abs.should == 5
+      BigDecimal.new(-5).abs.should == 5
+    end
+
+    it 'is comparable' do
+      low  = BigDecimal.new('0.0000001')
+      high = BigDecimal.new('0.0000002')
+
+      low.should == low
+      low.should != high
+
+      low.should >= low
+      low.should <= low
+
+      low.should <= high
+      high.should >= low
+
+      low.should < high
+      high.should > low
+    end
   end
 
-  it 'is comparable' do
-    low  = BigDecimal.new('0.0000001')
-    high = BigDecimal.new('0.0000002')
+  describe 'concerning Objective-C interoperability' do
+    it 'can be passed to Objective-C APIs transperantly' do
+      string = '0.123456789123456789'
+      formatter = NSNumberFormatter.new
+      formatter.alwaysShowsDecimalSeparator = true
+      formatter.minimumIntegerDigits = 1
+      formatter.minimumFractionDigits = string.split('.').last.length
 
-    low.should == low
-    low.should != high
+      formatter.stringFromNumber(BigDecimal.new(string)).should == string
+    end
 
-    low.should >= low
-    low.should <= low
-
-    low.should <= high
-    high.should >= low
-
-    low.should < high
-    high.should > low
-  end
-
-  it 'can be passed to Objective-C APIs transperantly' do
-    string = '0.123456789123456789'
-    formatter = NSNumberFormatter.new
-    formatter.alwaysShowsDecimalSeparator = true
-    formatter.minimumIntegerDigits = 1
-    formatter.minimumFractionDigits = string.split('.').last.length
-
-    formatter.stringFromNumber(BigDecimal.new(string)).should == string
-  end
-
-  it 'can be passed from Objective-C APIs transperantly' do
-    string = '0.123456789123456789'
-    NSDecimalNumber.decimalNumberWithString(string).should == BigDecimal.new(string)
+    it 'can be passed from Objective-C APIs transperantly' do
+      string = '0.123456789123456789'
+      NSDecimalNumber.decimalNumberWithString(string).should == BigDecimal.new(string)
+    end
   end
 end
