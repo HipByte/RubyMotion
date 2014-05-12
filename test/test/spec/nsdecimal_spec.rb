@@ -130,12 +130,8 @@ describe 'BigDecimal' do
     formatter.stringFromNumber(BigDecimal.new(string)).should == string
   end
 
-  # TODO when we receive a number from an Objective-C API we must
-  #      ensure to keep it a NSDecimalNumber
-  xit 'can be passed from Objective-C APIs transperantly' do
+  it 'can be passed from Objective-C APIs transperantly' do
     string = '0.123456789123456789'
-    formatter = NSNumberFormatter.new
-    formatter.generatesDecimalNumbers = true
-    formatter.numberFromString(string).should == BigDecimal.new(string)
+    NSDecimalNumber.decimalNumberWithString(string).should == BigDecimal.new(string)
   end
 end
