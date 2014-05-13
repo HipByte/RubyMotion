@@ -181,5 +181,12 @@ describe 'BigDecimal' do
       string = '0.123456789123456789'
       NSDecimalNumber.decimalNumberWithString(string).should == BigDecimal.new(string)
     end
+
+    it 'converts NSDecimal to BigDecimal' do
+      string = '0.123456789123456789'
+      value = NSDecimalNumber.decimalNumberWithString(string).decimalValue
+      value.class.should == BigDecimal
+      value.inspect.should == string
+    end
   end
 end
