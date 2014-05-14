@@ -166,7 +166,7 @@ describe 'BigDecimal' do
     end
   end
 
-  describe 'concerning Objective-C interoperability' do
+  describe 'concerning (Objective-)C interoperability' do
     it 'can be passed to Objective-C APIs transperantly' do
       string = '0.123456789123456789'
       formatter = NSNumberFormatter.new
@@ -187,6 +187,17 @@ describe 'BigDecimal' do
       value = NSDecimalNumber.decimalNumberWithString(string).decimalValue
       value.class.should == BigDecimal
       value.inspect.should == string
+    end
+
+    it 'converts BigDecimal to NSDecimal' do
+      string = '0.123456789123456789'
+      number = NSDecimalNumber.decimalNumberWithDecimal(BigDecimal.new(string))
+      number.description.should == string
+    end
+
+    it 'converts BigDecimal to a pointer to NSDecimal' do
+      string = '0.123456789123456789'
+      NSDecimalString(BigDecimal.new(string), NSLocale.currentLocale).should == string
     end
   end
 end
