@@ -132,6 +132,10 @@ describe 'BigDecimal' do
       (BigDecimal.new('0.0003') ** 2).inspect.should == '0.00000009'
     end
 
+    it 'can raise to the power -N' do
+      (BigDecimal.new('2') ** -3).inspect.should == '0.125'
+    end
+
     it 'can perform a modulo operation' do
       (BigDecimal.new('0.1') % '0.2').should == '0.1'
       (BigDecimal.new('0.2') % '0.2').should == 0
