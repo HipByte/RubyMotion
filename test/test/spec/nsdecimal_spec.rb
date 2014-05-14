@@ -25,6 +25,10 @@ describe 'BigDecimal' do
     end
 
     it 'can be created with a float' do
+      should.not.raise TypeError do
+        BigDecimal.new(0.1)
+      end
+
       # Use 0.0 here because it's the only Float we can trust to not lose precision.
       number = 0.0
       number.class.should == Float
