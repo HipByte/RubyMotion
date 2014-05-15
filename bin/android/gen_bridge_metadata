@@ -8,7 +8,7 @@ if ARGV.size != 2
   exit 1
 end
 
-jar_path = ARGV[0]
+jar_path = File.expand_path(ARGV[0])
 bs_path = File.expand_path(ARGV[1])
 
 tmp_path = File.join(ENV['TMPDIR'], '__android_bridgesupport__', File.basename(jar_path))
