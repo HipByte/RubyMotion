@@ -28,7 +28,7 @@ module Motion; module Project;
     register :android
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
-      :sub_activities, :api_version, :arch, :vendored_jars
+      :sub_activities, :api_version, :arch
 
     def initialize(project_dir, build_mode)
       super
@@ -36,7 +36,6 @@ module Motion; module Project;
       @main_activity = 'MainActivity'
       @sub_activities = []
       @arch = 'armv5te'
-      @vendored_jars = []
     end
 
     def validate
@@ -146,6 +145,27 @@ module Motion; module Project;
         else
           raise "Invalid arch `#{arch}'"
       end 
+    end
+
+    def bin_exec(name)
+      File.join(App.config.motiondir, 'bin', name)
+    end
+
+    def vendored_jars
+      @vendored_jars = Dir.glob('vendor/*.jar')
+    end
+
+    def vendored_bs_files
+      @vendored_bs_files ||= begin
+        vendored_jars.map do |jar_file|
+          bs_file = File.join(File.dirname(jar_file), File.basename(jar_file) + '.bridgesupport')
+          if !File.exist?(bs_file) or File.mtime(jar_file) > File.mtime(bs_file)
+            App.info 'Create', bs_file
+            sh "#{bin_exec('android/gen_bridge_metadata')} \"#{jar_file}\" \"#{bs_file}\""
+          end
+          bs_file
+        end
+      end
     end
   end
 end; end

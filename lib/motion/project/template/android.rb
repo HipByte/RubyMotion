@@ -34,10 +34,11 @@ require 'motion/project/template/android/config'
 desc "Create an application package file (.apk)"
 task :build do
   # Compile Ruby files.
-  ruby = File.join(App.config.motiondir, 'bin/ruby')
+  ruby = App.config.bin_exec('ruby')
   init_func_n = 0
   ruby_objs = []
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
+  bs_files += App.config.vendored_bs_files
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(App.config.build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   kernel_bc = File.join(App.config.versioned_arch_datadir, "kernel-#{App.config.arch}.bc")
