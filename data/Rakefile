@@ -468,7 +468,7 @@ task :android do
     # Copy runtime jar. 
     cp "../vm/android-#{api_vers}-classes/rubymotion.jar", "android/#{api_vers}"
 
-    # Generate .bridgesupport files
+    # Generate the android.bridgesupport file.
     jar_path = File.join(ANDROID_SDK, 'platforms', "android-#{api_vers}", 'android.jar')
     bs_path = "android/#{api_vers}/BridgeSupport/android.bridgesupport"
     if !File.exist?(bs_path) or File.mtime(jar_path) > File.mtime(bs_path)
