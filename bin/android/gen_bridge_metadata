@@ -17,7 +17,7 @@ FileUtils.mkdir_p tmp_path
 
 Dir.chdir(tmp_path) do
   # Unzip the .jar archive.
-  system "/usr/bin/unzip -q \"#{jar_path}\""
+  exit 1 unless system "/usr/bin/unzip -q \"#{jar_path}\""
 
   # Decompile classes.
   classes = Dir.glob("**/*.class").map { |x| x.gsub('/', '.').gsub('$', '.').sub(/\.class$/, '') }
