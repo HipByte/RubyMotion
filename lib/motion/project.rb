@@ -42,19 +42,7 @@ system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
 
 desc "Clear local build objects"
 task :clean do
-  paths = [App.config.build_dir]
-  paths.concat(Dir.glob(App.config.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }))
-  paths.each do |p|
-    next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
-    App.info 'Delete', p
-    rm_rf p
-    if File.exist?(p)
-      # It can happen that because of file permissions a dir/file is not
-      # actually removed, which can lead to confusing issues.
-      App.fail "Failed to remove `#{p}'. Please remove this path manually."
-    end
-  end
-  App.config.vendor_projects.each { |vendor| vendor.clean }
+  App.config.clean_project
 end
 
 namespace :clean do

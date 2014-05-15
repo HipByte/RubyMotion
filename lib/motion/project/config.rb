@@ -296,5 +296,20 @@ in the debugger.
 EOS
       $stderr.puts '=' * 80
     end
+
+    def clean_project
+      paths = [self.build_dir]
+      paths.concat(Dir.glob(self.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }))
+      paths.each do |p|
+        next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
+        App.info 'Delete', p
+        rm_rf p
+        if File.exist?(p)
+          # It can happen that because of file permissions a dir/file is not
+          # actually removed, which can lead to confusing issues.
+          App.fail "Failed to remove `#{p}'. Please remove this path manually."
+        end
+      end
+    end
   end
 end; end
