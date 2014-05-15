@@ -454,7 +454,6 @@ task :clean do
 end
 
 # TODO - merge to main task
-ANDROID_API_PACKAGES = %w{java android}
 task :android do
   ANDROID_API_VERSIONS.each do |api_vers|
     # Copy runtime library and kernel file
@@ -471,68 +470,10 @@ task :android do
 
     # Generate .bridgesupport files
     jar_path = File.join(ANDROID_SDK, 'platforms', "android-#{api_vers}", 'android.jar')
-    tmp_path = File.join("/tmp/rm_android_#{api_vers}")
-    tmp_path_clear = !File.exist?(tmp_path)
-    mkdir_p tmp_path if tmp_path_clear
-    data_dir = Dir.pwd
-    Dir.chdir(tmp_path) do
-      sh "/usr/bin/unzip \"#{jar_path}\"" if tmp_path_clear
-      ANDROID_API_PACKAGES.each do |package|
-        bs_path = "#{data_dir}/android/#{api_vers}/BridgeSupport/#{package}.bridgesupport"
-        next if File.exist?(bs_path)
-        mkdir_p File.dirname(bs_path)
-        classes = Dir.glob("#{package}/**/*.class").map { |x| x.gsub('/', '.').gsub('$', '.').sub(/\.class$/, '') }
-        javap_tmp_path = "/tmp/rm_android_#{api_vers}_#{package}.txt"
-        sh "/usr/bin/javap -s #{classes.join(' ')} > \"#{javap_tmp_path}\""
-        bs_data = ''
-        bs_data << <<EOS
-<?xml version='1.0'?>
-<signatures version='1.0'>
-EOS
-        txt = File.read(javap_tmp_path)
-        res = txt.scan(/(class)\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
-        res += txt.scan(/(class)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
-        res += txt.scan(/(interface)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab interfaces
-        res.each do |type, elem, body_txt|
-          elem_path = elem.gsub(/\./, '/')
-          bs_data << <<EOS
-  <#{type} name=\"#{elem_path}\">
-EOS
-          body_txt.strip.split(/\n/).each_cons(2) do |elem_line, signature_line|
-            signature_line = signature_line.strip
-            md = signature_line.match(/^Signature:\s+(.+)$/)
-            next unless md
-            signature = md[1]
-
-            elem_line = elem_line.strip
-            if md = elem_line.match(/\s([^(\s]+)\(/)
-              # A method.
-              method = md[1]
-              if method == elem
-                # An initializer.
-                method = '&lt;init&gt;'
-              end
-              class_method = elem_line.include?('static')
-              bs_data << <<EOS
-    <method name=\"#{method}\" type=\"#{signature}\"#{class_method ? ' class_method="true"' : ''}/>
-EOS
-            elsif md = elem_line.match(/\s([^;\s]+);$/)
-              # A constant.
-              constant = md[1] 
-              bs_data << <<EOS
-    <const name=\"#{constant}\" type=\"#{signature}\"/>
-EOS
-            end
-          end
-          bs_data << <<EOS
-  </#{type}>
-EOS
-        end
-        bs_data << <<EOS
-</signatures>
-EOS
-        File.open(bs_path, 'w') { |io| io.write(bs_data) }
-      end
+    bs_path = "android/#{api_vers}/BridgeSupport/android.bridgesupport"
+    if !File.exist?(bs_path) or File.mtime(jar_path) > File.mtime(bs_path)
+      mkdir_p File.dirname(bs_path)
+      sh "/usr/bin/ruby ../bin/android/gen_bridge_metadata \"#{jar_path}\" \"#{bs_path}\""
     end
   end
 end

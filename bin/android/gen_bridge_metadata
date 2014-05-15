@@ -1,0 +1,80 @@
+#!/usr/bin/ruby
+# encoding: utf-8
+
+require 'fileutils'
+
+if ARGV.size != 2
+  $stderr.puts "Usage: #{__FILE__} <jar-file> <output-file>"
+  exit 1
+end
+
+jar_path = ARGV[0]
+bs_path = File.expand_path(ARGV[1])
+
+tmp_path = File.join(ENV['TMPDIR'], '__android_bridgesupport__', File.basename(jar_path))
+FileUtils.rm_rf tmp_path
+FileUtils.mkdir_p tmp_path
+
+Dir.chdir(tmp_path) do
+  # Unzip the .jar archive.
+  system "/usr/bin/unzip -q \"#{jar_path}\""
+
+  # Decompile classes.
+  classes = Dir.glob("**/*.class").map { |x| x.gsub('/', '.').gsub('$', '.').sub(/\.class$/, '') }
+  javap_tmp_path = File.join(File.dirname(tmp_path), 'classes.txt')
+  system "/usr/bin/javap -s #{classes.join(' ')} > \"#{javap_tmp_path}\""
+
+  # Create the BridgeSupport text.
+  bs_data = ''
+  bs_data << <<EOS
+<?xml version='1.0'?>
+<signatures version='1.0'>
+EOS
+  txt = File.read(javap_tmp_path)
+  res = txt.scan(/(class)\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
+  res += txt.scan(/(class)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
+  res += txt.scan(/(interface)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab interfaces
+  res.each do |type, elem, body_txt|
+    elem_path = elem.gsub(/\./, '/')
+    bs_data << <<EOS
+<#{type} name=\"#{elem_path}\">
+EOS
+    body_txt.strip.split(/\n/).each_cons(2) do |elem_line, signature_line|
+      signature_line = signature_line.strip
+      md = signature_line.match(/^Signature:\s+(.+)$/)
+      next unless md
+      signature = md[1]
+
+      elem_line = elem_line.strip
+      if md = elem_line.match(/\s([^(\s]+)\(/)
+        # A method.
+        method = md[1]
+        if method == elem
+          # An initializer.
+          method = '&lt;init&gt;'
+        end
+        class_method = elem_line.include?('static')
+        bs_data << <<EOS
+<method name=\"#{method}\" type=\"#{signature}\"#{class_method ? ' class_method="true"' : ''}/>
+EOS
+      elsif md = elem_line.match(/\s([^;\s]+);$/)
+=begin
+        # A constant.
+        constant = md[1] 
+        bs_data << <<EOS
+<const name=\"#{constant}\" type=\"#{signature}\"/>
+EOS
+=end
+      end
+    end
+    bs_data << <<EOS
+</#{type}>
+EOS
+  end
+  bs_data << <<EOS
+</signatures>
+EOS
+
+  # Write the BridgeSupport data down.
+  File.open(bs_path, 'w') { |io| io.write(bs_data) }
+end
