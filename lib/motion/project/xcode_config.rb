@@ -45,6 +45,7 @@ module Motion; module Project;
       @entitlements = {}
       @delegate_class = 'AppDelegate'
       @spec_mode = false
+      @vendor_projects = []
     end
 
     def xcode_dir
@@ -396,6 +397,17 @@ EOS
 
     def app_icon_name_from_asset_bundle
       File.basename(app_icons_asset_bundle, '.appiconset')
+    end
+
+    attr_reader :vendor_projects
+
+    def vendor_project(path, type, opts={})
+      opts[:force_load] = true unless opts[:force_load] == false
+      @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
+    end
+
+    def unvendor_project(path)
+      @vendor_projects.delete_if { |x| x.path == path }
     end
   end
 end; end
