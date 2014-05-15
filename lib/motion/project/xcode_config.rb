@@ -409,5 +409,10 @@ EOS
     def unvendor_project(path)
       @vendor_projects.delete_if { |x| x.path == path }
     end
+
+    def clean_project
+      super
+      @vendor_projects.each { |vendor| vendor.clean }
+    end
   end
 end; end
