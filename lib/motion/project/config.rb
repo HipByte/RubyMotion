@@ -86,7 +86,6 @@ module Motion; module Project
       @version = '1.0'
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
-      @vendor_projects = []
     end
 
     OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
@@ -222,17 +221,6 @@ module Motion; module Project
         deps = [deps] unless deps.is_a?(Array)
         @dependencies[res_path.call(path)] = deps.map(&res_path)
       end
-    end
-
-    attr_reader :vendor_projects
-
-    def vendor_project(path, type, opts={})
-      opts[:force_load] = true unless opts[:force_load] == false
-      @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
-    end
-
-    def unvendor_project(path)
-      @vendor_projects.delete_if { |x| x.path == path }
     end
 
     def file_dependencies(file)
