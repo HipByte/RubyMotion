@@ -17,6 +17,7 @@
   * Improved Object#method_missing performance. ~10% faster.
   * Improved performance in where it would register Objective-C selector.
     Object#{send, respond_to?} will be ~30% faster.
+  * Improved String interpolation performance. ~10% faster.
 
 = RubyMotion 2.27 =
 
