@@ -284,8 +284,9 @@ EOS
       or File.mtime(android_manifest) > File.mtime(archive) \
       or App.config.resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
     App.info 'Create', archive
-    resource_flags = App.config.resources_dirs.map { |x| '-A "' + x + '"' }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{resource_flags} -I \"#{android_jar}\" -F \"#{archive}\""
+    assets_flags = App.config.assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
+    resources_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{resources_flags} -I \"#{android_jar}\" -F \"#{archive}\""
     Dir.chdir(App.config.build_dir) do
       [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
         line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{file}\""
