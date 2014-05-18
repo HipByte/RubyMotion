@@ -29,7 +29,7 @@ module Motion; module Project;
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :arch, :assets_dirs, :icon,
-      :manifest_metadata
+      :manifest_metadata, :logs_components
 
     def initialize(project_dir, build_mode)
       super
@@ -181,6 +181,10 @@ module Motion; module Project;
           bs_file
         end
       end
+    end
+
+    def logs_components
+      @logs_components ||= [package_path, 'AndroidRuntime', 'chromium', 'dalvikvm'].map { |component| component + ':I' }
     end
   end
 end; end

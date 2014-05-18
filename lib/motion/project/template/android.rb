@@ -356,7 +356,7 @@ def run_apk(mode)
       exit 0
     end
     # Show logs.
-    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.package_path}:I AndroidRuntime:E chromium:I dalvikvm:I"
+    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.logs_components.join(' ')}"
   end
 end
 
