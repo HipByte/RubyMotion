@@ -245,6 +245,13 @@ EOS
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="1" android:versionName="1.0">
 	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
 	<application android:label="#{App.config.name}" android:debuggable="true" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
+EOS
+    App.config.manifest_metadata.each do |key, val|
+      android_manifest_txt << <<EOS
+		<meta-data android:name=\"#{key}\" android:value=\"#{val}\"/>
+EOS
+    end
+    android_manifest_txt << <<EOS
         	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
             		<intent-filter>
                 		<action android:name="android.intent.action.MAIN" />

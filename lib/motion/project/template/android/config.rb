@@ -28,7 +28,8 @@ module Motion; module Project;
     register :android
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
-      :sub_activities, :api_version, :arch, :assets_dirs, :icon
+      :sub_activities, :api_version, :arch, :assets_dirs, :icon,
+      :manifest_metadata
 
     def initialize(project_dir, build_mode)
       super
@@ -37,6 +38,7 @@ module Motion; module Project;
       @sub_activities = []
       @arch = 'armv5te'
       @assets_dirs = [File.join(project_dir, 'assets')]
+      @manifest_metadata = {}
     end
 
     def validate
