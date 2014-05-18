@@ -10,6 +10,10 @@ class Base
   def func(x, a:y, b:z)
     12345
   end
+
+  def func2(x, y)
+    98765
+  end
 end
 
 class Foo < Base
@@ -20,6 +24,10 @@ class Foo < Base
 
   def func(x, a:y, b:z)
     super(x, a:y, b:z)
+  end
+
+  def func2(x, y)
+    super(x, {:a => 12, :b => 34, :c => 56})
   end
 end
 
@@ -57,5 +65,6 @@ describe "'super'" do
     # RM-276
     obj = Foo.new
     obj.func(1, a:2, b:3).should == 12345
+    obj.func2(1, 2).should == 98765
   end
 end
