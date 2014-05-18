@@ -60,7 +60,7 @@ module Motion; module Project;
     end
 
     def package_path
-      App.config.package.gsub('.', '/')
+      package.gsub('.', '/')
     end
 
     def api_version
