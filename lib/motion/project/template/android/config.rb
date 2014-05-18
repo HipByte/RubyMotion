@@ -38,6 +38,8 @@ module Motion; module Project;
       @sub_activities = []
       @arch = 'armv5te'
       @assets_dirs = [File.join(project_dir, 'assets')]
+      @vendored_jars = []
+      @vendored_resources = []
       @manifest_metadata = {}
     end
 
@@ -154,8 +156,18 @@ module Motion; module Project;
       File.join(App.config.motiondir, 'bin', name)
     end
 
-    def vendored_jars
-      @vendored_jars = Dir.glob('vendor/*.jar')
+    attr_reader :vendored_jars, :vendored_resources
+
+    def vendor_project(opt)
+      jar = opt.delete(:jar)
+      unless jar
+        App.fail "Expected `:jar' key/value pair in `#{opt}'"
+      end
+      @vendored_jars << jar
+      res = opt.delete(:resources)
+      if res
+        @vendored_resources << res
+      end
     end
 
     def vendored_bs_files

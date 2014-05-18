@@ -292,8 +292,8 @@ EOS
       or App.config.resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
     App.info 'Create', archive
     assets_flags = App.config.assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
-    resources_flags = App.config.resources_dirs.map { |x| '-S "' + x + '"' }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{resources_flags} -I \"#{android_jar}\" -F \"#{archive}\""
+    resources_flags = (App.config.resources_dirs + App.config.vendored_resources).map { |x| '-S "' + x + '"' }.join(' ')
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
     Dir.chdir(App.config.build_dir) do
       [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
         line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{file}\""
