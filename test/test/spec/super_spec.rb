@@ -8,6 +8,9 @@ class Base
   end
   
   def func(x, a:y, b:z)
+    x.should == 1
+    y.should == 2
+    z.should == {"foo"=>3, "bar"=>4}
     12345
   end
 
@@ -23,7 +26,7 @@ class Foo < Base
   end
 
   def func(x, a:y, b:z)
-    super(x, a:y, b:z)
+    super(1, a:2, b:{"foo"=>3, "bar"=>4})
   end
 
   def func2(x, y)
