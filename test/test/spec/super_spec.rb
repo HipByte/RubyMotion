@@ -6,12 +6,20 @@ class Base
       obj.bar(args)
     end
   end
+  
+  def func(x, a:y, b:z)
+    12345
+  end
 end
 
 class Foo < Base
   def bar(args)
     $spec_result << "a"
     super
+  end
+
+  def func(x, a:y, b:z)
+    super(x, a:y, b:z)
   end
 end
 
@@ -45,4 +53,9 @@ describe "'super'" do
     c.frame.origin.x.should == 42
   end
 
+  it "should call the method even if passed keyword argument" do
+    # RM-276
+    obj = Foo.new
+    obj.func(1, a:2, b:3).should == 12345
+  end
 end
