@@ -29,7 +29,7 @@ module Motion; module Project;
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :arch, :assets_dirs, :icon,
-      :manifest_metadata, :logs_components
+      :logs_components
 
     def initialize(project_dir, build_mode)
       super
@@ -40,7 +40,7 @@ module Motion; module Project;
       @assets_dirs = [File.join(project_dir, 'assets')]
       @vendored_jars = []
       @vendored_resources = []
-      @manifest_metadata = {}
+      @manifest_entries = {}
     end
 
     def validate
@@ -185,6 +185,35 @@ module Motion; module Project;
 
     def logs_components
       @logs_components ||= [package_path, 'AndroidRuntime', 'chromium', 'dalvikvm'].map { |component| component + ':I' }
+    end
+
+    attr_reader :manifest_entries
+
+    def manifest_entry(toplevel_element=nil, element, attributes)
+      if toplevel_element
+        App.fail "toplevel element must be either nil or `application'" unless toplevel_element == 'application'
+      end
+      elems = (@manifest_entries[toplevel_element] ||= [])
+      elems << { :name => element, :attributes => attributes }
+    end
+
+    def manifest_xml_lines(toplevel_element)
+      @manifest_entries[toplevel_element].map do |elem|
+        name = elem[:name]
+        attributes = elem[:attributes]
+        attributes_line = attributes.to_a.map do |key, val|
+          key = case key
+            when :name
+              'android:name'
+            when :value
+              'android:value'
+            else
+              key
+          end
+          "#{key}=\"#{val}\""
+        end.join(' ')
+        "<#{name} #{attributes_line}/>"
+      end
     end
   end
 end; end

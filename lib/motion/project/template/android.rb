@@ -143,7 +143,44 @@ EOS
     end
   end
 
-  # Create java files.
+  # Generate the Android manifest file.
+  android_manifest_txt = ''
+  android_manifest_txt << <<EOS
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="1" android:versionName="1.0">
+	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
+EOS
+    App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
+    android_manifest_txt << <<EOS
+	<application android:label="#{App.config.name}" android:debuggable="true" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
+EOS
+    App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
+    android_manifest_txt << <<EOS
+        	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
+            		<intent-filter>
+                		<action android:name="android.intent.action.MAIN" />
+                		<category android:name="android.intent.category.LAUNCHER" />
+            		</intent-filter>
+        	</activity>
+EOS
+  (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
+    android_manifest_txt << <<EOS
+		<activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
+			<meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
+		</activity>
+EOS
+  end
+  android_manifest_txt << <<EOS
+    </application>
+</manifest> 
+EOS
+  android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
+  if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
+    App.info 'Create', android_manifest
+    File.open(android_manifest, 'w') { |io| io.write(android_manifest_txt) }
+  end
+
+  # Create java files based on the classes map files.
   java_classes = {}
   Dir.glob(objs_build_dir + '/**/*.map') do |map|
     txt = File.read(map)
@@ -236,44 +273,6 @@ EOS
       or classes_changed
     App.info 'Create', dex_classes
     sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
-  end
-
-  # Generate the Android manifest file.
-  android_manifest_txt = ''
-  android_manifest_txt << <<EOS
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="1" android:versionName="1.0">
-	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
-	<application android:label="#{App.config.name}" android:debuggable="true" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
-EOS
-    App.config.manifest_metadata.each do |key, val|
-      android_manifest_txt << <<EOS
-		<meta-data android:name=\"#{key}\" android:value=\"#{val}\"/>
-EOS
-    end
-    android_manifest_txt << <<EOS
-        	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
-            		<intent-filter>
-                		<action android:name="android.intent.action.MAIN" />
-                		<category android:name="android.intent.category.LAUNCHER" />
-            		</intent-filter>
-        	</activity>
-EOS
-  (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
-    android_manifest_txt << <<EOS
-		<activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
-			<meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
-		</activity>
-EOS
-  end
-  android_manifest_txt << <<EOS
-    </application>
-</manifest> 
-EOS
-  android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
-  if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
-    App.info 'Create', android_manifest
-    File.open(android_manifest, 'w') { |io| io.write(android_manifest_txt) }
   end
 
   # Create the debug keystore if needed.
