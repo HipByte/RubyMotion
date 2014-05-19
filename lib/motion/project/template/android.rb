@@ -241,8 +241,9 @@ EOS
   all_resources = (App.config.resources_dirs + App.config.vendored_projects.map { |x| x[:resources] }.compact)
   aapt_resources_flags = all_resources.map { |x| '-S "' + x + '"' }.join(' ')
   r_java_mtime = Dir.glob(java_dir + '/**/R.java').map { |x| File.mtime(x) }.max
-  if !r_java_mtime or all_resources.any? { |x| File.mtime(x) > r_java_mtime }
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" --extra-packages com.google.android.gms --auto-add-overlay"
+  if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
+    extra_packages = App.config.vendored_projects.map { |x| x[:package] }.compact.map { |x| "--extra-packages #{x}" }.join(' ')
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
   end
 
   # Compile java files.

@@ -165,7 +165,14 @@ module Motion; module Project;
       App.fail "Expected `:manifest' key/value pair when `:resources' is given" if res and !manifest
       App.fail "Expected `:resources' key/value pair when `:manifest' is given" if manifest and !res
       App.fail "Unused arguments: `#{opt}'" unless opt.empty?
-      @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest }
+
+      package = nil
+      if manifest
+        line = `/usr/bin/xmllint --xpath '/manifest/@package' \"#{manifest}\"`.strip
+        App.fail "Given manifest `#{manifest}' does not have a `package' attribute in the top-level element" if $?.to_i != 0
+        package = line.match(/package=\"(.+)\"$/)[1]
+      end
+      @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest, :package => package }
     end
 
     def vendored_bs_files
