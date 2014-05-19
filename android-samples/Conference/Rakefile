@@ -19,6 +19,7 @@ Motion::Project::App.setup do |app|
   %w{ACCESS_NETWORK_STATE ACCESS_FINE_LOCATION INTERNET WRITE_EXTERNAL_STORAGE}.each do |perm|
     app.manifest_entry('uses-permission', :name => "android.permission.#{perm}")
   end
+  app.manifest_entry('uses-permission', :name => 'com.google.android.providers.gsf.permission.READ_GSERVICES')
 
   # Enable the Google Play Services library in the manifest file.
   app.manifest_entry('application', 'meta-data', :name => 'com.google.android.gms.version', :value => '@integer/google_play_services_version')
