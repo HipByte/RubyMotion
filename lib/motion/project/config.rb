@@ -199,10 +199,6 @@ module Motion; module Project
       end
     end
 
-    def versionized_build_dir(platform)
-      File.join(build_dir, platform + '-' + deployment_target + '-' + build_mode_name)
-    end
-
     attr_reader :project_dir
 
     def project_file
