@@ -242,6 +242,10 @@ EOS
       @name + (spec_mode ? '_spec' : '')
     end
 
+    def versionized_build_dir(platform)
+      File.join(build_dir, platform + '-' + deployment_target + '-' + build_mode_name)
+    end
+
     def app_bundle_dsym(platform)
       File.join(versionized_build_dir(platform), bundle_name + '.dSYM')
     end
