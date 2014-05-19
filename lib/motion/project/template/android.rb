@@ -268,8 +268,8 @@ EOS
       next
     end
 
-    if !File.exist?(class_path) or File.mtime(java_path) > File.mtime(class_path)
-      App.info 'Create', class_path
+    if !File.exist?(java_class_path) or File.mtime(java_path) > File.mtime(java_class_path)
+      App.info 'Create', java_class_path
       sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
       classes_changed = true
     end
