@@ -257,13 +257,13 @@ EOS
     paths = java_path.split('/')
     paths[paths.index('java')] = 'classes'
     paths[-1].sub!(/\.java$/, '.class')
-    class_path = paths.join('/')
+    java_class_path = paths.join('/')
 
     class_name = File.basename(java_path, '.java')
     if !java_classes.has_key?(class_name) and class_name != 'R'
       # This .java file is not referred in the classes map, so it must have been created in the past. We remove it as well as its associated .class file (if any).
       rm_rf java_path
-      rm_rf class_path
+      rm_rf java_class_path
       classes_changed = true
       next
     end
