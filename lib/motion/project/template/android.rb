@@ -236,9 +236,17 @@ EOS
     end
   end
 
-  # Compile java files.
+  # Create R.java files.
   android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
-  vendored_jars = App.config.vendored_jars
+  all_resources = (App.config.resources_dirs + App.config.vendored_projects.map { |x| x[:resources] }.compact)
+  aapt_resources_flags = all_resources.map { |x| '-S "' + x + '"' }.join(' ')
+  r_java_mtime = Dir.glob(java_dir + '/**/R.java').map { |x| File.mtime(x) }.max
+  if !r_java_mtime or all_resources.any? { |x| File.mtime(x) > r_java_mtime }
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" --extra-packages com.google.android.gms --auto-add-overlay"
+  end
+
+  # Compile java files.
+  vendored_jars = App.config.vendored_projects.map { |x| x[:jar] }
   vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
   classes_dir = File.join(App.config.build_dir, 'classes')
   mkdir_p classes_dir
@@ -251,7 +259,7 @@ EOS
     class_path = paths.join('/')
 
     class_name = File.basename(java_path, '.java')
-    if !java_classes.has_key?(class_name)
+    if !java_classes.has_key?(class_name) and class_name != 'R'
       # This .java file is not referred in the classes map, so it must have been created in the past. We remove it as well as its associated .class file (if any).
       rm_rf java_path
       rm_rf class_path
@@ -291,8 +299,7 @@ EOS
       or App.config.resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
     App.info 'Create', archive
     assets_flags = App.config.assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
-    resources_flags = (App.config.resources_dirs + App.config.vendored_resources).map { |x| '-S "' + x + '"' }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
     Dir.chdir(App.config.build_dir) do
       [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
         line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{file}\""

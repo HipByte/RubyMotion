@@ -38,8 +38,7 @@ module Motion; module Project;
       @sub_activities = []
       @arch = 'armv5te'
       @assets_dirs = [File.join(project_dir, 'assets')]
-      @vendored_jars = []
-      @vendored_resources = []
+      @vendored_projects = []
       @manifest_entries = {}
     end
 
@@ -156,23 +155,23 @@ module Motion; module Project;
       File.join(App.config.motiondir, 'bin', name)
     end
 
-    attr_reader :vendored_jars, :vendored_resources
+    attr_reader :vendored_projects
 
     def vendor_project(opt)
       jar = opt.delete(:jar)
-      unless jar
-        App.fail "Expected `:jar' key/value pair in `#{opt}'"
-      end
-      @vendored_jars << jar
+      App.fail "Expected `:jar' key/value pair in `#{opt}'" unless jar
       res = opt.delete(:resources)
-      if res
-        @vendored_resources << res
-      end
+      manifest = opt.delete(:manifest)
+      App.fail "Expected `:manifest' key/value pair when `:resources' is given" if res and !manifest
+      App.fail "Expected `:resources' key/value pair when `:manifest' is given" if manifest and !res
+      App.fail "Unused arguments: `#{opt}'" unless opt.empty?
+      @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest }
     end
 
     def vendored_bs_files
       @vendored_bs_files ||= begin
-        vendored_jars.map do |jar_file|
+        vendored_projects.map do |proj|
+          jar_file = proj[:jar]
           bs_file = File.join(File.dirname(jar_file), File.basename(jar_file) + '.bridgesupport')
           if !File.exist?(bs_file) or File.mtime(jar_file) > File.mtime(bs_file)
             App.info 'Create', bs_file
