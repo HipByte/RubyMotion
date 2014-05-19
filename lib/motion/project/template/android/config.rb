@@ -40,6 +40,8 @@ module Motion; module Project;
       @assets_dirs = [File.join(project_dir, 'assets')]
       @vendored_projects = []
       @manifest_entries = {}
+      @release_keystore_path = nil
+      @release_keystore_alias = nil
     end
 
     def validate
@@ -220,6 +222,13 @@ module Motion; module Project;
         end.join(' ')
         "<#{name} #{attributes_line}/>"
       end
+    end
+
+    attr_reader :release_keystore_path, :release_keystore_alias
+
+    def release_keystore(path, alias_name)
+      @release_keystore_path = path
+      @release_keystore_alias = alias_name
     end
   end
 end; end
