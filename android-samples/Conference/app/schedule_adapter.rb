@@ -3,6 +3,7 @@ class ScheduleAdapter < Android::Widget::ArrayAdapter
     @schedule = schedule
   end
 
+  # Instead of a generic TextView, we return a custom view for each schedule item.
   def getView(position, convertView, parent)
     titleTextView = Android::Widget::TextView.new(context)
     titleTextView.text = @schedule[position][:title]

@@ -85,22 +85,18 @@ class ScheduleFragment < Android::App::Fragment
 
   def onCreateView(inflater, container, savedInstanceState)
     @view ||= begin
-      @pos = arguments.getInt(MainActivity::MenuPosition)
-      if @pos == 0 || @pos == 1
-        view = Android::Widget::ListView.new(activity)
-        schedule = @pos == 0 ? ScheduleDay1 : ScheduleDay2
-        view.adapter = ScheduleAdapter.new(activity, Android::R::Layout::Simple_list_item_1, schedule)
-        view.adapter.schedule = schedule
-        view.backgroundColor = Android::Graphics::Color::WHITE
-        view.divider = Android::Graphics::Drawable::ColorDrawable.new(Android::Graphics::Color::BLACK)
-        view.dividerHeight = 1
-        view
-      else
-        view = Android::Widget::TextView.new(activity)
-        view.text = 'blablabla'
-        view.backgroundColor = Android::Graphics::Color::RED
-        view
-      end
+      # Retrieve the item position from the arguments. We use it to determine which schedule day we need to display.
+      pos = arguments.getInt(MainActivity::MenuPosition)
+
+      # Create the list view with a custom adapter.
+      view = Android::Widget::ListView.new(activity)
+      schedule = pos == 0 ? ScheduleDay1 : ScheduleDay2
+      view.adapter = ScheduleAdapter.new(activity, Android::R::Layout::Simple_list_item_1, schedule)
+      view.adapter.schedule = schedule
+      view.backgroundColor = Android::Graphics::Color::WHITE
+      view.divider = Android::Graphics::Drawable::ColorDrawable.new(Android::Graphics::Color::BLACK)
+      view.dividerHeight = 1
+      view
     end
   end
 end
