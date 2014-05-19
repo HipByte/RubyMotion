@@ -33,6 +33,10 @@ require 'motion/project/template/android/config'
 
 desc "Create an application package file (.apk)"
 task :build do
+  # Prepare build dir.
+  app_build_dir = App.config.versionized_build_dir
+  mkdir_p app_build_dir
+
   # Compile Ruby files.
   ruby = App.config.bin_exec('ruby')
   init_func_n = 0
@@ -40,7 +44,7 @@ task :build do
   bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   bs_files += App.config.vendored_bs_files
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
-  objs_build_dir = File.join(App.config.build_dir, 'obj', 'local', App.config.armeabi_directory_name)
+  objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   kernel_bc = File.join(App.config.versioned_arch_datadir, "kernel-#{App.config.arch}.bc")
   ruby_objs_changed = false
   App.config.files.each do |ruby_path|
@@ -96,7 +100,7 @@ EOS
     return JNI_VERSION_1_6;
 }
 EOS
-  payload_c = File.join(App.config.build_dir, 'jni/payload.c')
+  payload_c = File.join(app_build_dir, 'jni/payload.c')
   mkdir_p File.dirname(payload_c)
   if !File.exist?(payload_c) or File.read(payload_c) != payload_c_txt
     File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
@@ -105,7 +109,7 @@ EOS
   # Compile and link payload library.
   libs_abi_subpath = "lib/#{App.config.armeabi_directory_name}"
   libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_name}"
-  libpayload_path = "#{App.config.build_dir}/#{libpayload_subpath}"
+  libpayload_path = "#{app_build_dir}/#{libpayload_subpath}"
   if !File.exist?(libpayload_path) \
       or ruby_objs_changed \
       or File.mtime(File.join(App.config.versioned_arch_datadir, "librubymotion-static.a")) > File.mtime(libpayload_path)
@@ -119,21 +123,21 @@ EOS
   end
 
   # Create a build/libs -> build/lib symlink (important for ndk-gdb).
-  Dir.chdir(App.config.build_dir) { ln_s 'lib', 'libs' unless File.exist?('libs') }
+  Dir.chdir(app_build_dir) { ln_s 'lib', 'libs' unless File.exist?('libs') }
 
   # Create a build/jni/Android.mk file (important for ndk-gdb).
-  File.open("#{App.config.build_dir}/jni/Android.mk", 'w') { |io| }
+  File.open("#{app_build_dir}/jni/Android.mk", 'w') { |io| }
 
   # Copy the gdb server.
   gdbserver_subpath = "#{libs_abi_subpath}/gdbserver"
-  gdbserver_path = "#{App.config.build_dir}/#{gdbserver_subpath}"
+  gdbserver_path = "#{app_build_dir}/#{gdbserver_subpath}"
   if !File.exist?(gdbserver_path)
     App.info 'Create', gdbserver_path
     sh "/usr/bin/install -p #{App.config.ndk_path}/prebuilt/android-arm/gdbserver/gdbserver #{File.dirname(gdbserver_path)}"
   end
 
   # Create the gdb config file.
-  gdbconfig_path = "#{App.config.build_dir}/#{libs_abi_subpath}/gdb.setup"
+  gdbconfig_path = "#{app_build_dir}/#{libs_abi_subpath}/gdb.setup"
   if !File.exist?(gdbconfig_path)
     App.info 'Create', gdbconfig_path
     File.open(gdbconfig_path, 'w') do |io|
@@ -152,12 +156,12 @@ EOS
 EOS
     App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
     android_manifest_txt << <<EOS
-	<application android:label="#{App.config.name}" android:debuggable="true" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
+	<application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
 EOS
     App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
     android_manifest_txt << <<EOS
-        	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
-            		<intent-filter>
+        	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}" android:configChanges="keyboardHidden|orientation|screenSize">
+			<intent-filter>
                 		<action android:name="android.intent.action.MAIN" />
                 		<category android:name="android.intent.category.LAUNCHER" />
             		</intent-filter>
@@ -174,7 +178,7 @@ EOS
     </application>
 </manifest> 
 EOS
-  android_manifest = File.join(App.config.build_dir, 'AndroidManifest.xml')
+  android_manifest = File.join(app_build_dir, 'AndroidManifest.xml')
   if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
     App.info 'Create', android_manifest
     File.open(android_manifest, 'w') { |io| io.write(android_manifest_txt) }
@@ -209,7 +213,7 @@ EOS
       end
     end
   end
-  java_dir = File.join(App.config.build_dir, 'java')
+  java_dir = File.join(app_build_dir, 'java')
   java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
   mkdir_p java_app_package_dir
   java_classes.each do |name, klass|
@@ -249,11 +253,11 @@ EOS
   # Compile java files.
   vendored_jars = App.config.vendored_projects.map { |x| x[:jar] }
   vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
-  classes_dir = File.join(App.config.build_dir, 'classes')
+  classes_dir = File.join(app_build_dir, 'classes')
   mkdir_p classes_dir
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
   classes_changed = false
-  Dir.glob(File.join(App.config.build_dir, 'java', '**', '*.java')).each do |java_path|
+  Dir.glob(File.join(app_build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
     paths[paths.index('java')] = 'classes'
     paths[-1].sub!(/\.java$/, '.class')
@@ -276,7 +280,7 @@ EOS
   end
 
   # Generate the dex file.
-  dex_classes = File.join(App.config.build_dir, 'classes.dex')
+  dex_classes = File.join(app_build_dir, 'classes.dex')
   if !File.exist?(dex_classes) \
       or File.mtime(App.config.project_file) > File.mtime(dex_classes) \
       or classes_changed
@@ -284,11 +288,17 @@ EOS
     sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
   end
 
-  # Create the debug keystore if needed.
-  debug_keystore = File.expand_path('~/.android/debug.keystore')
-  unless File.exist?(debug_keystore)
-    App.info 'Create', debug_keystore
-    sh "/usr/bin/keytool -genkeypair -alias androiddebugkey -keypass android -keystore \"#{debug_keystore}\" -storepass android -dname \"CN=Android Debug,O=Android,C=US\" -validity 9999"
+  keystore = nil
+  if App.config.development?
+    # Create the debug keystore if needed.
+    keystore = File.expand_path('~/.android/debug.keystore')
+    unless File.exist?(keystore)
+      App.info 'Create', keystore
+      sh "/usr/bin/keytool -genkeypair -alias androiddebugkey -keypass android -keystore \"#{keystore}\" -storepass android -dname \"CN=Android Debug,O=Android,C=US\" -validity 9999"
+    end
+  else
+    keystore = App.config.release_keystore_path
+    App.fail "app.release_keystore(path, alias_name) must be called when doing a release build" unless keystore
   end
 
   # Generate the APK file.
@@ -301,21 +311,32 @@ EOS
     App.info 'Create', archive
     assets_flags = App.config.assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
-    Dir.chdir(App.config.build_dir) do
+    Dir.chdir(app_build_dir) do
       [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
-        line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"../#{archive}\" \"#{file}\""
+        line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"#{File.basename(archive)}\" \"#{file}\""
         line << " > /dev/null" unless Rake.application.options.trace
         sh line
       end
     end
 
     App.info 'Sign', archive
-    sh "/usr/bin/jarsigner -storepass android -keystore \"#{debug_keystore}\" \"#{archive}\" androiddebugkey"
+    if App.config.development?
+      sh "/usr/bin/jarsigner -storepass android -keystore \"#{keystore}\" \"#{archive}\" androiddebugkey"
+    else
+      sh "/usr/bin/jarsigner -sigalg SHA1withRSA -digestalg SHA1 -keystore \"#{keystore}\" \"#{archive}\" \"#{App.config.release_keystore_alias}\""
+    end
 
     App.info 'Align', archive
     sh "\"#{App.config.sdk_path}/tools/zipalign\" -f 4 \"#{archive}\" \"#{archive}-aligned\""
     sh "/bin/mv \"#{archive}-aligned\" \"#{archive}\""
   end
+end
+
+desc "Create an application package file (.apk) for release (Google Play)"
+task :release do
+  App.config_without_setup.build_mode = :release
+  App.config_without_setup.distribution_mode = true
+  Rake::Task["build"].invoke
 end
 
 def adb_mode_flag(mode)
@@ -342,10 +363,13 @@ end
 
 def run_apk(mode)
   if ENV['debug']
+    App.fail "debug mode not implemented yet"
+=begin
     Dir.chdir(App.config.build_dir) do
       App.info 'Debug', App.config.apk_path
       sh "\"#{App.config.ndk_path}/ndk-gdb\" #{adb_mode_flag(mode)} --adb=\"#{adb_path}\" --start"
     end
+=end
   else
     # Clear log.
     sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -c"

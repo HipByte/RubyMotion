@@ -77,12 +77,16 @@ module Motion; module Project;
       end
     end
 
+    def versionized_build_dir
+      File.join(build_dir, build_mode_name + '-' + api_version)
+    end
+
     def build_tools_dir
       @build_tools_dir ||= Dir.glob(sdk_path + '/build-tools/android-*').sort { |x, y| File.basename(x) <=> File.basename(y) }.max
     end
 
     def apk_path
-      File.join(build_dir, name + '.apk')
+      File.join(versionized_build_dir, name + '.apk')
     end
 
     def ndk_toolchain_bin_dir
