@@ -51,8 +51,7 @@ module Motion; module Project
       end
     end
 
-    variable :name, :files, :build_dir, :specs_dir, :resources_dirs, :version,
-      :motiondir
+    variable :name, :files, :build_dir, :specs_dir, :resources_dirs, :motiondir
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
@@ -83,7 +82,6 @@ module Motion; module Project
       @resources_dirs = [File.join(project_dir, 'resources')]
       @build_dir = File.join(project_dir, 'build')
       @specs_dir = File.join(project_dir, 'spec')
-      @version = '1.0'
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
     end
