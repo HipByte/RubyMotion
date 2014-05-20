@@ -30,7 +30,8 @@ module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
       :weak_frameworks, :framework_search_paths, :libs, :identifier,
-      :codesign_certificate, :short_version, :entitlements, :delegate_class
+      :codesign_certificate, :short_version, :entitlements, :delegate_class,
+      :version
 
     def initialize(project_dir, build_mode)
       super
@@ -46,6 +47,7 @@ module Motion; module Project;
       @delegate_class = 'AppDelegate'
       @spec_mode = false
       @vendor_projects = []
+      @version = '1.0'
     end
 
     def xcode_dir
