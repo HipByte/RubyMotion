@@ -5,6 +5,7 @@ require 'motion/project/template/android'
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'RubyMotion #inspect 2014'
+  app.version('2', '1.1')
   app.api_version = '18'
   app.icon = 'icon'
   app.package = 'com.hipbyte.inspect2014'
