@@ -29,7 +29,7 @@ module Motion; module Project;
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :arch, :assets_dirs, :icon,
-      :logs_components
+      :logs_components, :version_code, :version_name
 
     def initialize(project_dir, build_mode)
       super
@@ -42,6 +42,8 @@ module Motion; module Project;
       @manifest_entries = {}
       @release_keystore_path = nil
       @release_keystore_alias = nil
+      @version_code = '1'
+      @version_name = '1.0'
     end
 
     def validate
@@ -233,6 +235,11 @@ module Motion; module Project;
     def release_keystore(path, alias_name)
       @release_keystore_path = path
       @release_keystore_alias = alias_name
+    end
+
+    def version(code, name)
+      @version_code = code
+      @version_name = name
     end
   end
 end; end

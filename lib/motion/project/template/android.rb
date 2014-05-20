@@ -151,7 +151,7 @@ EOS
   android_manifest_txt = ''
   android_manifest_txt << <<EOS
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="1" android:versionName="1.0">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{App.config.version_code}" android:versionName="#{App.config.version_name}">
 	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
 EOS
     App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
