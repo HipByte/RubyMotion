@@ -52,7 +52,7 @@ module Bacon
         options = args.pop
         if options.has_key?(:if) && !options[:if]
           return xit(*args, &block)
-        else options.has_key?(:unless) && options[:unless]
+        elsif options.has_key?(:unless) && options[:unless]
           return xit(*args, &block)
         end
       end
