@@ -38,7 +38,7 @@ describe 'BigDecimal' do
     end
 
     it 'can be created with a Bignum' do
-      number = 123456789123456789
+      number = NSIntegerMax
       number.class.should == Bignum
       bd = BigDecimal.new(number)
       bd.class.should == BigDecimal
