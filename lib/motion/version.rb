@@ -24,5 +24,5 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion
-  Version = "2.27"
+  Version = "2.28"
 end
