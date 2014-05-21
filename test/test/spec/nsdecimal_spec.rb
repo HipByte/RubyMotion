@@ -59,7 +59,8 @@ describe 'BigDecimal' do
       bd.inspect.should == '0.1'
     end
 
-    it 'raises in case a BigDecimal cannot be created from the given object' do
+    # TODO leads to segfault on OS X 32bit
+    it 'raises in case a BigDecimal cannot be created from the given object', :unless => (osx? && bits == 32) do
       should.raise TypeError do
         BigDecimal.new(Object.new)
       end

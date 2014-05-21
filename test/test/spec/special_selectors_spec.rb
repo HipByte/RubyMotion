@@ -12,12 +12,12 @@ end
 
 describe "Objective-C predicate" do
   # TODO
-  it "is available in its Ruby `#predicate?` form", :unless => osx_32bit? do
+  xit "is available in its Ruby `#predicate?` form" do
     TestSpecialSelectors.new.should.respond_to :predicate?
   end
 
   # TODO
-  it "is callable in its Ruby `#predicate?` form", :unless => osx_32bit? do
+  xit "is callable in its Ruby `#predicate?` form" do
     obj = TestSpecialSelectors.new
     obj.aSetter = 42
     obj.predicate?(42).should == true
@@ -26,19 +26,19 @@ end
 
 describe "Objective-C subscripting" do
   # TODO
-  it "is available in its Ruby `#[]` getter form", :unless => osx_32bit? do
+  it "is available in its Ruby `#[]` getter form", :if => ((osx? && sdk_version >= '10.8') || (ios? && sdk_version >= '6.0')) do
     obj = TestSpecialSelectors.new
     obj.should.respond_to :[]
   end
 
   # TODO
-  it "is available in its Ruby `#[]=` setter form", :unless => osx_32bit? do
+  it "is available in its Ruby `#[]=` setter form", :if => ((osx? && sdk_version >= '10.8') || (ios? && sdk_version >= '6.0')) do
     obj = TestSpecialSelectors.new
     obj.should.respond_to :[]=
   end
 
   # TODO
-  it "works with indexed-subscripting", :unless => osx_32bit? do
+  it "works with indexed-subscripting", :if => ((osx? && sdk_version >= '10.8') || (ios? && sdk_version >= '6.0')) do
     obj = TestSpecialSelectors.new
     o = obj[0] = 42
     obj[0].should == 42
@@ -46,7 +46,7 @@ describe "Objective-C subscripting" do
   end
 
   # TODO
-  it "works with keyed-subscripting", :unless => osx_32bit? do
+  it "works with keyed-subscripting", :if => ((osx? && sdk_version >= '10.8') || (ios? && sdk_version >= '6.0')) do
     obj = TestSpecialSelectors.new
     o = obj['a'] = 'foo'
     obj['a'].should == 'foo'

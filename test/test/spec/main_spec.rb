@@ -26,7 +26,7 @@ end
 
 describe 'A method returning a 64-bit struct' do
   # TODO
-  it "can be called", :unless => osx_32bit? do
+  it "can be called", :if => ios? do
     o = TestMethod.new
     o.methodReturningCGSize.should == CGSize.new(1, 2)
   end
@@ -39,7 +39,7 @@ end
 
 describe 'A method returning a 128-bit struct' do
   # TODO
-  it "can be called", :unless => osx_32bit? do
+  it "can be called", :if => ios? do
     o = TestMethod.new
     o.methodReturningCGRect.should == CGRect.new(CGPoint.new(1, 2), CGSize.new(3, 4))
   end

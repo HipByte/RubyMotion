@@ -20,11 +20,11 @@ unless osx_32bit
 end
 
 describe "An exception" do
-  it "includes backtrace info when raised from a file scope", :unless => osx_32bit do
+  xit "includes backtrace info when raised from a file scope" do
     $file_scope_exception.backtrace.first.should.match /exception_spec\.rb:2/
   end
 
-  it "includes backtrace info when raised from a class scope", :unless => osx_32bit do
+  xit "includes backtrace info when raised from a class scope" do
     $class_scope_exception.backtrace.first.should.match /exception_spec\.rb:12/
   end
 end

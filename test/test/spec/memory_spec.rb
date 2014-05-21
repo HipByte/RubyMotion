@@ -227,7 +227,7 @@ end
 
 describe "C functions that return retained objects" do
   # TODO
-  it "returns an autoreleased object if the function name contains 'Create'", :unless => osx_32bit? do
+  xit "returns an autoreleased object if the function name contains 'Create'" do
     lambda {
       CFStringCreateWithFormat(nil, {}, '%@', 42)
     }.should.be.autoreleased
