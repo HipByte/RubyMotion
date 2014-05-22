@@ -5,7 +5,7 @@ require 'motion/project/template/android'
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'RubyMotion #inspect 2014'
-  app.version('2', '1.1')
+  app.version('3', '1.2')
   app.api_version = '18'
   app.icon = 'icon'
   app.package = 'com.hipbyte.inspect2014'
@@ -30,7 +30,7 @@ Motion::Project::App.setup do |app|
 
   if app.release?
     # In release mode, we have to specify the release key.
-    app.release_keystore('~/my-release-key.keystore', 'release-key')
+    app.release_keystore(File.expand_path('~/my-release-key.keystore'), 'release-key')
     # Release mode has a dedicated Google Play Services API key.
     app.manifest_entry('application', 'meta-data', :name => 'com.google.android.maps.v2.API_KEY', :value => 'AIzaSyDRF-wx9BPcakFnHBJodn0KzAEFALF4ZBU')
   else
