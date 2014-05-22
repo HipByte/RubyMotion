@@ -27,7 +27,7 @@ class MainActivity < Android::App::Activity
     # Create the drawer layout, which will be the activity's main view. The first subview must be the drawer content view and the second the drawer menu list view.
     @drawerLayout = Android::Support::V4::Widget::DrawerLayout.new(self)
     @drawerLayout.addView(@contentLayout, Android::Support::V4::Widget::DrawerLayout::LayoutParams.new(Android::View::ViewGroup::LayoutParams::MATCH_PARENT, Android::View::ViewGroup::LayoutParams::MATCH_PARENT))
-    @drawerLayout.addView(@drawerList, Android::Support::V4::Widget::DrawerLayout::LayoutParams.new(dpToPx(240), Android::View::ViewGroup::LayoutParams::MATCH_PARENT, Android::View::Gravity::START))
+    @drawerLayout.addView(@drawerList, Android::Support::V4::Widget::DrawerLayout::LayoutParams.new(240 * density, Android::View::ViewGroup::LayoutParams::MATCH_PARENT, Android::View::Gravity::START))
     self.contentView = @drawerLayout
 
     # Enable the action bar app icon to behave as a drawer toggle action.
@@ -71,11 +71,6 @@ class MainActivity < Android::App::Activity
     selectItem(position)
   end
 
-  # Helper to translate dp into pixels.
-  def dpToPx(dp)
-    dp * self.resources.displayMetrics.density
-  end
-
   def selectItem(pos)
     # Create the view Fragment object if it does not exist already.
     @fragments[pos] ||= begin
@@ -102,5 +97,9 @@ class MainActivity < Android::App::Activity
     # Refresh the action bar title and close the drawer.
     self.title = MenuTitles[pos]
     @drawerLayout.closeDrawer(@drawerList)
+  end
+
+  def density
+    @density ||= resources.displayMetrics.density
   end
 end

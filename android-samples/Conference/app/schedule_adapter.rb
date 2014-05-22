@@ -27,22 +27,25 @@ class ScheduleAdapter < Android::Widget::ArrayAdapter
       titleTextView.gravity = Android::View::Gravity::CENTER_VERTICAL
     end
 
+    rightView = nil
+    rightViewHeight = -1
     if whoTextView
-      layout1 = Android::Widget::LinearLayout.new(context)
-      layout1.orientation = Android::Widget::LinearLayout::VERTICAL
-      layout1.addView(titleTextView)
-      layout1.addView(whoTextView)
+      rightView = Android::Widget::LinearLayout.new(context)
+      rightView.orientation = Android::Widget::LinearLayout::VERTICAL
+      rightView.addView(titleTextView)
+      rightView.addView(whoTextView)
     else
-      layout1 = titleTextView
+      rightView = titleTextView
+      rightViewHeight = 65 * context.density
     end
 
-    whenTextView.setPadding(20, 10, 10, 10)
-    layout1.setPadding(10, 10, 10, 10)
+    whenTextView.setPadding(10 * context.density, 10, 10, 10)
+    rightView.setPadding(0, 10, 10, 10)
 
     layout2 = Android::Widget::LinearLayout.new(context)
     layout2.orientation = Android::Widget::LinearLayout::HORIZONTAL
-    layout2.addView(whenTextView, 170, -1)
-    layout2.addView(layout1, -1, 130)
+    layout2.addView(whenTextView, 85 * context.density, -1)
+    layout2.addView(rightView, -1, rightViewHeight)
     layout2
   end
 end

@@ -3,11 +3,14 @@ class AboutFragment < Android::App::Fragment
     @view ||= begin
       layout = Android::Widget::LinearLayout.new(activity)
       layout.orientation = Android::Widget::LinearLayout::VERTICAL
-      layout.setPadding(120, 120, 120, 120)
+      pad = 30 * activity.density
+      layout.setPadding(pad, pad, pad, pad)
       layout.backgroundColor = Android::Graphics::Color::WHITE
 
       logoView = Android::Widget::ImageView.new(activity)
       logoView.imageResource = activity.resources.getIdentifier('rmc_logo', 'drawable', activity.packageName)
+      logoView.adjustViewBounds = true
+      logoView.maxHeight = 400 * activity.density
       layout.addView(logoView)
  
       titleTextView = Android::Widget::TextView.new(activity)
@@ -16,7 +19,7 @@ class AboutFragment < Android::App::Fragment
       titleTextView.setTypeface(nil, Android::Graphics::Typeface::BOLD)
       titleTextView.textColor = Android::Graphics::Color::BLACK
       titleTextView.gravity = Android::View::Gravity::CENTER_HORIZONTAL
-      titleTextView.setPadding(0, 40, 0, 10)
+      titleTextView.setPadding(0, 20 * activity.density, 0, 5 * activity.density)
       layout.addView(titleTextView)
 
       texts = [
@@ -31,7 +34,7 @@ class AboutFragment < Android::App::Fragment
         textView.textSize = 20.0
         textView.textColor = Android::Graphics::Color::BLACK
         textView.gravity = Android::View::Gravity::CENTER_HORIZONTAL
-        textView.setPadding(0, 30, 0, 0)
+        textView.setPadding(0, 15 * activity.density, 0, 0)
         layout.addView(textView)
       end
 

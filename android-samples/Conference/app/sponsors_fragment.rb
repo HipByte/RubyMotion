@@ -6,6 +6,7 @@ class SponsorsFragment < Android::App::Fragment
         logoView.imageResource = activity.resources.getIdentifier(basename, 'drawable', activity.packageName)
         logoView.onClickListener = self
         logoView.tag = url
+        logoView.adjustViewBounds = true
         logoView
       end
 
@@ -14,14 +15,17 @@ class SponsorsFragment < Android::App::Fragment
 
       layout.addView(createLogoView.call('pixate', 'http://pixate.com'))
 
-      layout2 = Android::Widget::LinearLayout.new(activity)
-      layout2.orientation = Android::Widget::LinearLayout::HORIZONTAL
-      layout2.gravity = Android::View::Gravity::CENTER_HORIZONTAL
-
-      layout2.addView(createLogoView.call('terriblelabs', 'http://terriblelabs.com'))
-      layout2.addView(createLogoView.call('rubymine', 'http://jetbrains.com/ruby'))
-
-      layout.addView(layout2)
+      otherLayout = nil
+      if activity.density > 1.0
+        otherLayout = Android::Widget::LinearLayout.new(activity)
+        otherLayout.orientation = Android::Widget::LinearLayout::HORIZONTAL
+        otherLayout.gravity = Android::View::Gravity::CENTER_HORIZONTAL
+        layout.addView(otherLayout)
+      else
+        otherLayout = layout
+      end
+      otherLayout.addView(createLogoView.call('terriblelabs', 'http://terriblelabs.com'))
+      otherLayout.addView(createLogoView.call('rubymine', 'http://jetbrains.com/ruby'))
 
       scrollView = Android::Widget::ScrollView.new(activity)
       scrollView.backgroundColor = Android::Graphics::Color::WHITE
