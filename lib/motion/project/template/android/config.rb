@@ -212,7 +212,7 @@ module Motion; module Project;
     end
 
     def manifest_xml_lines(toplevel_element)
-      @manifest_entries[toplevel_element].map do |elem|
+      (@manifest_entries[toplevel_element] or []).map do |elem|
         name = elem[:name]
         attributes = elem[:attributes]
         attributes_line = attributes.to_a.map do |key, val|
