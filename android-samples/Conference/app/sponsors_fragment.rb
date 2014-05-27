@@ -14,18 +14,8 @@ class SponsorsFragment < Android::App::Fragment
       layout.orientation = Android::Widget::LinearLayout::VERTICAL
 
       layout.addView(createLogoView.call('pixate', 'http://pixate.com'))
-
-      otherLayout = nil
-      if activity.density > 1.0
-        otherLayout = Android::Widget::LinearLayout.new(activity)
-        otherLayout.orientation = Android::Widget::LinearLayout::HORIZONTAL
-        otherLayout.gravity = Android::View::Gravity::CENTER_HORIZONTAL
-        layout.addView(otherLayout)
-      else
-        otherLayout = layout
-      end
-      otherLayout.addView(createLogoView.call('terriblelabs', 'http://terriblelabs.com'))
-      otherLayout.addView(createLogoView.call('rubymine', 'http://jetbrains.com/ruby'))
+      layout.addView(createLogoView.call('terriblelabs', 'http://terriblelabs.com'))
+      layout.addView(createLogoView.call('rubymine', 'http://jetbrains.com/ruby'))
 
       scrollView = Android::Widget::ScrollView.new(activity)
       scrollView.backgroundColor = Android::Graphics::Color::WHITE
