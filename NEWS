@@ -1,3 +1,7 @@
+= RubyMotion 2.29 =
+
+  * Fixed a bug which the removed objects using Array#delete would not released.
+
 = RubyMotion 2.28 =
 
   * Added support for `BigDecimal'. This class is implemented on top of
