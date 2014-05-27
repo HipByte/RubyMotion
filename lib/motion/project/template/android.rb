@@ -402,9 +402,10 @@ namespace 'emulator' do
 
   desc "Start the emulator in the background"
   task :start_avd do
-    unless `/bin/ps -a`.split(/\n/).any? { |x| x.include?('emulator64-arm') and x.include?('RubyMotion') }
+    avd = (ENV['avd'] || App.config.avd_config[:name])
+    unless `/bin/ps -a`.split(/\n/).any? { |x| x.include?('emulator64-arm') and x.include?(avd) }
       Rake::Task["emulator:create_avd"].invoke
-      sh "\"#{App.config.sdk_path}/tools/emulator\" -avd \"#{App.config.avd_config[:name]}\" &"
+      sh "\"#{App.config.sdk_path}/tools/emulator\" -avd \"#{avd}\" &"
       sh "\"#{App.config.sdk_path}/platform-tools/adb\" -e wait-for-device"
     end
   end
