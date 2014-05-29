@@ -242,7 +242,13 @@ EOS
 
   # Create R.java files.
   android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
-  all_resources = (App.config.resources_dirs + App.config.vendored_projects.map { |x| x[:resources] }.compact)
+  resources_dirs = []
+  App.config.resources_dirs.flatten.each do |dir|
+    next unless File.exist?(dir)
+    next unless File.directory?(dir)
+    resources_dirs << dir
+  end
+  all_resources = (resources_dirs + App.config.vendored_projects.map { |x| x[:resources] }.compact)
   aapt_resources_flags = all_resources.map { |x| '-S "' + x + '"' }.join(' ')
   r_java_mtime = Dir.glob(java_dir + '/**/R.java').map { |x| File.mtime(x) }.max
   if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
@@ -307,9 +313,15 @@ EOS
       or File.mtime(dex_classes) > File.mtime(archive) \
       or File.mtime(libpayload_path) > File.mtime(archive) \
       or File.mtime(android_manifest) > File.mtime(archive) \
-      or App.config.resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
+      or resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
     App.info 'Create', archive
-    assets_flags = App.config.assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
+    assets_dirs = []
+    App.config.assets_dirs.flatten.each do |dir|
+      next unless File.exist?(dir)
+      next unless File.directory?(dir)
+      assets_dirs << dir
+    end
+    assets_flags = assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
     Dir.chdir(app_build_dir) do
       [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
