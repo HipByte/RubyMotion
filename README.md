@@ -47,6 +47,12 @@ $ brew install class-dump
 ```
 
 
+### Java for Android
+
+When create a bridgesupport file for android, it requires Java SE 6 by Apple provided (not Oracle's Java SE 8)
+You can get it from http://support.apple.com/kb/DL1572
+
+
 ### Clone RubyMotion source
 
 ```
