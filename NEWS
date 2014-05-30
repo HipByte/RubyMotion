@@ -1,6 +1,8 @@
 = RubyMotion 2.29 =
 
   * Fixed a bug which the removed objects using Array#delete would not released.
+  * Fixed a bug which was causing a `not precompiled' error when it would called
+    #alias for Objecive-C method which has Objective-C blocks argument.
 
 = RubyMotion 2.28 =
 
