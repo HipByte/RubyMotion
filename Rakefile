@@ -146,6 +146,7 @@ task :install do
       data.concat(Dir.glob("./data/#{name}/*.dylib"))
       sdk_versions.each do |sdk_version|
         data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
+        data.concat(Dir.glob("./data/#{name}/#{sdk_version}/*.jar"))
         ANDROID_ARCHS.each do |arch|
           data.concat(Dir.glob("./data/#{name}/#{sdk_version}/#{arch}/*"))
         end
