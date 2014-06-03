@@ -1,8 +1,10 @@
 = RubyMotion 2.29 =
 
-  * Fixed a bug which the removed objects using Array#delete would not released.
-  * Fixed a bug which was causing a `not precompiled' error when it would called
-    #alias for Objecive-C method which has Objective-C blocks argument.
+  * Added support for iOS 8.0 and OS X Yosemite (10.10). Xcode 6 Beta 1 or
+    newer is required in order to build.
+  * Fixed a bug where objects removed by Array#delete would not released.
+  * Fixed a bug where a `not precompiled' error would happen when calling an
+    alias to an Objective-C method with a C-level block argument.
 
 = RubyMotion 2.28 =
 
