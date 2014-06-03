@@ -1415,6 +1415,30 @@ main(int argc, char **argv)
 	    @selector(specifierWithApplicationPath:), app_path);
     assert(app_spec != nil);
 
+    // Retrieve the SimDevice.
+
+    // Create SimDeviceSet (needed in Xcode 6.0).
+    id sim_device = nil;
+    if (strstr([xcode_path UTF8String], "Xcode6") != NULL) {
+	// FIXME improve check for Xcode 6
+	Class SimDevice = NSClassFromString(@"SimDevice");
+	assert(SimDevice != nil);
+
+	Class SimDeviceSet = NSClassFromString(@"SimDeviceSet");
+	assert(SimDeviceSet != nil);
+
+	id sim_deviceset = ((id (*)(id, SEL, id))objc_msgSend)(SimDeviceSet,
+		@selector(defaultSet), nil);
+	assert(sim_deviceset != nil);
+
+	id sim_devices = ((id (*)(id, SEL, id))objc_msgSend)(sim_deviceset,
+		@selector(devices), nil);
+	assert(sim_devices != NULL);
+
+	// FIXME select the right device
+	sim_device = [sim_devices objectAtIndex:0];
+    }
+
     // Create system root.
     id system_root = ((id (*)(id, SEL, id))objc_msgSend)(SystemRoot,
 	    @selector(rootWithSDKVersion:), sdk_version);
@@ -1446,7 +1470,13 @@ main(int argc, char **argv)
     ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setSimulatedSystemRoot:), system_root);
     ((void (*)(id, SEL, id))objc_msgSend)(config,
+	@selector(setSimulatedArchitecture:), @"i386");
+    ((void (*)(id, SEL, id))objc_msgSend)(config,
 	@selector(setLocalizedClientName:), @"NYANCAT");
+    if (sim_device != nil) {
+	((void (*)(id, SEL, id))objc_msgSend)(config,
+	    @selector(setDevice:), sim_device);
+    }
 
     char path[MAXPATHLEN] = {'\0'};
     const char *stdout_path = getenv("SIM_STDOUT_PATH");
