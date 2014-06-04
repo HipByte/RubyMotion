@@ -24,6 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/xcode_config'
+require 'motion/util/version'
 
 module Motion; module Project;
   class OSXConfig < XcodeConfig
@@ -162,22 +163,10 @@ module Motion; module Project;
     end
 
     def supported_sdk_versions(versions)
-      osx_version = `sw_vers -productVersion`.strip
+      osx_version = `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
       versions.reverse.find { |vers|
-        compare_version(osx_version, vers) >= 0 && File.exist?(datadir(vers)) }
-    end
-
-    def compare_version(version1, version2)
-      v1 = version1.match(/(\d+)\.(\d+)/)
-      v2 = version2.match(/(\d+)\.(\d+)/)
-      ver1 = v1[1].to_i; ver2 = v2[1].to_i
-      return -1 if ver1 < ver2
-      return  1 if ver1 > ver2
-
-      ver1 = v1[2].to_i; ver2 = v2[2].to_i
-      return  0 if ver1 == ver2
-      return -1 if ver1 < ver2
-      return  1
+        Util::Version.new(osx_version) <= Util::Version.new(vers) && File.exist?(datadir(vers))
+      }
     end
 
     def main_cpp_file_txt(spec_objs)
