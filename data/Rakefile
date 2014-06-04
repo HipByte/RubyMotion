@@ -25,7 +25,7 @@ task :vm_files do
     end
     install File.join(objs, 'librubymotion-static.a'), sdk
 
-    if first
+    if first and ENV['SDK_BETA'] == nil
       objs = "../vm/MacOSX#{sdk_version}-repl.objs"
       install File.join(objs, 'librubymotion-repl.dylib'), 'osx'
       first = false
@@ -50,7 +50,7 @@ task :vm_files do
     install File.join(objs, 'librubymotion-static.a'), sim
   end
 
-  if IOS_SDK_VERSIONS.size > 1
+  if IOS_SDK_VERSIONS.size > 1 and ENV['SDK_BETA'] == nil
     # Create a fat librubymotion-repl.dylib library for iOS simulator. The i386 slice has a deployment_target for 4.3 and the x86_64 slice has a deployment_target for 7.1.
     first_ios_repl = "../vm/iPhoneSimulator#{IOS_SDK_VERSIONS.first}-repl.objs/librubymotion-repl.dylib"
 
