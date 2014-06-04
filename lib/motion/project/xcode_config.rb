@@ -111,7 +111,7 @@ EOS
       end
 
       # deployment_target
-      if deployment_target.to_f > sdk_version.to_f
+      if Util::Version.new(deployment_target) > Util::Version.new(sdk_version)
         App.fail "Deployment target `#{deployment_target}' must be equal or lesser than SDK version `#{sdk_version}'"
       end
       unless File.exist?(datadir)
