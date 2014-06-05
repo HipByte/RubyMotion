@@ -1,3 +1,8 @@
+= RubyMotion 2.30 =
+
+  * Fixed a bug where it would trigger a crash when it will call a objc method
+    that is supposed to return a block, but instead return nil.
+
 = RubyMotion 2.29 =
 
   * Added support for Xcode 6 Beta 1 and iOS 8.0 / OS X Yosemite (10.10).
