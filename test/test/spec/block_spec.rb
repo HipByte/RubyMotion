@@ -341,4 +341,15 @@ describe "C-Blocks" do
     obj = TestBlocks.new
     obj.map.should == nil
   end
+
+  class TestBlocks
+    alias :old_map :map
+  end
+
+  # RM-508
+  it "should not crash when it call alias method which has C-Blocks" do
+    obj = TestBlocks.new
+    obj.old_map.should == obj.map
+  end
+
 end
