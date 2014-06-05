@@ -334,3 +334,11 @@ describe "Proc#owner" do
     b.owner.should == self
   end
 end
+
+describe "C-Blocks" do
+  # RM-502
+  it "should not crash when ObjC method return nil instead of C-Blocks" do
+    obj = TestBlocks.new
+    obj.map.should == nil
+  end
+end
