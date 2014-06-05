@@ -2,6 +2,8 @@
 
   * Fixed a bug where it would trigger a crash when it will call a objc method
     that is supposed to return a block, but instead return nil.
+  * Fixed a bug where it would trigger a crash when Symbol object will be used
+    with NSCoding.
 
 = RubyMotion 2.29 =
 
