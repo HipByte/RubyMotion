@@ -4,6 +4,7 @@
     that is supposed to return a block, but instead return nil.
   * Fixed a bug where it would trigger a crash when Symbol object will be used
     with NSCoding.
+  * Added BigDecimal#{to_i, to_int, to_f, to_s, coerce} methods.
 
 = RubyMotion 2.29 =
 
