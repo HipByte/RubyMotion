@@ -149,7 +149,8 @@ END
     end
   end
 
-  simulate_device = App.config.device_family_string(family_int, target, retina)
+  device_name = ENV["device_name"]
+  simulate_device = App.config.device_family_string(device_name, family_int, target, retina)
 
   # Launch the simulator.
   xcode = App.config.xcode_dir

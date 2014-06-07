@@ -200,7 +200,7 @@ module Motion; module Project;
       end
     end
 
-    def device_family_string(family, target, retina)
+    def device_family_string(device_name, family, target, retina)
       device = case family
         when :iphone, 1
           "iPhone"
@@ -211,7 +211,7 @@ module Motion; module Project;
       ver = xcode_version[0].match(/(\d+)/)
       case ver[0].to_i
       when 6
-        device + device_retina_xcode6_string(family, target, retina)
+        (device_name.nil?) ? device + device_retina_xcode6_string(family, target, retina) : device_name
       when 5
         device + device_retina_xcode5_string(family, target, retina)
       else
