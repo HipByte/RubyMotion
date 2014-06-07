@@ -9,6 +9,7 @@
     You can use "iPhone 4s", "iPhone 5", "iPhone 5s", "iPad 2" ,"iPad Retina",
     "iPad Air", "Resizable iPhone" and "Resizable iPad" for device name.
     (Ex rake device_name="Resizable iPhone")
+  * Improved String interpolation performance. ~10% faster.
 
 = RubyMotion 2.29 =
 
