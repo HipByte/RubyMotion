@@ -209,10 +209,13 @@ module Motion; module Project;
       end
 
       ver = xcode_version[0].match(/(\d+)/)
-      if ver[0].to_i < 5
-        device + device_retina_xcode4_string(family, target, retina)
-      else
+      case ver[0].to_i
+      when 6
+        device + device_retina_xcode6_string(family, target, retina)
+      when 5
         device + device_retina_xcode5_string(family, target, retina)
+      else
+        device + device_retina_xcode4_string(family, target, retina)
       end
     end
 
@@ -251,6 +254,17 @@ module Motion; module Project;
         else
           (family == 1) ? retina4_string : ''
         end
+      end
+    end
+
+    def device_retina_xcode6_string(family, target, retina)
+      case retina
+      when '3.5'
+        ' 4s'
+      when '4'
+        ' 5s'
+      else
+        (family == 1) ? ' 5s' : ' Retina'
       end
     end
 
