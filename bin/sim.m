@@ -1419,11 +1419,8 @@ main(int argc, char **argv)
 
     // Create SimDeviceSet (needed in Xcode 6.0).
     id sim_device = nil;
-    if (strstr([xcode_path UTF8String], "Xcode6") != NULL) {
-	// FIXME improve check for Xcode 6
-	Class SimDevice = NSClassFromString(@"SimDevice");
-	assert(SimDevice != nil);
-
+    Class SimDevice = NSClassFromString(@"SimDevice");
+    if (SimDevice != NULL) {
 	Class SimDeviceSet = NSClassFromString(@"SimDeviceSet");
 	assert(SimDeviceSet != nil);
 
