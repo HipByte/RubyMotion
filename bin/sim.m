@@ -1432,8 +1432,13 @@ main(int argc, char **argv)
 		@selector(devices), nil);
 	assert(sim_devices != NULL);
 
-	// FIXME select the right device
 	sim_device = [sim_devices objectAtIndex:0];
+	for (id device in sim_devices) {
+	    if ([device_name compare:[device name]] == NSOrderedSame) {
+		sim_device = device;
+		break;
+	    }
+	}
     }
 
     // Create system root.
