@@ -5,6 +5,7 @@
   * Fixed a bug where it would trigger a crash when Symbol object will be used
     with NSCoding.
   * Added BigDecimal#{to_i, to_int, to_f, to_s, coerce} methods.
+  * Added Kernel#BigDecimal method.
   * Added `device_name' parameter in order to select iOS 8 simulater device.
     You can use "iPhone 4s", "iPhone 5", "iPhone 5s", "iPad 2" ,"iPad Retina",
     "iPad Air", "Resizable iPhone" and "Resizable iPad" for device name.
