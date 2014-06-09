@@ -4,6 +4,8 @@
     that is supposed to return a block, but instead return nil.
   * Fixed a bug where it would trigger a crash when Symbol object will be used
     with NSCoding.
+  * Fixed a bug where short cut selector does not work when method name has
+    trailing number.
   * Added BigDecimal#{to_i, to_int, to_f, to_s, coerce} methods.
   * Added Kernel#BigDecimal method.
   * Added `device_name' parameter in order to select iOS 8 simulater device.
