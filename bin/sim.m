@@ -602,8 +602,8 @@ CONCURRENT_BEGIN
 	    [delegate replEval:[NSString stringWithFormat:
 		@"<<MotionReplCaptureView %f,%f,%d", 0.0, 0.0, 0]];
 	    previousHighlight = false;
+	    refresh_repl_prompt(nil, true);
 	}
-	refresh_repl_prompt(nil, true);
 CONCURRENT_END
 	if (type == kCGEventLeftMouseDown) {
 	    // Reset the simulator app bounds as it may have moved.
