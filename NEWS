@@ -13,6 +13,7 @@
     "iPad Air", "Resizable iPhone" and "Resizable iPad" for device name.
     (Ex rake device_name="Resizable iPhone")
   * Improved String interpolation performance. ~10% faster.
+  * Improved NoMethodError to contain full Objective-C selector.
 
 = RubyMotion 2.29 =
 
