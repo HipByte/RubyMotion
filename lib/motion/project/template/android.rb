@@ -289,7 +289,8 @@ EOS
   dex_classes = File.join(app_build_dir, 'classes.dex')
   if !File.exist?(dex_classes) \
       or File.mtime(App.config.project_file) > File.mtime(dex_classes) \
-      or classes_changed
+      or classes_changed \
+      or vendored_jars.any? { |x| File.mtime(x) > File.mtime(dex_classes) }
     App.info 'Create', dex_classes
     sh "\"#{App.config.build_tools_dir}/dx\" --dex --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
   end
