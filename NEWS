@@ -6,6 +6,8 @@
     with NSCoding.
   * Fixed a bug where short cut selector does not work when method name has
     trailing number.
+  * Fixed a bug where "scrollViewWillEndDragging:withVelocity:targetContentOffset:"
+    delegator method was not defined correctly.
   * Added BigDecimal#{to_i, to_int, to_f, to_s, coerce} methods.
   * Added Kernel#BigDecimal method.
   * Added `device_name' parameter in order to select iOS 8 simulater device.
