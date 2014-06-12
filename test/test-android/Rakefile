@@ -9,6 +9,23 @@ Motion::Project::App.setup do |app|
   app.sdk_path = File.expand_path('~/src/android-sdk-macosx')
   app.ndk_path = File.expand_path('~/src/android-ndk-r9d')
 
+  # Build the vendor jar if needed.
+  testjava_jar = 'vendor/testjava.jar'
+  if !File.exist?(testjava_jar) \
+      or Dir.glob('vendor/java/**/*.java').any? { |x| File.mtime(x) > File.mtime(testjava_jar) }
+    FileUtils.rm_rf('vendor/classes')
+    FileUtils.mkdir('vendor/classes')
+    Dir.chdir('vendor/java') do
+      Dir.glob('**/*.java').each do |java|
+        sh "/usr/bin/javac -d ../classes \"#{java}\""
+      end
+    end
+    Dir.chdir('vendor/classes') do
+      sh "/usr/bin/jar cvf ../testjava.jar ."
+    end
+  end
+  app.vendor_project :jar => testjava_jar
+
   # Make sure the main file is compiled and executed first.
   ary = app.files
   ary.delete('./app/main.rb')
