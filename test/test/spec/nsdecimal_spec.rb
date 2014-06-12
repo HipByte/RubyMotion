@@ -209,4 +209,15 @@ describe 'BigDecimal' do
       NSDecimalString(BigDecimal.new(string), NSLocale.currentLocale).should == string
     end
   end
+
+  describe 'NSJSONSerialization.JSONObjectWithData' do
+    it 'should return 0.0 as Float' do
+      # RM-511
+      json = "{\"value\": 0.0}"
+      opts = NSJSONReadingMutableContainers | NSJSONReadingMutableLeaves | NSJSONReadingAllowFragments
+      result = NSJSONSerialization.JSONObjectWithData(json.to_data, options: opts, error: nil)
+      result['value'].should == 0.0
+      result['value'].class.should == Float
+    end
+  end
 end
