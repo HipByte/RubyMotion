@@ -1,0 +1,9 @@
+$:.unshift("../../lib")
+require 'motion/project/template/ios'
+# require 'motion/project/template/osx'
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = 'TestBigDecimal'
+  app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
+end
