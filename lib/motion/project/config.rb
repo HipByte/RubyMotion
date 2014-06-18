@@ -241,7 +241,6 @@ module Motion; module Project
         # Core library + core helpers.
         Dir.chdir(File.join(File.dirname(__FILE__), '..')) do
           (['spec.rb'] +
-          Dir.glob(File.join('spec', 'helpers', '*.rb')) +
           Dir.glob(File.join('project', 'template', App.template.to_s, 'spec-helpers', '*.rb'))).
             map { |x| File.expand_path(x) }
         end
@@ -251,7 +250,7 @@ module Motion; module Project
     def spec_files
       @spec_files ||= begin
         # Project helpers.
-        helpers = Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
+        helpers = Dir.glob(File.join(specs_dir, 'helpers', '**', '*.rb'))
         # Project specs.
         specs = Dir.glob(File.join(specs_dir, '**', '*.rb')) - helpers
         if files_filter = ENV['files']
