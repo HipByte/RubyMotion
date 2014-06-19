@@ -24,4 +24,9 @@ describe "CoreMidi" do
     MIDIPortDispose(outputRef)
     MIDIClientDispose(clientRef)
   end
+
+  # RM-33
+  it "MIDIPacketList should not cause a crash" do
+    MIDIPacketList.type.should == "{MIDIPacketList=I[1{MIDIPacket=QS[256C]}]}"
+  end
 end
