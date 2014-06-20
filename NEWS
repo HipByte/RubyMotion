@@ -14,6 +14,7 @@
     NSCoding.
   * Fixed a bug where NSJSONSerialization returns BigDecimal object when "0.0"
     were stored in JSON.
+  * Fixed a bug where dynamically defined method would not be removed properly.
   * Added BigDecimal#{to_i, to_int, to_f, to_s, coerce, +@, -@, modulo, quo,
     power, floor, ceil, round} methods.
   * Added Kernel#BigDecimal method.
