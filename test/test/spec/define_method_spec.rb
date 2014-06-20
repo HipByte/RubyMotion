@@ -2,7 +2,9 @@ class TestDefineMethod
   define_method :test1 { 42 }
   define_method :test2 { |x| x + 100 }
   define_method :test3 { |x, y| x + y }
-  define_method :test4 { |*ary| ary.inject(0) { |m, x| m + x } }     
+  define_method :test4 { |*ary| ary.inject(0) { |m, x| m + x } }
+  define_method :remove_test { 1234 }
+
 end
 
 describe "define_method" do
@@ -84,5 +86,15 @@ describe "define_method" do
   # RM-105 Assertion failed where extend a module which contains define_method
   it "should work on extended class" do
     TestExtendedClass.test.should == 42
+  end
+end
+
+describe "remove_method" do
+  # RM-505
+  it "should remove dynamically defined method" do
+    obj = TestDefineMethod.new
+    obj.respond_to?(:remove_test).should == true
+    TestDefineMethod.send(:remove_method, :remove_test)
+    obj.respond_to?(:remove_test).should == false
   end
 end
