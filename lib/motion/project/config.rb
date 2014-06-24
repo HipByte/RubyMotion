@@ -251,7 +251,7 @@ module Motion; module Project
     def spec_files
       @spec_files ||= begin
         # Project helpers.
-        helpers = Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
+        helpers = Dir.glob(File.join(specs_dir, 'helpers', '**', '*.rb'))
         # Project specs.
         specs = Dir.glob(File.join(specs_dir, '**', '*.rb')) - helpers
         if files_filter = ENV['files']
