@@ -1,5 +1,7 @@
 = RubyMotion 2.30 =
 
+  * Fixed a bug where spec helpers nested in sub-directories were being
+    considered spec files instead of helpers. Patch by Ignacio Piantanida.
   * Fixed a bug which it would trigger an assertion failed when use #layout in
     iOS 8 and MIDIPacketList.
   * Fixed a bug where it would trigger a crash when it will call a objc method
