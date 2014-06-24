@@ -66,7 +66,9 @@ if __FILE__ == $0
     opts.on(nil, '--no-64-bit', 'Do not write 64-bit annotations.') do
       enable_64 = false
     end
-    no_32bit_support = `/usr/bin/sw_vers -productVersion`.strip >= '10.9'
+
+    # 64-bit is now the only option
+    no_32bit_support = `/usr/bin/sw_vers -productVersion`.strip.match(/^10\.(\d+)/)[1].to_i >= 9
     if no_32bit_support
       opts.on(nil, '--no-32-bit', 'Do not write 32-bit annotations.') do
         enable_32 = false
@@ -112,6 +114,7 @@ if __FILE__ == $0
       begin
         opts.parse!(ARGV)
         ARGV.each { |header| g.add_header(header) }
+        no_32bit_support = true
         if no_32bit_support
           g.parse(enable_32, enable_64, compiler_flags_64)
         else
