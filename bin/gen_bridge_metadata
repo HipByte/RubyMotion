@@ -114,7 +114,6 @@ if __FILE__ == $0
       begin
         opts.parse!(ARGV)
         ARGV.each { |header| g.add_header(header) }
-        no_32bit_support = true
         if no_32bit_support
           g.parse(enable_32, enable_64, compiler_flags_64)
         else
