@@ -29,6 +29,7 @@
   * Improved NoMethodError to contain full Objective-C selector.
     And, #method_missing receives full Objective-C selector as method name.
   * Reduced app size by removing unnecessary Objective-C stubs.
+  * Improve compile time of Ruby codes. 50% faster.
 
 = RubyMotion 2.29 =
 
