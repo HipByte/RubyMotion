@@ -29,6 +29,8 @@
   * Improved NoMethodError to contain full Objective-C selector.
     And, #method_missing receives full Objective-C selector as method name.
   * Reduced app size by removing unnecessary Objective-C stubs.
+  * [OSX] Corresponded to NSTaggedPointerString object which it is introduced on
+    Yosemite.
 
 = RubyMotion 2.29 =
 
