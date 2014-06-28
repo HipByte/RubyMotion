@@ -113,6 +113,14 @@ describe 'CFTypeRefs' do
   end
 end
 
+
+describe "Typedef'ed argument" do
+  # RM-518
+  it "should be accepted" do
+    TestMethod.testTypedefArgument('foo').should == 'foo'
+  end
+end
+
 describe 'RUBY_ENGINE' do
   it "should be 'rubymotion'" do
     RUBY_ENGINE.should == 'rubymotion'

@@ -79,6 +79,8 @@ typedef id (^MyBlock)(void);
 
 + (BOOL)isReturnValueRetained:(id)object forSelector:(SEL)sel;
 
+typedef NSString RMString;
++ (id)testTypedefArgument:(RMString*)string;
 @end
 
 @interface TestIterator : NSObject <NSFastEnumeration>

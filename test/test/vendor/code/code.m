@@ -144,6 +144,11 @@
     return [count intValue] == 1;
 }
 
++ (id)testTypedefArgument:(RMString*)string
+{
+    return string;
+}
+
 @end
 
 @implementation TestIterator
