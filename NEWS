@@ -31,6 +31,8 @@
   * Reduced app size by removing unnecessary Objective-C stubs.
   * [OSX] Corresponded to NSTaggedPointerString object which it is introduced on
     Yosemite.
+  * [OSX] Fixed a bug which wrong default deployment_target would cause a build
+    error on old OS X host machine.
 
 = RubyMotion 2.29 =
 
