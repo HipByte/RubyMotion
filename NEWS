@@ -1,43 +1,50 @@
 = RubyMotion 2.30 =
 
-  * Fixed a bug where spec helpers nested in sub-directories were being
-    considered spec files instead of helpers. Patch by Ignacio Piantanida.
-  * Fixed a bug which it would trigger an assertion failed when use #layout in
-    iOS 8 and MIDIPacketList.
-  * Fixed a bug where it would trigger a crash when it will call a objc method
-    that is supposed to return a block, but instead return nil.
-  * Fixed a bug where it would trigger a crash when Symbol object will be used
-    with NSCoding.
-  * Fixed a bug where short cut selector does not work when method name has
-    trailing number.
-  * Fixed a bug where "scrollViewWillEndDragging:withVelocity:targetContentOffset:"
-    delegator method was not defined correctly.
-  * Fixed a bug where it would trigger a crash when Struct class is used with
-    NSCoding.
-  * Fixed a bug where NSJSONSerialization returns BigDecimal object when "0.0"
-    were stored in JSON.
-  * Fixed a bug where dynamically defined method would not be removed properly.
-  * Fixed a bug where typedef parameter would cause a "not precompiled" error.
-  * Added BigDecimal#{to_i, to_int, to_f, to_s, coerce, +@, -@, modulo, quo,
-    power, floor, ceil, round} methods.
-  * Added Kernel#BigDecimal method.
-  * Added `device_name' parameter in order to select iOS 8 simulater device.
+  * The iOS 8.0 and OS X 10.10 versions of the runtime have been recompiled
+    with Xcode 6 Beta 2.
+  * Added the `device_name' parameter in order to select iOS 8 simulater device.
     You can use "iPhone 4s", "iPhone 5", "iPhone 5s", "iPad 2" ,"iPad Retina",
     "iPad Air", "Resizable iPhone" and "Resizable iPad" for device name.
     (Ex rake device_name="Resizable iPhone")
+  * Improved the compiler to optimize the app executable size, by removing
+    unnecessary internal Objective-C stubs. Apps should be 10-30% lighter,
+    depending on how much native calls they use.
+  * Added the BigDecimal#{to_i, to_int, to_f, to_s, coerce, +@, -@, modulo, quo,
+    power, floor, ceil, round} methods.
+  * Added the Kernel#BigDecimal method.
   * Improved String interpolation performance. ~10% faster.
-  * Improved NoMethodError to contain full Objective-C selector.
-    And, #method_missing receives full Objective-C selector as method name.
-  * Reduced app size by removing unnecessary Objective-C stubs.
-  * [OSX] Corresponded to NSTaggedPointerString object which it is introduced on
-    Yosemite.
-  * [OSX] Corresponded to CoreData framework bug which NSDictionary which is
-    returned by NSManagedObjectModel#entitiesByName does not work as expected
-    on OS X 10.9.
-  * [OSX] Fixed a bug which wrong default deployment_target would cause a build
-    error on old OS X host machine.
-  * [OSX] Fixed a "not precompiled" error if it would specify old version as
-    `app.deployment_target' on Yosemite.
+  * Improved the NoMethodError exception message to include the full
+    Objective-C selector. Also, #method_missing will now receive the full
+    Objective-C selector as the method name.
+  * Fixed a bug where spec helpers nested in sub-directories were being
+    considered spec files instead of helpers. Thanks to Ignacio Piantanida for
+    the patch.
+  * Fixed a bug where a crash due to an assertion would be happening when using
+    #layout on a MIDIPacketList object on iOS 8.
+  * Fixed a bug where a crash would happen when calling a Objective-C method
+    supposed to return a block, but instead returning nil.
+  * Fixed a bug where a crash would happen when a Symbol object was used with
+    the NSCoding interface methods.
+  * Fixed a bug where shortcut selectors would not work when the method name
+    was begining or ending with a number.
+  * Fixed a bug where the `scrollViewWillEndDragging:withVelocity:
+    targetContentOffset:' delegate method would not be defined properly.
+  * Fixed a bug where a crash would happen when a Struct object was used with
+    the NSCoding interface methods.
+  * Fixed a bug where the `NSJSONSerialization' interface would return a
+    BigDecimal object if the `0.0' value was stored in the original JSON data.
+  * Fixed a bug where dynamically-defined methods would not be removed properly.
+  * Fixed a bug where typedef parameters would cause a "not precompiled" error.
+  * [OSX] Fixed the runtime to recognize `NSTaggedPointerString' objects that
+    were introduced in Yosemite.
+  * [OSX] Fixed a bug with the `NSManagedObjectModel#entitiesByName' method of
+    the CoreData framework where it would return an NSDictionary that was not
+    expected on 10.9.
+  * [OSX] Fixed a bug where the default value for `app.deployment_target' was
+    wrong and would cause a build error on an old version of OS X.
+  * [OSX] Fixed a bug where a "not precompiled" error would happen when
+    specifying an older version OS X version for `app.deployment_target' when
+    building on Yosemite.
 
 = RubyMotion 2.29 =
 
