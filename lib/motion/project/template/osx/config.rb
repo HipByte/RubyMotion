@@ -40,7 +40,7 @@ module Motion; module Project;
       @icon = ''
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @category = 'utilities'
-      @frameworks = ['AppKit', 'Foundation', 'CoreGraphics']
+      @frameworks = ['AppKit', 'Foundation', 'CoreGraphics', 'CoreServices']
       @embedded_frameworks = []
       @external_frameworks = []
       @codesign_for_development = false
@@ -162,11 +162,18 @@ module Motion; module Project;
       ''
     end
 
+    def deployment_target
+      @deployment_target ||= osx_version
+    end
+
     def supported_sdk_versions(versions)
-      osx_version = `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
       versions.reverse.find { |vers|
         Util::Version.new(osx_version) <= Util::Version.new(vers) && File.exist?(datadir(vers))
       }
+    end
+    
+    def osx_version
+      `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
     end
 
     def main_cpp_file_txt(spec_objs)

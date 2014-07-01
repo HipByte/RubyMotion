@@ -198,7 +198,7 @@ EOS
         deps << 'UIAutomation' if spec_mode
         deps.each do |framework|
           supported_versions.each do |ver|
-            next if ver < deployment_target || sdk_version < ver
+            next if Util::Version.new(ver) < Util::Version.new(deployment_target) || Util::Version.new(sdk_version) < Util::Version.new(ver)
             bs_path = File.join(datadir(ver), 'BridgeSupport', framework + '.bridgesupport')
             if File.exist?(bs_path)
               bs_files << bs_path

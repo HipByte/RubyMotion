@@ -29,6 +29,15 @@
   * Improved NoMethodError to contain full Objective-C selector.
     And, #method_missing receives full Objective-C selector as method name.
   * Reduced app size by removing unnecessary Objective-C stubs.
+  * [OSX] Corresponded to NSTaggedPointerString object which it is introduced on
+    Yosemite.
+  * [OSX] Corresponded to CoreData framework bug which NSDictionary which is
+    returned by NSManagedObjectModel#entitiesByName does not work as expected
+    on OS X 10.9.
+  * [OSX] Fixed a bug which wrong default deployment_target would cause a build
+    error on old OS X host machine.
+  * [OSX] Fixed a "not precompiled" error if it would specify old version as
+    `app.deployment_target' on Yosemite.
 
 = RubyMotion 2.29 =
 
