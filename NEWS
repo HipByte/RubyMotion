@@ -36,6 +36,8 @@
     on OS X 10.9.
   * [OSX] Fixed a bug which wrong default deployment_target would cause a build
     error on old OS X host machine.
+  * [OSX] Fixed a "not precompiled" error if it would specify old version as
+    `app.deployment_target' on Yosemite.
 
 = RubyMotion 2.29 =
 
