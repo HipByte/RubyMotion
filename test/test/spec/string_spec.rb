@@ -43,3 +43,27 @@ describe "Strings with multibyte characters" do
     "..€€……".rindex("…").should == 5
   end
 end
+
+# RM-528
+describe "String#getCharacters:range:" do
+  def get_characters(loc, len)
+    buf_str = Pointer.new(:ushort, len)
+    buf_nsstr = Pointer.new(:ushort, len)
+
+    @str.getCharacters(buf_str, range:NSMakeRange(loc, len))
+    @nsstr.getCharacters(buf_nsstr, range:NSMakeRange(loc, len))
+
+    len.times do |i|
+      buf_str[i].should == buf_nsstr[i]
+    end
+  end
+
+  it " should extract Unicode properly" do
+    @str = "😄😃😀😊☺️😉😍😘😚😗😙😜😝😛"
+    @nsstr = NSString.stringWithString(@str)
+
+    @str.length.times do |i|
+      get_characters(i, @str.length - i)
+    end
+  end
+end
