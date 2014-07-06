@@ -1,6 +1,8 @@
 = RubyMotion 2.31 =
 
   * Fixed a regression which it would cause a crash when call variadic method.
+  * Fixed a bug which it would not extract Unicode character properly outside
+    BMP when String was passed Objctive-C API.
 
 = RubyMotion 2.30 =
 
