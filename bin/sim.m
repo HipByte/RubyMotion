@@ -118,7 +118,7 @@ sigterminate(int sig)
 static void
 sigforwarder(int sig)
 {
-    if (gdb_task != nil) {
+    if (gdb_task != nil && [gdb_task.launchPath rangeOfString:@"/lldb"].location == NSNotFound) {
 	kill([gdb_task processIdentifier], sig);
     }
 }
