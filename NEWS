@@ -5,6 +5,8 @@
     BMP when String was passed Objctive-C API.
   * Fixed a bug which it would cause "not precompiled" error by
     NSURLSessionDownloadTask#cancelByProducingResumeData.
+  * [iOS] Fixed a bug which CTRL+C would terminate debugger immediately with
+    `rake debug=1'.
 
 = RubyMotion 2.30 =
 
