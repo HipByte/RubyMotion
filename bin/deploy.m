@@ -869,8 +869,20 @@ start_debug_server(am_device_t dev)
 	assert([py_cmds writeToFile:py_cmds_path atomically:YES
 		encoding:NSUTF8StringEncoding error:nil]);
 
-	NSString *cmds = [NSString stringWithFormat:
-	    @"command script import %@", py_cmds_path];
+	NSString *cmds = [NSString stringWithFormat:@""\
+	"command script import /Library/RubyMotion/lldb/lldb.py\n"\
+	"command script import %@\n"\
+	"breakpoint set --name rb_exc_raise\n"\
+	"breakpoint set --name malloc_error_break\n"\
+	"",
+	    py_cmds_path];
+	NSString *user_cmds = [NSString stringWithContentsOfFile:
+	    @"debugger_cmds" encoding:NSUTF8StringEncoding error:nil];
+	if (user_cmds != nil) {
+	    cmds = [cmds stringByAppendingString:user_cmds];
+	    cmds = [cmds stringByAppendingString:@"\n"];
+	}
+
 	NSString *cmds_path = [NSString pathWithComponents:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
 	    @"_deploylldbcmds", nil]];
