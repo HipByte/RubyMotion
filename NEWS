@@ -10,6 +10,10 @@
     #drawMapRect:zoomScale:inContext:'.
   * [iOS] Fixed a bug which CTRL+C would terminate debugger immediately with
     `rake debug=1'.
+  * [iOS] Fixed a bug which custom debug command (Ex "pro", "pri") would not
+    work with remote debugging.
+  * [iOS] Fixed a bug which user debug command would not be loaded with remote
+    debugging.
 
 = RubyMotion 2.30 =
 
