@@ -263,6 +263,35 @@ def generate_bs_static_stub(file, includes)
     name = node['name'].to_s
     retval = node.xpath('./retval')[0][declared_type_attribute].to_s
     args = node.xpath('./arg').map { |node| node[declared_type_attribute].to_s }
+
+    #
+    # FIXME
+    #
+    # 'SCNMatrix4FromMat4', 'SCNMatrix4ToMat4', 'SCNVector3ToFloat3' and 'SCNVector4ToFloat4' inline functions
+    # are added since iOS 8.OSX 10.10 beta3.
+    # gen_bridge_metadata's clang (included in bridgesupportparser.bundle) is too old and
+    # its clang does not generate the argument type of those functions properly.
+    # 
+    # So, when compile the stub functions of those inline function, it causes a compile error as the following.
+    #
+    #    osx/10.10/BridgeSupport/SceneKit_stubs.m:6:31: error: passing 'int' to parameter of incompatible type 'matrix_float4x4'
+    #    return SCNMatrix4FromMat4(arg0);
+    #
+    case name
+    when 'SCNMatrix4FromMat4'
+      args[0] = 'matrix_float4x4'
+      retval = 'SCNMatrix4'
+    when 'SCNMatrix4ToMat4'
+      args[0] = 'SCNMatrix4'
+      retval = 'matrix_float4x4'
+    when 'SCNVector3ToFloat3'
+      args[0] = 'SCNVector3'
+      retval = 'vector_float3'
+    when 'SCNVector4ToFloat4'
+      args[0] = 'SCNVector4'
+      retval = 'vector_float4'
+    end
+
     if retval.strip.empty?
       nil
     else
