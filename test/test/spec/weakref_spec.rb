@@ -37,6 +37,25 @@ describe "WeakRef" do
     ary2.should == ary
   end
 
+  # RM-407
+  it "Hash key should be resolved" do
+    key = "key"
+    weak_key = WeakRef.new(key)
+    hash = {weak_key => 42}
+    hash[key].should == 42
+    hash[weak_key].should == 42
+
+    hash = {weak_key => 42}
+    hash[weak_key] = 123
+    hash[key].should == 123
+    hash[weak_key].should == 123
+
+    hash = {weak_key => 42}
+    hash.delete(key)
+    hash[key].should == nil
+    hash[weak_key].should == nil
+  end
+
   xit "cannot be subclassed" do
     lambda { class Foo < WeakRef; end }.should.raise(RuntimeError)
   end
