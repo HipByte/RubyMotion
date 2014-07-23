@@ -8,6 +8,8 @@
   * Fixed a bug which it would cause a crash when it will override the method
     which has structures as argument like `MKOverlayRenderer
     #drawMapRect:zoomScale:inContext:'.
+  * Fixed a bug which it could not retrive a value from Hash object when
+    WeakRef object would be used as Hash key.
   * [iOS] Fixed a bug which CTRL+C would terminate debugger immediately with
     `rake debug=1'.
   * [iOS] Fixed a bug which custom debug command (Ex "pro", "pri") would not
