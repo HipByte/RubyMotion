@@ -44,6 +44,7 @@ describe "WeakRef" do
     hash = {weak_key => 42}
     hash[key].should == 42
     hash[weak_key].should == 42
+    hash["key"].should == 42
 
     hash = {weak_key => 42}
     hash[weak_key] = 123
