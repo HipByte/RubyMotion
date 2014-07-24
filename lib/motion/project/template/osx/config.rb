@@ -124,7 +124,13 @@ module Motion; module Project;
 
     def bridgesupport_cflags
       a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
-      sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
+      major = a[0].to_i
+      minor = a[1].to_i
+      if major <= 10 && minor <= 9
+        sdk_version_headers = "#{major}#{minor}0"
+      else
+        sdk_version_headers = "#{major}#{minor}00"
+      end
       "-mmacosx-version-min=#{sdk_version} -D__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__=#{sdk_version_headers}"
     end
 
