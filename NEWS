@@ -1,21 +1,23 @@
 = RubyMotion 2.31 =
 
-  * Fixed a regression which it would cause a crash when call variadic method.
-  * Fixed a bug which it would not extract Unicode character properly outside
-    BMP when String was passed Objctive-C API.
-  * Fixed a bug which it would cause "not precompiled" error by
-    NSURLSessionDownloadTask#cancelByProducingResumeData.
-  * Fixed a bug which it would cause a crash when it will override the method
-    which has structures as argument like `MKOverlayRenderer
-    #drawMapRect:zoomScale:inContext:'.
-  * Fixed a bug which it could not retrive a value from Hash object when
-    WeakRef object would be used as Hash key.
-  * [iOS] Fixed a bug which CTRL+C would terminate debugger immediately with
-    `rake debug=1'.
-  * [iOS] Fixed a bug which custom debug command (Ex "pro", "pri") would not
-    work with remote debugging.
-  * [iOS] Fixed a bug which user debug command would not be loaded with remote
-    debugging.
+  * The iOS 8.0 and OS X 10.10 versions of the runtime have been recompiled
+    with Xcode 6 Beta 4.
+  * Fixed a regression where a crash would happen when calling methods with
+    variadic arguments.
+  * Fixed a bug where Unicode characters outside the BMP of a String object
+    would not be properly extracted when passed to an Objective-C API.
+  * Fixed a bug where a "not precompiled" error would happen when calling the
+    NSURLSessionDownloadTask#cancelByProducingResumeData method.
+  * Fixed a bug where a crash would happen when trying to override a method that
+    has `MKOverlayRenderer' arguments (ex. #drawMapRect:zoomScale:inContext:).
+  * Fixed a bug where trying to retrieve a value from a Hash object using a
+    key wrapped as a WeakRef would not work as expected.
+  * [iOS] Fixed a bug where ^C would not terminate the `rake debug=1' debugging
+    session immediately.
+  * [iOS] Fixed a bug where custom debug commands (ex. `pro', `pri') would not
+    work in a remote/device debugging session.
+  * [iOS] Fixed a bug which user-defined debug commands would not be loaded
+    in a remote/device debugging session.
 
 = RubyMotion 2.30 =
 
