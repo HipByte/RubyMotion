@@ -1,5 +1,7 @@
 = RubyMotion 2.32 =
 
+  * Fixed a regression where a crash would happen when calling user defined
+    method if the same method was already defined in some classes in Apple SDK.
   * Fixed a bug where a "not precompiled" error would happen when calling the
     SKPhysicsWorld method which takes with Objective-C Blocks.
 
