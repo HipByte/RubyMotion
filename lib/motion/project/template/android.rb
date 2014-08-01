@@ -301,6 +301,7 @@ EOS
     keystore = File.expand_path('~/.android/debug.keystore')
     unless File.exist?(keystore)
       App.info 'Create', keystore
+      FileUtils.mkdir_p(File.expand_path('~/.android'))
       sh "/usr/bin/keytool -genkeypair -alias androiddebugkey -keypass android -keystore \"#{keystore}\" -storepass android -dname \"CN=Android Debug,O=Android,C=US\" -validity 9999"
     end
   else
