@@ -1,5 +1,8 @@
 = RubyMotion 2.32 =
 
+  * Fixed a bug where a "not precompiled" error would happen when calling the
+    SKPhysicsWorld method which takes with Objective-C Blocks.
+
 = RubyMotion 2.31 =
 
   * The iOS 8.0 and OS X 10.10 versions of the runtime have been recompiled
