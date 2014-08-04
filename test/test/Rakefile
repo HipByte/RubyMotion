@@ -10,12 +10,14 @@ require "motion/project/template/#{ENV['PLATFORM']}"
 ENV['output'] ||= 'pretty_spec_dox'
 
 Motion::Project::App.setup do |app|
-  # Use `rake config' to see complete project settings.
   app.name = 'test'
   app.frameworks += ['AddressBook', 'AddressBookUI', 'AudioToolbox', 'AVFoundation', 'CoreData', 'CoreMIDI', 'GameKit']
   app.vendor_project('vendor/code', :static)
 
   app.spec_files.insert(1, *FileList['../../lib/motion/util/version.rb', '../helpers/*.rb'])
+
+  # Test data for (UI|NS)Application subclassing
+  app.info_plist['NSPrincipalClass'] = 'ApplicationSubclass'
 
   if ENV['deployment_target']
     app.deployment_target = ENV['deployment_target']

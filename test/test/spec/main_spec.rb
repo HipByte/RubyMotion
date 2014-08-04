@@ -253,3 +253,10 @@ describe "NSNotFound" do
     num.unsignedIntegerValue.should == NSNotFound
   end
 end
+
+describe "Application singleton subclassing" do
+  xit "registers the principal class" do
+    app = (ios? ? UIApplication : NSApplication).sharedApplication
+    app.class.should == ApplicationSubclass
+  end
+end
