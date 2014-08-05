@@ -1,6 +1,7 @@
 = RubyMotion 2.33 =
 
   * Improved Enumerable#inject performance. ~40% times faster.
+  * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
 
 = RubyMotion 2.32 =
 
