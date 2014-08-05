@@ -114,7 +114,7 @@ namespace :spec do
             task bit => :install_aggregate_test_handler do
               App.info "TESTING", "Running test suite on the #{platform} #{sdk_version} SDK with arch #{bit}-bit"
               begin
-                sh "env PLATFORM=#{platform} ARCH=#{arch} deployment_target=#{sdk_version} #{"target=#{sdk_version}" if platform == 'ios'} rake #{'clean' unless ENV['clean'] == '0'} spec"
+                sh "env PLATFORM=#{platform} ARCH=#{arch} deployment_target=#{sdk_version} rake #{'clean' unless ENV['clean'] == '0'} spec"
               rescue RuntimeError
                 test_fail_count << $?.exitstatus
               end
