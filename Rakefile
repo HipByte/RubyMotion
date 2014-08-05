@@ -35,7 +35,7 @@ ANDROID_NDK = File.join(ENV['HOME'], 'src/android-ndk-r9d')
 ANDROID_API_VERSIONS =
   if File.exist?(ANDROID_SDK)
     Dir.glob(File.join(ANDROID_SDK, 'platforms/android-*')).map do |platform_dir|
-      platform_dir.scan(/\d+$/)[0]
+      platform_dir.scan(/android\-(.+)$/)[0][0]
     end
   else
     []
@@ -44,7 +44,7 @@ ANDROID_ARCHS = ['armv5te', 'armv7']
 
 if true
   # DEBUG
-  ANDROID_API_VERSIONS.clear; ANDROID_API_VERSIONS << 18
+  ANDROID_API_VERSIONS.clear; ANDROID_API_VERSIONS << 'L'
   ANDROID_ARCHS.clear; ANDROID_ARCHS << 'armv5te'
 end
 
