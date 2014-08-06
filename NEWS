@@ -5,6 +5,8 @@
     method if the same method was already defined in some classes in Apple SDK.
   * Fixed a bug where a "not precompiled" error would happen when calling the
     SKPhysicsWorld method which takes with Objective-C Blocks.
+  * Fixed a bug which superclass method would be called if method was removed
+    through Module#remove_method.
   * Reduced the app boot time. ~70% faster.
 
 = RubyMotion 2.31 =
