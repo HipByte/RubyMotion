@@ -145,14 +145,22 @@ module Motion; module Project;
       File.expand_path(File.join('~/Library/Containers', identifier, "Data/rubymotion-repl-#{Time.now.to_i}"))
     end
 
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s({
+    def generic_info_plist
+      super.merge({
         'NSHumanReadableCopyright' => copyright,
         'NSPrincipalClass' => 'NSApplication',
         'CFBundleIconFile' => (icon or ''),
         'LSMinimumSystemVersion' => deployment_target,
         'LSApplicationCategoryType' => (@category.start_with?('public.app-category') ? @category : 'public.app-category.' + @category)
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
+      })
+    end
+
+    def merged_info_plist
+      generic_info_plist.merge(dt_info_plist).merge(info_plist)
+    end
+
+    def info_plist_data(platform)
+      Motion::PropertyList.to_s(merged_info_plist)
     end
 
     def strip_args
@@ -230,17 +238,17 @@ EOS
     end
     main_txt << <<EOS
     RubyMotionInit(argc, argv);
-    NSApplication *app = [NSClassFromString(@"#{info_plist['NSPrincipalClass']}") sharedApplication];
+    NSApplication *app = [NSClassFromString(@"#{merged_info_plist['NSPrincipalClass']}") sharedApplication];
     [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
 EOS
     if spec_mode
-      main_txt << "SpecLauncher *specLauncher = [[SpecLauncher alloc] init];\n"
-      main_txt << "[[NSNotificationCenter defaultCenter] addObserver:specLauncher selector:@selector(appLaunched:) name:NSApplicationDidFinishLaunchingNotification object:nil];\n"
+      main_txt << "    SpecLauncher *specLauncher = [[SpecLauncher alloc] init];\n"
+      main_txt << "    [[NSNotificationCenter defaultCenter] addObserver:specLauncher selector:@selector(appLaunched:) name:NSApplicationDidFinishLaunchingNotification object:nil];\n"
     end
     if use_application_main_function?
-      main_txt << "NSApplicationMain(argc, (const char **)argv);\n"
+      main_txt << "    NSApplicationMain(argc, (const char **)argv);\n"
     else
-      main_txt << "[app run];\n"
+      main_txt << "    [app run];\n"
     end
     main_txt << <<EOS
     [pool release];
@@ -253,7 +261,7 @@ EOS
     # If the user specifies a custom principal class the NSApplicationMain()
     # function will only work if they have also specified a nib or storyboard.
     def use_application_main_function?
-      info = info_plist
+      info = merged_info_plist
       if info['NSPrincipalClass'] == 'NSApplication'
         true
       else
