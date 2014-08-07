@@ -44,15 +44,22 @@ module Motion; module Project;
       @release_keystore_alias = nil
       @version_code = '1'
       @version_name = '1.0'
+
+      if path = ENV['RUBYMOTION_ANDROID_SDK']
+        @sdk_path = File.expand_path(path)
+      end
+      if path = ENV['RUBYMOTION_ANDROID_NDK']
+        @ndk_path = File.expand_path(path)
+      end
     end
 
     def validate
       if !sdk_path or !File.exist?(sdk_path)
-        App.fail "app.sdk_path should point to the Android SDK directory."
+        App.fail "app.sdk_path should point to a valid Android SDK directory."
       end
 
       if !ndk_path or !File.exist?(ndk_path)
-        App.fail "app.ndk_path should point to the Android NDK directory."
+        App.fail "app.ndk_path should point to a valid Android NDK directory."
       end
 
       super
