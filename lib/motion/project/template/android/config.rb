@@ -86,7 +86,8 @@ module Motion; module Project;
         if versions.empty?
           App.fail "Given Android SDK does not support any API version (nothing relevant in `#{sdk_path}/platforms')"
         end
-        versions.sort.max
+        vers = versions.map { |x| x.to_i }.max
+        vers == 20 ? 'L' : vers.to_s
       end
     end
 
