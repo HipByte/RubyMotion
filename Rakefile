@@ -42,6 +42,7 @@ ANDROID_API_VERSIONS =
   end
 ANDROID_API_VERSIONS.delete_if { |x| x.match(/\d+/) and x.to_i < 12 }
 ANDROID_API_VERSIONS.delete_if { |x| x == '20' }
+ANDROID_API_VERSIONS.unshift('8')
 ANDROID_ARCHS = ['armv5te', 'armv7']
 
 if false
