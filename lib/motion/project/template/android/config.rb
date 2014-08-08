@@ -27,7 +27,7 @@ module Motion; module Project;
   class AndroidConfig < Config
     register :android
 
-    variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
+    variable :sdk_path, :ndk_path, :zipalign_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :arch, :assets_dirs, :icon,
       :logs_components, :version_code, :version_name
 
@@ -63,6 +63,10 @@ module Motion; module Project;
       end
 
       super
+    end
+
+    def zipalign_path
+      @zipalign ||= Dir.glob(File.join(sdk_path, 'build-tools/*/zipalign')).last
     end
 
     def package

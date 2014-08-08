@@ -341,7 +341,7 @@ EOS
     end
 
     App.info 'Align', archive
-    sh "\"#{App.config.sdk_path}/build-tools/20.0.0/zipalign\" -f 4 \"#{archive}\" \"#{archive}-aligned\""
+    sh "\"#{App.config.zipalign_path}\" -f 4 \"#{archive}\" \"#{archive}-aligned\""
     sh "/bin/mv \"#{archive}-aligned\" \"#{archive}\""
   end
 end
