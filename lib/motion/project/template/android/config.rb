@@ -66,7 +66,18 @@ module Motion; module Project;
     end
 
     def zipalign_path
-      @zipalign ||= Dir.glob(File.join(sdk_path, 'build-tools/*/zipalign')).last
+      @zipalign ||= begin
+        ary = Dir.glob(File.join(sdk_path, 'build-tools/*/zipalign'))
+        if ary.empty?
+          path = File.join(sdk_path, 'tools/zipalign')
+          unless File.exist?(path)
+            App.fail "Can't locate `zipalign' tool. Make sure you properly installed the Android Build Tools package and try again."
+          end
+          path
+        else
+          ary.last
+        end
+      end
     end
 
     def package
