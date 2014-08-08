@@ -8,6 +8,7 @@
   * Fixed a bug which superclass method would be called if method was removed
     through Module#remove_method.
   * Improved Module#define_method performance. ~3 times faster.
+  * Improved Object#method_missing performance. ~8 times faster.
   * Reduced the app boot time. ~70% faster.
 
 = RubyMotion 2.31 =
