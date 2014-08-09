@@ -1,3 +1,9 @@
+= RubyMotion 3.0 beta 0.5 =
+
+  * Fixed the build system to fail with a proper error message when trying
+    to install an app on a device that runs an API version lower than the one
+    targetted by the app itself. Patch by Mark Villacampa.
+
 = RubyMotion 3.0 beta 0.4 =
 
   * Added support for Android API 3, 4, 7, 10 and 11. All versions of Android
