@@ -1,4 +1,5 @@
 PROJECT_VERSION = '2.32'
+PRE_PROJECT_VERSION = '3.0beta0.4'
 XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
 sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
@@ -40,9 +41,7 @@ ANDROID_API_VERSIONS =
   else
     []
   end
-ANDROID_API_VERSIONS.delete_if { |x| x.match(/\d+/) and x.to_i < 12 }
-ANDROID_API_VERSIONS.delete_if { |x| x == '20' }
-ANDROID_API_VERSIONS.unshift('8')
+ANDROID_API_VERSIONS.delete_if { |x| x == '20' } # Android 20 is 'L'
 ANDROID_ARCHS = ['armv5te', 'armv7']
 
 if false
@@ -531,8 +530,10 @@ task "android" do
     exit 1
   end
 
+=begin
   # make sure pass ANDROID macro when build an android miniruby
   ENV['CFLAGS'] = '-DANDROID'
+=end
 
   rake "vm", "android"
   rake "data", "android"
