@@ -174,9 +174,7 @@ Following is the current status of RubyMotion for Android. Keep in mind that thi
 
 ### Android
 
-The following Android API levels are supported: 12, 13, 14, 15, 16, 17, 18, 19 and L (soon-to-be 20). You can find more information about Android API levels (and especially which versions of Android they relate to) from [this page](http://developer.android.com/guide/topics/manifest/uses-sdk-element.html).
-
-API levels below 12 are not supported yet.
+The following Android API levels are supported: 3, 4, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 and L (soon-to-be 20). You can find more information about Android API levels (and especially which versions of Android they relate to) from [this page](http://developer.android.com/guide/topics/manifest/uses-sdk-element.html).
 
 RubyMotion is known to work on both Dalvik and ART. However we do recommend developing and testing on Dalvik.
 
