@@ -62,6 +62,10 @@ module Motion; module Project;
         App.fail "app.ndk_path should point to a valid Android NDK directory."
       end
 
+      if !File.exist?("#{ndk_path}/platforms/android-#{api_version_ndk}")
+        App.fail "It looks like your version of the NDK does not support API level #{api_version}. Switch to a lower API level or install a more recent NDK."
+      end
+
       super
     end
 
@@ -138,12 +142,26 @@ module Motion; module Project;
       "-no-canonical-prefixes -target #{arch}-none-linux-androideabi #{archflags} -mthumb -msoft-float -marm -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\""
     end
 
+    def api_version_ndk
+      @api_version_ndk ||=
+        # NDK does not provide headers for versions of Android with no native
+        # API changes (ex. 10 and 11 are the same as 9).
+        case api_version
+          when '6', '7'
+            '5'
+          when '10', '11'
+            '9'
+          else
+            api_version
+        end
+    end
+
     def cflags
       archflags = case arch
         when 'armv5te'
           "-mtune=xscale"
       end
-      "#{asflags} #{archflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/include\" -Wformat -Werror=format-security"
+      "#{asflags} #{archflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-arm/usr/include\" -Wformat -Werror=format-security"
     end
 
     def cxxflags
@@ -159,7 +177,7 @@ module Motion; module Project;
     end
 
     def ldflags
-      "-Wl,-soname,#{payload_library_filename} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+      "-Wl,-soname,#{payload_library_filename} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
     end
 
     def versioned_datadir
