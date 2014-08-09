@@ -160,7 +160,7 @@ EOS
 EOS
     App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
     android_manifest_txt << <<EOS
-        	<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}" android:configChanges="keyboardHidden|orientation|screenSize">
+		<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
 			<intent-filter>
                 		<action android:name="android.intent.action.MAIN" />
                 		<category android:name="android.intent.category.LAUNCHER" />
