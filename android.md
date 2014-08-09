@@ -25,6 +25,8 @@ $ javac -version
 javac 1.6.0_65
 </pre>
 
+Java 1.7 should work but we recommend sticking to Java 1.6.
+
 ### Downloading the Android SDK
 
 Download the [Eclipse ADT](http://developer.android.com/sdk/index.html) bundle from the official Android website. You will have to accept the terms of conditions before the download.
