@@ -128,6 +128,14 @@ You should now be good to go!
 
 If you are running an older version of Android these steps might not work for you. We recommend that you do a Google search for *enable developer mode* with your Android version number.
 
+At the time of this writing, the devices where RubyMotion is known to run are:
+
+- Nexus 5
+- Nexus 7
+- Samsung Galaxy S2
+- Samsung Galaxy Note
+- Motorola G
+
 ## Getting started
 
 Let's create a *Hello World* app.
