@@ -335,7 +335,7 @@ EOS
 
     App.info 'Sign', archive
     if App.config.development?
-      sh "/usr/bin/jarsigner -storepass android -keystore \"#{keystore}\" \"#{archive}\" androiddebugkey"
+      sh "/usr/bin/jarsigner -digestalg SHA1 -storepass android -keystore \"#{keystore}\" \"#{archive}\" androiddebugkey"
     else
       sh "/usr/bin/jarsigner -sigalg SHA1withRSA -digestalg SHA1 -keystore \"#{keystore}\" \"#{archive}\" \"#{App.config.release_keystore_alias}\""
     end
