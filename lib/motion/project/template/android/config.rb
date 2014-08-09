@@ -150,12 +150,16 @@ module Motion; module Project;
       "#{cflags} -I\"#{ndk_path}/sources/cxx-stl/stlport/stlport\""
     end
 
+    def payload_library_filename
+      "lib#{payload_library_name}.so"
+    end
+
     def payload_library_name
-      'libpayload.so'
+      'payload'
     end
 
     def ldflags
-      "-Wl,-soname,#{payload_library_name} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"  
+      "-Wl,-soname,#{payload_library_filename} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
     end
 
     def versioned_datadir

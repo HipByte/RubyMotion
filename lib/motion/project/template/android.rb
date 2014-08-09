@@ -108,7 +108,7 @@ EOS
 
   # Compile and link payload library.
   libs_abi_subpath = "lib/#{App.config.armeabi_directory_name}"
-  libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_name}"
+  libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_filename}"
   libpayload_path = "#{app_build_dir}/#{libpayload_subpath}"
   if !File.exist?(libpayload_path) \
       or ruby_objs_changed \
@@ -231,7 +231,7 @@ EOS
       java_file_txt << "\t#{method}\n"
     end
     if name == App.config.main_activity
-      java_file_txt << "\tstatic {\n\t\tSystem.load(\"#{App.config.payload_library_name}\");\n\t}\n"
+      java_file_txt << "\tstatic {\n\t\tSystem.loadLibrary(\"#{App.config.payload_library_name}\");\n\t}\n"
     end
     java_file_txt << "}\n"
     java_file = File.join(java_app_package_dir, name + '.java')
