@@ -122,7 +122,9 @@ In case you haven't done it already, make sure your device is connected to your 
 4. Go back to the previous screen and scroll down again, a **Developer options** item is now available. Tap on it.
 5. Check the **USB debugging** item. This will allow your Mac to communicate with the device for development tasks. A window will appear on the device, asking you to authorize the Mac. Make sure to confirm that.
 
-You should be good to go!
+You should now be good to go!
+
+If you are running an older version of Android these steps might not work for you. We recommend that you do a Google search for *enable developer mode* with your Android version number.
 
 ## Getting started
 
