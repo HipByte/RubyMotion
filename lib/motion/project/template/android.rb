@@ -370,9 +370,34 @@ end
 
 def install_apk(mode)
   App.info 'Install', App.config.apk_path
+
+  if mode == :device
+    App.fail "Could not find a USB-connected device" if device_id.empty?
+
+    device_version = device_api_version(device_id)
+    app_api_version = App.config.api_version
+    app_api_version = app_api_version == 'L' ? 20 : app_api_version.to_i
+    if device_version < app_api_version
+      App.fail "Cannot install an app built for API version #{App.config.api_version} on a device running API version #{device_version}"
+    end
+  end
+
   line = "\"#{adb_path}\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
   line << " > /dev/null" unless Rake.application.options.trace
   sh line
+end
+
+def device_api_version(device_id)
+  api_version = `"#{adb_path}" -s "#{device_id}\" shell getprop ro.build.version.sdk`
+  if $?.exitstatus == 0
+    api_version.to_i
+  else
+    App.fail "Could not retrieve the API version for USB-connected device `#{device_id}'"
+  end
+end
+
+def device_id
+  @device_id ||= `\"#{adb_path}\" devices| awk 'NR==1{next} length($1)>0{printf $1; exit}'`
 end
 
 def run_apk(mode)
