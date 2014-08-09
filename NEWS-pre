@@ -2,12 +2,13 @@
 
   * Added support for Android API 3, 4, 7, 10 and 11. All versions of Android
     installable by the Android SDK manager are now supported.
-  * Fixed the detection of the `zipalign' tool (again).
+  * Fixed the detection of the `zipalign' tool (again). Thanks to Norberto
+    Ortigoza for the help.
   * Fixed the build system to fail with a proper error message in case the
     installed NDK does not support the API level we want.
   * Fixed the build system to properly use the right NDK headers when
     targetting a API level that is not covered, as it skips API levels with no
-    public changes.
+    public changes. Thanks to Mark Villacampa for the help.
   * Fixed the `jarsigner' invocation to support JDK 1.7. Thanks to Mark
     Villacampa for the patch.
   * Fixed a bug where the RubyMotion JNI library wouldn't properly load on
