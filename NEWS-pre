@@ -1,0 +1,28 @@
+= RubyMotion 3.0 beta 0.4 =
+
+  * Fixed the detection of the `zipalign' tool (again).
+  * Fixed the `jarsigner' invocation to support JDK 1.7. Thanks to Mark
+    Villacampa for the patch.
+  * Fixed a bug where the RubyMotion JNI library wouldn't properly load on
+    older versions of Android (such as API 8). Thanks to Mark Villacampa for
+    the patch.
+  * Fixed the build system to generate an AndroidManifest.xml file without
+    `configChanges' attributes. Google doesn't recommend setting it and it's
+    also not supported in older versions of Android (such as API 8).  Thanks
+    to Mark Villacampa for the patch.
+  * Fixed the detection of the Android build tools directory on certain
+    installations of the SDK. Thanks to Mark Villacampa for the patch.  
+
+= RubyMotion 3.0 beta 0.3 =
+
+  * Added support for Android API 8.
+
+= RubyMotion 3.0 beta 0.2 =
+
+  * Fixed the detection of the `zipalign' tool.
+  * Fixed a crash when sending #new to a Class object where an object of the
+    superclass would be returned instead of the actual class.
+
+= RubyMotion 3.0 beta 0.1 =
+
+  * First release.
