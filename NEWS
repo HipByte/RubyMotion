@@ -3,6 +3,8 @@
   * [OSX]Fixed a bug that made it impossible to use a `NSApplication' subclass.
   * Fixed a regression where a crash would happen when calling user defined
     method if the same method was already defined in some classes in Apple SDK.
+  * Fixed a regression where a crash would happen when calling methods after
+    used a method with variadic arguments.
   * Fixed a bug where a "not precompiled" error would happen when calling the
     SKPhysicsWorld method which takes with Objective-C Blocks.
   * Fixed a bug which superclass method would be called if method was removed
