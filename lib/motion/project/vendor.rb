@@ -150,6 +150,12 @@ EOS
     def build_xcode(platform, opts)
       project_dir = File.expand_path(@config.project_dir)
       Dir.chdir(@path) do
+          # Validate common build directory.
+          if !File.writable?(Dir.pwd)
+            $stderr.puts "Cannot write into the `#{Dir.pwd}' directory, please check permissions and try again."
+            exit 1
+          end
+
         build_dir = build_dir(platform)
         if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
           FileUtils.mkdir_p build_dir
