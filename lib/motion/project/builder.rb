@@ -69,12 +69,6 @@ module Motion; module Project;
         bs_files.concat(vendor_project.bs_files)
       end
 
-      # Validate common build directory.
-      if !File.directory?(Builder.common_build_dir) or !File.writable?(Builder.common_build_dir)
-        $stderr.puts "Cannot write into the `#{Builder.common_build_dir}' directory, please remove or check permissions and try again."
-        exit 1
-      end
-
       # Prepare embedded and external frameworks BridgeSupport files (OSX-only).
       if config.respond_to?(:embedded_frameworks) && config.respond_to?(:external_frameworks)
         embedded_frameworks = config.embedded_frameworks.map { |x| File.expand_path(x) }
@@ -552,6 +546,13 @@ EOS
           rescue
           end
         end
+
+        # Validate common build directory.
+        if !File.directory?(dir) or !File.writable?(dir)
+          $stderr.puts "Cannot write into the `#{dir}' directory, please remove or check permissions and try again."
+          exit 1
+        end
+
         dir
       end
     end
