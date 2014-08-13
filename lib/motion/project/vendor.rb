@@ -65,8 +65,7 @@ module Motion; module Project;
     def build_static(platform, opts)
       App.info 'Build', @path
       Dir.chdir(@path) do
-        build_dir = "build-#{platform}"
-
+        build_dir = build_dir(platform)
         libs = (opts.delete(:products) or Dir.glob('*.a'))
         source_files = (opts.delete(:source_files) or ['**/*.{c,m,cpp,cxx,mm,h}']).map { |pattern| Dir.glob(pattern) }.flatten
         cflags = (opts.delete(:cflags) or '')
@@ -151,7 +150,7 @@ EOS
     def build_xcode(platform, opts)
       project_dir = File.expand_path(@config.project_dir)
       Dir.chdir(@path) do
-        build_dir = "build-#{platform}"
+        build_dir = build_dir(platform)
         if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
           FileUtils.mkdir_p build_dir
 
@@ -228,6 +227,16 @@ EOS
     end
 
     private
+
+    def build_dir(platform)
+      @build_dir ||= begin
+        path = "build-#{platform}"
+        unless File.writable?(Dir.pwd)
+          path = File.join(Builder.common_build_dir, @path, path)
+        end
+        path
+      end
+    end
 
     def gen_method(prefix)
       method = "#{prefix}_#{@type.to_s}".intern
