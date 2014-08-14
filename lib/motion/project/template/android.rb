@@ -388,7 +388,7 @@ def install_apk(mode)
 end
 
 def device_api_version(device_id)
-  api_version = `"#{adb_path}" -s "#{device_id}\" shell getprop ro.build.version.sdk`
+  api_version = `"#{adb_path}" -d -s "#{device_id}\" shell getprop ro.build.version.sdk`
   if $?.exitstatus == 0
     api_version.to_i
   else
@@ -397,7 +397,7 @@ def device_api_version(device_id)
 end
 
 def device_id
-  @device_id ||= `\"#{adb_path}\" devices| awk 'NR==1{next} length($1)>0{printf $1; exit}'`
+  @device_id ||= `\"#{adb_path}\" -d devices| awk 'NR==1{next} length($1)>0{printf $1; exit}'`
 end
 
 def run_apk(mode)
