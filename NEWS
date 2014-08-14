@@ -9,6 +9,7 @@
     SKPhysicsWorld method which takes with Objective-C Blocks.
   * Fixed a bug which superclass method would be called if method was removed
     through Module#remove_method.
+  * Fixed a bug which it would trigger crash when the method for KVO was called.
   * Fixed a bug where overrode Time#+ would not be called.
   * Fixed a bug which it would trigger random crash when #method_missing will be
     called.
