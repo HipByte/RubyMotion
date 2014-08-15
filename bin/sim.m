@@ -258,10 +258,22 @@ locate_app_windows_ids(void)
 	validate(name, NSString);
 
 #if defined(SIMULATOR_IOS)
+	// Don't recognise Simulator windows other than the main window (e.g. an
+	// external display window).
+	if ([name rangeOfString:sdk_version].location == NSNotFound) {
+	    continue;
+	}
+
+	// Get the bundle ID for the process ID of this window and check if is
+	// indeed the iOS Simulator.
 	ProcessSerialNumber psn;
-	GetProcessForPID((pid_t)[[dict objectForKey:(NSString *)kCGWindowOwnerPID] intValue], &psn);
-	CFDictionaryRef processInfo = ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
-	NSString *bundleID = [(NSDictionary *)processInfo objectForKey:(NSString *)kCFBundleIdentifierKey];
+	NSNumber *processID = [dict objectForKey:(NSString *)kCGWindowOwnerPID];
+	GetProcessForPID((pid_t)[processID intValue], &psn);
+	NSDictionary *processInfo =
+	    (NSDictionary *)ProcessInformationCopyDictionary(&psn,
+				kProcessDictionaryIncludeAllInformationMask);
+	NSString *bundleIDKey = (NSString *)kCFBundleIdentifierKey;
+	NSString *bundleID = [processInfo objectForKey:bundleIDKey];
 	if (![bundleID isEqualToString:@"com.apple.iphonesimulator"]) {
 	    continue;
 	}
