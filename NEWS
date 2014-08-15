@@ -1,7 +1,10 @@
 = RubyMotion 2.32 =
 
+  * [iOS] Fixed a bug where the iOS 8 Simulator could not be launched with the
+    default device config.
+  * [iOS] Fixed a bug where the iOS 8 Simulator could not be used to select
+    views in the REPL.
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
-  * [iOS8] Fixed a bug which iOS 8 simulator could not be launched by default.
   * Fixed a regression where a crash would happen when calling user defined
     method if the same method was already defined in some classes in Apple SDK.
   * Fixed a regression where a crash would happen when calling methods after
