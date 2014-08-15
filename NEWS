@@ -4,6 +4,8 @@
     default device config.
   * [iOS] Fixed a bug where the iOS 8 Simulator could not be used to select
     views in the REPL.
+  * [iOS] Fixed a bug where the REPL view selection would incorrectly invert the
+    coordinates for the landscape orientation on iOS 8.
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
   * Fixed a regression where a crash would happen when calling user defined
     method if the same method was already defined in some classes in Apple SDK.
