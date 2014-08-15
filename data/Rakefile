@@ -55,7 +55,8 @@ task :vm_files do
     first_ios_repl = "../vm/iPhoneSimulator#{IOS_SDK_VERSIONS.first}-repl.objs/librubymotion-repl.dylib"
 
     # FIXME : Need to use latest SDK version instead of '7.1'
-    raise "does not target 7.1?" unless IOS_SDK_VERSIONS.include?('7.1')
+    raise "[!] Need to target at least the iOS 7.1 SDK." unless IOS_SDK_VERSIONS.include?('7.1')
+    raise "[!] An iOS SDK older than 7.1 is required in order to build the REPL dylib." if IOS_SDK_VERSIONS.first == '7.1'
     last_ios_repl = "../vm/iPhoneSimulator7.1-repl.objs/librubymotion-repl.dylib"
 
     sh "/usr/bin/lipo -extract_family x86_64 \"#{last_ios_repl}\" -output /tmp/librubymotion-repl64.dylib"
