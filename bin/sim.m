@@ -46,6 +46,7 @@ static BOOL debugger_killed_session = NO;
 static NSString *xcode_path = nil;
 static int simulator_retina_type = DEVICE_RETINA_FALSE;
 static int simulator_device_family = DEVICE_FAMILY_IPHONE;
+static int major_sdk_version = 0;
 #endif
 static NSString *sdk_version = nil;
 static NSString *replSocketPath = nil;
@@ -244,7 +245,7 @@ locate_app_windows_ids(void)
 
     NSMutableArray *ids = [[NSMutableArray alloc] init];
 
-    CFArrayRef windows = CGWindowListCopyWindowInfo(kCGWindowListOptionAll,
+    CFArrayRef windows = CGWindowListCopyWindowInfo(kCGWindowListOptionAll|kCGWindowListExcludeDesktopElements,
 	    kCGNullWindowID);
     bool bounds_ok = false;
 
@@ -257,47 +258,30 @@ locate_app_windows_ids(void)
 	validate(name, NSString);
 
 #if defined(SIMULATOR_IOS)
-	static NSArray *patterns = nil;
-	if (patterns == nil) {
-	    patterns = [[NSArray alloc] initWithObjects:
-		[NSString stringWithFormat:@"iPhone - iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPad - iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPad / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone (Retina 3.5-inch) - iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone (Retina 3.5-inch) / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone Retina (3.5-inch) / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone (Retina 4-inch) - iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone (Retina 4-inch) / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone Retina (4-inch) / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPhone Retina (4-inch 64-bit) / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPad (Retina) - iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPad (Retina) / iOS %@", sdk_version],
-		[NSString stringWithFormat:@"iPad Retina / iOS %@", sdk_version],
-		nil];
-	}
-
-	bool found = false;
-	for (NSString *pattern in patterns) {
-	    if ([name rangeOfString:pattern].location != NSNotFound) {
-		found = true;
-		break;
-	    }
-	}
-	if (!found) {
+	ProcessSerialNumber psn;
+	GetProcessForPID((pid_t)[[dict objectForKey:(NSString *)kCGWindowOwnerPID] intValue], &psn);
+	CFDictionaryRef processInfo = ProcessInformationCopyDictionary(&psn, kProcessDictionaryIncludeAllInformationMask);
+	NSString *bundleID = [(NSDictionary *)processInfo objectForKey:(NSString *)kCFBundleIdentifierKey];
+	if (![bundleID isEqualToString:@"com.apple.iphonesimulator"]) {
 	    continue;
 	}
-	if ([name rangeOfString:@"Retina"].location != NSNotFound) {
-	    simulator_retina_type = DEVICE_RETINA_TRUE;
-	    if ([name rangeOfString:@"3.5-inch"].location != NSNotFound) {
-		simulator_retina_type = DEVICE_RETINA_3_5;
+
+	// Starting from iOS 8 there are no simulator devices with extended
+	// chrome anymore, so we don't need this information to identify the
+	// window frame size.
+	if (major_sdk_version < 8) {
+	    if ([name rangeOfString:@"Retina"].location != NSNotFound) {
+		simulator_retina_type = DEVICE_RETINA_TRUE;
+		if ([name rangeOfString:@"3.5-inch"].location != NSNotFound) {
+		    simulator_retina_type = DEVICE_RETINA_3_5;
+		}
+		else if ([name rangeOfString:@"4-inch"].location != NSNotFound) {
+		    simulator_retina_type = DEVICE_RETINA_4;
+		}
 	    }
-	    else if ([name rangeOfString:@"4-inch"].location != NSNotFound) {
-		simulator_retina_type = DEVICE_RETINA_4;
+	    if ([name rangeOfString:@"iPad"].location != NSNotFound) {
+		simulator_device_family = DEVICE_FAMILY_IPAD;
 	    }
-	}
-	if ([name rangeOfString:@"iPad"].location != NSNotFound) {
-	    simulator_device_family = DEVICE_FAMILY_IPAD;
 	}
 #else // !SIMULATOR_IOS
 	int window_pid = [[dict objectForKey:@"kCGWindowOwnerPID"] intValue];
@@ -405,169 +389,176 @@ get_app_windows_bounds(void)
 // #undef validate
 
 #if defined(SIMULATOR_IOS)
-	// Inset the main view frame.
-        //
-        // Devices that (at a scale of 100%) have thick borders and their
-        // respective frames.
-        //
-        // On Retina Mac, the Retina iOS devices are shown at their native size
-        // while on a Non-Retina Mac they are twice as large.
-        //
+	bool found_thick_border = false;
 
-        // Non-Retina Mac
-        // ===========================================================
-        // DEVICE             | PORTRAIT FRAME
-        // ===========================================================
-        // Original iPhone    | 368x716
-        // -----------------------------------------------------------
-        // iPhone Retina 3.5" | 724x1044
-        // -----------------------------------------------------------
-        // iPhone Retina 4"   | 724x1220
-        // -----------------------------------------------------------
-        // Original iPad      | 852x1108
-        // -----------------------------------------------------------
-        // iPad Retina        | 1704x2216 (TODO This is the screenshot!)
-        // -----------------------------------------------------------
+	// Starting from iOS 8 there are no simulator devices with extended
+	// chrome anymore, so we don't need this information to identify the
+	// window frame size.
+	if (major_sdk_version < 8) {
+	    // Inset the main view frame.
+	    //
+	    // Devices that (at a scale of 100%) have thick borders and their
+	    // respective frames.
+	    //
+	    // On Retina Mac, the Retina iOS devices are shown at their native
+	    // size while on a Non-Retina Mac they are twice as large.
+	    //
 
-        // Retina Mac
-        //
-        // ===========================================================
-        // DEVICE             | PORTRAIT FRAME
-        // ===========================================================
-        // Original iPhone    | 368x716
-        // -----------------------------------------------------------
-        // iPhone Retina 3.5" | 368x716
-        // -----------------------------------------------------------
-        // iPhone Retina 4"   | 386x806
-        // -----------------------------------------------------------
-        // Original iPad      | 852x1108
-        // -----------------------------------------------------------
-        // iPad Retina        | 852x1108
-        // -----------------------------------------------------------
+	    // Non-Retina Mac
+	    // ===========================================================
+	    // DEVICE             | PORTRAIT FRAME
+	    // ===========================================================
+	    // Original iPhone    | 368x716
+	    // -----------------------------------------------------------
+	    // iPhone Retina 3.5" | 724x1044
+	    // -----------------------------------------------------------
+	    // iPhone Retina 4"   | 724x1220
+	    // -----------------------------------------------------------
+	    // Original iPad      | 852x1108
+	    // -----------------------------------------------------------
+	    // iPad Retina        | 1704x2216 (TODO This is the screenshot!)
+	    // -----------------------------------------------------------
 
-        int w = (int)CGRectGetWidth(bounds);
-        int h = (int)CGRectGetHeight(bounds);
-        // NSLog(@"W: %d H: %d", w, h);
-        bool portrait = w < h;
-        bool retina_mac = (int)[[NSScreen mainScreen] backingScaleFactor] > 1;
-        bool found_thick_border = false;
+	    // Retina Mac
+	    //
+	    // ===========================================================
+	    // DEVICE             | PORTRAIT FRAME
+	    // ===========================================================
+	    // Original iPhone    | 368x716
+	    // -----------------------------------------------------------
+	    // iPhone Retina 3.5" | 368x716
+	    // -----------------------------------------------------------
+	    // iPhone Retina 4"   | 386x806
+	    // -----------------------------------------------------------
+	    // Original iPad      | 852x1108
+	    // -----------------------------------------------------------
+	    // iPad Retina        | 852x1108
+	    // -----------------------------------------------------------
+
+	    int w = (int)CGRectGetWidth(bounds);
+	    int h = (int)CGRectGetHeight(bounds);
+	    // NSLog(@"W: %d H: %d", w, h);
+	    bool portrait = w < h;
+	    bool retina_mac = (int)[[NSScreen mainScreen] backingScaleFactor] > 1;
 
 #define MATCHES_FRAME(ww, hh) (portrait ? (w == ww && h == hh) : (w == hh && h == ww))
 #define LOG_MATCH(desc) \
-  if (debug_sim_window_offsets) { \
-    fprintf(stderr, "*** Recognized current Simulator window as %s.\n", desc); \
-  }
-// Inset to account for the border and offset for the window drop shadow.
+    if (debug_sim_window_offsets) { \
+	fprintf(stderr, "*** Recognized current Simulator window as %s.\n", desc); \
+    }
+    // Inset to account for the border and offset for the window drop shadow.
 #define BORDER_INSET(x, y) \
-  bounds = CGRectOffset(portrait ? CGRectInset(bounds, x, y) : CGRectInset(bounds, y, x), 1, 2); \
-  found_thick_border = true;
+    bounds = CGRectOffset(portrait ? CGRectInset(bounds, x, y) : CGRectInset(bounds, y, x), 1, 2); \
+    found_thick_border = true;
 
-        if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
-          if (simulator_retina_type == DEVICE_RETINA_FALSE) {
-            if (MATCHES_FRAME(368, 716)) {
-              LOG_MATCH("a Non-Retina iPhone with thick iPhone border");
-              // Same size on *Non* Retina and Retina Mac *with* iPhone border.
-              // State: Portrait & Landscape perfect!
-              BORDER_INSET(24, 118);
-            }
-          }
-          else if (simulator_retina_type == DEVICE_RETINA_3_5) {
-            if (retina_mac) {
-              if (MATCHES_FRAME(368, 716)) {
-                LOG_MATCH("a Retina iPhone 3.5\" with thick iPhone border " \
-                          "running on a Retina Mac");
-                // Retina Mac with enough space for the full iPhone border.
-                // State: Portrait & Landscape perfect!
-                BORDER_INSET(24, 118);
-              }
-              else if (MATCHES_FRAME(366, 526)) {
-                LOG_MATCH("a Retina iPhone 3.5\" with thick iPad border " \
-                          "running on a Retina Mac");
-                // Retina Mac with not enough space for the full iPhone border,
-                // so gets an iPad border.
-                // State: Untested! Does it even exist?
-                BORDER_INSET(23, 23);
-              }
-            }
-            else {
-              if (MATCHES_FRAME(368, 716)) {
-                LOG_MATCH("a Retina iPhone 3.5\" with thick iPhone border " \
-                          "running on a Non-Retina Mac");
-                // Non-Retina Mac with enough space for the full iPhone border.
-                // State: Untested!
-                BORDER_INSET(24, 118);
-              }
-              else if (MATCHES_FRAME(724, 1044)) {
-                LOG_MATCH("a Retina iPhone 3.5\" with thick iPad border " \
-                          "running on a Non-Retina Mac");
-                // Non-Retina Mac with not enough space for the full iPhone
-                // border, so gets an iPad border.
-                // State: Portrait & Landscape perfect!
-                BORDER_INSET(42, 42);
-              }
-            }
-          }
-          else if (simulator_retina_type == DEVICE_RETINA_4) {
-            if (retina_mac) {
-              if (MATCHES_FRAME(386, 806)) {
-                LOG_MATCH("a Retina iPhone 4\" with thick iPhone border " \
-                          "running on a Retina Mac");
-                // Retina Mac with enough space for the full iPhone border.
-                // State: Untested!
-                BORDER_INSET(33, 119);
-              }
-              else if (MATCHES_FRAME(366, 614)) {
-                 LOG_MATCH("a Retina iPhone 4\" with thick iPad border " \
-                           "running on a Retina Mac"); 
-                // Retina Mac with not enough space for the full iPhone border,
-                // so gets an iPad border.
-                // State: Untested! Does it even exist?
-                BORDER_INSET(23, 23);
-              }
-            }
-            else {
-              if (MATCHES_FRAME(724, 1220)) {
-                LOG_MATCH("a Retina iPhone 4\" with thick iPad border " \
-                          "running on a Non-Retina Mac");
-                // Non-Retina Mac with not enough space for the full iPhone
-                // border, so gets an iPad border.
-                // State: Portrait & Landscape perfect!
-                BORDER_INSET(42, 42);
-              }
-              else if (MATCHES_FRAME(706, 1374)) {
-                LOG_MATCH("a Retina iPhone 4\" with thick iPhone border " \
-                          "running on a Retina Mac");
-                // Non-Retina Mac with enough space for the full iPhone border.
-                // State: Untested! Does it even exist?
-                BORDER_INSET(33, 119);
-              }
-            }
-          }
-        }
-        // iPad
-        else {
-          if (MATCHES_FRAME(852, 1108)) {
-            LOG_MATCH("a Non-Retina iPad with thick iPad border");
-            // Non-Retina iPad is the same size on Non-Retina and Retina Mac,
-            // as is the Retina iPad on a Retina Mac.
-            // State: Only Non-Retina iPad + Non-Retina Mac: Portrait & Landscape perfect!
-            BORDER_INSET(42, 42);
-          }
-          else if (simulator_retina_type == DEVICE_RETINA_TRUE &&
-                    !retina_mac && MATCHES_FRAME(1582, 2216)) {
-            LOG_MATCH("a Retina iPad with thick border on a Non-Retina Mac");
-            // Retina iPad on a Non-Retina Mac is roughly twice as large.
-            // State: Untested! Does it even exist?
-            BORDER_INSET(42, 42);
-          }
-        }
+	    if (simulator_device_family == DEVICE_FAMILY_IPHONE) {
+	      if (simulator_retina_type == DEVICE_RETINA_FALSE) {
+		if (MATCHES_FRAME(368, 716)) {
+		  LOG_MATCH("a Non-Retina iPhone with thick iPhone border");
+		  // Same size on *Non* Retina and Retina Mac *with* iPhone border.
+		  // State: Portrait & Landscape perfect!
+		  BORDER_INSET(24, 118);
+		}
+	      }
+	      else if (simulator_retina_type == DEVICE_RETINA_3_5) {
+		if (retina_mac) {
+		  if (MATCHES_FRAME(368, 716)) {
+		    LOG_MATCH("a Retina iPhone 3.5\" with thick iPhone border " \
+			      "running on a Retina Mac");
+		    // Retina Mac with enough space for the full iPhone border.
+		    // State: Portrait & Landscape perfect!
+		    BORDER_INSET(24, 118);
+		  }
+		  else if (MATCHES_FRAME(366, 526)) {
+		    LOG_MATCH("a Retina iPhone 3.5\" with thick iPad border " \
+			      "running on a Retina Mac");
+		    // Retina Mac with not enough space for the full iPhone border,
+		    // so gets an iPad border.
+		    // State: Untested! Does it even exist?
+		    BORDER_INSET(23, 23);
+		  }
+		}
+		else {
+		  if (MATCHES_FRAME(368, 716)) {
+		    LOG_MATCH("a Retina iPhone 3.5\" with thick iPhone border " \
+			      "running on a Non-Retina Mac");
+		    // Non-Retina Mac with enough space for the full iPhone border.
+		    // State: Untested!
+		    BORDER_INSET(24, 118);
+		  }
+		  else if (MATCHES_FRAME(724, 1044)) {
+		    LOG_MATCH("a Retina iPhone 3.5\" with thick iPad border " \
+			      "running on a Non-Retina Mac");
+		    // Non-Retina Mac with not enough space for the full iPhone
+		    // border, so gets an iPad border.
+		    // State: Portrait & Landscape perfect!
+		    BORDER_INSET(42, 42);
+		  }
+		}
+	      }
+	      else if (simulator_retina_type == DEVICE_RETINA_4) {
+		if (retina_mac) {
+		  if (MATCHES_FRAME(386, 806)) {
+		    LOG_MATCH("a Retina iPhone 4\" with thick iPhone border " \
+			      "running on a Retina Mac");
+		    // Retina Mac with enough space for the full iPhone border.
+		    // State: Untested!
+		    BORDER_INSET(33, 119);
+		  }
+		  else if (MATCHES_FRAME(366, 614)) {
+		     LOG_MATCH("a Retina iPhone 4\" with thick iPad border " \
+			       "running on a Retina Mac"); 
+		    // Retina Mac with not enough space for the full iPhone border,
+		    // so gets an iPad border.
+		    // State: Untested! Does it even exist?
+		    BORDER_INSET(23, 23);
+		  }
+		}
+		else {
+		  if (MATCHES_FRAME(724, 1220)) {
+		    LOG_MATCH("a Retina iPhone 4\" with thick iPad border " \
+			      "running on a Non-Retina Mac");
+		    // Non-Retina Mac with not enough space for the full iPhone
+		    // border, so gets an iPad border.
+		    // State: Portrait & Landscape perfect!
+		    BORDER_INSET(42, 42);
+		  }
+		  else if (MATCHES_FRAME(706, 1374)) {
+		    LOG_MATCH("a Retina iPhone 4\" with thick iPhone border " \
+			      "running on a Retina Mac");
+		    // Non-Retina Mac with enough space for the full iPhone border.
+		    // State: Untested! Does it even exist?
+		    BORDER_INSET(33, 119);
+		  }
+		}
+	      }
+	    }
+	    // iPad
+	    else {
+	      if (MATCHES_FRAME(852, 1108)) {
+		LOG_MATCH("a Non-Retina iPad with thick iPad border");
+		// Non-Retina iPad is the same size on Non-Retina and Retina Mac,
+		// as is the Retina iPad on a Retina Mac.
+		// State: Only Non-Retina iPad + Non-Retina Mac: Portrait & Landscape perfect!
+		BORDER_INSET(42, 42);
+	      }
+	      else if (simulator_retina_type == DEVICE_RETINA_TRUE &&
+			!retina_mac && MATCHES_FRAME(1582, 2216)) {
+		LOG_MATCH("a Retina iPad with thick border on a Non-Retina Mac");
+		// Retina iPad on a Non-Retina Mac is roughly twice as large.
+		// State: Untested! Does it even exist?
+		BORDER_INSET(42, 42);
+	      }
+	    }
+	    if (debug_sim_window_offsets && !found_thick_border) {
+		fprintf(stderr, "*** Current Simulator window NOT recognized as " \
+				"having thick borders (%dx%d).\n", w, h);
+	    }
+	}
         if (!found_thick_border) {
-          if (debug_sim_window_offsets) {
-            fprintf(stderr, "*** Current Simulator window NOT recognized as " \
-                            "having thick borders (%dx%d).\n", w, h);
-          }
-          bounds.origin.y += 24;
-          bounds.size.height -= 24;
+	    // Offset window title bar.
+	    bounds.origin.y += 24;
+	    bounds.size.height -= 24;
         }
 
 #undef MATCHES_FRAME
@@ -1307,6 +1298,7 @@ main(int argc, char **argv)
 #endif
     sdk_version = [[NSString stringWithUTF8String:argv[argv_n++]] retain];
 #if defined(SIMULATOR_IOS)
+    major_sdk_version = [[[sdk_version componentsSeparatedByString:@"."] objectAtIndex:0] intValue];
     xcode_path = [[NSString stringWithUTF8String:argv[argv_n++]] retain];
 #endif
     NSString *app_path =
