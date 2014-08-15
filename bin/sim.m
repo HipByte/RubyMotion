@@ -1415,8 +1415,16 @@ main(int argc, char **argv)
 	    @selector(specifierWithApplicationPath:), app_path);
     assert(app_spec != nil);
 
-    // Retrieve the SimDevice.
+    // Create system root.
+    id system_root = ((id (*)(id, SEL, id))objc_msgSend)(SystemRoot,
+                                                         @selector(rootWithSDKVersion:), sdk_version);
+    if (system_root == nil) {
+        fprintf(stderr, "*** iOS simulator for %s SDK not found.\n\n",
+                [sdk_version UTF8String]);
+        exit(1);
+    }
 
+    // Retrieve the SimDevice.
     // Create SimDeviceSet (needed in Xcode 6.0).
     id sim_device = nil;
     Class SimDevice = NSClassFromString(@"SimDevice");
@@ -1432,22 +1440,18 @@ main(int argc, char **argv)
 		@selector(devices), nil);
 	assert(sim_devices != NULL);
 
+	// Retrive the runtime of SDK.
+	id sim_runtime = ((id (*)(id, SEL, id))objc_msgSend)(system_root, @selector(runtime), nil);
+
 	sim_device = [sim_devices objectAtIndex:0];
 	for (id device in sim_devices) {
-	    if ([device_name compare:[device name]] == NSOrderedSame) {
+	    id device_runtime = ((id (*)(id, SEL, id))objc_msgSend)(device, @selector(runtime), nil);
+	    if (device_runtime == sim_runtime &&
+		[device_name compare:[device name]] == NSOrderedSame) {
 		sim_device = device;
 		break;
 	    }
 	}
-    }
-
-    // Create system root.
-    id system_root = ((id (*)(id, SEL, id))objc_msgSend)(SystemRoot,
-	    @selector(rootWithSDKVersion:), sdk_version);
-    if (system_root == nil) {
-	fprintf(stderr, "*** iOS simulator for %s SDK not found.\n\n",
-		[sdk_version UTF8String]);
-	exit(1);
     }
 
     // Create session config.
