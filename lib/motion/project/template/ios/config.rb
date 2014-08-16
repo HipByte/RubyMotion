@@ -407,7 +407,7 @@ module Motion; module Project;
     def sdk_build_version(platform)
       @sdk_build_version ||= begin
         sdk_path = sdk(platform)
-        `xcodebuild -version -sdk '#{sdk_path}' ProductBuildVersion`.strip
+        `#{locate_binary('xcodebuild')} -version -sdk '#{sdk_path}' ProductBuildVersion`.strip
       end
     end
 
