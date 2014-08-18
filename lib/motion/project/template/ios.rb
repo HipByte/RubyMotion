@@ -230,12 +230,14 @@ task :static do
   sh "/usr/bin/lipo -create #{libs.join(' ')} -output \"#{fat_lib}\""
 end
 
+# With Xcode 5 not all templates worked on the sim or device.
+#
+# TODO: This should be cleaned up once Xcode 5 is no longer supported.
 IOS_SIM_INSTRUMENTS_TEMPLATES = [
   'Allocations', 'Leaks', 'Activity Monitor',
   'Zombies', 'Time Profiler', 'System Trace', 'Automation',
   'File Activity', 'Core Data'
 ]
-
 IOS_DEVICE_INSTRUMENTS_TEMPLATES = [
   'Allocations', 'Leaks', 'Activity Monitor',
   'Zombies', 'Time Profiler', 'System Trace', 'Automation',
@@ -245,6 +247,14 @@ IOS_DEVICE_INSTRUMENTS_TEMPLATES = [
 
 desc "Same as profile:simulator"
 task :profile => ['profile:simulator']
+
+def profiler_templates
+  if App.config.xcode_version[0] >= '6.0'
+    App.config.profiler_known_templates.map do |template_path|
+      File.basename(template_path, File.extname(template_path))
+    end
+  end
+end
 
 namespace :profile do
   desc "Run a build on the simulator through Instruments"
@@ -263,7 +273,7 @@ namespace :profile do
     device_name = ENV["device_name"]
     device_name = App.config.device_family_string(device_name, family_int, target, retina)
 
-    plist = App.config.profiler_config_plist('iPhoneSimulator', ENV['args'], ENV['template'], IOS_SIM_INSTRUMENTS_TEMPLATES)
+    plist = App.config.profiler_config_plist('iPhoneSimulator', ENV['args'], ENV['template'], profiler_templates || IOS_SIM_INSTRUMENTS_TEMPLATES)
     plist['com.apple.xcode.simulatedDeviceFamily'] = App.config.device_family_ints.first
     plist['com.apple.xcode.SDKPath'] = App.config.sdk('iPhoneSimulator')
     plist['optionalData']['launchOptions']['architectureType'] = 0
@@ -275,7 +285,7 @@ namespace :profile do
     desc 'List all built-in Simulator Instruments templates'
     task :templates do
       puts "Built-in Simulator Instruments templates:"
-      IOS_SIM_INSTRUMENTS_TEMPLATES.each do |template|
+      (profiler_templates || IOS_SIM_INSTRUMENTS_TEMPLATES).each do |template|
         puts "* #{template}"
       end
     end
@@ -294,7 +304,7 @@ namespace :profile do
       App.fail 'Unable to determine remote app path'
     end
 
-    plist = App.config.profiler_config_plist('iPhoneOS', ENV['args'], ENV['template'], IOS_DEVICE_INSTRUMENTS_TEMPLATES, false)
+    plist = App.config.profiler_config_plist('iPhoneOS', ENV['args'], ENV['template'], profiler_templates || IOS_DEVICE_INSTRUMENTS_TEMPLATES, false)
     plist['absolutePathOfLaunchable'] = File.join($deployed_app_path, App.config.bundle_name)
     plist['deviceIdentifier'] = (ENV['id'] or App.config.device_id)
     App.profile('iPhoneOS', plist)
@@ -304,7 +314,7 @@ namespace :profile do
     desc 'List all built-in device Instruments templates'
     task :templates do
       puts "Built-in device Instruments templates:"
-      IOS_DEVICE_INSTRUMENTS_TEMPLATES.each do |template|
+      (profiler_templates || IOS_DEVICE_INSTRUMENTS_TEMPLATES).each do |template|
         puts "* #{template}"
       end
     end
