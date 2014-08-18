@@ -10,6 +10,8 @@
     when it will configure `app.xcode_dir' for Xcode6 path.
   * [iOS] Fixed a bug where Instruments.app does not launch with `rake profile'
     on iOS 8.
+  * [iOS] Fixed a bug where `iPhone 4s / iOS 7' simulator was always launched
+    if Xcode 6 location path was specified through `app.xcode_dir'.
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
   * Fixed a regression where a crash would happen when calling user defined
     method if the same method was already defined in some classes in Apple SDK.
