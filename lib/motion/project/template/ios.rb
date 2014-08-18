@@ -252,11 +252,22 @@ namespace :profile do
     ENV['__USE_DEVICE_INT__'] = '1'
     Rake::Task['build:simulator'].invoke
 
+    target = ENV['target'] || App.config.sdk_version
+    family_int =
+      if family = ENV['device_family']
+        App.config.device_family_int(family.downcase.intern)
+      else
+        App.config.device_family_ints[0]
+      end
+    retina = ENV['retina']
+    device_name = ENV["device_name"]
+    device_name = App.config.device_family_string(device_name, family_int, target, retina)
+
     plist = App.config.profiler_config_plist('iPhoneSimulator', ENV['args'], ENV['template'], IOS_SIM_INSTRUMENTS_TEMPLATES)
     plist['com.apple.xcode.simulatedDeviceFamily'] = App.config.device_family_ints.first
     plist['com.apple.xcode.SDKPath'] = App.config.sdk('iPhoneSimulator')
     plist['optionalData']['launchOptions']['architectureType'] = 0
-    plist['deviceIdentifier'] = App.config.sdk('iPhoneSimulator')
+    plist['deviceIdentifier'] = App.config.profiler_config_device_identifier(device_name, target)
     App.profile('iPhoneSimulator', plist)
   end
 
