@@ -301,14 +301,10 @@ EOS
         if File.exist?(template)
           template_path = template
         elsif !builtin_templates.grep(/#{template}/i).empty?
-          # Get a list of just the templates (ignoring devices)
-          list = `#{locate_binary('instruments')} -s 2>&1`.strip.split("\n")
-          start = list.index('Known Templates:') + 1
-          list = list[start..-1]
-          # Only interested in the template (file base) names
-          list.map! { |line| line.sub(/^\s*"/, '').sub(/",*$/, '') }
           template = template.downcase
-          template_path = list.find { |path| File.basename(path, File.extname(path)).downcase == template }
+          template_path = profiler_known_templates.find do |path|
+            File.basename(path, File.extname(path)).downcase == template
+          end
         else
           App.fail("Invalid Instruments template path or name.")
         end
@@ -339,6 +335,15 @@ EOS
           },
         }.merge(optional_data),
       }
+    end
+
+    def profiler_known_templates
+      # Get a list of just the templates (ignoring devices)
+      list = `#{locate_binary('instruments')} -s 2>&1`.strip.split("\n")
+      start = list.index('Known Templates:') + 1
+      list = list[start..-1]
+      # Only interested in the template (file base) names
+      list.map { |line| line.sub(/^\s*"/, '').sub(/",*$/, '') }
     end
 
     def profiler_config_device_identifier(device_name, target)
