@@ -51,6 +51,7 @@ module Motion; module Project;
     end
 
     def xcode_dir
+      @xcode_version = nil
       @xcode_dir ||= begin
         xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
 
