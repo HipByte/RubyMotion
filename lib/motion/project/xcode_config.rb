@@ -301,7 +301,7 @@ EOS
         if File.exist?(template)
           template_path = template
         elsif !builtin_templates.grep(/#{template}/i).empty?
-          list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map { |line| line.sub(/^\s*"/, '').sub(/",*$/, '') }
+          list = `#{locate_binary('instruments')} -s 2>&1`.strip.split("\n").map { |line| line.sub(/^\s*"/, '').sub(/",*$/, '') }
           template = template.downcase
           template_path = list.find { |path| File.basename(path, File.extname(path)).downcase == template }
         else
@@ -339,7 +339,7 @@ EOS
     def profiler_config_device_identifier(device_name, target)
       if xcode_version[0] >= '6.0'
         re = /#{device_name} \(#{target} Simulator\) \[(.+)\]/
-        `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").each { |line|
+        `#{locate_binary('instruments')} -s 2>&1`.strip.split("\n").each { |line|
           if m = re.match(line)
             return m[1]
           end
