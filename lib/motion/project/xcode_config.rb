@@ -336,6 +336,19 @@ EOS
       }
     end
 
+    def profiler_config_device_identifier(device_name, target)
+      if xcode_version[0] >= '6.0'
+        re = /#{device_name} \(#{target} Simulator\) \[(.+)\]/
+        `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").each { |line|
+          if m = re.match(line)
+            return m[1]
+          end
+        }
+      else
+        App.config.sdk('iPhoneSimulator')
+      end
+    end
+
     def pkginfo_data
       "AAPL#{@bundle_signature}"
     end
