@@ -301,7 +301,7 @@ EOS
         if File.exist?(template)
           template_path = template
         elsif !builtin_templates.grep(/#{template}/i).empty?
-          list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map { |line| line.sub(/^\s+"/, '').sub(/",*$/, '') }
+          list = `/usr/bin/xcrun instruments -s 2>&1`.strip.split("\n").map { |line| line.sub(/^\s*"/, '').sub(/",*$/, '') }
           template = template.downcase
           template_path = list.find { |path| File.basename(path, File.extname(path)).downcase == template }
         else
