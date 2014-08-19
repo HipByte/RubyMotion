@@ -69,7 +69,7 @@ module Motion; module Project;
         bs_files.concat(vendor_project.bs_files)
       end
 
-      # Prepare embedded and external frameworks BridgeSupport files (OSX-only).
+      # Prepare embedded and external frameworks BridgeSupport files
       if config.respond_to?(:embedded_frameworks) && config.respond_to?(:external_frameworks)
         embedded_frameworks = config.embedded_frameworks.map { |x| File.expand_path(x) }
         external_frameworks = config.external_frameworks.map { |x| File.expand_path(x) }
@@ -305,7 +305,12 @@ EOS
           res = `/usr/bin/otool -L \"#{main_exec}\"`.scan(/(.*#{File.basename(path)}.*)\s\(/)
           if res and res[0] and res[0][0]
             old_path = res[0][0].strip
-            new_path = "@executable_path/../Frameworks/" + old_path.scan(/#{File.basename(path)}.*/)[0]
+            if platform == "MacOSX"
+              exec_path = "@executable_path/../Frameworks/"
+            else
+              exec_path = "@executable_path/Frameworks/"
+            end
+            new_path = exec_path + old_path.scan(/#{File.basename(path)}.*/)[0]
             sh "/usr/bin/install_name_tool -change \"#{old_path}\" \"#{new_path}\" \"#{main_exec}\""
           else
             App.warn "Cannot locate and fix install name path of embedded framework `#{path}' in executable `#{main_exec}', application might not start"
