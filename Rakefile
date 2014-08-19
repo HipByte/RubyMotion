@@ -2,10 +2,10 @@ PROJECT_VERSION = '2.32'
 PRE_PROJECT_VERSION = '3.0beta0.4'
 XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
-sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator*.sdk')).map do |path|
+sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator?*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneSimulator(.+)\.sdk$/)[0][0]
 end
-ios_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk')).map do |path|
+ios_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneOS.platform/Developer/SDKs/iPhoneOS?*.sdk')).map do |path|
   File.basename(path).scan(/^iPhoneOS(.+)\.sdk$/)[0][0]
 end
 IOS_SDK_VERSIONS = (sim_sdks & ios_sdks)
