@@ -41,8 +41,6 @@ module Motion; module Project;
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @category = 'utilities'
       @frameworks = ['AppKit', 'Foundation', 'CoreGraphics', 'CoreServices']
-      @embedded_frameworks = []
-      @external_frameworks = []
       @codesign_for_development = false
       @codesign_for_release = true
       @eval_support = false
@@ -54,13 +52,6 @@ module Motion; module Project;
     def device_family; 'mac'; end
 
     def validate
-      %w{ embedded_frameworks external_frameworks }.each do |attr|
-        value = send(attr)
-        if !(value.is_a?(Array) and value.all? { |x| File.exist?(x) and File.extname(x) == '.framework' })
-          App.fail "app.#{attr} should be an array of framework paths"
-        end
-      end
-
       super
     end
 

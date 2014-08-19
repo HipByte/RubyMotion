@@ -29,8 +29,8 @@ require 'motion/util/code_sign'
 module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
-      :weak_frameworks, :framework_search_paths, :libs, :identifier,
-      :codesign_certificate, :short_version, :entitlements, :delegate_class,
+      :weak_frameworks, :embedded_frameworks, :external_frameworks, :framework_search_paths,
+      :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class,
       :version
 
     def initialize(project_dir, build_mode)
@@ -39,6 +39,8 @@ module Motion; module Project;
       @dependencies = {}
       @frameworks = []
       @weak_frameworks = []
+      @embedded_frameworks = []
+      @external_frameworks = []
       @framework_search_paths = []
       @libs = []
       @bundle_signature = '????'
@@ -117,6 +119,14 @@ EOS
       end
       unless File.exist?(datadir)
         App.fail "iOS deployment target #{deployment_target} is not supported by this version of RubyMotion"
+      end
+
+      # embedded_frameworks
+      %w{ embedded_frameworks external_frameworks }.each do |attr|
+        value = send(attr)
+        if !(value.is_a?(Array) and value.all? { |x| File.exist?(x) and File.extname(x) == '.framework' })
+          App.fail "app.#{attr} should be an array of framework paths"
+        end
       end
 
       super
