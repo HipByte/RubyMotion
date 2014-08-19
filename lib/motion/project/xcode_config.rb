@@ -248,7 +248,7 @@ EOS
     end
 
     def ldflags(platform)
-      common_flags(platform)
+      common_flags(platform) + ' -Wl,-no_pie'
     end
 
     def bundle_name
