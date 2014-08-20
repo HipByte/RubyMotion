@@ -218,7 +218,9 @@ EOS
         headers_dir = opts.delete(:headers_dir)
         if headers_dir
           project_dir = File.expand_path(@config.project_dir)
-          headers = Dir.glob(File.join(project_dir, headers_dir, '**/*.h'))
+          # Dir.glob does not traverse symlinks with `**`, using this pattern
+          # will at least traverse symlinks one level down.
+          headers = Dir.glob(File.join(project_dir, headers_dir, '**{,/*/**}/*.h'))
           if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
             FileUtils.mkdir_p File.dirname(bs_file)
             bs_cflags = (opts.delete(:bridgesupport_cflags) or opts.delete(:cflags) or '')
