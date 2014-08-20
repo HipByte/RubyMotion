@@ -15,6 +15,8 @@
   * [iOS] Added `app.embedded_frameworks' configuration to support dynamic
     framework on iOS 8.
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
+  * Fixed a bug where headers in nested symlinked directories could not be used
+    with `vendor_project' and an Xcode project.
   * Fixed a regression where a crash would happen when calling user defined
     method if the same method was already defined in some classes in Apple SDK.
   * Fixed a regression where a crash would happen when calling methods after
