@@ -1,5 +1,7 @@
 = RubyMotion 2.32 =
 
+  * [iOS] Fixed a bug where backtraces could not be symbolicated on the iOS 8
+    Simulator.
   * [iOS] Fixed a bug where the iOS 8 Simulator could not be launched with the
     default device config.
   * [iOS] Fixed a bug where the iOS 8 Simulator could not be used to select
