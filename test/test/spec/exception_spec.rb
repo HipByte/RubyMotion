@@ -1,3 +1,9 @@
+class TestExceptionsFixture
+  def self.foo(arg1, arg2)
+    raise 'Oh noes!'
+  end
+end
+
 # TODO exceptions on the file scope cannot be handled in OSX 10.6
 osx_32bit = OSX_VERSION && BITS == 32
 unless osx_32bit
@@ -7,10 +13,7 @@ unless osx_32bit
     $file_scope_exception = e
   end
 
-  class TestClassScopeExceptions
-    def self.foo(arg1, arg2)
-    end
-
+  class TestExceptionsFixture
     begin
       foo(:too_few_args)
     rescue Object => e
@@ -26,6 +29,16 @@ describe "An exception" do
 
   xit "includes backtrace info when raised from a class scope" do
     $class_scope_exception.backtrace.first.should.match /exception_spec\.rb:12/
+  end
+
+  it "includes backtrace info when raised from a method scope" do
+    exception = nil
+    begin
+      TestExceptionsFixture.foo(1,2)
+    rescue Object => e
+      exception = e
+    end
+    exception.backtrace.first.should.match /exception_spec\.rb:3/
   end
 end
 
