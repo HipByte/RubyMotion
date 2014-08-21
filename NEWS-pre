@@ -6,6 +6,9 @@
   * Fixed a bug where constant lookups inside modules would cause a crash.
   * Fixed a bug where methods in a module included in a module included in a
     class would not be copied to that class (yeah, I know).
+  * Fixed a bug where dispatching `super' more than once in the same message
+    chain would cause an infinite loop.
+  * Fixed the compiler to handle Java methods re-definition in Ruby subclasses.
 
 = RubyMotion 3.0 beta 0.4 =
 
