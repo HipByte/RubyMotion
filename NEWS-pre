@@ -9,6 +9,8 @@
   * Fixed a bug where dispatching `super' more than once in the same message
     chain would cause an infinite loop.
   * Fixed the compiler to handle Java methods re-definition in Ruby subclasses.
+  * Fixed the compiler to expose to Java classes that inherit from pure-Ruby
+    classes (and not just Java classes).
 
 = RubyMotion 3.0 beta 0.4 =
 
