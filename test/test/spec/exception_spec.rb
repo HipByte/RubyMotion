@@ -31,7 +31,7 @@ describe "An exception" do
     $class_scope_exception.backtrace.first.should.match /exception_spec\.rb:12/
   end
 
-  unless OSX_VERSION == "10.6" || OSX_VERSION == "10.7"
+  unless osx_32bit
     it "includes backtrace info when raised from a method scope" do
       exception = nil
       begin
