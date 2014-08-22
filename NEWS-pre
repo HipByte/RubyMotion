@@ -1,5 +1,7 @@
 = RubyMotion 3.0 beta 0.5 =
 
+  * Added the `app.permissions' variable that can be used to expose
+    `uses-permission' elements in the manifest file. Patch by Mark Rickert.
   * Fixed the build system to fail with a proper error message when trying
     to install an app on a device that runs an API version lower than the one
     targetted by the app itself. Patch by Mark Villacampa.
