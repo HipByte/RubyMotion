@@ -154,12 +154,21 @@ EOS
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{App.config.version_code}" android:versionName="#{App.config.version_name}">
 	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
 EOS
-    App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
+  # Application permissions
+  Array(App.config.permissions).each do |permission|
+    permission = "android.permission.#{permission.to_s.upcase}" if permission.is_a?(Symbol)
     android_manifest_txt << <<EOS
+  <uses-permission android:name="#{permission}"></uses-permission>
+EOS
+  end
+  # Custom manifest entries.
+  App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
+  android_manifest_txt << <<EOS
 	<application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
 EOS
-    App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
-    android_manifest_txt << <<EOS
+  App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
+  # Main activity.
+  android_manifest_txt << <<EOS
 		<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
 			<intent-filter>
                 		<action android:name="android.intent.action.MAIN" />
@@ -167,6 +176,7 @@ EOS
             		</intent-filter>
         	</activity>
 EOS
+  # Sub-activities.
   (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
     android_manifest_txt << <<EOS
 		<activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
