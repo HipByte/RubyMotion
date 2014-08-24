@@ -203,21 +203,42 @@ EOS
       if md = line.match(/^([^\s]+)\s*:\s*([^\s]+)\s*<([^>]*)>$/)
         current_class = java_classes[md[1]]
         if current_class
+          # Class is already exported, make sure the super classes match.
           if current_class[:super] != md[2]
             $stderr.puts "Class `#{md[1]}' already defined with a different super class (`#{current_class[:super]}')"
             exit 1
           end
         else
+          # Export a new class.
           infs = md[3].split(',').map { |x| x.strip }
           current_class = {:super => md[2], :methods => [], :interfaces => infs}
           java_classes[md[1]] = current_class
         end
       elsif md = line.match(/^\t(.+)$/)
         if current_class == nil
-          $stderr.puts "Method definition outside class definition"
+          $stderr.puts "Method declaration outside class definition"
           exit 1
         end
-        current_class[:methods] << md[1]
+        method_line = md[1]
+        add_method = false
+        if method_line.include?('{')
+          # A method definition (ex. a constructor), always include it.
+          add_method = true
+        else
+          # Strip 'public native X' (where X is the return type).
+          ary = method_line.split(/\s+/)
+          if ary[0] == 'public' and ary[1] == 'native'
+            method_line2 = ary[3..-1].join(' ')
+            # Make sure we are not trying to declare the same method twice.
+            if current_class[:methods].all? { |x| x.index(method_line2) != x.size - method_line2.size }
+              add_method = true
+            end
+          else
+            # Probably something else (what could it be?).
+            add_method = true
+          end 
+        end
+        current_class[:methods] << method_line if add_method
       else
         $stderr.puts "Ignoring line: #{line}"
       end
