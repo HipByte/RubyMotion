@@ -13,6 +13,10 @@
   * Fixed the compiler to handle Java methods re-definition in Ruby subclasses.
   * Fixed the compiler to expose to Java classes that inherit from pure-Ruby
     classes (and not just Java classes).
+  * Fixed a limitation in the compiler where classes had to inherit from
+    a Java class in order to be exposed to Java. Now, super-less classes will
+    automatically inherit from java.lang.Object (making the super-part of
+    `class MyClass < Java::Lang::Object' unnecessary).
 
 = RubyMotion 3.0 beta 0.4 =
 
