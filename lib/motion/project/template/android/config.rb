@@ -244,7 +244,7 @@ module Motion; module Project;
     end
 
     def logs_components
-      @logs_components ||= [package_path, 'AndroidRuntime', 'chromium', 'dalvikvm'].map { |component| component + ':I' }
+      @logs_components ||= [package_path, 'AndroidRuntime', 'chromium', 'dalvikvm', 'Bundle'].map { |component| component + ':I' }
     end
 
     attr_reader :manifest_entries
