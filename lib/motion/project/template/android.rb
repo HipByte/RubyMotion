@@ -248,12 +248,14 @@ EOS
   java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
   mkdir_p java_app_package_dir
   java_classes.each do |name, klass|
+    klass_super = klass[:super]
+    klass_super = 'java.lang.Object' if klass_super == '$blank$'
     java_file_txt = ''
     java_file_txt << <<EOS
 // This file has been generated automatically. Do not edit.
 package #{App.config.package};
 EOS
-    java_file_txt << "public class #{name} extends #{klass[:super]}"
+    java_file_txt << "public class #{name} extends #{klass_super}"
     if klass[:interfaces].size > 0
       java_file_txt << " implements #{klass[:interfaces].join(', ')}"
     end
