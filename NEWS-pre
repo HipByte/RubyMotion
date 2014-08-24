@@ -19,6 +19,11 @@
     a Java class in order to be exposed to Java. Now, super-less classes will
     automatically inherit from java.lang.Object (making the super-part of
     `class MyClass < Java::Lang::Object' unnecessary).
+  * Fixed a bug in the runtime when dispatching a polymorphic method where
+    the expected method would not be selected. The runtime will now select
+    methods when given arguments match (kind_of?) the expected types prior to
+    selecting a method where an implicit coercion (ex. any object -> bool)
+    would be performed.
 
 = RubyMotion 3.0 beta 0.4 =
 
