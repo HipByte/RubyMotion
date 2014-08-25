@@ -1,0 +1,13 @@
+# -*- coding: utf-8 -*-
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.extension do |ext|
+    ext.name = '<%= extension_name %>'
+    ext.type = "fileprovider-nonui"
+    # TODO: its not inside attributes!
+    ext.attributes = {
+      "NSExtensionFileProviderDocumentGroup" => "group.sdf.Extension-Test"
+    }
+  end
+end
