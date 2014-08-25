@@ -88,6 +88,19 @@ module Motion; module Project;
         embedded_frameworks = external_frameworks = []
       end
 
+      # Build targets
+      unless config.targets.empty?
+        config.targets.each do |target|
+          target.build(platform)
+        end
+
+        # Prepare target frameworks
+        target_frameworks = []
+        config.targets.select { |t| t.type == :framework }.each do |target|
+          target_frameworks << target.framework_name
+        end
+      end
+
       # Build object files.
       objs_build_dir = File.join(build_dir, 'objs')
       FileUtils.mkdir_p(objs_build_dir)
@@ -181,6 +194,8 @@ module Motion; module Project;
 
       # Generate init file.
       init_txt = <<EOS
+#import <Foundation/Foundation.h>
+
 extern "C" {
     void ruby_sysinit(int *, char ***);
     void ruby_init(void);
@@ -219,6 +234,14 @@ RubyMotionInit(int argc, char **argv)
 	    void *self = rb_vm_top_self();
 EOS
       init_txt << config.define_global_env_txt
+
+      unless target_frameworks.empty?
+        init_txt << "NSString *frameworks_path = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent: @\"Frameworks\"];\n"
+        target_frameworks.each do |framework|
+          init_txt << "[[NSBundle bundleWithPath: [frameworks_path stringByAppendingPathComponent: @\"#{framework}\"]] load];\n"
+        end
+      end
+
       app_objs.each do |_, init_func|
         init_txt << "#{init_func}(self, 0);\n"
       end
@@ -415,6 +438,13 @@ EOS
             App.info 'Copy', src_path
             FileUtils.cp_r(src_path, dest_path)
           end 
+        end
+      end
+
+      # Copy target products
+      unless config.targets.empty?
+        config.targets.each do |target|
+          target.copy_products(platform)
         end
       end
 
