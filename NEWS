@@ -2,6 +2,8 @@
 
   * Improved Enumerable#inject performance. ~40% times faster.
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
+  * [OSX] Fixed a bug where it would trigger a crash when it will evaluates a
+    expression on REPL on Yosemite.
 
 = RubyMotion 2.32 =
 
