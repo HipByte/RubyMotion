@@ -24,6 +24,8 @@
     methods when given arguments match (kind_of?) the expected types prior to
     selecting a method where an implicit coercion (ex. any object -> bool)
     would be performed.
+  * Fixed the runtime to implement the `finalize' native method on the Module
+    class, necessary when intermediate modules are created.
 
 = RubyMotion 3.0 beta 0.4 =
 
