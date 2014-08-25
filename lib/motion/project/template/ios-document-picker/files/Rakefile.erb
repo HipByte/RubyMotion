@@ -1,0 +1,20 @@
+# -*- coding: utf-8 -*-
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.extension do |ext|
+    ext.name = '<%= extension_name %>'
+    ext.type = "fileprovider-ui"
+    ext.attributes = {
+      "UIDocumentPickerModes" => [
+        "UIDocumentPickerModeImport",
+        "UIDocumentPickerModeOpen",
+        "UIDocumentPickerModeExportToService",
+        "UIDocumentPickerModeMoveToService"
+      ],
+      "UIDocumentPickerSupportedFileTypes" => [
+        "public.content"
+      ]
+    }
+  end
+end
