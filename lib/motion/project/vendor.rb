@@ -48,7 +48,7 @@ module Motion; module Project;
     end
 
     def clean
-      [XcodeBuildDir, 'build', 'build-iPhoneSimulator', 'build-iPhoneOS'].each do |build_dir|
+      [XcodeBuildDir, 'build', 'build-iPhoneSimulator', 'build-iPhoneOS', 'build-MacOSX'].each do |build_dir|
         build_dir = File.join(@path, build_dir)
         if File.exist?(build_dir)
           App.info 'Delete', build_dir
