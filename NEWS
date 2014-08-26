@@ -4,6 +4,8 @@
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
   * [OSX] Fixed a bug where it would trigger a crash when it will evaluates a
     expression on REPL on Yosemite.
+  * [OSX] Fixed a bug where the build directory for 3rd-party library wouldn't
+    be removed with `rake clean' command.
 
 = RubyMotion 2.32 =
 
