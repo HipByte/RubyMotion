@@ -19,6 +19,8 @@
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
   * [OSX] Fixed a bug where it would trigger a crash when it will evaluates a
     expression on REPL on Yosemite.
+  * [OSX] Fixed a bug where the build directory for 3rd-party library wouldn't
+    be removed with `rake clean' command.
   * Fixed a bug where headers in nested symlinked directories could not be used
     with `vendor_project' and an Xcode project.
   * Fixed a regression where a crash would happen when calling user defined
