@@ -356,10 +356,6 @@ module Motion; module Project;
     #   end
     # end
 
-    def info_plist
-      super.merge({ 'CFBundlePackageType' => 'FMWK' })
-    end
-
     def info_plist_data(platform)
       Motion::PropertyList.to_s({
         'MinimumOSVersion' => deployment_target,
@@ -393,7 +389,8 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
+      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist)
+       .merge({ 'CFBundlePackageType' => 'FMWK' }))
     end
 
     def manifest_plist_data

@@ -24,3 +24,4 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/target/framework_target'
+require 'motion/project/target/extension_target'
