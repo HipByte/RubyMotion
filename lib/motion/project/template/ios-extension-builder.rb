@@ -404,11 +404,11 @@ EOS
       end
 
       # Create bundle/PkgInfo.
-      bundle_pkginfo = File.join(bundle_path, 'PkgInfo')
-      if !File.exist?(bundle_pkginfo) or File.mtime(config.project_file) > File.mtime(bundle_pkginfo)
-        App.info 'Create', bundle_pkginfo
-        File.open(bundle_pkginfo, 'w') { |io| io.write(config.pkginfo_data) }
-      end
+      # bundle_pkginfo = File.join(bundle_path, 'PkgInfo')
+      # if !File.exist?(bundle_pkginfo) or File.mtime(config.project_file) > File.mtime(bundle_pkginfo)
+      #   App.info 'Create', bundle_pkginfo
+      #   File.open(bundle_pkginfo, 'w') { |io| io.write(config.pkginfo_data) }
+      # end
 
       # Compile IB resources.
       config.resources_dirs.each do |dir|

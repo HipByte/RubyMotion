@@ -391,7 +391,8 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
+      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist)
+       .merge({ 'CFBundlePackageType' => 'XPC!' }))
     end
 
     def manifest_plist_data
@@ -522,13 +523,11 @@ EOS
     RubyMotionInit(argc, argv);
 EOS
     main_txt << <<EOS
-    // retval = (*NSExtensionMain)();
-    dlopen("/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit", 0x1);
-    objc_msgSend(NSClassFromString(@"PKService"), @selector(_defaultRun:arguments:), argc, argv);
-    // retval = UIApplicationMain(argc, argv, nil, @"#{delegate_class}");
+    dlopen("/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit", 0x2);
+    retval = ((int(*)(id, SEL, int, char**))objc_msgSend)(NSClassFromString(@"PKService"), @selector(_defaultRun:arguments:), argc, argv);
     rb_exit(retval);
     [pool release];
-    return 0;
+    return retval;
 }
 EOS
     end

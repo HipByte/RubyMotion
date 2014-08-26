@@ -464,6 +464,8 @@ EOS
       case type
       when :framework
         @targets << Motion::Project::FrameworkTarget.new(path, type, self, opts)
+      when :extension
+        @targets << Motion::Project::ExtensionTarget.new(path, type, self, opts)
       else
         App.fail("Unsupported target type '#{type}'")
       end
