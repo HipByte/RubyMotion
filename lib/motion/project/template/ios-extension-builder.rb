@@ -280,6 +280,8 @@ EOS
         sh "#{cxx} \"#{main}\" #{config.cflags(platform, true)} -c -o \"#{main_o}\""
       end
 
+      librubymotion = File.join(datadir, platform, 'librubymotion-static.a')
+
       # Prepare bundle.
       bundle_path = config.app_bundle(platform)
       unless File.exist?(bundle_path)
