@@ -81,23 +81,6 @@ module Motion; module Project
         exit 1
       end
 
-      # Prepare embedded and external frameworks BridgeSupport files (OSX-only).
-      if config.respond_to?(:embedded_frameworks) && config.respond_to?(:external_frameworks)
-        embedded_frameworks = config.embedded_frameworks.map { |x| File.expand_path(x) }
-        external_frameworks = config.external_frameworks.map { |x| File.expand_path(x) }
-        (embedded_frameworks + external_frameworks).each do |path|
-          headers = Dir.glob(File.join(path, 'Headers/**/*.h'))
-          bs_file = File.join(Builder.common_build_dir, File.expand_path(path) + '.bridgesupport')
-          if !File.exist?(bs_file) or File.mtime(path) > File.mtime(bs_file)
-            FileUtils.mkdir_p(File.dirname(bs_file))
-            config.gen_bridge_metadata(platform, headers, bs_file, '', [])
-          end
-          bs_files << bs_file
-        end
-      else
-        embedded_frameworks = external_frameworks = []
-      end
-
       # Prepare target frameworks
       target_frameworks = []
       config.targets.select { |t| t.type == :framework && t.load? }.each do |target|
@@ -304,8 +287,8 @@ EOS
           or File.mtime(librubymotion) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        framework_search_paths = (config.framework_search_paths + (embedded_frameworks + external_frameworks).map { |x| File.dirname(x) }).uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
-        frameworks = (config.frameworks_dependencies + (embedded_frameworks + external_frameworks).map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
+        framework_search_paths = config.framework_search_paths.uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
+        frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
           libs << vendor_project.libs.map { |x|
@@ -320,23 +303,6 @@ EOS
         end || ""
         sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
-
-        # Change the install name of embedded frameworks.
-        embedded_frameworks.each do |path|
-          res = `/usr/bin/otool -L \"#{main_exec}\"`.scan(/(.*#{File.basename(path)}.*)\s\(/)
-          if res and res[0] and res[0][0]
-            old_path = res[0][0].strip
-            if platform == "MacOSX"
-              exec_path = "@executable_path/../Frameworks/"
-            else
-              exec_path = "@executable_path/Frameworks/"
-            end
-            new_path = exec_path + old_path.scan(/#{File.basename(path)}.*/)[0]
-            sh "/usr/bin/install_name_tool -change \"#{old_path}\" \"#{new_path}\" \"#{main_exec}\""
-          else
-            App.warn "Cannot locate and fix install name path of embedded framework `#{path}' in executable `#{main_exec}', application might not start"
-          end
-        end
       end
 
       # Compile IB resources.
@@ -414,19 +380,6 @@ EOS
               end
             end
           end
-        end
-      end
-
-      # Copy embedded frameworks.
-      unless embedded_frameworks.empty?
-        app_frameworks = File.join(config.app_bundle(platform), 'Frameworks')
-        FileUtils.mkdir_p(app_frameworks)
-        embedded_frameworks.each do |src_path|
-          dest_path = File.join(app_frameworks, File.basename(src_path))
-          if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
-            App.info 'Copy', src_path
-            FileUtils.cp_r(src_path, dest_path)
-          end 
         end
       end
 
