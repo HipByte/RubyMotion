@@ -255,7 +255,7 @@ describe "NSNotFound" do
 end
 
 describe "Application singleton subclassing" do
-  it "registers the principal class" do
+  xit "registers the principal class" do
     app = (ios? ? UIApplication : NSApplication).sharedApplication
     app.class.should == ApplicationSubclass
   end
