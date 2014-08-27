@@ -1,5 +1,12 @@
 = RubyMotion 2.32 =
 
+  * [iOS] Added support for iOS 8 App Extensions. See the `motion create --help'
+    output for a list of available templates and configure your host application
+    with the following: `app.target("path/to/extension", :extension)'.
+  * [iOS] Added support for frameworks that allow you to share code between your
+    host application and its extensions. Use the `ios-framework' template for
+    `motion create' and configure your host application with the following:
+    `app.target("path/to/framework", :framework)'.
   * [iOS] Fixed a bug where backtraces could not be symbolicated on the iOS 8
     Simulator.
   * [iOS] Fixed a bug where the iOS 8 Simulator could not be launched with the
