@@ -27,85 +27,10 @@ require 'motion/project/builder'
 
 module Motion; module Project
   class Builder
-    def archive(config)
-      # Create .ipa archive.
-      app_bundle = config.app_bundle('iPhoneOS')
-      archive = config.archive
-      if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
-        App.info 'Create', archive
-        tmp = "/tmp/ipa_root"
-        sh "/bin/rm -rf #{tmp}"
-        sh "/bin/mkdir -p #{tmp}/Payload"
-        sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
-        Dir.chdir(tmp) do
-          sh "/bin/chmod -R 755 Payload"
-          sh "/usr/bin/zip -q -r archive.zip Payload"
-        end
-        sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
-      end
-
-      # Create manifest file (if needed).
-      manifest_plist = File.join(config.versionized_build_dir('iPhoneOS'), 'manifest.plist')
-      manifest_plist_data = config.manifest_plist_data
-      if manifest_plist_data and (!File.exist?(manifest_plist) or File.mtime(config.project_file) > File.mtime(manifest_plist))
-        App.info 'Create', manifest_plist
-        File.open(manifest_plist, 'w') { |io| io.write(manifest_plist_data) } 
-      end
-    end
 
     def codesign(config, platform)
-      bundle_path = config.app_bundle(platform)
-      raise unless File.exist?(bundle_path)
-
-      # Create bundle/ResourceRules.plist.
-      resource_rules_plist = File.join(bundle_path, 'ResourceRules.plist')
-      unless File.exist?(resource_rules_plist)
-        App.info 'Create', resource_rules_plist
-        File.open(resource_rules_plist, 'w') do |io|
-          io.write(<<-PLIST)
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-        <key>rules</key>
-        <dict>
-                <key>.*</key>
-                <true/>
-                <key>Info.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>10</real>
-                </dict>
-                <key>ResourceRules.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>100</real>
-                </dict>
-        </dict>
-</dict>
-</plist>
-PLIST
-        end
-      end
-
-      # Copy the provisioning profile.
-      bundle_provision = File.join(bundle_path, "embedded.mobileprovision")
-      App.info 'Create', bundle_provision
-      FileUtils.cp config.provisioning_profile, bundle_provision
-
-      # Codesign.
-      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
-      if File.mtime(config.project_file) > File.mtime(bundle_path) \
-          or !system("#{codesign_cmd} --verify \"#{bundle_path}\" >& /dev/null")
-        App.info 'Codesign', bundle_path
-        entitlements = File.join(config.versionized_build_dir(platform), "Entitlements.plist")
-        File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
-        sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
-      end
+      entitlements = File.join(config.app_bundle(platform), "Entitlements.plist")
+      File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
     end
 
     def build(config, platform, opts)
