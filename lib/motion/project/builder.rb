@@ -235,7 +235,7 @@ RubyMotionInit(int argc, char **argv)
 EOS
       init_txt << config.define_global_env_txt
 
-      unless target_frameworks.empty?
+      if !config.targets.empty? and !target_frameworks.empty?
         init_txt << "NSString *frameworks_path = [[[NSBundle mainBundle] bundlePath] stringByAppendingPathComponent: @\"Frameworks\"];\n"
         target_frameworks.each do |framework|
           init_txt << "[[NSBundle bundleWithPath: [frameworks_path stringByAppendingPathComponent: @\"#{framework}\"]] load];\n"
