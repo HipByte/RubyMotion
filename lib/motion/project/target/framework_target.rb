@@ -113,7 +113,6 @@ PLIST
         App.info 'Codesign', framework_path
         # TODO remove one of these
         sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{framework_path}\""
-        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --preserve-metadata=\"identifier,entitlements,resource-rules\" \"#{framework_path}\""
       end
     end
 
