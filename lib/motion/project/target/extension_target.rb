@@ -116,6 +116,15 @@ PLIST
         end
       end
 
+      # Set 'application-identifier' in Entitlements.plist
+      extension_dir = File.join(dest_extension_path, extension_name)
+      info_plist = File.join(extension_dir, 'Info.plist')
+      entitlements = File.join(extension_dir, 'Entitlements.plist')
+      extension_bundle_name = `/usr/libexec/PlistBuddy -c "print CFBundleName" #{info_plist}`.strip
+      extension_bundle_indentifer = "#{@config.identifier}.#{extension_bundle_name}"
+      application_identifier = @config.seed_id + '.' + extension_bundle_indentifer
+      `/usr/libexec/PlistBuddy -c "Add application-identifier string #{application_identifier}" #{entitlements}`
+
       # Copy the provisioning profile
       bundle_provision = File.join(extension_dir, "embedded.mobileprovision")
       App.info 'Create', bundle_provision
@@ -126,8 +135,8 @@ PLIST
       if File.mtime(@config.project_file) > File.mtime(extension_dir) \
           or !system("#{codesign_cmd} --verify \"#{extension_dir}\" >& /dev/null")
         App.info 'Codesign', extension_dir
-        # TODO remove one of these
-        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{extension_dir}\""
+        entitlements = File.join(extension_dir, "Entitlements.plist")
+        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{extension_dir}\""
       end
     end
 
