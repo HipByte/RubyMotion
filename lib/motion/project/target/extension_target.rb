@@ -52,7 +52,7 @@ module Motion; module Project
         end
       end
 
-      success = system("cd #{@full_path} && bundle exec rake #{command}")
+      success = system("cd #{@full_path} && #{environment_variables} bundle exec rake #{command}")
       unless success
         App.fail "Target '#{@path}' failed to build"
       end
@@ -132,7 +132,7 @@ PLIST
     end
 
     def clean
-      system("cd #{@full_path} && bundle exec rake clean")
+      system("cd #{@full_path} && #{environment_variables} bundle exec rake clean")
     end
 
     def build_dir(config, platform)
@@ -152,6 +152,14 @@ PLIST
 
     def extension_name
       File.basename(src_extension_path)
+    end
+
+    def environment_variables
+      [
+        "RM_TARGET_SDK_VERSION=\"#{@config.sdk_version}\"",
+        "RM_TARGET_DEPLOYMENT_TARGET=\"#{@config.deployment_target}\"",
+        "RM_TARGET_BUILD=\"1\""
+      ].join(' ')
     end
 
   end

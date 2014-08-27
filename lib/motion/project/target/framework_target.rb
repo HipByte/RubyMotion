@@ -52,7 +52,7 @@ module Motion; module Project
         end
       end
 
-      success = system("cd #{@full_path} && bundle exec rake #{command}")
+      success = system("cd #{@full_path} && #{environment_variables} bundle exec rake #{command}")
       unless success
         App.fail "Target '#{@path}' failed to build"
       end
@@ -111,13 +111,12 @@ PLIST
       if File.mtime(@config.project_file) > File.mtime(framework_path) \
           or !system("#{codesign_cmd} --verify \"#{framework_path}\" >& /dev/null")
         App.info 'Codesign', framework_path
-        # TODO remove one of these
         sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{framework_path}\""
       end
     end
 
     def clean
-      system("cd #{@full_path} && bundle exec rake clean")
+      system("cd #{@full_path} && #{environment_variables} bundle exec rake clean")
     end
 
     def build_dir(config, platform)
@@ -138,6 +137,14 @@ PLIST
     # Indicates wether to load the framework at runtime or not
     def load?
       @opts[:load]
+    end
+
+    def environment_variables
+      [
+        "RM_TARGET_SDK_VERSION=\"#{@config.sdk_version}\"",
+        "RM_TARGET_DEPLOYMENT_TARGET=\"#{@config.deployment_target}\"",
+        "RM_TARGET_BUILD=\"1\""
+      ].join(' ')
     end
 
   end
