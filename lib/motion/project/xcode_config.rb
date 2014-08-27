@@ -461,6 +461,10 @@ EOS
     attr_accessor :targets
 
     def target(path, type, opts={})
+      unless File.exist?(path)
+        App.fail "Could not find target of type '#{type}' at '#{path}'"
+      end
+
       case type
       when :framework
         opts[:load] = true unless opts[:load] == false
