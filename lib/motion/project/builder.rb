@@ -96,7 +96,7 @@ module Motion; module Project;
 
         # Prepare target frameworks
         target_frameworks = []
-        config.targets.select { |t| t.type == :framework }.each do |target|
+        config.targets.select { |t| t.type == :framework && t.load? }.each do |target|
           target_frameworks << target.framework_name
         end
       end
