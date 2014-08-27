@@ -112,11 +112,15 @@ PLIST
 
 
     def build(config, platform, opts)
+      config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
+      config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
+
       datadir = config.datadir
       unless File.exist?(File.join(datadir, platform))
         $stderr.puts "This version of RubyMotion does not support `#{platform}'"
         exit 1
       end
+
       archs = config.archs[platform]
 
       # static_library = opts.delete(:static)
@@ -157,7 +161,7 @@ PLIST
         exit 1
       end
 
-      # TODO Framework: Should don't accept embedded (umbrella) frameworks
+      # TODO Framework: Should not accept embedded (umbrella) frameworks
       # Prepare embedded and external frameworks BridgeSupport files (OSX-only).
       if config.respond_to?(:embedded_frameworks) && config.respond_to?(:external_frameworks)
         embedded_frameworks = config.embedded_frameworks.map { |x| File.expand_path(x) }

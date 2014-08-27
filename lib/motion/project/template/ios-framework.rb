@@ -29,12 +29,16 @@ require 'motion/util/version'
 App = Motion::Project::App
 App.template = :'ios-framework'
 
+unless ENV['RM_TARGET_BUILD']
+  App.fail "Framework targets cannot be built manually"
+end
+
 require 'motion/project'
 require 'motion/project/template/ios-framework/config'
 require 'motion/project/template/ios-framework/builder'
 
 desc "Build the project, then run the simulator"
-task :default => :simulator
+task :default => :"build:simulator"
 
 desc "Build everything"
 task :build => ['build:simulator', 'build:device']

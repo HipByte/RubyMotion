@@ -109,14 +109,18 @@ PLIST
     end
 
     def build(config, platform, opts)
+      config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
+      config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
+
       datadir = config.datadir
       unless File.exist?(File.join(datadir, platform))
         $stderr.puts "This version of RubyMotion does not support `#{platform}'"
         exit 1
       end
+
       archs = config.archs[platform]
 
-      static_library = opts.delete(:static)
+      # static_library = opts.delete(:static)
 
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
@@ -342,15 +346,15 @@ EOS
         sh "#{cxx} \"#{init}\" #{config.cflags(platform, true)} -c -o \"#{init_o}\""
       end
 
-      librubymotion = File.join(datadir, platform, 'librubymotion-static.a')
-      if static_library
-        # Create a static archive with all object files + the runtime.
-        lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
-        App.info 'Create', lib
-        objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        sh "/usr/bin/libtool -static \"#{librubymotion}\" #{objs_list} -o \"#{lib}\""
-        return lib
-      end
+      # librubymotion = File.join(datadir, platform, 'librubymotion-static.a')
+      # if static_library
+      #   # Create a static archive with all object files + the runtime.
+      #   lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
+      #   App.info 'Create', lib
+      #   objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
+      #   sh "/usr/bin/libtool -static \"#{librubymotion}\" #{objs_list} -o \"#{lib}\""
+      #   return lib
+      # end
 
       # Generate main file.
       main_txt = config.main_cpp_file_txt(spec_objs)
