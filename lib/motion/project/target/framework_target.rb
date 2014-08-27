@@ -136,5 +136,10 @@ PLIST
       File.basename(framework_path)
     end
 
+    # Indicates wether to load the framework at runtime or not
+    def load?
+      @opts[:load]
+    end
+
   end
 end;end

@@ -463,6 +463,7 @@ EOS
     def target(path, type, opts={})
       case type
       when :framework
+        opts[:load] = true unless opts[:load] == false
         @targets << Motion::Project::FrameworkTarget.new(path, type, self, opts)
       when :extension
         @targets << Motion::Project::ExtensionTarget.new(path, type, self, opts)
