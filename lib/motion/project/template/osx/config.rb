@@ -230,36 +230,20 @@ EOS
     end
     main_txt << <<EOS
     RubyMotionInit(argc, argv);
-    NSApplication *app = [NSClassFromString(@"#{info_plist['NSPrincipalClass']}") sharedApplication];
+    NSApplication *app = [NSApplication sharedApplication];
     [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
 EOS
     if spec_mode
       main_txt << "SpecLauncher *specLauncher = [[SpecLauncher alloc] init];\n"
       main_txt << "[[NSNotificationCenter defaultCenter] addObserver:specLauncher selector:@selector(appLaunched:) name:NSApplicationDidFinishLaunchingNotification object:nil];\n"
     end
-    if use_application_main_function?
-      main_txt << "NSApplicationMain(argc, (const char **)argv);\n"
-    else
-      main_txt << "[app run];\n"
-    end
     main_txt << <<EOS
+    NSApplicationMain(argc, (const char **)argv);
     [pool release];
     rb_exit(0);
     return 0;
 }
 EOS
-    end
-
-    # If the user specifies a custom principal class the NSApplicationMain()
-    # function will only work if they have also specified a nib or storyboard.
-    def use_application_main_function?
-      info = info_plist
-      if info['NSPrincipalClass'] == 'NSApplication'
-        true
-      else
-        files = info.values_at('NSMainNibFile', 'NSMainStoryboardFile').compact
-        files.any? { |file| !file.strip.empty? }
-      end
     end
   end
 end; end
