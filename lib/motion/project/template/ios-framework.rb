@@ -37,7 +37,7 @@ require 'motion/project'
 require 'motion/project/template/ios-framework/config'
 require 'motion/project/template/ios-framework/builder'
 
-desc "Build the project, then run the simulator"
+desc "Build the simulator version"
 task :default => :"build:simulator"
 
 desc "Build everything"
