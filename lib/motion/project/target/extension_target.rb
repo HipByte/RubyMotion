@@ -52,7 +52,10 @@ module Motion; module Project
         end
       end
 
-      success = system("cd #{@full_path} && #{environment_variables} bundle exec rake #{command}")
+      args = ''
+      args << " --trace" if App::VERBOSE
+
+      success = system("cd #{@full_path} && #{environment_variables} rake #{command} #{args}")
       unless success
         App.fail "Target '#{@path}' failed to build"
       end
