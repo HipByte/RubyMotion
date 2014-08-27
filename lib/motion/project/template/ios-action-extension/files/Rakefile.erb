@@ -1,0 +1,15 @@
+# -*- coding: utf-8 -*-
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.extension do |ext|
+    ext.name = '<%= extension_name %>'
+    ext.type = 'ui-services'
+    ext.attributes = {
+      "NSExtensionActivationRule" => "TRUEPREDICATE",
+      "NSExtensionPointName" => "com.apple.ui-services",
+      "NSExtensionPointVersion" => "1.0"
+    }
+    ext.frameworks << "MobileCoreServices"
+  end
+end

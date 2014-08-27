@@ -25,6 +25,7 @@
 
 require 'motion/project/config'
 require 'motion/util/code_sign'
+require 'motion/project/target'
 
 module Motion; module Project;
   class XcodeConfig < Config
@@ -43,6 +44,7 @@ module Motion; module Project;
       @external_frameworks = []
       @framework_search_paths = []
       @libs = []
+      @targets = []
       @bundle_signature = '????'
       @short_version = nil
       @entitlements = {}
@@ -453,6 +455,21 @@ EOS
     def clean_project
       super
       @vendor_projects.each { |vendor| vendor.clean }
+      @targets.each { |target| target.clean }
+    end
+
+    attr_accessor :targets
+
+    def target(path, type, opts={})
+      case type
+      when :framework
+        opts[:load] = true unless opts[:load] == false
+        @targets << Motion::Project::FrameworkTarget.new(path, type, self, opts)
+      when :extension
+        @targets << Motion::Project::ExtensionTarget.new(path, type, self, opts)
+      else
+        App.fail("Unsupported target type '#{type}'")
+      end
     end
   end
 end; end

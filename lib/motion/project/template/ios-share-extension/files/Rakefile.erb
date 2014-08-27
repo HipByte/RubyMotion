@@ -1,0 +1,15 @@
+# -*- coding: utf-8 -*-
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.extension do |ext|
+    ext.name = '<%= extension_name %>'
+    ext.type = "share-services"
+    ext.attributes = {
+      "NSExtensionActivationRule" => "TRUEPREDICATE"
+      "NSExtensionPointName" => "1.0"
+      "NSExtensionPointVersion" => "1.0"
+    }
+    ext.frameworks << "MobileCoreServices"
+  end
+end

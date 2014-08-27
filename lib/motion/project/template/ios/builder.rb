@@ -57,6 +57,13 @@ module Motion; module Project
       bundle_path = config.app_bundle(platform)
       raise unless File.exist?(bundle_path)
 
+      # Codesign targets
+      unless config.targets.empty?
+        config.targets.each do |target|
+          target.codesign(platform)
+        end
+      end
+
       # Create bundle/ResourceRules.plist.
       resource_rules_plist = File.join(bundle_path, 'ResourceRules.plist')
       unless File.exist?(resource_rules_plist)
