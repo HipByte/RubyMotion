@@ -30,7 +30,7 @@ App = Motion::Project::App
 App.template = :'ios-framework'
 
 unless ENV['RM_TARGET_BUILD']
-  App.fail "Framework targets cannot be built manually"
+  App.fail "Framework targets must be built from an application project"
 end
 
 require 'motion/project'
