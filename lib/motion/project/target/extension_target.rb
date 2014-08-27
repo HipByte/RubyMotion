@@ -143,7 +143,7 @@ PLIST
     def src_extension_path
       @src_extension_path ||= begin
         path = File.join(@path, 'build', build_dir(@config, @platform), '*.appex')
-        Dir[path].sort_by{ |f| File.mtime(f) }.first
+        Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end
 

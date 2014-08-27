@@ -426,6 +426,13 @@ module Motion; module Project;
       File.join(motiondir, 'data', 'ios', target)
     end
 
+    # TODO datadir should not depend on the template name
+    def supported_versions
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'ios', '*')).select{|path| File.directory?(path)}.map do |path|
+        File.basename path
+      end
+    end
+
     def main_cpp_file_txt(spec_objs)
       main_txt = <<EOS
 #import <UIKit/UIKit.h>
