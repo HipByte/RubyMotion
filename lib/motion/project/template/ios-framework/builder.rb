@@ -29,88 +29,6 @@ require 'motion/project/dependency'
 
 module Motion; module Project
   class Builder
-    def archive(config)
-      # Create .ipa archive.
-      app_bundle = config.app_bundle('iPhoneOS')
-      archive = config.archive
-      if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
-        App.info 'Create', archive
-        tmp = "/tmp/ipa_root"
-        sh "/bin/rm -rf #{tmp}"
-        sh "/bin/mkdir -p #{tmp}/Payload"
-        sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
-        Dir.chdir(tmp) do
-          sh "/bin/chmod -R 755 Payload"
-          sh "/usr/bin/zip -q -r archive.zip Payload"
-        end
-        sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
-      end
-
-      # Create manifest file (if needed).
-      manifest_plist = File.join(config.versionized_build_dir('iPhoneOS'), 'manifest.plist')
-      manifest_plist_data = config.manifest_plist_data
-      if manifest_plist_data and (!File.exist?(manifest_plist) or File.mtime(config.project_file) > File.mtime(manifest_plist))
-        App.info 'Create', manifest_plist
-        File.open(manifest_plist, 'w') { |io| io.write(manifest_plist_data) } 
-      end
-    end
-
-    def codesign(config, platform)
-      bundle_path = config.app_bundle(platform)
-      raise unless File.exist?(bundle_path)
-
-      # Create bundle/ResourceRules.plist.
-      resource_rules_plist = File.join(bundle_path, 'ResourceRules.plist')
-      unless File.exist?(resource_rules_plist)
-        App.info 'Create', resource_rules_plist
-        File.open(resource_rules_plist, 'w') do |io|
-          io.write(<<-PLIST)
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-        <key>rules</key>
-        <dict>
-                <key>.*</key>
-                <true/>
-                <key>Info.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>10</real>
-                </dict>
-                <key>ResourceRules.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>100</real>
-                </dict>
-        </dict>
-</dict>
-</plist>
-PLIST
-        end
-      end
-
-      # Copy the provisioning profile.
-      bundle_provision = File.join(bundle_path, "embedded.mobileprovision")
-      App.info 'Create', bundle_provision
-      FileUtils.cp config.provisioning_profile, bundle_provision
-
-      # Codesign.
-      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
-      if File.mtime(config.project_file) > File.mtime(bundle_path) \
-          or !system("#{codesign_cmd} --verify \"#{bundle_path}\" >& /dev/null")
-        App.info 'Codesign', bundle_path
-        entitlements = File.join(config.versionized_build_dir(platform), "Entitlements.plist")
-        File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
-        sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
-      end
-    end
-
-
     def build(config, platform, opts)
       config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
       config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
@@ -123,15 +41,9 @@ PLIST
 
       archs = config.archs[platform]
 
-      # static_library = opts.delete(:static)
-
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
       @nfd = File.join(config.bindir, 'nfd')
-
-      # if config.spec_mode and (config.spec_files - config.spec_core_files).empty?
-      #   App.fail "No spec files in `#{config.specs_dir}'"
-      # end
 
       config.resources_dirs.flatten!
       config.resources_dirs.uniq!
@@ -161,12 +73,10 @@ PLIST
         exit 1
       end
 
-      # TODO Framework: Should not accept embedded (umbrella) frameworks
-      # Prepare embedded and external frameworks BridgeSupport files (OSX-only).
-      if config.respond_to?(:embedded_frameworks) && config.respond_to?(:external_frameworks)
-        embedded_frameworks = config.embedded_frameworks.map { |x| File.expand_path(x) }
+      # Prepare external frameworks BridgeSupport files (OSX-only).
+      if config.respond_to?(:external_frameworks)
         external_frameworks = config.external_frameworks.map { |x| File.expand_path(x) }
-        (embedded_frameworks + external_frameworks).each do |path|
+        external_frameworks.each do |path|
           headers = Dir.glob(File.join(path, 'Headers/**/*.h'))
           bs_file = File.join(Builder.common_build_dir, File.expand_path(path) + '.bridgesupport')
           if !File.exist?(bs_file) or File.mtime(path) > File.mtime(bs_file)
@@ -176,7 +86,7 @@ PLIST
           bs_files << bs_file
         end
       else
-        embedded_frameworks = external_frameworks = []
+        external_frameworks = []
       end
 
       # Build object files.
@@ -258,102 +168,11 @@ PLIST
 
       parallel = ParallelBuilder.new(objs_build_dir, build_file)
       parallel.files = config.ordered_build_files
-      parallel.files += config.spec_files if config.spec_mode
       parallel.run
 
       objs = app_objs = parallel.objects
-      spec_objs = []
-      if config.spec_mode
-        app_objs = objs[0...config.ordered_build_files.size]
-        spec_objs = objs[-(config.spec_files.size)..-1]
-      end
 
       FileUtils.touch(objs_build_dir) if any_obj_file_built
-
-#       # Generate init file.
-#       init_txt = <<EOS
-# extern "C" {
-#     void ruby_sysinit(int *, char ***);
-#     void ruby_init(void);
-#     void ruby_init_loadpath(void);
-#     void ruby_script(const char *);
-#     void ruby_set_argv(int, char **);
-#     void rb_vm_init_compiler(void);
-#     void rb_vm_init_jit(void);
-#     void rb_vm_aot_feature_provide(const char *, void *);
-#     void *rb_vm_top_self(void);
-#     void rb_define_global_const(const char *, void *);
-#     void rb_rb2oc_exc_handler(void);
-#     void rb_exit(int);
-# EOS
-#       app_objs.each do |_, init_func|
-#         init_txt << "void #{init_func}(void *, void *);\n"
-#       end
-#       init_txt << <<EOS
-# }
-
-# extern "C"
-# void
-# RubyMotionInit(int argc, char **argv)
-# {
-#     static bool initialized = false;
-#     if (!initialized) {
-#   ruby_init();
-#   ruby_init_loadpath();
-#         if (argc > 0) {
-#       const char *progname = argv[0];
-#       ruby_script(progname);
-#   }
-# #if !__LP64__
-#   try {
-# #endif
-#       void *self = rb_vm_top_self();
-# EOS
-#       init_txt << config.define_global_env_txt
-#       app_objs.each do |_, init_func|
-#         init_txt << "#{init_func}(self, 0);\n"
-#       end
-#       init_txt << <<EOS
-# #if !__LP64__
-#   }
-#   catch (...) {
-#       rb_rb2oc_exc_handler();
-#   }
-# #endif
-#   initialized = true;
-#     }
-# }
-# EOS
-
-#       # Compile init file.
-#       init = File.join(objs_build_dir, 'init.mm')
-#       init_o = File.join(objs_build_dir, 'init.o')
-#       if !(File.exist?(init) and File.exist?(init_o) and File.read(init) == init_txt)
-#         File.open(init, 'w') { |io| io.write(init_txt) }
-#         sh "#{cxx} \"#{init}\" #{config.cflags(platform, true)} -c -o \"#{init_o}\""
-#       end
-
-      # librubymotion = File.join(datadir, platform, 'librubymotion-static.a')
-      # if static_library
-      #   # Create a static archive with all object files + the runtime.
-      #   lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
-      #   App.info 'Create', lib
-      #   objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-      #   sh "/usr/bin/libtool -static \"#{librubymotion}\" #{objs_list} -o \"#{lib}\""
-      #   return lib
-      # end
-
-      # # Generate main file.
-      # main_txt = config.main_cpp_file_txt(spec_objs)
- 
-      # # Compile main file.
-      # main = File.join(objs_build_dir, 'main.mm')
-      # main_o = File.join(objs_build_dir, 'main.o')
-      # if !(File.exist?(main) and File.exist?(main_o) and File.read(main) == main_txt)
-      #   File.open(main, 'w') { |io| io.write(main_txt) }
-      #   sh "#{cxx} \"#{main}\" #{config.cflags(platform, true)} -c -o \"#{main_o}\""
-      # end
-
 
       init_txt = <<EOS
 #import <Foundation/Foundation.h>
@@ -371,7 +190,6 @@ EOS
 __attribute__((constructor))
 static void initializer(void)
 {
-
     static bool initialized = false;
     if (!initialized) {
       void *self = rb_vm_top_self();
@@ -416,8 +234,8 @@ EOS
           # or File.mtime(librubymotion) > File.mtime(main_exec)
         App.info 'Link', main_exec
         objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        framework_search_paths = (config.framework_search_paths + (embedded_frameworks + external_frameworks).map { |x| File.dirname(x) }).uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
-        frameworks = (config.frameworks_dependencies + (embedded_frameworks + external_frameworks).map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
+        framework_search_paths = (config.framework_search_paths + external_frameworks.map { |x| File.dirname(x) }).uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
+        frameworks = (config.frameworks_dependencies + external_frameworks.map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
           libs << vendor_project.libs.map { |x|
@@ -430,41 +248,10 @@ EOS
             "-stdlib=libstdc++"
           end
         end || ""
-        # sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs} -single_module -compatibility_version 1 -current_version 1 -undefined dynamic_lookup -dynamiclib -read_only_relocs suppress -dead_strip -install_name @rpath/#{config.name}.framework/#{config.name} -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -rpath -Xlinker @loader_path/Frameworks"
 
-        # system %Q{ clang++ -O0 -g -o /tmp/liblol.dylib /tmp/main.o "/tmp/#{filename}.x86_64.o" -arch x86_64 -lobjc -licucore #{frameworks_flags} -dynamiclib -install_name /tmp/liblol.dylib -Xlinker -rpath -Xlinker /tmp/liblol.dylib -Xlinker -rpath -Xlinker /tmp/liblol.dylib -mmacosx-version-min=10.9 -single_module -compatibility_version 1 -current_version 1 -undefined suppress -flat_namespace }
-
-
-
-        # clang -arch armv7 -dynamiclib -isysroot [] -L[] -F[] -filelist [] -install_name @rpath/frameworktest.framework/frameworktest -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -rpath -Xlinker @loader_path/Frameworks -dead_strip -fapplication-extension -miphoneos-version-min=8.0 -single_module -compatibility_version 1 -current_version 1 -Xlinker -dependency_info -Xlinker [] -o frameworktest
-
         main_exec_created = true
-
-        # # Change the install name of embedded frameworks.
-        # embedded_frameworks.each do |path|
-        #   res = `/usr/bin/otool -L \"#{main_exec}\"`.scan(/(.*#{File.basename(path)}.*)\s\(/)
-        #   if res and res[0] and res[0][0]
-        #     old_path = res[0][0].strip
-        #     if platform == "MacOSX"
-        #       exec_path = "@executable_path/../Frameworks/"
-        #     else
-        #       exec_path = "@executable_path/Frameworks/"
-        #     end
-        #     new_path = exec_path + old_path.scan(/#{File.basename(path)}.*/)[0]
-        #     sh "/usr/bin/install_name_tool -change \"#{old_path}\" \"#{new_path}\" \"#{main_exec}\""
-        #   else
-        #     App.warn "Cannot locate and fix install name path of embedded framework `#{path}' in executable `#{main_exec}', application might not start"
-        #   end
-        # end
       end
-
-      # # Create bundle/PkgInfo.
-      # bundle_pkginfo = File.join(bundle_path, 'PkgInfo')
-      # if !File.exist?(bundle_pkginfo) or File.mtime(config.project_file) > File.mtime(bundle_pkginfo)
-      #   App.info 'Create', bundle_pkginfo
-      #   File.open(bundle_pkginfo, 'w') { |io| io.write(config.pkginfo_data) }
-      # end
 
       # Compile IB resources.
       config.resources_dirs.each do |dir|
@@ -544,19 +331,6 @@ EOS
         end
       end
 
-      # # Copy embedded frameworks.
-      # unless embedded_frameworks.empty?
-      #   app_frameworks = File.join(config.app_bundle(platform), 'Frameworks')
-      #   FileUtils.mkdir_p(app_frameworks)
-      #   embedded_frameworks.each do |src_path|
-      #     dest_path = File.join(app_frameworks, File.basename(src_path))
-      #     if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
-      #       App.info 'Copy', src_path
-      #       FileUtils.cp_r(src_path, dest_path)
-      #     end 
-      #   end
-      # end
-
       # Create bundle/Info.plist.
       bundle_info_plist = File.join(bundle_path, 'Info.plist')
       if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
@@ -603,14 +377,6 @@ EOS
         compile_resource_to_binary_plist(strings_file)
       end
 
-      # # Optional support for #eval (OSX-only).
-      # if config.respond_to?(:eval_support) and config.eval_support
-      #   repl_dylib_path = File.join(datadir, '..', 'librubymotion-repl.dylib')
-      #   dest_path = File.join(app_resources_dir, File.basename(repl_dylib_path))
-      #   copy_resource(repl_dylib_path, dest_path)
-      #   preserve_resources << File.basename(repl_dylib_path)
-      # end
-
       # Delete old resource files.
       resources_files = resources_paths.map { |x| path_on_resources_dirs(config.resources_dirs, x) }
       Dir.chdir(app_resources_dir) do
@@ -631,11 +397,12 @@ EOS
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
       end
 
+      # TODO find a way to strip framework symbols
       # Strip all symbols. Only in distribution mode.
-      if main_exec_created and (config.distribution_mode or ENV['__strip__'])
-        App.info "Strip", main_exec
-        sh "#{config.locate_binary('strip')} #{config.strip_args} \"#{main_exec}\""
-      end
+      # if main_exec_created and (config.distribution_mode or ENV['__strip__'])
+      #   App.info "Strip", main_exec
+      #   sh "#{config.locate_binary('strip')} #{config.strip_args} \"#{main_exec}\""
+      # end
     end
 
     def path_on_resources_dirs(dirs, path)
@@ -671,17 +438,6 @@ EOS
         FileUtils.cp_r(res_path, dest_path)
       end
     end
-
-    # def profile(config, platform, config_plist)
-    #   plist_path = File.join(config.versionized_build_dir(platform), 'pbxperfconfig.plist')
-    #   App.info('Create', plist_path)
-    #   plist_path = File.expand_path(plist_path)
-    #   File.open(plist_path, 'w') { |f| f << Motion::PropertyList.to_s(config_plist) }
-
-    #   instruments_app = File.expand_path('../Applications/Instruments.app', config.xcode_dir)
-    #   App.info('Profile', config.app_bundle(platform))
-    #   sh "'#{File.join(config.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
-    # end
 
     class << self
       def common_build_dir

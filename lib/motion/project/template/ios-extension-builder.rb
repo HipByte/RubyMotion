@@ -45,8 +45,6 @@ module Motion; module Project
 
       archs = config.archs[platform]
 
-      # static_library = opts.delete(:static)
-
       ruby = File.join(config.bindir, 'ruby')
       llc = File.join(config.bindir, 'llc')
       @nfd = File.join(config.bindir, 'nfd')
@@ -271,16 +269,6 @@ EOS
         sh "#{cxx} \"#{init}\" #{config.cflags(platform, true)} -c -o \"#{init_o}\""
       end
 
-      # librubymotion = File.join(datadir, platform, 'librubymotion-static.a')
-      # if static_library
-      #   # Create a static archive with all object files + the runtime.
-      #   lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
-      #   App.info 'Create', lib
-      #   objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-      #   sh "/usr/bin/libtool -static \"#{librubymotion}\" #{objs_list} -o \"#{lib}\""
-      #   return lib
-      # end
-
       # Generate main file.
       main_txt = config.main_cpp_file_txt(spec_objs)
  
@@ -348,13 +336,6 @@ EOS
           end
         end
       end
-
-      # Create bundle/PkgInfo.
-      # bundle_pkginfo = File.join(bundle_path, 'PkgInfo')
-      # if !File.exist?(bundle_pkginfo) or File.mtime(config.project_file) > File.mtime(bundle_pkginfo)
-      #   App.info 'Create', bundle_pkginfo
-      #   File.open(bundle_pkginfo, 'w') { |io| io.write(config.pkginfo_data) }
-      # end
 
       # Compile IB resources.
       config.resources_dirs.each do |dir|
