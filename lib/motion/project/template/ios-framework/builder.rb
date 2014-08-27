@@ -24,8 +24,6 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/builder'
-require 'motion/project/paralel_builder'
-require 'motion/project/dependency'
 
 module Motion; module Project
   class Builder
@@ -33,6 +31,7 @@ module Motion; module Project
       config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
       config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
       config.xcode_dir = ENV['RM_TARGET_XCODE_DIR'] if ENV['RM_TARGET_XCODE_DIR']
+      @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
 
       datadir = config.datadir
       unless File.exist?(File.join(datadir, platform))
@@ -55,7 +54,7 @@ module Motion; module Project
       cxx = config.locate_compiler(platform, 'clang++')
     
       build_dir = File.join(config.versionized_build_dir(platform))
-      App.info 'Build', build_dir
+      App.info 'Build', relative_path(build_dir)
  
       # Prepare the list of BridgeSupport files needed.
       bs_files = config.bridgesupport_files
@@ -113,7 +112,7 @@ module Motion; module Project
         init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} \"#{obj}\"`.scan(/T\s+_(MREP_.*)/)[0][0]
 
         if should_rebuild
-          App.info 'Compile', rpath
+          App.info 'Compile', relative_path(rpath)
           FileUtils.mkdir_p(File.dirname(obj))
           arch_objs = []
           archs.each do |arch|
@@ -216,14 +215,14 @@ EOS
       # Prepare bundle.
       bundle_path = config.app_bundle(platform)
       unless File.exist?(bundle_path)
-        App.info 'Create', bundle_path
+        App.info 'Create', relative_path(bundle_path)
         FileUtils.mkdir_p(bundle_path)
       end
 
       # Link executable.
       main_exec = config.app_bundle_executable(platform)
       unless File.exist?(File.dirname(main_exec))
-        App.info 'Create', File.dirname(main_exec)
+        App.info 'Create', relative_path(File.dirname(main_exec))
         FileUtils.mkdir_p(File.dirname(main_exec))
       end
       main_exec_created = false
@@ -232,8 +231,7 @@ EOS
           or objs.any? { |path, _| File.mtime(path) > File.mtime(main_exec) } \
           or File.mtime(init_o) > File.mtime(main_exec) \
           or vendor_libs.any? { |lib| File.mtime(lib) > File.mtime(main_exec) }
-          # or File.mtime(librubymotion) > File.mtime(main_exec)
-        App.info 'Link', main_exec
+        App.info 'Link', relative_path(main_exec)
         objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
         framework_search_paths = (config.framework_search_paths + external_frameworks.map { |x| File.dirname(x) }).uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
         frameworks = (config.frameworks_dependencies + external_frameworks.map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
@@ -262,7 +260,7 @@ EOS
           ib_resources.concat(Dir.glob(File.join(dir, '**', '*.storyboard')).map { |storyboard| [storyboard, storyboard.sub(/\.storyboard$/, '.storyboardc')] })
           ib_resources.each do |src, dest|
             if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
-              App.info 'Compile', src
+              App.info 'Compile', relative_path(src)
               sh "/usr/bin/ibtool --compile \"#{dest}\" \"#{src}\""
             end
           end
@@ -315,7 +313,7 @@ EOS
           Dir.glob(File.join(dir, '*.xcdatamodeld')).each do |model|
             momd = model.sub(/\.xcdatamodeld$/, '.momd')
             if !File.exist?(momd) or File.mtime(model) > File.mtime(momd)
-              App.info 'Compile', model
+              App.info 'Compile', relative_path(model)
               model = File.expand_path(model) # momc wants absolute paths.
               momd = File.expand_path(momd)
               sh "\"#{App.config.xcode_dir}/usr/bin/momc\" \"#{model}\" \"#{momd}\""
@@ -324,7 +322,7 @@ EOS
           if cmd = config.spritekit_texture_atlas_compiler
             Dir.glob(File.join(dir, '*.atlas')).each do |atlas|
               if File.directory?(atlas)
-                App.info 'Compile', atlas
+                App.info 'Compile', relative_path(atlas)
                 sh "\"#{cmd}\" \"#{atlas}\" \"#{bundle_path}\""
               end
             end
@@ -335,7 +333,7 @@ EOS
       # Create bundle/Info.plist.
       bundle_info_plist = File.join(bundle_path, 'Info.plist')
       if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
-        App.info 'Create', bundle_info_plist
+        App.info 'Create', relative_path(bundle_info_plist)
         File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
         sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
       end
@@ -367,7 +365,7 @@ EOS
       resources_paths.each do |res_path|
         res = path_on_resources_dirs(config.resources_dirs, res_path)
         if reserved_app_bundle_files.include?(res)
-          App.fail "Cannot use `#{res_path}' as a resource file because it's a reserved application bundle file"
+          App.fail "Cannot use `#{relative_path(res_path)}' as a resource file because it's a reserved application bundle file"
         end
         dest_path = File.join(app_resources_dir, res)
         copy_resource(res_path, dest_path)
@@ -386,7 +384,7 @@ EOS
           next if reserved_app_bundle_files.include?(bundle_res)
           next if resources_files.include?(bundle_res)
           next if preserve_resources.include?(File.basename(bundle_res))
-          App.warn "File `#{bundle_res}' found in app bundle but not in resource directories, removing"
+          App.warn "File `#{relative_path(bundle_res)}' found in app bundle but not in resource directories, removing"
           FileUtils.rm_rf(bundle_res)
         end
       end
@@ -394,7 +392,7 @@ EOS
       # Generate dSYM.
       dsym_path = config.app_bundle_dsym(platform)
       if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
-        App.info "Create", dsym_path
+        App.info "Create", relative_path(dsym_path)
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
       end
 
@@ -406,28 +404,9 @@ EOS
       # end
     end
 
-    def path_on_resources_dirs(dirs, path)
-      dir = dirs.each do |dir|
-        break dir if path =~ /^#{dir}/
-      end
-      path = path.sub(/^#{dir}\/*/, '') if dir
-      path
-    end
-
-    def convert_filesystem_encoding(string)
-      if RUBY_VERSION < "2.1.0"
-        return eval `#{@nfd} "#{string}"`
-      else
-        # Dir.glob on Ruby 2.1 returns file path as "Normalization Form C".
-        # So, we do not convert to "Normalization Form D".
-        # (Ruby 2.0 or below, Dir.glob returns "Normalization Form D").
-        return string
-      end
-    end
-
     def compile_resource_to_binary_plist(path)
       unless File.size(path) == 0
-        App.info 'Compile', path
+        App.info 'Compile', relative_path(path)
         sh "/usr/bin/plutil -convert binary1 \"#{path}\""
       end
     end
@@ -435,22 +414,13 @@ EOS
     def copy_resource(res_path, dest_path)
       if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
         FileUtils.mkdir_p(File.dirname(dest_path))
-        App.info 'Copy', res_path
+        App.info 'Copy', relative_path(res_path)
         FileUtils.cp_r(res_path, dest_path)
       end
     end
 
-    class << self
-      def common_build_dir
-        dir = File.expand_path("~/Library/RubyMotion/build")
-        unless File.exist?(dir)
-          begin
-            FileUtils.mkdir_p dir
-          rescue
-          end
-        end
-        dir
-      end
+    def relative_path(dir)
+      Pathname.new(File.expand_path(dir)).relative_path_from(Pathname.new(@host_app_dir)).to_s
     end
 
   end
