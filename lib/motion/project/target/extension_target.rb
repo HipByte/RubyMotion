@@ -72,12 +72,13 @@ module Motion; module Project
         App.info 'Copy', src_path
         FileUtils.cp_r(src_path, dest_path)
 
-        # Modify CFBundleIdentifier
+        # At build time Extensions do not know the bundle indentifier of its
+        # parent app, so we have to modify their Info.plist later
         extension_dir = File.join(dest_extension_path, extension_name)
         info_plist = File.join(extension_dir, 'Info.plist')
-        extension_bundle_name = `/usr/libexec/PlistBuddy -c "print CFBundleName" #{info_plist}`.strip
+        extension_bundle_name = `/usr/libexec/PlistBuddy -c "print CFBundleName" "#{info_plist}"`.strip
         extension_bundle_indentifer = "#{@config.identifier}.#{extension_bundle_name}"
-        `/usr/libexec/PlistBuddy -c "set CFBundleIdentifier #{extension_bundle_indentifer}" #{info_plist}`
+        `/usr/libexec/PlistBuddy -c "set CFBundleIdentifier #{extension_bundle_indentifer}" "#{info_plist}"`
       end 
     end
 
@@ -119,11 +120,12 @@ PLIST
         end
       end
 
-      # Set 'application-identifier' in Entitlements.plist
+      # At build time Extensions do not know the bundle indentifier of its
+      # parent app, so we have to modify their Entitlements.plist later
       extension_dir = File.join(dest_extension_path, extension_name)
       info_plist = File.join(extension_dir, 'Info.plist')
       entitlements = File.join(extension_dir, 'Entitlements.plist')
-      extension_bundle_name = `/usr/libexec/PlistBuddy -c "print CFBundleName" #{info_plist}`.strip
+      extension_bundle_name = `/usr/libexec/PlistBuddy -c "print CFBundleName" "#{info_plist}"`.strip
       extension_bundle_indentifer = "#{@config.identifier}.#{extension_bundle_name}"
       application_identifier = @config.seed_id + '.' + extension_bundle_indentifer
       `/usr/libexec/PlistBuddy -c "Add application-identifier string #{application_identifier}" #{entitlements}`
