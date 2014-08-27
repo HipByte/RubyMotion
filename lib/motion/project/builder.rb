@@ -89,13 +89,13 @@ module Motion; module Project;
       end
 
       # Build targets
+      target_frameworks = []
       unless config.targets.empty?
         config.targets.each do |target|
           target.build(platform)
         end
 
         # Prepare target frameworks
-        target_frameworks = []
         config.targets.select { |t| t.type == :framework && t.load? }.each do |target|
           target_frameworks << target.framework_name
         end

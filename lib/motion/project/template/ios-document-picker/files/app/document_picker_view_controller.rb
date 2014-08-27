@@ -1,4 +1,4 @@
-class  DocumentPickerViewController < UIDocumentPickerExtensionViewController
+class DocumentPickerViewController < UIDocumentPickerExtensionViewController
 
   def openDocument(sender)
     documentURL = self.documentStorageURL.URLByAppendingPathComponent("Untitled.txt")
