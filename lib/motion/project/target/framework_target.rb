@@ -128,7 +128,7 @@ PLIST
     def framework_path
       @framework_path ||= begin
         path = File.join(@path, 'build', build_dir(@config, @platform), '*.framework')
-        Dir[path].sort_by{ |f| File.mtime(f) }.first
+        Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end
 

@@ -2,11 +2,6 @@ class KeyboardViewController < UIInputViewController
 
   attr_accessor :nextKeyboardButton
 
-  def initWithNibName(nibNameOrNil, bundle:nibBundleOrNil)
-    super
-    self
-  end
-
   def updateViewConstraints
     super
     # Add custom view sizing constraints here

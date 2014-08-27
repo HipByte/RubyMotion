@@ -66,6 +66,13 @@ module Motion; module Project;
       File.join(motiondir, 'data', 'ios', target)
     end
 
+    # TODO datadir should not depend on the template name
+    def supported_versions
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'ios', '*')).select{|path| File.directory?(path)}.map do |path|
+        File.basename path
+      end
+    end
+
     # def app_icons_info_plist_path(platform)
     #   File.expand_path(File.join(versionized_build_dir(platform), 'AppIcon.plist'))
     # end
