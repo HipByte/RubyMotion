@@ -23,6 +23,8 @@
     on iOS 8.
   * [iOS] Fixed a bug where `iPhone 4s / iOS 7' simulator was always launched
     if Xcode 6 location path was specified through `app.xcode_dir'.
+  * [iOS] Fixed a bug in iOS 8 where Hash objects could not be passed as an
+    object of an NSUserDefaults.
   * [iOS] Added `app.embedded_frameworks' configuration to support dynamic
     framework on iOS 8.
   * Fixed a bug where headers in nested symlinked directories could not be used
