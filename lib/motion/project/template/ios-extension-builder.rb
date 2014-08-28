@@ -315,7 +315,7 @@ EOS
           ib_resources.each do |src, dest|
             if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
               App.info 'Compile', src
-              sh "/usr/bin/ibtool --compile \"#{dest}\" \"#{src}\""
+              sh "/usr/bin/ibtool --compile \"#{File.expand_path(dest)}\" \"#{File.expand_path(src)}\""
             end
           end
         end

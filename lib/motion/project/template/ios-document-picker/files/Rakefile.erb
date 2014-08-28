@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
-  app.extension do |ext|
-    ext.name = '<%= extension_name %>'
-    ext.type = "fileprovider-ui"
-    ext.attributes = {
+  app.name = '<%= name %>'
+  app.info_plist['NSExtension'] = {
+    'NSExtensionAttributes' => {
       "UIDocumentPickerModes" => [
         "UIDocumentPickerModeImport",
         "UIDocumentPickerModeOpen",
@@ -15,6 +22,11 @@ Motion::Project::App.setup do |app|
       "UIDocumentPickerSupportedFileTypes" => [
         "public.content"
       ]
-    }
-  end
+    },
+    # 'NSExtensionPrincipalClass' => 'DocumentPickerViewController',
+    'NSExtensionMainStoryboard' => 'MainInterface',
+    'NSExtensionPointIdentifier' => 'com.apple.fileprovider-ui'
+  }
+  # 
+  app.entitlements['com.apple.security.application-groups'] = '<%= name %>'
 end

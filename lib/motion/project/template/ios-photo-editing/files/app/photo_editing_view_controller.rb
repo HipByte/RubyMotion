@@ -4,7 +4,18 @@ class PhotoEditingViewController < UIViewController
 
   def viewDidLoad
     super
-    # Do any additional setup after loading the view.
+    
+    self.view.backgroundColor = UIColor.whiteColor
+
+    label = UILabel.alloc.init
+    label.text = "Hello World"
+    label.textColor = UIColor.blackColor
+    label.textAlignment = NSTextAlignmentCenter
+    label.setTranslatesAutoresizingMaskIntoConstraints(false)
+    self.view.addSubview(label)
+
+    self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("|-[label]-|", options:0, metrics:nil, views:{"label" => label}))
+    self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-[label]-|", options:0, metrics:nil, views:{"label" => label}))
   end
 
   def didReceiveMemoryWarning

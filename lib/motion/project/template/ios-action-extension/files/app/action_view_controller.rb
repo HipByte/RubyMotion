@@ -20,13 +20,14 @@ class ActionViewController < UIViewController
         if itemProvider.hasItemConformingToTypeIdentifier(KUTTypeImage)
           # This is an image. We'll load it, then place it in our image view.
           imageView = WeakRef.new(self.imageView)
-          itemProvider.loadItemForTypeIdentifier(KUTTypeImage, options:nil, completionHandler: proc { |image, error|
-            if image
+          itemProvider.loadItemForTypeIdentifier(KUTTypeImage, options:nil, completionHandler: proc { |url, error|
+            if url
+              image = UIImage.alloc.initWithData(NSData.dataWithContentsOfURL(url))
               NSOperationQueue.mainQueue.addOperationWithBlock(proc {
                 imageView.setImage(image)
-              }.weak!)
+              })
             end
-          }.weak!)
+          })
 
           imageFound = true
           break

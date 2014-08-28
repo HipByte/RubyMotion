@@ -1,13 +1,24 @@
 # -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
-  app.extension do |ext|
-    ext.name = '<%= extension_name %>'
-    ext.type = "fileprovider-nonui"
-    # TODO: its not inside attributes!
-    ext.attributes = {
-      "NSExtensionFileProviderDocumentGroup" => "group.sdf.Extension-Test"
-    }
-  end
+  app.name = '<%= name %>'
+  app.info_plist['NSExtension'] = {
+    'NSExtensionAttributes' => {
+      "NSExtensionFileProviderDocumentGroup" => "<%= name %>"
+    },
+    'NSExtensionPrincipalClass' => 'FileProvider',
+    'NSExtensionPointIdentifier' => 'com.apple.fileprovider-nonui'
+  }
+  app.entitlements['com.apple.security.application-groups'] = '<%= name %>'
 end
+
+
