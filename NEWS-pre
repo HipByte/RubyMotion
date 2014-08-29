@@ -7,7 +7,7 @@
     dup, ==, eql?, binding, to_s, lambda?, weak!, owner.
   * Added the following String methods: clear, concat, <<, empty?, replace,
     intern, to_str, upcase, upcase!, downcase, downcase!, swapcase, swapcase!,
-    capitalize, capitalize!.
+    capitalize, capitalize!, reverse, reverse!, *.
 
 = RubyMotion 3.0 beta 0.5 =
 
