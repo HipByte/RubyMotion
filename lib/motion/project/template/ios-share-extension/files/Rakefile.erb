@@ -1,0 +1,31 @@
+# -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = '<%= name %>'
+  app.frameworks << 'Social'
+  app.info_plist['NSExtension'] = {
+    'NSExtensionAttributes' => {
+      'NSExtensionActivationRule' => {
+        'NSExtensionActivationSupportsFileWithMaxCount' => 0,
+        'NSExtensionActivationSupportsImageWithMaxCount' => 1,
+        'NSExtensionActivationSupportsMovieWithMaxCount' => 0,
+        'NSExtensionActivationSupportsText' => false, 
+        'NSExtensionActivationSupportsWebURLWithMaxCount' => 0
+      },
+      'NSExtensionPointName' => 'com.apple.share-services',
+      'NSExtensionPointVersion' => '1.0'
+    },
+    'NSExtensionPrincipalClass' => 'ShareViewController',
+    'NSExtensionPointIdentifier' => 'com.apple.share-services'
+  }
+end
+
