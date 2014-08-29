@@ -1,3 +1,9 @@
+= RubyMotion 3.0 beta 0.6 =
+
+  * Fixed the symbolication of backtraces to work on versions of Android where
+    the `libcorkscrew' library isn't present (such as super-old API versions as
+    well as the latest one, L).
+
 = RubyMotion 3.0 beta 0.5 =
 
   * Added the `app.permissions' variable that can be used to expose
