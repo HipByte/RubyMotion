@@ -146,7 +146,9 @@ PLIST
     end
 
     def clean
-      system("cd #{@full_path} && #{environment_variables} bundle exec rake clean")
+      args = ''
+      args << " --trace" if App::VERBOSE
+      system("cd #{@full_path} && #{environment_variables} rake clean #{args}")
     end
 
     def build_dir(config, platform)
