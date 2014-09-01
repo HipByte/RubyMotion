@@ -1,4 +1,4 @@
-PROJECT_VERSION = '2.32'
+PROJECT_VERSION = '2.33'
 PRE_PROJECT_VERSION = '3.0beta0.4'
 XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
@@ -26,8 +26,8 @@ end
 
 if false
   # DEBUG
-  IOS_SDK_VERSIONS.clear; IOS_SDK_VERSIONS << '7.0'
-  OSX_SDK_VERSIONS.clear; OSX_SDK_VERSIONS << '10.8'
+  IOS_SDK_VERSIONS.clear; IOS_SDK_VERSIONS << '8.0'
+  OSX_SDK_VERSIONS.clear; OSX_SDK_VERSIONS << '10.9'
 end
 
 # Android support - experimental
@@ -44,7 +44,7 @@ ANDROID_API_VERSIONS =
 ANDROID_API_VERSIONS.delete_if { |x| x == '20' } # Android 20 is 'L'
 ANDROID_ARCHS = ['armv5te', 'armv7']
 
-if false
+if true#false
   # DEBUG
   ANDROID_API_VERSIONS.clear; ANDROID_API_VERSIONS << 'L'
   ANDROID_ARCHS.clear; ANDROID_ARCHS << 'armv5te'
