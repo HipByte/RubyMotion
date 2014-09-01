@@ -1280,7 +1280,7 @@ lldb_commands_file(int pid, NSString *app_path)
 static void
 usage(void)
 {
-    system("open http://www.youtube.com/watch?v=1orMXD_Ijbs&feature=fvst");
+    system("open https://www.youtube.com/watch?v=jI-kpVh6e1U");
     exit(1);
 }
 
@@ -1444,7 +1444,7 @@ main(int argc, char **argv)
 		@selector(devices), nil);
 	assert(sim_devices != NULL);
 
-	// Retrive the runtime of SDK.
+	// Retrieve the runtime of SDK.
 	id sim_runtime = ((id (*)(id, SEL, id))objc_msgSend)(system_root, @selector(runtime), nil);
 
 	sim_device = [sim_devices objectAtIndex:0];
