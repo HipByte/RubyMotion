@@ -51,12 +51,12 @@ module Motion; module Project;
       [XcodeBuildDir, 'build', 'build-iPhoneSimulator', 'build-iPhoneOS'].each do |build_dir|
         build_dir = File.join(@path, build_dir)
         if File.exist?(build_dir)
-          App.info 'Delete', build_dir
+          App.info 'Delete', relative_path(build_dir)
           FileUtils.rm_rf build_dir
           if File.exist?(build_dir)
             # It can happen that because of file permissions a dir/file is not
             # actually removed, which can lead to confusing issues.
-            App.fail "Failed to remove `#{build_dir}'. Please remove this path manually."
+            App.fail "Failed to remove `#{relative_path(build_dir)}'. Please remove this path manually."
           end
         end
       end
@@ -261,6 +261,14 @@ EOS
         bs_file = File.join(build_dir, bs_file)
       end
       bs_file
+    end
+
+    def relative_path(path)
+      if ENV['RM_TARGET_HOST_APP_PATH']
+        Pathname.new(File.expand_path(path)).relative_path_from(Pathname.new(ENV['RM_TARGET_HOST_APP_PATH'])).to_s
+      else
+        path
+      end
     end
   end
 end; end
