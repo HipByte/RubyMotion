@@ -1,3 +1,56 @@
+= RubyMotion 2.32 =
+
+  * The iOS 8.0 and OS X 10.10 versions of the runtime have been recompiled
+    with Xcode 6 Beta 6.
+  * [iOS] Depracted rake options `device_family' and `retina' in favor of
+    `device_name' which takes the name of one of the configured device-sets
+    found in Xcode -> Window -> Devices or the `simctl' tool (its location can
+    be found in the message shown when using one of the deprecated options).
+  * [iOS] Added support for iOS 8 App Extensions. See the `motion create --help'
+    output for a list of available templates and configure your host application
+    with the following: `app.target("path/to/extension", :extension)'.
+  * [iOS] Added support for frameworks that allow you to share code between your
+    host application and its extensions. Use the `ios-framework' template for
+    `motion create' and configure your host application with the following:
+    `app.target("path/to/framework", :framework)'.
+  * [iOS] Fixed a bug where backtraces could not be symbolicated on the iOS 8
+    Simulator.
+  * [iOS] Fixed a bug where the iOS 8 Simulator could not be launched with the
+    default device config.
+  * [iOS] Fixed a bug where the iOS 8 Simulator could not be used to select
+    views in the REPL.
+  * [iOS] Fixed a bug where the REPL view selection would incorrectly invert the
+    coordinates for the landscape orientation on iOS 8.
+  * [iOS] Fixed a bug where "xcodebuild: error:" message would be displayed
+    when it will configure `app.xcode_dir' for Xcode6 path.
+  * [iOS] Fixed a bug where Instruments.app does not launch with `rake profile'
+    on iOS 8.
+  * [iOS] Fixed a bug where `iPhone 4s / iOS 7' simulator was always launched
+    if Xcode 6 location path was specified through `app.xcode_dir'.
+  * [iOS] Fixed a bug in iOS 8 where Hash objects could not be passed as an
+    object of an NSUserDefaults.
+  * [iOS] Added `app.embedded_frameworks' configuration to support dynamic
+    framework on iOS 8.
+  * Fixed a bug where headers in nested symlinked directories could not be used
+    with `vendor_project' and an Xcode project.
+  * Fixed a regression where a crash would happen when calling user defined
+    method if the same method was already defined in some classes in Apple SDK.
+  * Fixed a regression where a crash would happen when calling methods after
+    used a method with variadic arguments.
+  * Fixed a bug where a "not precompiled" error would happen when calling the
+    SKPhysicsWorld method which takes with Objective-C Blocks.
+  * Fixed a bug which superclass method would be called if method was removed
+    through Module#remove_method.
+  * Fixed a bug which it would trigger crash when the method for KVO was called.
+  * Fixed a bug where overrode Time#+ would not be called.
+  * Fixed a bug which it would trigger random crash when #method_missing will be
+    called.
+  * Fixed a bug where it would cause a "Permission denied" error if vendor
+    library directory was not writable.
+  * Improved Module#define_method performance. ~3 times faster.
+  * Improved Object#method_missing performance. ~8 times faster.
+  * Reduced the app boot time. ~40% faster.
+
 = RubyMotion 2.31 =
 
   * The iOS 8.0 and OS X 10.10 versions of the runtime have been recompiled
