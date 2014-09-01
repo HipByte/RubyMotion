@@ -2,6 +2,10 @@
 
   * The iOS 8.0 and OS X 10.10 versions of the runtime have been recompiled
     with Xcode 6 Beta 6.
+  * [iOS] Depracted rake options `device_family' and `retina' in favor of
+    `device_name' which takes the name of one of the configured device-sets
+    found in Xcode -> Window -> Devices or the `simctl' tool (its location can
+    be found in the message shown when using one of the deprecated options).
   * [iOS] Added support for iOS 8 App Extensions. See the `motion create --help'
     output for a list of available templates and configure your host application
     with the following: `app.target("path/to/extension", :extension)'.
