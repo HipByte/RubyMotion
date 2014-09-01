@@ -87,24 +87,40 @@ task :simulator do
   end
   target ||= App.config.sdk_version
 
-  family_int =
+  # May be overridden on Xcode <= 5 with the `device_family' option (see below)
+  #
+  # TODO This argument is required for the `sim` tool, but it's ignored for
+  #      Xcode >= 6. We should get rid of it at some point.
+  #
+  family_int = App.config.device_family_ints[0]
+
+  xcode_version = Motion::Util::Version.new(App.config.xcode_version.first)
+  if xcode_version >= Motion::Util::Version.new('6')
+    if ENV['device_family'] || ENV['retina']
+      simctl = File.join(App.config.xcode_dir, 'Platforms/iPhoneSimulator.platform/Developer/usr/bin/simctl')
+      App.fail "Starting with Xcode 6 / iOS Simulator 8, the `device_family' " \
+               "and `retina' options are no longer valid. Instead, use the " \
+               "`device_name' option which takes the name of one of the " \
+               "configured device-sets found in Xcode -> Window -> Devices " \
+               "or under `Devices' in the output of: $ #{simctl} list"
+    end
+  else
     if family = ENV['device_family']
-      App.config.device_family_int(family.downcase.intern)
-    else
-      App.config.device_family_ints[0]
+      family_int = App.config.device_family_int(family.downcase.intern)
     end
 
-  retina = ENV['retina']
-  if retina && retina.strip.downcase == 'false' && family_int == 1 # iPhone only
-    ios_7 = Motion::Util::Version.new('7')
-    if Motion::Util::Version.new(target) >= ios_7
-      if deployment_target < ios_7
-        App.fail "In order to simulate on a non-retina device, please use " \
-                 "the `target' option to specify the simulated SDK version. " \
-                 "E.g.: rake target=#{deployment_target} retina=false"
-      else
-        App.fail "It is not possible to simulate on a non-retina device " \
-                 "when not deploying to iOS < 7."
+    retina = ENV['retina']
+    if retina && retina.strip.downcase == 'false' && family_int == 1 # iPhone only
+      ios_7 = Motion::Util::Version.new('7')
+      if Motion::Util::Version.new(target) >= ios_7
+        if deployment_target < ios_7
+          App.fail "In order to simulate on a non-retina device, please use " \
+                   "the `target' option to specify the simulated SDK version. " \
+                   "E.g.: rake target=#{deployment_target} retina=false"
+        else
+          App.fail "It is not possible to simulate on a non-retina device " \
+                   "when not deploying to iOS < 7."
+        end
       end
     end
   end
