@@ -296,13 +296,21 @@ EOS
       paths.concat(Dir.glob(self.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }))
       paths.each do |p|
         next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
-        App.info 'Delete', p
+        App.info 'Delete', relative_path(p)
         rm_rf p
         if File.exist?(p)
           # It can happen that because of file permissions a dir/file is not
           # actually removed, which can lead to confusing issues.
-          App.fail "Failed to remove `#{p}'. Please remove this path manually."
+          App.fail "Failed to remove `#{relative_path(p)}'. Please remove this path manually."
         end
+      end
+    end
+
+    def relative_path(path)
+      if ENV['RM_TARGET_HOST_APP_PATH']
+        Pathname.new(File.expand_path(path)).relative_path_from(Pathname.new(ENV['RM_TARGET_HOST_APP_PATH'])).to_s
+      else
+        path
       end
     end
   end
