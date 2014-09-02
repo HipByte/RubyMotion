@@ -401,14 +401,13 @@ EOS
       require 'tempfile'
       headers_file = Tempfile.new('gen_bridge_metadata-headers-list')
       headers.each { |header| headers_file.puts(header) }
+      headers_file.close # flush
       # Prepare rest of options.
       sdk_path = self.sdk(local_platform)
       includes = ['-I.'] + headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
       exceptions = exceptions.map { |x| "\"#{x}\"" }.join(' ')
       c_flags = "#{c_flags} -isysroot '#{sdk_path}' #{bridgesupport_cflags} #{includes.join(' ')}"
       sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' #{bridgesupport_flags} --cflags \"#{c_flags}\" --headers \"#{headers_file.path}\" -o '#{bs_file}' #{ "-e #{exceptions}" if exceptions.length != 0}"
-    ensure
-      headers_file.close
     end
 
     def define_global_env_txt
