@@ -3,7 +3,10 @@
   * Fixed the symbolication of backtraces to work on versions of Android where
     the `libcorkscrew' library isn't present (such as super-old API versions as
     well as the latest one, L).
-  * Added the Kernel module and moved all methods that belong there.
+  * Added the Kernel module and moved all methods pre-defined on Object that
+    now belong there.
+  * Added the following Kernel methods: tap, instance_variable_get,
+    instance_variable_set, instance_variable_defined?.
   * Added the following Object methods: eql?.
   * Added the following Module methods: attr, included_modules.
   * Added the following String methods: clear, concat, <<, empty?, replace,
