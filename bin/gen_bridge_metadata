@@ -91,6 +91,16 @@ if __FILE__ == $0
       g.out_file = opt
     end
 
+    # RubyMotion addition that allows us to overcome 'too many arguments' error
+    # when passing many headers to this tool.
+    opts.on('--headers FILE', 'Use headers listed in file as input.') do |file|
+      File.open(file, 'r') do |io|
+        io.each_line do |header|
+          g.add_header(header.strip)
+        end
+      end
+    end
+
     help_msg = "Use the `-h' flag or consult gen_bridge_metadata(1) for help."
     opts.on('-h', '--help', 'Show this message.') do
       puts opts, help_msg
