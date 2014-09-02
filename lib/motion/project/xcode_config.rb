@@ -395,11 +395,20 @@ EOS
     end
 
     def gen_bridge_metadata(platform, headers, bs_file, c_flags, exceptions=[])
+      # Instead of potentially passing hundreds of arguments to the
+      # `gen_bridge_metadata` command, which can lead to a 'too many arguments'
+      # error, we list them in a temp file and pass that to the command.
+      require 'tempfile'
+      headers_file = Tempfile.new('gen_bridge_metadata-headers-list')
+      headers.each { |header| headers_file.puts(header) }
+      # Prepare rest of options.
       sdk_path = self.sdk(local_platform)
       includes = ['-I.'] + headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
       exceptions = exceptions.map { |x| "\"#{x}\"" }.join(' ')
       c_flags = "#{c_flags} -isysroot '#{sdk_path}' #{bridgesupport_cflags} #{includes.join(' ')}"
-      sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' #{bridgesupport_flags} --cflags \"#{c_flags}\" #{headers.map { |x| "'#{x}'" }.join(' ')} -o '#{bs_file}' #{ "-e #{exceptions}" if exceptions.length != 0}"
+      sh "RUBYOPT='' '#{File.join(bindir, 'gen_bridge_metadata')}' #{bridgesupport_flags} --cflags \"#{c_flags}\" --headers \"#{headers_file.path}\" -o '#{bs_file}' #{ "-e #{exceptions}" if exceptions.length != 0}"
+    ensure
+      headers_file.close
     end
 
     def define_global_env_txt
