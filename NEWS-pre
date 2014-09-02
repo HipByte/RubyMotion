@@ -5,6 +5,8 @@
     well as the latest one, L).
   * Added the Kernel module and moved all methods pre-defined on Object that
     now belong there.
+  * Moved the following methods from Class to Module: ancestors, to_s,
+    attr_reader, attr_writer, attr_accessor.
   * Added the following Kernel methods: tap, instance_variable_get,
     instance_variable_set, instance_variable_defined?.
   * Added the following Object methods: eql?.
