@@ -6,6 +6,8 @@
     expression on REPL on Yosemite.
   * [OSX] Fixed a bug where the build directory for 3rd-party library wouldn't
     be removed with `rake clean' command.
+  * Fixed a bug where Method#owner will return incorrect owner if the method 
+    in inherited class would be overrided.
 
 = RubyMotion 2.32 =
 
