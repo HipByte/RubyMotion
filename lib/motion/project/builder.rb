@@ -307,7 +307,6 @@ EOS
           or vendor_libs.any? { |lib| File.mtime(lib) > File.mtime(main_exec) } \
           or File.mtime(librubymotion) > File.mtime(main_exec)
         App.info 'Link', main_exec
-        objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
         framework_search_paths = (config.framework_search_paths + (embedded_frameworks + external_frameworks).map { |x| File.dirname(x) }).uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
         frameworks = (config.frameworks_dependencies + (embedded_frameworks + external_frameworks).map { |x| File.basename(x, '.framework') }).map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
@@ -322,7 +321,15 @@ EOS
             "-stdlib=libstdc++"
           end
         end || ""
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform))
+        # Instead of potentially passing hundreds of arguments to the `clang++`
+        # command, which can lead to a 'too many arguments' error, we list them
+        # in a temp file and pass that to the command.
+        require 'tempfile'
+        objs_file = Tempfile.new('linker-objs-list')
+        objs_list.each { |obj| objs_file.puts(obj) }
+        objs_file.close # flush
+        sh "#{cxx} -o \"#{main_exec}\" -filelist \"#{objs_file.path}\" #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
 
         # Change the install name of embedded frameworks.

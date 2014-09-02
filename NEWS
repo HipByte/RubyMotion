@@ -1,6 +1,8 @@
 = RubyMotion 2.33 =
 
   * Improved Enumerable#inject performance. ~40% times faster.
+  * Fixed a bug that could cause `clang++' to be called with too many arguments
+    for a shell to handle.
   * Fixed a bug that could cause `gen_bridge_metadata' to be called with too
     many arguments for a shell (on Yosemite) to handle.
   * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
