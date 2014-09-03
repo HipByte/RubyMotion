@@ -12,6 +12,8 @@
     be removed with `rake clean' command.
   * Fixed a bug where Method#owner will return incorrect owner if the method 
     in inherited class would be overrided.
+  * Fixed a bug where wrong method would called when it would include module 
+    which have#viewWillAppear and #viewWillDisappear implementations.
 
 = RubyMotion 2.32 =
 
