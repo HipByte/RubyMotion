@@ -10,7 +10,7 @@
   * Added the following Object methods: eql?.
   * Added the following Module methods: attr, included_modules,
     instance_methods, public_instance_methods, protected_instance_methods,
-    private_instance_methods.
+    private_instance_methods, method_added.
   * Added the following Class methods: inherited.
   * Added the following String methods: clear, concat, <<, empty?, replace,
     intern, to_str, upcase, upcase!, downcase, downcase!, swapcase, swapcase!,
@@ -25,6 +25,8 @@
     1023 characters.
   * Fixed the runtime to dispatch the `inherited' method on the super class
     upon a class definition.
+  * Fixed the runtime to dispatch the `method_added' method on the class upon
+    a method definition.
 
 = RubyMotion 3.0 beta 0.5 =
 
