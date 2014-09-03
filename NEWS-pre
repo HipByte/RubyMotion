@@ -11,6 +11,7 @@
   * Added the following Module methods: attr, included_modules,
     instance_methods, public_instance_methods, protected_instance_methods,
     private_instance_methods.
+  * Added the following Class methods: inherited.
   * Added the following String methods: clear, concat, <<, empty?, replace,
     intern, to_str, upcase, upcase!, downcase, downcase!, swapcase, swapcase!,
     capitalize, capitalize!, reverse, reverse!, *, <=>, casecmp, start_with?,
@@ -22,6 +23,8 @@
     well as the latest one, L).
   * Fixed the runtime to properly truncate log lines with the Android limit of
     1023 characters.
+  * Fixed the runtime to dispatch the `inherited' method on the super class
+    upon a class definition.
 
 = RubyMotion 3.0 beta 0.5 =
 
