@@ -22,9 +22,11 @@ end
 describe "Module" do
   module BaseModule
     def testMethod1(obj)
+      obj.should == true
       super
     end
     def testMethod2(obj)
+      obj.should == true
       super
     end
   end
