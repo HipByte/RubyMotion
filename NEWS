@@ -1,5 +1,7 @@
 = RubyMotion 2.33 =
 
+  * Improved exception backtrace symbolication performance by ensuring the dSYM
+    bundle is used when available.
   * Improved Enumerable#inject performance. ~40% times faster.
   * Fixed a bug that could cause `clang++' to be called with too many arguments
     for a shell to handle.

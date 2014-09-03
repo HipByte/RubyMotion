@@ -171,6 +171,7 @@ END
   # Launch the simulator.
   xcode = App.config.xcode_dir
   env = "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\""
+  env << " RM_BUILT_EXECUTABLE=\"#{File.expand_path(App.config.app_bundle_executable('iPhoneSimulator'))}\""
   env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
   sim = File.join(App.config.bindir, 'ios/sim')
   debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
