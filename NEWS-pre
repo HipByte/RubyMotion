@@ -5,7 +5,8 @@
   * Moved the following methods from Class to Module: ancestors, to_s,
     attr_reader, attr_writer, attr_accessor.
   * Added the following Kernel methods: tap, instance_variable_get,
-    instance_variable_set, instance_variable_defined?, methods.
+    instance_variable_set, instance_variable_defined?, methods, sprintf,
+    format.
   * Added the following Object methods: eql?.
   * Added the following Module methods: attr, included_modules,
     instance_methods, public_instance_methods, protected_instance_methods,
