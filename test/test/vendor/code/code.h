@@ -130,3 +130,11 @@ typedef struct MyUnionHasBool {
 + (id)methodWithObjectVoidPointer:(void *)object;
 + (int)methodWithCTypeVoidPointer:(void *)val;
 @end
+
+@interface TestModuleInclude : NSObject
+- (int)testMethod1:(bool)value;
+- (int)testMethod2:(bool)value;
+- (int)run_testMethod1;
+- (int)run_testMethod2;
+@end
+

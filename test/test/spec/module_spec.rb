@@ -18,3 +18,24 @@ describe "Module" do
   end
 end
 =end
+
+describe "Module" do
+  module BaseModule
+    def testMethod1(obj)
+      super
+    end
+    def testMethod2(obj)
+      super
+    end
+  end
+
+  class TestRM583 < TestModuleInclude
+    include BaseModule
+  end
+
+  # RM-583
+  it "included module method should be call correctly from Objc" do
+    TestRM583.new.run_testMethod2.should == 456
+    TestRM583.new.run_testMethod1.should == 123
+  end
+end

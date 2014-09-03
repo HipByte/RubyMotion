@@ -227,3 +227,24 @@ ReturnsIntBlock KreateGlobalBlock()
 }
 
 @end
+
+@implementation TestModuleInclude
+- (int)testMethod1:(bool)value
+{
+    return 123;
+}
+- (int)testMethod2:(bool)value
+{
+    return 456;
+}
+- (int)run_testMethod1
+{
+    return [self testMethod1:true];
+}
+- (int)run_testMethod2
+{
+    return [self testMethod2:true];
+}
+
+@end
+
