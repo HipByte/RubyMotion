@@ -19,6 +19,8 @@
   * Added the following Array methods: values_at.
   * Added the following Proc methods: [], ===, yield, to_proc, arity, clone,
     dup, ==, eql?, binding, to_s, lambda?, weak!, owner.
+  * Added the following Regexp methods: source, casefold?, options, names,
+    named_captures, ===.
   * Re-based the MatchData class on a proper distinct subclass in order to
     lift runtime limitations.
   * Added the following MatchData methods: regexp, size, length, offset, begin,
