@@ -16,12 +16,14 @@
     intern, to_str, upcase, upcase!, downcase, downcase!, swapcase, swapcase!,
     capitalize, capitalize!, reverse, reverse!, *, <=>, casecmp, start_with?,
     end_with?, include?, index, rindex.
+  * Added the following Array methods: values_at.
   * Added the following Proc methods: [], ===, yield, to_proc, arity, clone,
     dup, ==, eql?, binding, to_s, lambda?, weak!, owner.
   * Re-based the MatchData class on a proper distinct subclass in order to
     lift runtime limitations.
   * Added the following MatchData methods: regexp, size, length, offset, begin,
-    end, inspect, to_s, string, pre_match, post_match, captures, names.
+    end, inspect, to_s, string, pre_match, post_match, captures, names,
+    values_at.
   * Fixed the symbolication of backtraces to work on versions of Android where
     the `libcorkscrew' library isn't present (such as super-old API versions as
     well as the latest one, L).
