@@ -1,5 +1,6 @@
 = RubyMotion 2.33 =
 
+  * Fixed a bug that ommitted class and protocol methods from the ctags.
   * Improved exception backtrace symbolication performance by ensuring the dSYM
     bundle is used when available.
   * Improved Enumerable#inject performance. ~40% times faster.
