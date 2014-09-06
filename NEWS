@@ -20,6 +20,8 @@
     which have#viewWillAppear and #viewWillDisappear implementations.
   * Fixed a bug where #method_missing would receive incorrect arguments after
     calling was cached.
+  * Fixed a bug where the build system would ping the update server for each
+    target an application project includes.
 
 = RubyMotion 2.32 =
 
