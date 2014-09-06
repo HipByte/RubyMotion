@@ -18,6 +18,8 @@
     in inherited class would be overrided.
   * Fixed a bug where wrong method would called when it would include module 
     which have#viewWillAppear and #viewWillDisappear implementations.
+  * Fixed a bug where #method_missing would receive incorrect arguments after
+    calling was cached.
 
 = RubyMotion 2.32 =
 
