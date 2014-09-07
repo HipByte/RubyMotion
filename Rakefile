@@ -117,11 +117,15 @@ end
 
 desc "Install"
 task :install do
+  ship_android_support = ENV['SHIP_ANDROID_SUPPORT']
   public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/ios/deploy', './bin/ios/sim',
     './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd', './bin/gen_bridge_metadata',
     './bin/instruments', 'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri',
     './lldb/lldb.py'])
+  if ship_android_support
+    binaries << './bin/android/gen_bridge_metadata'
+  end
   data = ['./NEWS', './LEGAL']
   data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH) - ['./lib/Rakefile'])
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
@@ -142,7 +146,6 @@ task :install do
       end
     end
   end
-  ship_android_support = ENV['SHIP_ANDROID_SUPPORT']
   if ship_android_support
     [['android', ANDROID_API_VERSIONS]].each do |name, sdk_versions|
       data.concat(Dir.glob("./data/#{name}/*.dylib"))
