@@ -12,7 +12,7 @@
     instance_methods, public_instance_methods, protected_instance_methods,
     private_instance_methods, method_added.
   * Added the following Class methods: inherited, superclass.
-  * Added the Enumerable module and the following methods: to_a.
+  * Added the Enumerable module and the following methods: to_a, entries.
   * Added the following String methods: clear, concat, <<, empty?, replace,
     intern, to_str, upcase, upcase!, downcase, downcase!, swapcase, swapcase!,
     capitalize, capitalize!, reverse, reverse!, *, <=>, casecmp, start_with?,
@@ -39,6 +39,8 @@
     upon a class definition.
   * Fixed the runtime to dispatch the `method_added' method on the class upon
     a method definition.
+  * Fixed an installer bug where the Android version of `gen_bridge_metadata'
+    was not properly included.
 
 = RubyMotion 3.0 beta 0.5 =
 
