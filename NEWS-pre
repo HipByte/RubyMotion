@@ -13,11 +13,12 @@
     private_instance_methods, method_added.
   * Added the following Class methods: inherited, superclass.
   * Added the Enumerable module and the following methods: to_a, entries.
+  * Added the Enumerator class and the following method: each.
   * Added the following String methods: clear, concat, <<, empty?, replace,
     intern, to_str, upcase, upcase!, downcase, downcase!, swapcase, swapcase!,
     capitalize, capitalize!, reverse, reverse!, *, <=>, casecmp, start_with?,
     end_with?, include?, index, rindex, strip, strip!, lstrip, lstrip!, rstrip,
-    rstrip!, insert.
+    rstrip!, insert, each_char, chars.
   * Added the following Array methods: values_at.
   * Added the following Range methods: ==, eql?, begin, end, exclude_end?,
     to_s.
