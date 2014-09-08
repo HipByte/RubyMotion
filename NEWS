@@ -14,6 +14,8 @@
     expression on REPL on Yosemite.
   * [OSX] Fixed a bug where the build directory for 3rd-party library wouldn't
     be removed with `rake clean' command.
+  * [OSX] Fixed a bug where it didn't handle `NSTaggedPointerString' objects
+    when it configured lower OS X version as deployment target on Yosemite.
   * Fixed a bug where Method#owner will return incorrect owner if the method 
     in inherited class would be overrided.
   * Fixed a bug where wrong method would called when it would include module 
