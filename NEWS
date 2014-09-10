@@ -1,5 +1,7 @@
 = RubyMotion 2.33 =
 
+  * [OSX] Fix a bug that made it impossible to build a OS X app on Yosemite
+    with Xcode 6 GM, even when targeting 10.9.
   * Fixed a bug that ommitted class and protocol methods from the ctags.
     Patch by Rakesh BS.
   * Improved exception backtrace symbolication performance by ensuring the dSYM
