@@ -173,7 +173,7 @@ module Motion; module Project;
 
     def supported_sdk_versions(versions)
       versions.reverse.find { |vers|
-        Util::Version.new(osx_version) <= Util::Version.new(vers) && File.exist?(datadir(vers))
+        Util::Version.new(deployment_target) <= Util::Version.new(vers) && File.exist?(datadir(vers))
       }
     end
     

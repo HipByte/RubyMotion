@@ -152,7 +152,7 @@ EOS
         end
         supported_vers = supported_sdk_versions(versions)
         unless supported_vers
-          App.fail "RubyMotion doesn't support any of these SDK versions: #{versions.join(', ')}"
+          App.fail "The requested SDK (#{deployment_target}) is not available or supported by RubyMotion at this time. Supported and available SDKs are: #{versions.join(', ')}."
         end
         supported_vers
       end
