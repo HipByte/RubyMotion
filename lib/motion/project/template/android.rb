@@ -77,7 +77,7 @@ EOS
   end
   payload_c_txt << <<EOS
 void rb_vm_register_native_methods(void);
-bool rb_vm_init(const char *app_package, JNIEnv *env);
+bool rb_vm_init(const char *app_package, const char *rm_env, const char *rm_version, JNIEnv *env);
 jint
 JNI_OnLoad(JavaVM *vm, void *reserved)
 {
@@ -87,7 +87,7 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
 	return -1;
     }
     assert(env != NULL);
-    rb_vm_init("#{App.config.package_path}", env);
+    rb_vm_init("#{App.config.package_path}", "#{App.config.rubymotion_env_value}", "#{Motion::Version}", env);
 EOS
   ruby_objs.each do |_, init_func|
     payload_c_txt << "    (*env)->PushLocalFrame(env, 32);\n"
