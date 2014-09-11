@@ -45,7 +45,7 @@ task :build do
   bs_files += App.config.vendored_bs_files
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
-  kernel_bc = File.join(App.config.versioned_arch_datadir, "kernel-#{App.config.arch}.bc")
+  kernel_bc = App.config.kernel_path
   ruby_objs_changed = false
   App.config.files.each do |ruby_path|
     bc_path = File.join(objs_build_dir, ruby_path + '.bc')
@@ -463,7 +463,7 @@ def run_apk(mode)
     # Enable port forwarding for the REPL socket.
     sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:33333 tcp:33333"
     # Launch the REPL.
-    sh "\"#{App.config.bin_exec('android/repl')}\" 0.0.0.0 33333"
+    sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path}\" 0.0.0.0 33333"
   end
 end
 

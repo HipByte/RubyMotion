@@ -206,7 +206,11 @@ module Motion; module Project;
     end
 
     def bin_exec(name)
-      File.join(App.config.motiondir, 'bin', name)
+      File.join(motiondir, 'bin', name)
+    end
+
+    def kernel_path
+      File.join(versioned_arch_datadir, "kernel-#{arch}.bc")
     end
 
     attr_reader :vendored_projects
