@@ -155,7 +155,13 @@ EOS
 	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
 EOS
   # Application permissions
-  Array(App.config.permissions).each do |permission|
+  permissions = Array(App.config.permissions)
+  if App.config.development?
+    # In development mode, we need the INTERNET permission in order to create
+    # the REPL socket.
+    permissions |= ['android.permission.INTERNET']
+  end
+  permissions.each do |permission|
     permission = "android.permission.#{permission.to_s.upcase}" if permission.is_a?(Symbol)
     android_manifest_txt << <<EOS
   <uses-permission android:name="#{permission}"></uses-permission>
