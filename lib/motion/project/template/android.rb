@@ -457,15 +457,13 @@ def run_apk(mode)
     line = "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
     line << " > /dev/null" unless Rake.application.options.trace
     sh line
-    Signal.trap('INT') do
-      # Kill the app on ^C.
-      if `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
-        sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
-      end
-      exit 0
-    end
-    # Show logs.
-    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.logs_components.join(' ')}"
+    # Show logs in a child process.
+    adb_logs_pid = spawn "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.logs_components.join(' ')}"
+    at_exit { Process.kill('KILL', adb_logs_pid) }
+    # Enable port forwarding for the REPL socket.
+    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:33333 tcp:33333"
+    # Launch the REPL.
+    sh "\"#{App.config.bin_exec('android/repl')}\" 0.0.0.0 33333"
   end
 end
 
