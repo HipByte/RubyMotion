@@ -125,6 +125,7 @@ task :install do
     './lldb/lldb.py'])
   if ship_android_support
     binaries << './bin/android/gen_bridge_metadata'
+    binaries << './bin/android/repl'
   end
   data = ['./NEWS', './LEGAL']
   data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH) - ['./lib/Rakefile'])
@@ -540,5 +541,5 @@ task "android" do
 
   rake "vm", "android"
   rake "data", "android"
-  rake "bin", "all"
+  rake "bin", "android"
 end

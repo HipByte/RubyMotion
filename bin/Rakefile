@@ -52,6 +52,12 @@ task :instruments do
   end
 end
 
+task :android do
+  Dir.chdir '../vm/jit-bridge' do
+    sh "rake"
+  end
+  sh "cp ../vm/jit-bridge/jit-bridge android/repl"
+end
 
 task :clean do
   %w{ruby llc ios/deploy ios/sim osx/sim ndf instruments}.each { |path| rm_rf(path) }
