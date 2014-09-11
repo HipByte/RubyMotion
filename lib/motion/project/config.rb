@@ -313,5 +313,13 @@ EOS
         path
       end
     end
+
+    def rubymotion_env_value
+      if spec_mode
+        'test'
+      else
+        development? ? 'development' : 'release'
+      end
+    end
   end
 end; end

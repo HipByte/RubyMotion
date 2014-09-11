@@ -411,13 +411,7 @@ EOS
     end
 
     def define_global_env_txt
-      rubymotion_env =
-        if spec_mode
-          'test'
-        else
-          development? ? 'development' : 'release'
-        end
-      "rb_define_global_const(\"RUBYMOTION_ENV\", @\"#{rubymotion_env}\");\nrb_define_global_const(\"RUBYMOTION_VERSION\", @\"#{Motion::Version}\");\n"
+      "rb_define_global_const(\"RUBYMOTION_ENV\", @\"#{rubymotion_env_value}\");\nrb_define_global_const(\"RUBYMOTION_VERSION\", @\"#{Motion::Version}\");\n"
     end
 
     def spritekit_texture_atlas_compiler
