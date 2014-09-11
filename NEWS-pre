@@ -1,3 +1,10 @@
+= RubyMotion 3.0 beta 0.7 =
+
+  * Added the REPL (interactive console). Works on an USB-connected device.
+    The REPL will start automatically upon `rake device' and logs will still
+    be printed in the terminal.
+  * Added the following Kernel methods: sleep.
+
 = RubyMotion 3.0 beta 0.6 =
 
   * Added the Kernel module and moved all methods pre-defined on Object that
