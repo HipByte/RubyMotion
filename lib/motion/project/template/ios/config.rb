@@ -24,6 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/xcode_config'
+require 'motion/util/version'
 
 module Motion; module Project;
   class IOSConfig < XcodeConfig
@@ -349,8 +350,60 @@ module Motion; module Project;
       end
     end
 
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s({
+    def launch_image_metadata(path)
+      filename = File.basename(path)
+      filename_components = File.basename(filename, File.extname(filename)).split(/-|@|~/)
+      name = filename_components.shift
+      scale = (filename_components.find { |c| c =~ /\dx/ } || 1).to_i
+      orientation = filename_components.find { |c| c =~ /Portrait|PortraitUpsideDown|Landscape|LandscapeLeft|LandscapeRight/ } || 'Portrait'
+      expected_height = filename_components.find { |c| c =~ /\d+h/ }
+      expected_height = expected_height.to_i if expected_height
+
+      metadata = `/usr/bin/sips -g format -g pixelWidth -g pixelHeight '#{path}'`.strip
+
+      format = metadata.match(/format: (\w+)/)[1]
+      unless metadata.include?('format: png')
+        App.fail "Launch Image `#{path}' not recognized as png file, but `#{format}' instead."
+      end
+
+      width = metadata.match(/pixelWidth: (\d+)/)[1].to_i
+      height = metadata.match(/pixelHeight: (\d+)/)[1].to_i
+      width /= scale
+      height /= scale
+      if expected_height && expected_height != height
+        App.fail "Launch Image size (#{width}x#{height}) does not match the specified modifier `#{expected_height}h'."
+      end
+
+      {
+        # For now I'm assuming that an image for an 'iOS 8'-only device, such as
+        # iPhone 6, will work fine with a min OS version of 7.0.
+        #
+        # Otherwise we would also have to reflect on the data and infer whether
+        # or not the device is a device such as the iPhone 6 and hardcode
+        # devices.
+        "UILaunchImageMinimumOSVersion" => "7.0",
+        "UILaunchImageName" => name,
+        "UILaunchImageOrientation" => orientation,
+        "UILaunchImageSize" => "{#{width}, #{height}}"
+      }
+    end
+
+    # From iOS 7 and up we try to infer the launch images by looking for png
+    # files that start with 'Default'.
+    #
+    def launch_images
+      if Util::Version.new(deployment_target) >= Util::Version.new('7')
+        images = resources_dirs.map do |dir|
+          Dir.glob(File.join(dir, 'Default*.png')).map do |file|
+            launch_image_metadata(file)
+          end
+        end.flatten.compact
+        images unless images.empty?
+      end
+    end
+
+    def merged_info_plist(platform)
+      ios = {
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
@@ -382,7 +435,19 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist))
+      }
+
+      base = info_plist
+      # If the user has not explicitely specified launch images, try to find
+      # them ourselves.
+      if !base.include?('UILaunchImages') && launch_images = self.launch_images
+        base['UILaunchImages'] = launch_images
+      end
+      ios.merge(generic_info_plist).merge(dt_info_plist).merge(base)
+    end
+
+    def info_plist_data(platform)
+      Motion::PropertyList.to_s(merged_info_plist(platform))
     end
 
     def manifest_plist_data
