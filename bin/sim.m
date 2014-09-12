@@ -1159,13 +1159,24 @@ lldb_commands_file(int pid, NSString *app_path)
 #if defined(SIMULATOR_IOS)
 	    @"continue\n"
 #else
-	    @"run\n"
+	    @""
 #endif
 	    ];
     }
 
     return save_debugger_command(cmds);
 }
+
+#if !defined(SIMULATOR_IOS)
+static NSString *
+lldb_run_command()
+{
+    if (getenv("no_continue") == NULL) {
+	return @"run";
+    }
+    return @"";
+}
+#endif
 
 #if defined(SIMULATOR_IOS)
 - (void)session:(id)session didEndWithError:(NSError *)error
@@ -1587,8 +1598,8 @@ main(int argc, char **argv)
 		 gdb_path, gdb_commands_file(), app_path];
 	}
 	else if ([[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
-	    line = [NSString stringWithFormat:@"%@ -s \"%@\"",
-		 lldb_path, lldb_commands_file(-1, app_path)];
+	    line = [NSString stringWithFormat:@"%@ -s \"%@\" -o \"%@\"",
+		 lldb_path, lldb_commands_file(-1, app_path), lldb_run_command()];
 	}
 	else {
 	    fprintf(stderr,

@@ -18,6 +18,7 @@
     be removed with `rake clean' command.
   * [OSX] Fixed a bug where it didn't handle `NSTaggedPointerString' objects
     when it configured lower OS X version as deployment target on Yosemite.
+  * [OSX] Fixed a bug where `rake debug=1' freezes lldb with Xcode 6 GM.
   * [iOS] Changed default simulator to 'iPhone 6' which it would be introduced
     by Xcode 6 GM.
   * Fixed a bug where Method#owner will return incorrect owner if the method 
