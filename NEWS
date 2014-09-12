@@ -1,5 +1,9 @@
 = RubyMotion 2.33 =
 
+  * [iOS] Add support for iPhone 6/6+ launch images. Unless explicitely
+    specified, the Info.plist `UILaunchImages' key is populated from all PNG
+    files in the resource directories that start with Default. For iPhone 6/6+
+    use the `-667h' and `-736h' filename modifiers.
   * [OSX] Fix a bug that made it impossible to build a OS X app on Yosemite
     with Xcode 6 GM, even when targeting 10.9.
   * Fixed a bug that ommitted class and protocol methods from the ctags.
