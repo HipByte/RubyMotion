@@ -1154,15 +1154,11 @@ lldb_commands_file(int pid, NSString *app_path)
 	cmds = [cmds stringByAppendingString:user_cmds];
 	cmds = [cmds stringByAppendingString:@"\n"];
     }
-    if (getenv("no_continue") == NULL) {
-	cmds = [cmds stringByAppendingString:
 #if defined(SIMULATOR_IOS)
-	    @"continue\n"
-#else
-	    @""
-#endif
-	    ];
+    if (getenv("no_continue") == NULL) {
+	cmds = [cmds stringByAppendingString:@"continue\n"];
     }
+#endif
 
     return save_debugger_command(cmds);
 }
