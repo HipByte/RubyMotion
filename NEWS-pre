@@ -8,6 +8,9 @@
   * Fixed the runtime to not create global weak references when running on
     Android API 13 or below. These are not supported and trying to use them
     results in a crash. A better workaround will be applied later on.
+  * Improved the method dispatcher to use Java reflection in case a method has
+    not been pre-compiled at build time; this is useful when sending messages
+    dynamically and also when using the REPL.
 
 = RubyMotion 3.0 beta 0.6 =
 
