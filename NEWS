@@ -25,6 +25,8 @@
   * [OSX] Fixed a bug where `rake debug=1' freezes lldb with Xcode 6 GM.
   * [iOS] Changed default simulator to 'iPhone 6' which it would be introduced
     by Xcode 6 GM.
+  * Fixed a bug where Instruments didn't launch if it would specify a template
+    name with "rake profile template='xxx'".
   * Fixed a bug where Method#owner will return incorrect owner if the method 
     in inherited class would be overrided.
   * Fixed a bug where wrong method would called when it would include module 
