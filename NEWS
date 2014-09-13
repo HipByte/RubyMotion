@@ -35,6 +35,7 @@
     calling was cached.
   * Fixed a bug where the build system would ping the update server for each
     target an application project includes.
+  * Improved Regexp.last_match performance. ~20% faster.
 
 = RubyMotion 2.32 =
 
