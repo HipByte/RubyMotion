@@ -54,7 +54,7 @@ module Motion; module Project
                            .returns("  format: png\n  pixelWidth: 640\n  pixelHeight: 960\n")
         @config.launch_image_metadata("resources/Default@2x.png").should == {
           "UILaunchImageMinimumOSVersion" => "7.0",
-          "UILaunchImageName" => "Default",
+          "UILaunchImageName" => "Default@2x",
           "UILaunchImageOrientation" => "Portrait",
           "UILaunchImageSize" => "{320, 480}"
         }
@@ -65,7 +65,7 @@ module Motion; module Project
                            .returns("  format: png\n  pixelWidth: 640\n  pixelHeight: 1136\n")
         @config.launch_image_metadata("resources/Default-568h@2x.png").should == {
           "UILaunchImageMinimumOSVersion" => "7.0",
-          "UILaunchImageName" => "Default",
+          "UILaunchImageName" => "Default-568h@2x",
           "UILaunchImageOrientation" => "Portrait",
           "UILaunchImageSize" => "{320, 568}"
         }
@@ -77,7 +77,7 @@ module Motion; module Project
         @config.launch_image_metadata("resources/Default-667h@2x.png").should == {
           #"UILaunchImageMinimumOSVersion" => "8.0",
           "UILaunchImageMinimumOSVersion" => "7.0",
-          "UILaunchImageName" => "Default",
+          "UILaunchImageName" => "Default-667h@2x",
           "UILaunchImageOrientation" => "Portrait",
           "UILaunchImageSize" => "{375, 667}"
         }
@@ -89,7 +89,7 @@ module Motion; module Project
         @config.launch_image_metadata("resources/Default-736h@3x.png").should == {
           #"UILaunchImageMinimumOSVersion" => "8.0",
           "UILaunchImageMinimumOSVersion" => "7.0",
-          "UILaunchImageName" => "Default",
+          "UILaunchImageName" => "Default-736h@3x",
           "UILaunchImageOrientation" => "Portrait",
           "UILaunchImageSize" => "{414, 736}"
         }
@@ -108,7 +108,7 @@ module Motion; module Project
                              .returns("  format: png\n  pixelWidth: 768\n  pixelHeight: 1024\n")
           @config.launch_image_metadata("resources/Default#{orientation_component}~ipad.png").should == {
             "UILaunchImageMinimumOSVersion" => "7.0",
-            "UILaunchImageName" => "Default",
+            "UILaunchImageName" => "Default#{orientation_component}~ipad",
             "UILaunchImageOrientation" => expected_orientation,
             "UILaunchImageSize" => "{768, 1024}"
           }
@@ -119,7 +119,7 @@ module Motion; module Project
                              .returns("  format: png\n  pixelWidth: 1536\n  pixelHeight: 2048\n")
           @config.launch_image_metadata("resources/Default#{orientation_component}@2x~ipad.png").should == {
             "UILaunchImageMinimumOSVersion" => "7.0",
-            "UILaunchImageName" => "Default",
+            "UILaunchImageName" => "Default#{orientation_component}@2x~ipad",
             "UILaunchImageOrientation" => expected_orientation,
             "UILaunchImageSize" => "{768, 1024}"
           }
