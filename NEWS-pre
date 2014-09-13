@@ -4,6 +4,10 @@
     The REPL will start automatically upon `rake device' and logs will still
     be printed in the terminal.
   * Added the following Kernel methods: sleep.
+  * Added the following Exception methods: inspect.
+  * Fixed the runtime to not create global weak references when running on
+    Android API 13 or below. These are not supported and trying to use them
+    results in a crash. A better workaround will be applied later on.
 
 = RubyMotion 3.0 beta 0.6 =
 
