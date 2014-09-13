@@ -351,8 +351,8 @@ module Motion; module Project;
     end
 
     def launch_image_metadata(path)
-      filename = File.basename(path)
-      filename_components = File.basename(filename, File.extname(filename)).split(/-|@|~/)
+      filename = File.basename(path, File.extname(path))
+      filename_components = filename.split(/-|@|~/)
       name = filename_components.shift
       scale = (filename_components.find { |c| c =~ /\dx/ } || 1).to_i
       orientation = filename_components.find { |c| c =~ /Portrait|PortraitUpsideDown|Landscape|LandscapeLeft|LandscapeRight/ } || 'Portrait'
@@ -382,7 +382,7 @@ module Motion; module Project;
         # or not the device is a device such as the iPhone 6 and hardcode
         # devices.
         "UILaunchImageMinimumOSVersion" => "7.0",
-        "UILaunchImageName" => name,
+        "UILaunchImageName" => filename,
         "UILaunchImageOrientation" => orientation,
         "UILaunchImageSize" => "{#{width}, #{height}}"
       }
