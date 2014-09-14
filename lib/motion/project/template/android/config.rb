@@ -248,7 +248,14 @@ module Motion; module Project;
     end
 
     def logs_components
-      @logs_components ||= [package_path, 'AndroidRuntime', 'chromium', 'dalvikvm', 'Bundle'].map { |component| component + ':I' }
+      @logs_components ||= begin
+        ary = []
+        ary << package_path + ':I'
+        %w{AndroidRuntime chromium dalvikvm Bundle art}.each do |comp|
+          ary << comp + ':E'
+        end
+        ary
+      end
     end
 
     attr_reader :manifest_entries
