@@ -27,9 +27,9 @@
     by Xcode 6 GM.
   * Fixed a bug where Instruments didn't launch if it would specify a template
     name with "rake profile template='xxx'".
-  * Fixed a bug where Method#owner will return incorrect owner if the method 
+  * Fixed a bug where Method#owner will return incorrect owner if the method
     in inherited class would be overrided.
-  * Fixed a bug where wrong method would called when it would include module 
+  * Fixed a bug where wrong method would called when it would include module
     which have#viewWillAppear and #viewWillDisappear implementations.
   * Fixed a bug where #method_missing would receive incorrect arguments after
     calling was cached.
@@ -206,7 +206,7 @@
     Thanks to Ignacio Piantanida for the detective work.
   * Fixed a regression introduced in RubyMotion 2.25 that was causing a
     build error in environment using Ruby 1.8.
-  * Fixed a regression introduced in RubyMotion 2.25 that was causing a 
+  * Fixed a regression introduced in RubyMotion 2.25 that was causing a
     `not precompiled' error if the method would handle a BOOL pointer as an
     argument.
   * Fixed a bug where Boxed subclasses could not be re-opened safely.
