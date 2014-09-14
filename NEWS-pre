@@ -9,10 +9,15 @@
   * Added the following Kernel methods: sleep, proc.
   * Added the following Exception methods: inspect.
   * Added the following Array methods: size, length, empty?, map, map!,
-    collect, collect!, push, clear, select, select!, keep_if, replace, concat.
+    collect, collect!, push, clear, select, select!, keep_if, replace, concat,
+    each_index, reverse_each, at, insert, unshift, +, index, find_index,
+    include?, delete_at, delete, compact, compact!, delete_if, reject, reject!.
+  * Added the following String methods: to_i, hex, oct, ord, chr, to_f.
   * Fixed the runtime to not create global weak references when running on
     Android API 13 or below. These are not supported and trying to use them
     results in a crash. A better workaround will be applied later on.
+  * Fixed the method dispatcher to check the arity of a Ruby method before
+    calling it.
 
 = RubyMotion 3.0 beta 0.6 =
 
