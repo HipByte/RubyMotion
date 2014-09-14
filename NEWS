@@ -36,7 +36,7 @@
   * Fixed a bug where the build system would ping the update server for each
     target an application project includes.
   * Fixed a memory leak which was created when huge splat would be passed into
-    the methods since seconde argument.
+    the methods since second argument.
   * Improved Regexp.last_match performance. ~20% faster.
 
 = RubyMotion 2.32 =
