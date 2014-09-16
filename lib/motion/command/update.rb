@@ -136,13 +136,6 @@ module Motion; class Command
       end
       FileUtils.rm_f tmp_dest
 
-      dest_installation_dir = nil
-      if @wanted_software_version
-        dest_installation_dir = '/Library/RubyMotion' + wanted_software_version.to_s
-      elsif @prerelease_mode
-        dest_installation_dir = '/Library/RubyMotionPre'
-      end
-
       if @wanted_software_version
         dest_installation_dir = '/Library/RubyMotion' + @wanted_software_version
         FileUtils.mv '/Library/RubyMotion', dest_installation_dir
