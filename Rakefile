@@ -44,7 +44,7 @@ ANDROID_API_VERSIONS =
 ANDROID_API_VERSIONS.delete_if { |x| x == '20' } # Android 20 is 'L'
 ANDROID_ARCHS = ['armv5te', 'armv7']
 
-if true#false
+if false
   # DEBUG
   ANDROID_API_VERSIONS.clear; ANDROID_API_VERSIONS << 'L'
   ANDROID_ARCHS.clear; ANDROID_ARCHS << 'armv5te'
@@ -56,8 +56,9 @@ def rake(dir, cmd='all')
   Dir.chdir(dir) do
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
     sdk_beta = ENV['SDK_BETA'] ? 'sdk_beta=1' : ''
+    project_vers = ENV['PRE_BUILD'] ? PRE_PROJECT_VERSION : PROJECT_VERSION
     trace = Rake.application.options.trace
-    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" android_ndk=\"#{ANDROID_NDK}\" project_version=\"#{PROJECT_VERSION}\" android_archs=\"#{ANDROID_ARCHS.join(',')}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
+    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" android_ndk=\"#{ANDROID_NDK}\" project_version=\"#{project_vers}\" android_archs=\"#{ANDROID_ARCHS.join(',')}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
   end
 end
 
@@ -536,6 +537,8 @@ end
 
 desc "Build Android support (experimental)"
 task "android" do
+  ENV['PRE_BUILD'] = '1'
+
   if ANDROID_API_VERSIONS.empty?
     $stderr.puts "Android SDK does not exist or does not have platforms class paths"
     exit 1
@@ -549,4 +552,5 @@ task "android" do
   rake "vm", "android"
   rake "data", "android"
   rake "bin", "android"
+  rake "lib", "all"
 end
