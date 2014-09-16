@@ -468,31 +468,13 @@ def run_apk(mode)
 end
 
 namespace 'emulator' do
-  desc "Create the Android Virtual Device for the emulator"
-  task :create_avd do
-    all_targets = `\"#{App.config.sdk_path}/tools/android\" list avd --compact`.split(/\n/)
-    if !all_targets.include?(App.config.avd_config[:name])
-      sh "/bin/echo -n \"no\" | \"#{App.config.sdk_path}/tools/android\" create avd --name \"#{App.config.avd_config[:name]}\" --target \"#{App.config.avd_config[:target]}\" --abi \"#{App.config.avd_config[:abi]}\" --snapshot"
-    end
-  end
-
-  desc "Start the emulator in the background"
-  task :start_avd do
-    avd = (ENV['avd'] || App.config.avd_config[:name])
-    unless `/bin/ps -a`.split(/\n/).any? { |x| x.include?('emulator64-arm') and x.include?(avd) }
-      Rake::Task["emulator:create_avd"].invoke
-      sh "\"#{App.config.sdk_path}/tools/emulator\" -avd \"#{avd}\" &"
-      sh "\"#{App.config.sdk_path}/platform-tools/adb\" -e wait-for-device"
-    end
-  end
-
   desc "Install the app in the emulator"
   task :install do
     install_apk(:emulator)
   end
 
   desc "Start the app's main intent in the emulator"
-  task :start => ['build', 'emulator:start_avd', 'emulator:install'] do
+  task :start => ['build', 'emulator:install'] do
     run_apk(:emulator)
   end
 end
