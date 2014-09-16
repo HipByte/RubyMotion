@@ -33,6 +33,7 @@ module Motion; class Command
     def self.options
       [
         ['--check', 'Only check whether or not a newer version is available'],
+        ['--pre', 'Install pre-releases of RubyMotion'],
         ['--cache-version=VERSION', 'Install a specific RubyMotion version'],
       ].concat(super)
     end
