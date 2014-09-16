@@ -1,5 +1,5 @@
 PROJECT_VERSION = '2.33'
-PRE_PROJECT_VERSION = '3.0beta0.4'
+PRE_PROJECT_VERSION = '3.0'
 XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
 sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator?*.sdk')).map do |path|
@@ -117,7 +117,7 @@ end
 
 desc "Install"
 task :install do
-  ship_android_support = ENV['SHIP_ANDROID_SUPPORT']
+  ship_android_support = ENV['PRE_BUILD']
   public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/ios/deploy', './bin/ios/sim',
     './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd', './bin/gen_bridge_metadata',
@@ -224,6 +224,11 @@ task :install do
     ln_sf destpath, File.join(bindir, File.basename(path))
   end
 
+  if ENV['PRE_BUILD']
+    # Copy NEWS-pre instead of NEWS
+    cp 'NEWS-pre', File.join(destmotiondir, 'NEWS')
+  end
+
   if File.exists?("vm/.yardoc")
     docdir = File.join(destmotiondir, '/doc')
     mkdir_p docdir
@@ -249,7 +254,9 @@ end
 desc "Generate .pkg"
 task :package do
   destdir = '/tmp/Motion'
-  pkg = "pkg/RubyMotion #{PROJECT_VERSION}.pkg"
+  pre_build = ENV['PRE_BUILD']
+  project_version = pre_build ? PRE_PROJECT_VERSION : PROJECT_VERSION
+  pkg = "pkg/RubyMotion #{project_version}.pkg"
   #if !File.exist?(destdir) or !File.exist?(pkg) or File.mtime(destdir) > File.mtime(pkg)
     ENV['DESTDIR'] = destdir
     rm_rf destdir
@@ -265,7 +272,7 @@ task :package do
       end
     end
 
-    sh "/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{PROJECT_VERSION}.pkg\" --version #{PROJECT_VERSION}"
+    sh "/Applications/PackageMaker.app/Contents/MacOS/PackageMaker --doc pkg/RubyMotion.pmdoc --out \"pkg/RubyMotion #{project_version}.pkg\" --version #{project_version}"
   #end
 end
 
