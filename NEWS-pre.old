@@ -1,0 +1,134 @@
+= RubyMotion 3.0 beta 7 =
+
+  * Added the REPL (interactive console). Works on an USB-connected device.
+    The REPL will start automatically upon `rake device' and logs will still
+    be printed in the terminal.
+  * Improved the method dispatcher to use Java reflection in case a method has
+    not been pre-compiled at build time; this is useful when sending messages
+    dynamically and also when using the REPL.
+  * Added the following Kernel methods: sleep, proc.
+  * Added the following Exception methods: inspect.
+  * Added the following Array methods: size, length, empty?, map, map!,
+    collect, collect!, push, clear, select, select!, keep_if, replace, concat,
+    each_index, reverse_each, at, insert, unshift, +, index, find_index,
+    include?, delete_at, delete, compact, compact!, delete_if, reject, reject!.
+  * Added the following String methods: to_i, hex, oct, ord, chr, to_f.
+  * Fixed the runtime to not create global weak references when running on
+    Android API 13 or below. These are not supported and trying to use them
+    results in a crash. A better workaround will be applied later on.
+  * Fixed the method dispatcher to check the arity of a Ruby method before
+    calling it.
+
+= RubyMotion 3.0 beta 6 =
+
+  * Added the Kernel module and moved all methods pre-defined on Object that
+    now belong there.
+  * Moved the following methods from Class to Module: ancestors, to_s,
+    attr_reader, attr_writer, attr_accessor.
+  * Added the following Kernel methods: tap, instance_variable_get,
+    instance_variable_set, instance_variable_defined?, methods, sprintf,
+    format.
+  * Added the following Object methods: eql?.
+  * Added the following Module methods: attr, included_modules,
+    instance_methods, public_instance_methods, protected_instance_methods,
+    private_instance_methods, method_added.
+  * Added the following Class methods: inherited, superclass.
+  * Added the Enumerable module and the following methods: to_a, entries.
+  * Added the Enumerator class and the following method: each.
+  * Added the following String methods: clear, concat, <<, empty?, replace,
+    intern, to_str, upcase, upcase!, downcase, downcase!, swapcase, swapcase!,
+    capitalize, capitalize!, reverse, reverse!, *, <=>, casecmp, start_with?,
+    end_with?, include?, index, rindex, strip, strip!, lstrip, lstrip!, rstrip,
+    rstrip!, insert, each_char, chars, each_line, lines.
+  * Added the following Array methods: values_at.
+  * Added the following Range methods: ==, ===, eql?, begin, end, exclude_end?,
+    to_s, include?, member?.
+  * Added the following Proc methods: [], ===, yield, to_proc, arity, clone,
+    dup, ==, eql?, binding, to_s, lambda?, weak!, owner.
+  * Added the following Regexp methods: source, casefold?, options, names,
+    named_captures, ===.
+  * Re-based the MatchData class on a proper distinct subclass in order to
+    lift runtime limitations.
+  * Added the following MatchData methods: regexp, size, length, offset, begin,
+    end, inspect, to_s, string, pre_match, post_match, captures, names,
+    values_at.
+  * Fixed the symbolication of backtraces to work on versions of Android where
+    the `libcorkscrew' library isn't present (such as super-old API versions as
+    well as the latest one, L).
+  * Fixed the runtime to properly truncate log lines with the Android limit of
+    1023 characters.
+  * Fixed the runtime to dispatch the `inherited' method on the super class
+    upon a class definition.
+  * Fixed the runtime to dispatch the `method_added' method on the class upon
+    a method definition.
+  * Fixed an installer bug where the Android version of `gen_bridge_metadata'
+    was not properly included.
+
+= RubyMotion 3.0 beta 5 =
+
+  * Added the `app.permissions' variable that can be used to expose
+    `uses-permission' elements in the manifest file. Patch by Mark Rickert.
+  * Changed `rake emulator|device' to start logging messages from the Bundle
+    package, which can be useful when debugging intents extended data.
+  * Fixed the build system to fail with a proper error message when trying
+    to install an app on a device that runs an API version lower than the one
+    targetted by the app itself. Patch by Mark Villacampa.
+  * Fixed a bug where constant lookups inside modules would cause a crash.
+  * Fixed a bug where methods in a module included in a module included in a
+    class would not be copied to that class (yeah, I know).
+  * Fixed a bug where dispatching `super' more than once in the same message
+    chain would cause an infinite loop.
+  * Fixed the compiler to handle Java methods re-definition in Ruby subclasses.
+  * Fixed the compiler to expose to Java classes that inherit from pure-Ruby
+    classes (and not just Java classes).
+  * Fixed a limitation in the compiler where classes had to inherit from
+    a Java class in order to be exposed to Java. Now, super-less classes will
+    automatically inherit from java.lang.Object (making the super-part of
+    `class MyClass < Java::Lang::Object' unnecessary).
+  * Fixed a bug in the runtime when dispatching a polymorphic method where
+    the expected method would not be selected. The runtime will now select
+    methods when given arguments match (kind_of?) the expected types prior to
+    selecting a method where an implicit coercion (ex. any object -> bool)
+    would be performed.
+  * Fixed the runtime to implement the `finalize' native method on the Module
+    class, necessary when intermediate modules are created.
+
+= RubyMotion 3.0 beta 4 =
+
+  * Added support for Android API 3, 4, 7, 10 and 11. All versions of Android
+    installable by the Android SDK manager are now supported.
+  * Fixed the runtime to not create global weak references when running on
+    Android API 8 or below. These are not supported and trying to use them
+    results in a crash. A better workaround will be applied later on.
+  * Fixed the detection of the `zipalign' tool (again). Thanks to Norberto
+    Ortigoza for the help.
+  * Fixed the build system to fail with a proper error message in case the
+    installed NDK does not support the API level we want.
+  * Fixed the build system to properly use the right NDK headers when
+    targetting a API level that is not covered, as it skips API levels with no
+    public changes. Thanks to Mark Villacampa for the help.
+  * Fixed the `jarsigner' invocation to support JDK 1.7. Thanks to Mark
+    Villacampa for the patch.
+  * Fixed a bug where the RubyMotion JNI library wouldn't properly load on
+    older versions of Android (such as API 8). Thanks to Mark Villacampa for
+    the patch.
+  * Fixed the build system to generate an AndroidManifest.xml file without
+    `configChanges' attributes. Google doesn't recommend setting it and it's
+    also not supported in older versions of Android (such as API 8).  Thanks
+    to Mark Villacampa for the patch.
+  * Fixed the detection of the Android build tools directory on certain
+    installations of the SDK. Thanks to Mark Villacampa for the patch.  
+
+= RubyMotion 3.0 beta 3 =
+
+  * Added support for Android API 8.
+
+= RubyMotion 3.0 beta 2 =
+
+  * Fixed the detection of the `zipalign' tool.
+  * Fixed a crash when sending #new to a Class object where an object of the
+    superclass would be returned instead of the actual class.
+
+= RubyMotion 3.0 beta 1 =
+
+  * First release.
