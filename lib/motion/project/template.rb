@@ -37,6 +37,8 @@ module Motion; module Project
       File.expand_path(File.join(__FILE__, '../template')),
       File.expand_path(File.join(ENV['HOME'], 'Library/RubyMotion/template'))
     ]
+    pre_templates = '/Library/RubyMotionPre/lib/motion/project/template'
+    Paths << pre_templates if File.exist?(pre_templates)
 
     # TODO Caching these and making it based on the Paths constant makes it
     #      less simple to register plugin templates, because you cannot add
