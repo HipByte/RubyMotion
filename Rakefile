@@ -1,4 +1,4 @@
-PROJECT_VERSION = '2.33'
+PROJECT_VERSION = '2.34'
 PRE_PROJECT_VERSION = '3.0'
 XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 

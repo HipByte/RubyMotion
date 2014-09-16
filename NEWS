@@ -1,4 +1,4 @@
-= RubyMotion 2.33 =
+= RubyMotion 2.34 =
 
   * [iOS] Add support for iPhone 6/6+ launch images. Unless explicitely
     specified, the Info.plist `UILaunchImages' key is populated from all PNG
@@ -40,6 +40,13 @@
   * Fixed a memory leak which was created when huge splat would be passed into
     the methods since second argument.
   * Improved Regexp.last_match performance. ~20% faster.
+
+= RubyMotion 2.33 =
+
+  * Added support for installing pre-releases of RubyMotion. The
+    `sudo motion update --pre' command will install a pre-release build in
+    `/Library/RubyMotionPre'. Currently, the pre-release channel contains
+    the first beta of RubyMotion for Android. Enjoy! ^_^
 
 = RubyMotion 2.32 =
 
