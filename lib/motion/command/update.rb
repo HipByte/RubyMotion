@@ -38,6 +38,7 @@ module Motion; class Command
     end
 
     def initialize(argv)
+      @prerelease_mode = argv.flag?('pre', false)
       @check_mode = argv.flag?('check', false)
       @wanted_software_version = argv.option('cache-version')
       @force_version = argv.option('force-version')
@@ -49,8 +50,9 @@ module Motion; class Command
       if @force_version
         help! "--force-version has been deprecated in favor of --cache-version"
       end
-      if @wanted_software_version && File.exist?('/Library/RubyMotion.old')
-        die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version")
+      if @wanted_software_version
+        die("/Library/RubyMotion.old already exists, please move this directory before using --cache-version") if File.exist?('/Library/RubyMotion.old')
+        die "--cache-version can't be used with --pre" if @prerelease_mode
       end
     end
 
@@ -62,8 +64,19 @@ module Motion; class Command
       end
     end
 
+    module Pre
+      path = '/Library/RubyMotionPre/lib/motion/version.rb'
+      eval(File.read(path)) if File.exist?(path)
+    end
+
     def product_version
-      Motion::Version
+      @product_version ||= begin
+        if @prerelease_mode and defined?(Pre::Motion::Version)
+          Pre::Motion::Version
+        else
+          Motion::Version
+        end
+      end
     end
 
     def curl(cmd)
@@ -77,7 +90,7 @@ module Motion; class Command
     def perform_check
       update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
       if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
-        resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{read_license_key}\" https://secure.rubymotion.com/latest_software_version")
+        resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"license_key=#{read_license_key}\" -d \"pre=#{@prerelease_mode ? 'true' : 'false'}\" https://secure.rubymotion.com/latest_software_version")
         exit 1 unless resp.match(/^\d+\.\d+/)
         File.open(update_check_file, 'w') { |io| io.write(resp) }
       end
@@ -101,7 +114,7 @@ module Motion; class Command
       need_root
 
       $stderr.puts "Connecting to the server..."
-      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{read_license_key}\" https://secure.rubymotion.com/update_software")
+      resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{read_license_key}\" -d \"pre=#{@prerelease_mode ? 'true' : 'false'}\" https://secure.rubymotion.com/update_software")
       unless resp.match(/^http:/)
         die resp
       end
@@ -111,8 +124,7 @@ module Motion; class Command
       tmp_dest = '/tmp/_rubymotion_su.pkg'
       curl("-# \"#{url}\" -o #{tmp_dest}")
 
-      if @wanted_software_version
-        $stderr.puts 'Saving current RubyMotion version...'
+      if @wanted_software_version or @prerelease_mode
         FileUtils.mv '/Library/RubyMotion', '/Library/RubyMotion.old'
       end
 
@@ -123,13 +135,26 @@ module Motion; class Command
       end
       FileUtils.rm_f tmp_dest
 
+      dest_installation_dir = nil
       if @wanted_software_version
-        FileUtils.mv '/Library/RubyMotion', "/Library/RubyMotion#{@wanted_software_version}"
-        $stderr.puts 'Restoring current RubyMotion version...' # done in ensure
-        $stderr.puts "RubyMotion #{@wanted_software_version} installed as /Library/RubyMotion#{@wanted_software_version}. To use it in a project, edit the Rakefile to point to /Library/RubyMotion#{@wanted_software_version}/lib instead of /Library/RubyMotion/lib."
+        dest_installation_dir = '/Library/RubyMotion' + wanted_software_version.to_s
+      elsif @prerelease_mode
+        dest_installation_dir = '/Library/RubyMotionPre'
+      end
+
+      if @wanted_software_version
+        dest_installation_dir = '/Library/RubyMotion' + @wanted_software_version
+        FileUtils.mv '/Library/RubyMotion', dest_installation_dir
+        $stderr.puts "RubyMotion #{@wanted_software_version} installed as #{dest_installation_dir}. To use it in a project, edit the Rakefile to point to #{dest_installation_dir}/lib instead of /Library/RubyMotion/lib."
       else
-        $stderr.puts "Software update installed.\n\n"
-        news = File.read('/Library/RubyMotion/NEWS')
+        if @prerelease_mode
+          FileUtils.rm_rf '/Library/RubyMotionPre'
+          FileUtils.mv '/Library/RubyMotion', '/Library/RubyMotionPre'
+          $stderr.puts "RubyMotion pre-release update installed in /Library/RubyMotionPre\n\n"
+        else
+          $stderr.puts "Software update installed.\n\n"
+        end
+        news = File.read("/Library/RubyMotion#{@prerelease_mode ? 'Pre' : ''}/NEWS")
         begin
           news.force_encoding('UTF-8')
         rescue
@@ -146,7 +171,7 @@ module Motion; class Command
 
       FileUtils.rm_rf Motion::Project::Builder.common_build_dir
     ensure
-      if @wanted_software_version && File.exist?('/Library/RubyMotion.old')
+      if dest_installation_dir && File.exist?('/Library/RubyMotion.old')
         FileUtils.mv '/Library/RubyMotion.old', '/Library/RubyMotion'
       end
     end
