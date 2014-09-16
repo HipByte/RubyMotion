@@ -165,7 +165,7 @@ module Motion; class Command
 
       FileUtils.rm_rf Motion::Project::Builder.common_build_dir
     ensure
-      if dest_installation_dir && File.exist?('/Library/RubyMotion.old')
+      if (@wanted_software_version or @prerelease_mode) and File.exist?('/Library/RubyMotion.old')
         FileUtils.mv '/Library/RubyMotion.old', '/Library/RubyMotion'
       end
     end
