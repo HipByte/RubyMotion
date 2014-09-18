@@ -1,3 +1,8 @@
+= RubyMotion 3.1 =
+
+  * Added the RUBYMOTION_VERSION and RUBYMOTION_ENV constants, which have the
+    same values as RubyMotion for iOS / OS X.
+
 = RubyMotion 3.0 =
 
   * First public beta with Android support. Make sure to read the "Getting
