@@ -75,6 +75,9 @@ module Motion; module Project
       end
 
       def build(platform, opts={})
+        # Allows the user to define a :prebuild task
+        Rake::Task[:prebuild].invoke if Rake::Task.task_defined?(:prebuild)
+
         builder.build(config, platform, opts)
       end
 
