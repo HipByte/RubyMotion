@@ -1,3 +1,10 @@
+= RubyMotion 2.33 =
+
+  * Added support for installing pre-releases of RubyMotion. The
+    `sudo motion update --pre' command will install a pre-release build in
+    `/Library/RubyMotionPre'. Currently, the pre-release channel contains
+    the first beta of RubyMotion for Android. Enjoy! ^_^
+
 = RubyMotion 2.32 =
 
   * The iOS 8.0 and OS X 10.10 versions of the runtime have been recompiled
