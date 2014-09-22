@@ -50,7 +50,7 @@ module Motion; module Project
         if File.mtime(config.project_file) > File.mtime(framework_path) \
             or !system("/usr/bin/codesign --verify \"#{framework_path}\" >& /dev/null")
           App.info 'Codesign', framework_path
-          sh "/usr/bin/codesign --force --sign \"#{config.codesign_certificate}\" --preserve-metadata=\"identifier,entitlements\" \"#{framework_path}\""
+          sh "/usr/bin/codesign --force --sign \"#{config.codesign_certificate}\" --preserve-metadata=\"identifier,entitlements,resource-rules\" \"#{framework_path}\""
         end
       end
 
