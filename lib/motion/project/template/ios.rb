@@ -80,7 +80,8 @@ desc "Run the simulator"
 task :simulator do
   deployment_target = Motion::Util::Version.new(App.config.deployment_target)
 
-  target = ENV['target']
+  target = App.config.simulator_target
+  target = ENV['target'] if ENV['target']
   if target && Motion::Util::Version.new(target) < deployment_target
     App.fail "It is not possible to simulate an SDK version (#{target}) " \
              "lower than the app's deployment target (#{deployment_target})"
@@ -165,7 +166,8 @@ END
     end
   end
 
-  device_name = ENV["device_name"]
+  device_name = App.config.simulator_device_name
+  device_name = ENV["device_name"] if ENV["device_name"]
   simulate_device = App.config.device_family_string(device_name, family_int, target, retina)
 
   # Launch the simulator.

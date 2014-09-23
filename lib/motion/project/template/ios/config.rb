@@ -32,7 +32,7 @@ module Motion; module Project;
 
     variable :device_family, :interface_orientations, :background_modes,
       :status_bar_style, :icons, :prerendered_icon, :fonts, :seed_id,
-      :provisioning_profile, :manifest_assets
+      :provisioning_profile, :manifest_assets, :simulator_target, :simulator_device_name
 
     def initialize(project_dir, build_mode)
       super
