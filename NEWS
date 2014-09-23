@@ -1,3 +1,47 @@
+= RubyMotion 2.34 =
+
+  * All iOS and OS X versions of the runtime have been recompiled with Xcode 6.
+  * [iOS] Add support for iPhone 6/6+ launch images. Unless explicitely
+    specified, the Info.plist `UILaunchImages' key is populated from all PNG
+    files in the resource directories that start with Default. For iPhone 6/6+
+    use the `-667h' and `-736h' filename modifiers.
+  * [OSX] Fix a bug that made it impossible to build a OS X app on Yosemite
+    with Xcode 6 GM, even when targeting 10.9.
+  * Fixed a bug that ommitted class and protocol methods from the ctags.
+    Patch by Rakesh BS.
+  * Improved exception backtrace symbolication performance by ensuring the dSYM
+    bundle is used when available.
+  * Improved Enumerable#inject performance. ~40% times faster.
+  * Fixed a bug that could cause `clang++' to be called with too many arguments
+    for a shell to handle.
+  * Fixed a bug that could cause `gen_bridge_metadata' to be called with too
+    many arguments for a shell (on Yosemite) to handle.
+  * [OSX] Fixed a bug that made it impossible to use a `NSApplication' subclass.
+  * [OSX] Fixed a bug where it would trigger a crash when it will evaluates a
+    expression on REPL on Yosemite.
+  * [OSX] Fixed a bug where the build directory for 3rd-party library wouldn't
+    be removed with `rake clean' command.
+  * [OSX] Fixed a bug where it didn't handle `NSTaggedPointerString' objects
+    when it configured lower OS X version as deployment target on Yosemite.
+  * [OSX] Fixed a bug where `rake debug=1' freezes lldb with Xcode 6 GM.
+  * [iOS] Changed default simulator to 'iPhone 6' which it would be introduced
+    by Xcode 6 GM.
+  * Fixed a bug where Instruments didn't launch if it would specify a template
+    name with "rake profile template='xxx'".
+  * Fixed a bug where Method#owner will return incorrect owner if the method
+    in inherited class would be overrided.
+  * Fixed a bug where wrong method would called when it would include module
+    which have #viewWillAppear and #viewWillDisappear implementations.
+  * Fixed a bug where method would not called when it would include some module
+    which have #viewWillAppear implementations.
+  * Fixed a bug where #method_missing would receive incorrect arguments after
+    calling was cached.
+  * Fixed a bug where the build system would ping the update server for each
+    target an application project includes.
+  * Fixed a memory leak which was created when huge splat would be passed into
+    the methods since second argument.
+  * Improved Regexp.last_match performance. ~20% faster.
+
 = RubyMotion 2.33 =
 
   * Added support for installing pre-releases of RubyMotion. The
@@ -174,7 +218,7 @@
     Thanks to Ignacio Piantanida for the detective work.
   * Fixed a regression introduced in RubyMotion 2.25 that was causing a
     build error in environment using Ruby 1.8.
-  * Fixed a regression introduced in RubyMotion 2.25 that was causing a 
+  * Fixed a regression introduced in RubyMotion 2.25 that was causing a
     `not precompiled' error if the method would handle a BOOL pointer as an
     argument.
   * Fixed a bug where Boxed subclasses could not be re-opened safely.
