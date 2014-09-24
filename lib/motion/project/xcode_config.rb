@@ -262,7 +262,7 @@ EOS
     end
 
     def app_bundle_dsym(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.dSYM')
+      File.join(versionized_build_dir(platform), bundle_name + '.app.dSYM')
     end
 
     def archive_extension
