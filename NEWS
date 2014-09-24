@@ -2,6 +2,8 @@
 
   * [iOS] Fixed a bug where it would not symbolicate with `rake profile:device`.
     The dSYM file path was changed to fix a bug.
+  * [iOS] Fixed a bug where the RubyMotion shared framework would not update
+    even if it changed the code in framework.
 
 = RubyMotion 2.34 =
 

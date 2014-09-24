@@ -63,12 +63,13 @@ module Motion; module Project
 
     def copy_products(platform)
       src_path = framework_path
-      dest_path = File.join(@config.app_bundle(platform), 'Frameworks', framework_name)
-      FileUtils.mkdir_p(File.join(@config.app_bundle(platform), 'Frameworks'))
+      dest_framework_dir = File.join(@config.app_bundle(platform), 'Frameworks')
+      dest_path = File.join(dest_framework_dir, framework_name)
 
       if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
         App.info 'Copy', src_path
-        FileUtils.cp_r(src_path, dest_path)
+        FileUtils.mkdir_p(dest_framework_dir)
+        FileUtils.cp_r(src_path, dest_framework_dir)
       end 
     end
 
