@@ -530,7 +530,7 @@ start_debug_server(am_device_t dev)
     }
 	
     NSString *dsym_path = [[app_package_path stringByDeletingPathExtension]
-	stringByAppendingString:@".dSYM"];
+	stringByAppendingString:@".app.dSYM"];
     if (![[NSFileManager defaultManager] fileExistsAtPath:dsym_path]) {
 	fprintf(stderr, "%s does not exist\n",
 		[dsym_path fileSystemRepresentation]);
@@ -1039,7 +1039,7 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 
     // Figure out where the .dSYM bundle is.
     NSString *dsym_path = [[app_package_path stringByDeletingPathExtension]
-	stringByAppendingPathExtension:@"dSYM"];
+	stringByAppendingPathExtension:@"app.dSYM"];
     assert([[NSFileManager defaultManager] fileExistsAtPath:dsym_path]);
 
     // Get the directory where the files will be saved.

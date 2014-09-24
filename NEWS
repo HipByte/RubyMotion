@@ -1,3 +1,8 @@
+= RubyMotion 2.35 =
+
+  * [iOS] Fixed a bug where it would not symbolicate with `rake profile:device`.
+    The dSYM file path was changed to fix a bug.
+
 = RubyMotion 2.34 =
 
   * All iOS and OS X versions of the runtime have been recompiled with Xcode 6.
