@@ -4,6 +4,8 @@
     The dSYM file path was changed to fix a bug.
   * [iOS] Fixed a bug where the RubyMotion shared framework would not update
     even if it changed the code in framework.
+  * Fixed a bug where GLKit functions would trigger a crash when it will run
+    app on iOS simulator.
 
 = RubyMotion 2.34 =
 
