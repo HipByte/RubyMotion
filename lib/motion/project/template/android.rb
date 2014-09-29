@@ -37,11 +37,104 @@ task :build do
   app_build_dir = App.config.versionized_build_dir
   mkdir_p app_build_dir
 
+  # Generate the Android manifest file.
+  android_manifest_txt = ''
+  android_manifest_txt << <<EOS
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{App.config.version_code}" android:versionName="#{App.config.version_name}">
+  <uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
+EOS
+  # Application permissions
+  permissions = Array(App.config.permissions)
+  if App.config.development?
+    # In development mode, we need the INTERNET permission in order to create
+    # the REPL socket.
+    permissions |= ['android.permission.INTERNET']
+  end
+  permissions.each do |permission|
+    permission = "android.permission.#{permission.to_s.upcase}" if permission.is_a?(Symbol)
+    android_manifest_txt << <<EOS
+  <uses-permission android:name="#{permission}"></uses-permission>
+EOS
+  end
+  # Custom manifest entries.
+  App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
+  android_manifest_txt << <<EOS
+  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
+EOS
+  App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
+  # Main activity.
+  android_manifest_txt << <<EOS
+    <activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
+      <intent-filter>
+                    <action android:name="android.intent.action.MAIN" />
+                    <category android:name="android.intent.category.LAUNCHER" />
+                </intent-filter>
+          </activity>
+EOS
+  # Sub-activities.
+  (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
+    android_manifest_txt << <<EOS
+    <activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
+      <meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
+    </activity>
+EOS
+  end
+  android_manifest_txt << <<EOS
+    </application>
+</manifest>
+EOS
+  android_manifest = File.join(app_build_dir, 'AndroidManifest.xml')
+  if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
+    App.info 'Create', android_manifest
+    File.open(android_manifest, 'w') { |io| io.write(android_manifest_txt) }
+  end
+
+  # Create R.java files.
+  java_dir = File.join(app_build_dir, 'java')
+  java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
+  mkdir_p java_app_package_dir
+  r_bs = File.join(app_build_dir, 'R.bridgesupport')
+
+  android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
+  resources_dirs = []
+  App.config.resources_dirs.flatten.each do |dir|
+    next unless File.exist?(dir)
+    next unless File.directory?(dir)
+    resources_dirs << dir
+  end
+  all_resources = (resources_dirs + App.config.vendored_projects.map { |x| x[:resources] }.compact)
+  aapt_resources_flags = all_resources.map { |x| '-S "' + x + '"' }.join(' ')
+
+  r_java_mtime = Dir.glob(java_dir + '/**/R.java').map { |x| File.mtime(x) }.max
+
+  bs_files = []
+  classes_changed = false
+  if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
+    extra_packages = App.config.vendored_projects.map { |x| x[:package] }.compact.map { |x| "--extra-packages #{x}" }.join(' ')
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
+
+
+    r_java = Dir.glob(java_dir + '/**/R.java')
+    classes_dir = File.join(app_build_dir, 'classes')
+    mkdir_p classes_dir
+
+    r_java.each do |java_path|
+      sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{classes_dir} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
+    end
+
+    r_classes = Dir.glob(classes_dir + '/**/R\$*[a-z]*.class').map { |c| "'#{c}'" }
+    sh "#{App.config.bin_exec('android/gen_bridge_metadata')} #{r_classes.join(' ')} -o \"#{r_bs}\" "
+
+    classes_changed = true
+  end
+  bs_files << r_bs if File.exist?(r_bs)
+
   # Compile Ruby files.
   ruby = App.config.bin_exec('ruby')
   init_func_n = 0
   ruby_objs = []
-  bs_files = Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
+  bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   bs_files += App.config.vendored_bs_files
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
@@ -147,59 +240,6 @@ EOS
     end
   end
 
-  # Generate the Android manifest file.
-  android_manifest_txt = ''
-  android_manifest_txt << <<EOS
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{App.config.version_code}" android:versionName="#{App.config.version_name}">
-	<uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
-EOS
-  # Application permissions
-  permissions = Array(App.config.permissions)
-  if App.config.development?
-    # In development mode, we need the INTERNET permission in order to create
-    # the REPL socket.
-    permissions |= ['android.permission.INTERNET']
-  end
-  permissions.each do |permission|
-    permission = "android.permission.#{permission.to_s.upcase}" if permission.is_a?(Symbol)
-    android_manifest_txt << <<EOS
-  <uses-permission android:name="#{permission}"></uses-permission>
-EOS
-  end
-  # Custom manifest entries.
-  App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
-  android_manifest_txt << <<EOS
-	<application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
-EOS
-  App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
-  # Main activity.
-  android_manifest_txt << <<EOS
-		<activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
-			<intent-filter>
-                		<action android:name="android.intent.action.MAIN" />
-                		<category android:name="android.intent.category.LAUNCHER" />
-            		</intent-filter>
-        	</activity>
-EOS
-  # Sub-activities.
-  (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
-    android_manifest_txt << <<EOS
-		<activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
-			<meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
-		</activity>
-EOS
-  end
-  android_manifest_txt << <<EOS
-    </application>
-</manifest> 
-EOS
-  android_manifest = File.join(app_build_dir, 'AndroidManifest.xml')
-  if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
-    App.info 'Create', android_manifest
-    File.open(android_manifest, 'w') { |io| io.write(android_manifest_txt) }
-  end
-
   # Create java files based on the classes map files.
   java_classes = {}
   Dir.glob(objs_build_dir + '/**/*.map') do |map|
@@ -250,9 +290,6 @@ EOS
       end
     end
   end
-  java_dir = File.join(app_build_dir, 'java')
-  java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
-  mkdir_p java_app_package_dir
   java_classes.each do |name, klass|
     klass_super = klass[:super]
     klass_super = 'java.lang.Object' if klass_super == '$blank$'
@@ -279,29 +316,12 @@ EOS
     end
   end
 
-  # Create R.java files.
-  android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
-  resources_dirs = []
-  App.config.resources_dirs.flatten.each do |dir|
-    next unless File.exist?(dir)
-    next unless File.directory?(dir)
-    resources_dirs << dir
-  end
-  all_resources = (resources_dirs + App.config.vendored_projects.map { |x| x[:resources] }.compact)
-  aapt_resources_flags = all_resources.map { |x| '-S "' + x + '"' }.join(' ')
-  r_java_mtime = Dir.glob(java_dir + '/**/R.java').map { |x| File.mtime(x) }.max
-  if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
-    extra_packages = App.config.vendored_projects.map { |x| x[:package] }.compact.map { |x| "--extra-packages #{x}" }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
-  end
-
   # Compile java files.
   vendored_jars = App.config.vendored_projects.map { |x| x[:jar] }
   vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
   classes_dir = File.join(app_build_dir, 'classes')
   mkdir_p classes_dir
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
-  classes_changed = false
   Dir.glob(File.join(app_build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
     paths[paths.index('java')] = 'classes'

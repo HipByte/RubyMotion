@@ -240,7 +240,7 @@ module Motion; module Project;
           bs_file = File.join(File.dirname(jar_file), File.basename(jar_file) + '.bridgesupport')
           if !File.exist?(bs_file) or File.mtime(jar_file) > File.mtime(bs_file)
             App.info 'Create', bs_file
-            sh "#{bin_exec('android/gen_bridge_metadata')} \"#{jar_file}\" \"#{bs_file}\""
+            sh "#{bin_exec('android/gen_bridge_metadata')} -o \"#{bs_file}\" \"#{jar_file}\""
           end
           bs_file
         end

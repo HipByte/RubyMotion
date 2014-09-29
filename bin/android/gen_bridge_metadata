@@ -2,52 +2,49 @@
 # encoding: utf-8
 
 require 'fileutils'
+require 'pathname'
+require 'optparse'
 
-if ARGV.size != 2
-  $stderr.puts "Usage: #{__FILE__} <jar-file> <output-file>"
-  exit 1
-end
+def gen_bridge_metadata(file)
 
-jar_path = File.expand_path(ARGV[0])
-bs_path = File.expand_path(ARGV[1])
+  file = File.expand_path(file)
 
-tmp_path = File.join(ENV['TMPDIR'], '__android_bridgesupport__', File.basename(jar_path))
-FileUtils.rm_rf tmp_path
-FileUtils.mkdir_p tmp_path
+  case ext = File.extname(file)
+  when '.jar'
+    class_path = File.join(ENV['TMPDIR'], '__android_bridgesupport__', File.basename(file))
+    FileUtils.rm_rf class_path
+    FileUtils.mkdir_p class_path
+    puts "Extracting #{file} to #{class_path}"
+    exit 1 unless system "/usr/bin/unzip -q \"#{file}\" -d \"#{class_path}\""
 
-puts "Extracting #{jar_path} to #{tmp_path}"
-
-Dir.chdir(tmp_path) do
-  # Unzip the .jar archive.
-  exit 1 unless system "/usr/bin/unzip -q \"#{jar_path}\""
+    classes = Dir.glob(File.join(class_path ,"**/*.class")).map { |c| c.gsub(class_path, '') }
+  when '.class'
+    class_path = File.dirname(file)
+    classes = [File.basename(file)]
+  else
+    die "Invalid file extension '#{ext}'. Supported extensions are 'jar' and 'class'"
+  end
 
   # Decompile classes.
-  classes = Dir.glob("**/*.class").map { |x| x.gsub('/', '.').gsub('$', '.').sub(/\.class$/, '') }
-  javap_tmp_path = File.join(File.dirname(tmp_path), 'classes.txt')
-  system "/usr/bin/javap -s #{classes.join(' ')} > \"#{javap_tmp_path}\""
+  classes = classes.map { |x| x.gsub('/', '.').gsub('$', '.').sub(/\.class$/, '') }
+  txt = `/usr/bin/javap -classpath "#{class_path}" -s #{classes.join(' ')}`
 
   # Create the BridgeSupport text.
-  bs_data = ''
-  bs_data << <<EOS
-<?xml version='1.0'?>
-<signatures version='1.0'>
-EOS
-  txt = File.read(javap_tmp_path)
   res = txt.scan(/(class)\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
   res += txt.scan(/(class)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
   res += txt.scan(/(interface)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab interfaces
   res.each do |type, elem, body_txt|
-    elem_path = elem.gsub(/\./, '/')
-    bs_data << <<EOS
+    elem_path = encode_xml(elem.gsub(/\./, '/'))
+    @bs_data << <<EOS
 <#{type} name=\"#{elem_path}\">
 EOS
     body_txt.strip.split(/\n/).each_cons(2) do |elem_line, signature_line|
-      signature_line = signature_line.strip
+      signature_line = encode_xml(signature_line.strip)
       md = signature_line.match(/^Signature:\s+(.+)$/)
       next unless md
       signature = md[1]
 
-      elem_line = elem_line.strip
+      elem_line = encode_xml(elem_line.strip)
       if md = elem_line.match(/\s([^(\s]+)\(/)
         # A method.
         method = md[1]
@@ -56,27 +53,60 @@ EOS
           method = '&lt;init&gt;'
         end
         class_method = elem_line.include?('static')
-        bs_data << <<EOS
+        @bs_data << <<EOS
 <method name=\"#{method}\" type=\"#{signature}\"#{class_method ? ' class_method="true"' : ''}/>
 EOS
       elsif md = elem_line.match(/\s([^;\s]+);$/)
 =begin
         # A constant.
-        constant = md[1] 
-        bs_data << <<EOS
+        constant = md[1]
+        @bs_data << <<EOS
 <const name=\"#{constant}\" type=\"#{signature}\"/>
 EOS
 =end
       end
     end
-    bs_data << <<EOS
+    @bs_data << <<EOS
 </#{type}>
 EOS
   end
-  bs_data << <<EOS
+end
+
+def encode_xml(string)
+  string.gsub(/[&<>"]/, ">" => "&gt;", "<" => "&lt;", "&" => "&amp;", '"' => "&quot;")
+end
+
+def die(*msg)
+    $stderr.puts msg
+    exit 1
+end
+
+if __FILE__ == $0
+    OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename(__FILE__)} [options] [<jar-file>|<class-file>...]"
+  opts.separator ''
+  opts.separator 'Options:'
+
+  opts.on('-o', '--output FILE', 'Write output to the given file.') do |opt|
+      die 'Output file can\'t be specified more than once' if @out_file
+      @out_file = opt
+  end
+
+  if ARGV.empty?
+      die opts.banner
+  else
+    opts.parse!(ARGV)
+    @bs_data = ''
+    @bs_data << <<EOS
+<?xml version='1.0'?>
+<signatures version='1.0'>
+EOS
+    ARGV.each { |file| gen_bridge_metadata(file) }
+
+    @bs_data << <<EOS
 </signatures>
 EOS
-
-  # Write the BridgeSupport data down.
-  File.open(bs_path, 'w') { |io| io.write(bs_data) }
+    File.open(@out_file, 'w') { |io| io.write(@bs_data) }
+  end
+    end
 end
