@@ -4,6 +4,12 @@
     same values as RubyMotion for iOS / OS X.
   * Added support for the Android R class. Thanks to Mark Villacampa for the
     patch.
+  * Fixed a bug where `app.vendor_project' would generate a .bridgesupport
+    file containing illegal XML characters (such as '<' or '>') inside
+    attributes. Thanks to Mark Villacampa for the patch.
+  * Fixed a bug where the dispatch of an overloaded Java method without
+    arguments would fail. The runtime will now return the first method of the
+    list (since we can't match any argument).
 
 = RubyMotion 3.0 =
 
