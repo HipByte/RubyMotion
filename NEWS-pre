@@ -10,6 +10,8 @@
   * Fixed a bug where the dispatch of an overloaded Java method without
     arguments would fail. The runtime will now return the first method of the
     list (since we can't match any argument).
+  * Fixed the `rake {emulator,device}' tasks to terminate the application in
+    case the user leaves the REPL session.
 
 = RubyMotion 3.0 =
 
