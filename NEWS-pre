@@ -12,6 +12,8 @@
     list (since we can't match any argument).
   * Fixed the `rake {emulator,device}' tasks to terminate the application in
     case the user leaves the REPL session.
+  * Fixed a bug when dispatching certain methods using reflection (REPL) that
+    return java.lang.Object.
 
 = RubyMotion 3.0 =
 
