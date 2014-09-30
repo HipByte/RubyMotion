@@ -479,7 +479,14 @@ def run_apk(mode)
     sh line
     # Show logs in a child process.
     adb_logs_pid = spawn "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.logs_components.join(' ')}"
-    at_exit { Process.kill('KILL', adb_logs_pid) }
+    at_exit do
+      # Kill the logcat process.
+      Process.kill('KILL', adb_logs_pid)
+      # Kill the app (if it's still active).
+      if `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
+        sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
+      end
+    end
     # Enable port forwarding for the REPL socket.
     sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:33333 tcp:33333"
     # Launch the REPL.
