@@ -25,6 +25,8 @@
     case the user leaves the REPL session.
   * Fixed a bug when dispatching certain methods using reflection (REPL) that
     return java.lang.Object.
+  * Fixed a bug in the compiler where a crash would happen when trying to
+    override a Java method accepting a Java array as argument.
 
 = RubyMotion 3.0 =
 
