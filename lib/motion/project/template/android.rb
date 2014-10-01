@@ -41,8 +41,8 @@ task :build do
   android_manifest_txt = ''
   android_manifest_txt << <<EOS
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{App.config.version_code}" android:versionName="#{App.config.version_name}">
-  <uses-sdk android:minSdkVersion="#{App.config.api_version}"/>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{x=App.config.version_code}" android:versionName="#{App.config.version_name}">
+  <uses-sdk android:minSdkVersion="#{App.config.api_version}" android:targetSdkVersion="#{App.config.target_api_version}"/>
 EOS
   # Application permissions
   permissions = Array(App.config.permissions)
@@ -96,7 +96,7 @@ EOS
   mkdir_p java_app_package_dir
   r_bs = File.join(app_build_dir, 'R.bridgesupport')
 
-  android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.api_version}/android.jar"
+  android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.target_api_version}/android.jar"
   resources_dirs = []
   App.config.resources_dirs.flatten.each do |dir|
     next unless File.exist?(dir)

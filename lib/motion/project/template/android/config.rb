@@ -28,8 +28,8 @@ module Motion; module Project;
     register :android
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
-      :sub_activities, :api_version, :arch, :assets_dirs, :icon,
-      :logs_components, :version_code, :version_name, :permissions,
+      :sub_activities, :api_version, :target_api_version, :arch, :assets_dirs,
+      :icon, :logs_components, :version_code, :version_name, :permissions,
       :application_class
 
     def initialize(project_dir, build_mode)
@@ -95,8 +95,8 @@ module Motion; module Project;
       package.gsub('.', '/')
     end
 
-    def api_version
-      @api_version ||= begin
+    def latest_api_version
+      @latest_api_version ||= begin
         versions = Dir.glob(sdk_path + '/platforms/android-*').map do |path|
           md = File.basename(path).match(/\d+$/)
           md ? md[0] : nil
@@ -104,9 +104,23 @@ module Motion; module Project;
         if versions.empty?
           App.fail "Given Android SDK does not support any API version (nothing relevant in `#{sdk_path}/platforms')"
         end
-        vers = versions.map { |x| x.to_i }.max
-        vers == 20 ? 'L' : vers.to_s
+        numbers = versions.map { |x| x.to_i }
+        vers = numbers.max
+        if vers == 20
+          # Don't return 20 (L) by default, as it's not yet stable.
+          numbers.delete(vers) 
+          vers = numbers.max
+        end
+        vers
       end
+    end
+
+    def api_version
+      @api_version ||= latest_api_version
+    end
+
+    def target_api_version
+      @target_api_version ||= latest_api_version
     end
 
     def versionized_build_dir
