@@ -509,7 +509,7 @@ task :android do
     bs_path = "android/#{api_vers}/BridgeSupport/android.bridgesupport"
     if !File.exist?(bs_path) or File.mtime(jar_path) > File.mtime(bs_path)
       mkdir_p File.dirname(bs_path)
-      sh "/usr/bin/ruby ../bin/android/gen_bridge_metadata \"#{jar_path}\" \"#{bs_path}\""
+      sh "/usr/bin/ruby ../bin/android/gen_bridge_metadata \"#{jar_path}\" -o \"#{bs_path}\""
     end
   end
 end
