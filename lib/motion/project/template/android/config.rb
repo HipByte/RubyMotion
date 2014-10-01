@@ -29,7 +29,8 @@ module Motion; module Project;
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :arch, :assets_dirs, :icon,
-      :logs_components, :version_code, :version_name, :permissions
+      :logs_components, :version_code, :version_name, :permissions,
+      :application_class
 
     def initialize(project_dir, build_mode)
       super
