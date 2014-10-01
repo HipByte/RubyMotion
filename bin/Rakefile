@@ -52,7 +52,7 @@ task :instruments do
   end
 end
 
-task :android do
+task :android => [:files] do
   Dir.chdir '../vm/jit-bridge' do
     sh "rake"
   end
