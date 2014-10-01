@@ -8,6 +8,13 @@
     the name of a custom Android::App::Application subclass that should be used
     by the application. By default, the variable has a nil value, which means
     a default class will be used.
+  * Improved app versioning. `app.api_version' will now map to the
+    `minSdkVersion' manifest attribute. Added `app.target_api_version' which
+    will map to `targetSdkVersion'. Both settings will have the latest API
+    version as the default value, except for 20 (L). We recommend that you
+    leave `app.target_api_version' intact and only modify `app.api_version'.
+  * Improved the REPL so that "self" now always points to the current app
+    activity. (Only works for API 14 or above.)
   * Fixed a bug where `app.vendor_project' would generate a .bridgesupport
     file containing illegal XML characters (such as '<' or '>') inside
     attributes. Thanks to Mark Villacampa for the patch.
