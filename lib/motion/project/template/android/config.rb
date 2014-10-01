@@ -111,7 +111,7 @@ module Motion; module Project;
           numbers.delete(vers) 
           vers = numbers.max
         end
-        vers
+        vers.to_s
       end
     end
 
