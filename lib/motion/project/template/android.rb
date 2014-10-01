@@ -60,7 +60,7 @@ EOS
   # Custom manifest entries.
   App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
   android_manifest_txt << <<EOS
-  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''}>
+  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''} #{App.config.application_class ? ('android:name="' + App.config.application_class + '"') : ''}>
 EOS
   App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
   # Main activity.
@@ -306,7 +306,8 @@ EOS
     klass[:methods].each do |method|
       java_file_txt << "\t#{method}\n"
     end
-    if name == App.config.main_activity
+    if name == App.config.application_class or (App.config.application_class == nil and name == App.config.main_activity)
+      # We need to insert code to load the payload library. It has to be done either in the main activity class or in the custom application class (if provided), as the later will be loaded first.
       java_file_txt << "\tstatic {\n\t\tSystem.loadLibrary(\"#{App.config.payload_library_name}\");\n\t}\n"
     end
     java_file_txt << "}\n"

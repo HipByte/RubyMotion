@@ -45,6 +45,7 @@ module Motion; module Project;
       @release_keystore_alias = nil
       @version_code = '1'
       @version_name = '1.0'
+      @application_class = nil
 
       if path = ENV['RUBYMOTION_ANDROID_SDK']
         @sdk_path = File.expand_path(path)
