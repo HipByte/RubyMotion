@@ -4,6 +4,10 @@
     same values as RubyMotion for iOS / OS X.
   * Added support for the Android R class. Thanks to Mark Villacampa for the
     patch.
+  * Added the `app.application_class' setting, which can be used to specify
+    the name of a custom Android::App::Application subclass that should be used
+    by the application. By default, the variable has a nil value, which means
+    a default class will be used.
   * Fixed a bug where `app.vendor_project' would generate a .bridgesupport
     file containing illegal XML characters (such as '<' or '>') inside
     attributes. Thanks to Mark Villacampa for the patch.
