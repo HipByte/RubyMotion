@@ -131,7 +131,7 @@ task :install do
   data = ['./NEWS', './LEGAL']
   data.concat(Dir.glob('./lib/**/*', File::FNM_DOTMATCH) - ['./lib/Rakefile'])
   data.delete_if { |x| true if x.include?("lib/yard/bin/") }
-  [['ios', IOS_SDK_VERSIONS + ['8.0']]].each do |name, sdk_versions|
+  [['ios', IOS_SDK_VERSIONS + ['8.1']]].each do |name, sdk_versions|
     data.concat(Dir.glob("./data/#{name}/*.dylib"))
     sdk_versions.each do |sdk_version|
       data.concat(Dir.glob("./data/#{name}/#{sdk_version}/BridgeSupport/*.bridgesupport"))
