@@ -1,5 +1,7 @@
 = RubyMotion 2.35 =
 
+  * Added support for iOS 8.1 (beta). You will need to install Xcode 6.1 GM
+    Seed in order to target it.
   * Fixed a bug that could occur when the only available SDKs are newer than the
     available BridgeSupport metadata.
   * [iOS] Fixed a bug where it would not symbolicate with `rake profile:device`.
