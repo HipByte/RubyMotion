@@ -144,7 +144,7 @@ EOS
 
     def sdk_version
       @sdk_version ||= begin
-        versions = Dir.glob(File.join(platforms_dir, "#{deploy_platform}.platform/Developer/SDKs/#{deploy_platform}*.sdk")).map do |path|
+        versions = Dir.glob(File.join(platforms_dir, "#{deploy_platform}.platform/Developer/SDKs/#{deploy_platform}[1-9]*.sdk")).map do |path|
           File.basename(path).scan(/#{deploy_platform}(.*)\.sdk/)[0][0]
         end
         if versions.size == 0
@@ -152,7 +152,7 @@ EOS
         end
         supported_vers = supported_sdk_versions(versions)
         unless supported_vers
-          App.fail "The requested SDK (#{deployment_target}) is not available or supported by RubyMotion at this time. Supported and available SDKs are: #{versions.join(', ')}."
+          App.fail "The requested deployment target SDK is not available or supported by RubyMotion at this time."
         end
         supported_vers
       end
