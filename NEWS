@@ -1,3 +1,15 @@
+= RubyMotion 2.35 =
+
+  * Fixed a bug that could occur when the only available SDKs are newer than the
+    available BridgeSupport metadata.
+  * [iOS] Fixed a bug where it would not symbolicate with `rake profile:device`.
+    The dSYM file path was changed to fix a bug.
+  * [iOS] Fixed a bug where the RubyMotion shared framework would not update
+    even if it changed the code in framework.
+  * [OSX] Fixed a bug that would always cause the REPL to crash.
+  * Fixed a bug where GLKit functions would trigger a crash when it will run
+    app on iOS simulator.
+
 = RubyMotion 2.34 =
 
   * All iOS and OS X versions of the runtime have been recompiled with Xcode 6.
