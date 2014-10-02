@@ -24,12 +24,6 @@ task :vm_files do
       install path, sdk
     end
     install File.join(objs, 'librubymotion-static.a'), sdk
-
-    if first and ENV['SDK_BETA'] == nil
-      objs = "../vm/MacOSX#{sdk_version}-repl.objs"
-      install File.join(objs, 'librubymotion-repl.dylib'), 'osx'
-      first = false
-    end
   end
 
   IOS_SDK_VERSIONS.each do |sdk_version|
@@ -48,6 +42,12 @@ task :vm_files do
       install path, sim
     end
     install File.join(objs, 'librubymotion-static.a'), sim
+  end
+
+  if OSX_SDK_VERSIONS.size > 1 and ENV['SDK_BETA'] == nil
+    raise "[!] Need OS X 10.8 SDK for REPL" unless OSX_SDK_VERSIONS.include?('10.8')
+    osx_repl = "../vm/MacOSX10.8-repl.objs"
+    install File.join(osx_repl, 'librubymotion-repl.dylib'), 'osx'
   end
 
   if IOS_SDK_VERSIONS.size > 1 and ENV['SDK_BETA'] == nil
