@@ -150,11 +150,40 @@ EOS
         if versions.size == 0
           App.fail "Can't find an iOS SDK in `#{platforms_dir}'"
         end
-        supported_vers = supported_sdk_versions(versions)
-        unless supported_vers
-          App.fail "The requested deployment target SDK is not available or supported by RubyMotion at this time."
+        supported_version = supported_sdk_versions(versions)
+        unless supported_version
+          # We don't have BridgeSupport data for any of the available SDKs. So
+          # use the latest available SDK of which the major version is the same
+          # as the latest available BridgeSupport version.
+
+          supported_sdks = supported_versions.map do |version|
+            Util::Version.new(version)
+          end.sort.reverse
+          available_sdks = versions.map do |version|
+            Util::Version.new(version)
+          end.sort.reverse
+
+          available_sdks.each do |available_sdk|
+            major_version = available_sdk.segments.first
+            compatible_sdk = supported_sdks.find do |supported_sdk|
+              supported_sdk.segments.first == major_version
+            end
+            if compatible_sdk
+              # Never override a user's setting!
+              @deployment_target ||= compatible_sdk.to_s
+              supported_version = available_sdk.to_s
+              App.warn("The available SDK (#{available_sdk}) is newer than " \
+                       "the latest available RubyMotion BridgeSupport " \
+                       "metadata (#{compatible_sdk}). The `sdk_version` and " \
+                       "`deployment_target` settings will be configured " \
+                       "accordingly.")
+              break
+            end
+          end
         end
-        supported_vers
+        supported_version || App.fail("The requested deployment target SDK " \
+                                      "is not available or supported by " \
+                                      "RubyMotion at this time.")
       end
     end
 
