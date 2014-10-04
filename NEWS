@@ -1,3 +1,7 @@
+= RubyMotion 2.36 =
+
+  * Improved IO#.read performance which read from files. ~4 times faster.
+
 = RubyMotion 2.35 =
 
   * Added support for iOS 8.1 (beta). You will need to install Xcode 6.1 GM
