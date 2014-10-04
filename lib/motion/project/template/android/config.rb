@@ -229,6 +229,16 @@ module Motion; module Project;
       File.join(versioned_arch_datadir, "kernel-#{arch}.bc")
     end
 
+    def clean_project
+      super
+      vendored_bs_files(false).each do |path|
+        if File.exist?(path)
+          App.info 'Delete', path
+          FileUtils.rm_f path
+        end
+      end
+    end
+
     attr_reader :vendored_projects
 
     def vendor_project(opt)
@@ -249,12 +259,12 @@ module Motion; module Project;
       @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest, :package => package }
     end
 
-    def vendored_bs_files
+    def vendored_bs_files(create=true)
       @vendored_bs_files ||= begin
         vendored_projects.map do |proj|
           jar_file = proj[:jar]
           bs_file = File.join(File.dirname(jar_file), File.basename(jar_file) + '.bridgesupport')
-          if !File.exist?(bs_file) or File.mtime(jar_file) > File.mtime(bs_file)
+          if create and (!File.exist?(bs_file) or File.mtime(jar_file) > File.mtime(bs_file))
             App.info 'Create', bs_file
             sh "#{bin_exec('android/gen_bridge_metadata')} -o \"#{bs_file}\" \"#{jar_file}\""
           end
