@@ -1,3 +1,7 @@
+= RubyMotion 3.2 =
+
+  * Fixed a crash in the REPL when accessing constant paths (ex. Foo::Bar).
+
 = RubyMotion 3.1 =
 
   * Added the RUBYMOTION_VERSION and RUBYMOTION_ENV constants, which have the
