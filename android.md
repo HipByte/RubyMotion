@@ -1,4 +1,4 @@
-# RubyMotion for Android Beta Notes
+# RubyMotion for Android: Getting Started
 
 Thanks for taking the time to test the beta of RubyMotion for Android.
 
@@ -135,6 +135,7 @@ At the time of this writing, the devices where RubyMotion is known to run are:
 - Samsung Galaxy S2
 - Samsung Galaxy Note
 - Motorola G
+- Motorola DEFY
 
 ## Getting started
 
@@ -215,10 +216,22 @@ The following classes are partially implemented:
 The following classes are not implemented yet:
 
 - `Binding`
-- `ThreadGroup`
+- `Encoding`
+- `Enumerator`
+- `Math`
+- `Method` / `UnboundMethod`
 - `Mutex`
 - `Time`
-- `File` / `IO`
+- `File` / `Dir` / `IO`
+- `ThreadGroup`
+- `ObjectSpace`
+- `Process`
+- `Range`
+- `Rational`
+- `Struct`
+
+The following classes will probably not be implemented:
+
 
 ## Additional resources
 
