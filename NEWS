@@ -1,5 +1,7 @@
 = RubyMotion 2.36 =
 
+  * Fixed a bug where it could not include #supportedInterfaceOrientations
+    method properly.
   * Improved IO#.read performance which read from files. ~4 times faster.
 
 = RubyMotion 2.35 =
