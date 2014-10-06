@@ -2,6 +2,9 @@
 
   * Fixed a bug where it could not include #supportedInterfaceOrientations
     method properly.
+  * Fixed a race condition bug in the runtime where a crash would occur if
+    the same Objective-C constant was being resolved at the same time from
+    different threads.
   * Improved IO#.read performance which read from files. ~4 times faster.
 
 = RubyMotion 2.35 =
