@@ -65,8 +65,12 @@ module Motion; module Project;
         App.fail "app.ndk_path should point to a valid Android NDK directory."
       end
 
+      if api_version == nil or !File.exist?("#{sdk_path}//platforms/android-#{api_version}")
+        App.fail "The Android SDK installed on your system does not support " + (api_version == nil ? "any API level" : "API level #{api_version}") + ". Run the `#{sdk_path}/tools/android' program to install missing API levels." 
+      end
+
       if !File.exist?("#{ndk_path}/platforms/android-#{api_version_ndk}")
-        App.fail "It looks like your version of the NDK does not support API level #{api_version}. Switch to a lower API level or install a more recent NDK."
+        App.fail "The Android NDK installed on your system does not support API level #{api_version}. Switch to a lower API level or install a more recent NDK."
       end
 
       super
@@ -101,15 +105,17 @@ module Motion; module Project;
           md = File.basename(path).match(/\d+$/)
           md ? md[0] : nil
         end.compact
-        if versions.empty?
-          App.fail "Given Android SDK does not support any API version (nothing relevant in `#{sdk_path}/platforms')"
-        end
+        return nil if versions.empty?
         numbers = versions.map { |x| x.to_i }
         vers = numbers.max
         if vers == 20
-          # Don't return 20 (L) by default, as it's not yet stable.
-          numbers.delete(vers) 
-          vers = numbers.max
+          if numbers.size > 1
+            # Don't return 20 (L) by default, as it's not yet stable.
+            numbers.delete(vers)
+            vers = numbers.max
+          else
+            vers = 'L'
+          end
         end
         vers.to_s
       end
