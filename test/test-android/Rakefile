@@ -5,7 +5,6 @@ require 'motion/project/template/android'
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = 'TestAndroid'
-  app.api_version = 'L'
 
   # Build the vendor jar if needed.
   testjava_jar = 'vendor/testjava.jar'
