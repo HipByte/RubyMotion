@@ -5,6 +5,9 @@
     APIs with the `rescue => Exception' expression.
   * Fixed the `rake clean' task to delete the .bridgesupport files that have
     been generated for vendored projects.
+  * Fixed a bug in the method dispatcher where the optional Hash syntax was
+    not properly recognized (ex: `foo(1, x:2, y:3, z:4)' to send
+    `foo(1, { :x => 2, :y => 3, :z => 4 })');
 
 = RubyMotion 3.1 =
 
