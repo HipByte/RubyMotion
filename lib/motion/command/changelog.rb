@@ -29,8 +29,25 @@ module Motion; class Command
     self.description = 'View the changes that have been made in all ' \
                        'RubyMotion versions.'
 
+    def self.options
+      [
+        ['--pre', 'Target a pre-release installation of RubyMotion'],
+      ].concat(super)
+    end
+
+    def initialize(argv)
+      @prerelease_mode = argv.flag?('pre', false)
+      super
+    end
+
     def run
-      system("#{pager} /Library/RubyMotion/NEWS")
+      file = '/Library/RubyMotion' + (@prerelease_mode ? 'Pre' : '') + '/NEWS'
+      if File.exist?(file)
+        system("#{pager} #{file}")
+      else
+        $stderr.puts "File `#{file}' does not exist"
+        exit 1
+      end
     end
   end
 end; end
