@@ -160,7 +160,7 @@ module Motion; class Command
           end
           $stderr.puts line
         end
-        $stderr.puts '(Run `motion changelog` to view all changes.)'
+        $stderr.puts '(Run `motion changelog' + (@prerelease_mode ? ' --pre' : '') + '` to view all changes.)'
       end
 
       FileUtils.rm_rf Motion::Project::Builder.common_build_dir
