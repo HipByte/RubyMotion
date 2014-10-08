@@ -301,7 +301,7 @@ EOS
     def invoke_xcodebuild(cmd)
       command = "#{XCODEBUILD_PATH} #{cmd}"
       unless App::VERBOSE
-        command << " | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
+        command << " 2>&1 | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
       end
       sh command
     end
