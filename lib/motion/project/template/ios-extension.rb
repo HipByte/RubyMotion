@@ -37,6 +37,11 @@ require 'motion/project'
 require 'motion/project/template/ios-extension-config'
 require 'motion/project/template/ios-extension-builder'
 
+desc "Clear local build objects"
+task :clean do
+  App.config.clean_project(['iPhoneSimulator', 'iPhoneOS'])
+end
+
 desc "Build the simulator version"
 task :default => :"build:simulator"
 
