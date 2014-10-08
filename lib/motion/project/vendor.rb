@@ -45,9 +45,6 @@ module Motion; module Project;
       Dir.chdir(@path) do
         send(gen_method('build'), platform)
       end
-      if @libs.empty?
-        App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
-      end
     end
 
     def clean(platforms)
@@ -140,6 +137,11 @@ EOS
         libs << libpath if File.exist?(libpath)
       end
 
+      @libs = libs.map { |x| File.expand_path(x) }
+      if @libs.empty?
+        App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
+      end
+
       headers = source_files.select { |p| File.extname(p) == '.h' }
       bs_files = []
       unless headers.empty?
@@ -152,8 +154,6 @@ EOS
         end
         bs_files << bs_file
       end
-
-      @libs = libs.map { |x| File.expand_path(x) }
       @bs_files = bs_files.map { |x| File.expand_path(x) }
     end
 
@@ -181,6 +181,11 @@ EOS
         `/usr/bin/touch \"#{build_dir}\"`
       end
 
+      @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
+      if @libs.empty?
+        App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
+      end
+
       # Generate the bridgesupport file if we need to.
       bs_file = bridgesupport_build_path(build_dir)
       headers_dir = @opts[:headers_dir]
@@ -195,9 +200,7 @@ EOS
           @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
         end
       end
-
       @bs_files = Dir.glob("#{build_dir}/*.bridgesupport").map { |x| File.expand_path(x) }
-      @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
     end
 
     private
