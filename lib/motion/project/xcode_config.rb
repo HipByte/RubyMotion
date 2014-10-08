@@ -486,9 +486,9 @@ EOS
       @vendor_projects.delete_if { |x| x.path == path }
     end
 
-    def clean_project
+    def clean_project(platforms)
       super
-      @vendor_projects.each { |vendor| vendor.clean }
+      @vendor_projects.each { |vendor| vendor.clean(platforms) }
       @targets.each { |target| target.clean }
     end
 

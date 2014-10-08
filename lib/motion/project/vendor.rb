@@ -28,10 +28,11 @@ module Motion; module Project;
     include Rake::DSL if Rake.const_defined?(:DSL)
 
     XcodeBuildDir = '.build'
+    XCODEBUILD_PATH = '/usr/bin/xcodebuild'
 
     def initialize(path, type, config, opts)
       @path = path.to_s
-      @type = type
+      @type = type.to_sym
       @config = config
       @opts = opts
       @libs = []
@@ -49,7 +50,16 @@ module Motion; module Project;
       end
     end
 
-    def clean
+    def clean(platforms)
+      if @type == :xcode
+        Dir.chdir(@path) do
+          platforms.each do |platform|
+            path = relative_path("./#{xcodeproj_path}")
+            App.info 'Clean', "#{path} for platform `#{platform}'"
+            xcodebuild(platform, 'clean')
+          end
+        end
+      end
       [XcodeBuildDir, 'build', 'build-iPhoneSimulator', 'build-iPhoneOS', 'build-MacOSX'].each do |build_dir|
         build_dir = File.join(@path, build_dir)
         if File.exist?(build_dir)
@@ -148,7 +158,6 @@ EOS
     end
 
     def build_xcode(platform)
-      project_dir = File.expand_path(@config.project_dir)
       # Validate common build directory.
       if !File.writable?(Dir.pwd)
         $stderr.puts "Cannot write into the `#{Dir.pwd}' directory, please check permissions and try again."
@@ -159,48 +168,7 @@ EOS
       if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
         FileUtils.mkdir_p build_dir
 
-        # Prepare Xcode project settings.
-        xcodeproj = @opts[:xcodeproj] || begin
-          projs = Dir.glob('*.xcodeproj')
-          if projs.size != 1
-            App.fail "Can't locate Xcode project file for vendor project #{@path}"
-          end
-          projs[0]
-        end
-        target = @opts[:target]
-        scheme = @opts[:scheme]
-        if target and scheme
-          App.fail "Both :target and :scheme are provided"
-        end
-        configuration = @opts[:configuration] || 'Release'
-
-        # Unset environment variables that could potentially make the build
-        # to fail.
-        %w{CC CXX CFLAGS CXXFLAGS LDFLAGS}.each { |f| ENV[f] &&= nil }
-
-        # Build project into a build directory. We delete the build directory
-        # each time because Xcode is too stupid to be trusted to use the
-        # same build directory for different platform builds.
-        xcode_build_dir = File.expand_path(XcodeBuildDir)
-        rm_rf xcode_build_dir
-        xcopts = ''
-        xcopts << "-target \"#{target}\" " if target
-        xcopts << "-scheme \"#{scheme}\" " if scheme
-        xcconfig = "CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" "
-        case platform
-        when "MacOSX"
-          xcconfig << "MACOSX_DEPLOYMENT_TARGET=#{@config.deployment_target} "
-        when /^iPhone/
-          xcconfig << "IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
-        else
-          App.fail "Unknown platform : #{platform}"
-        end
-        command = "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} #{xcconfig} build"
-        unless App::VERBOSE
-          command << " | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
-        end
-        puts command
-        sh command
+        xcodebuild(platform, 'build')
 
         # Copy .a files into the platform build directory.
         prods = @opts[:products]
@@ -217,7 +185,6 @@ EOS
       bs_file = bridgesupport_build_path(build_dir)
       headers_dir = @opts[:headers_dir]
       if headers_dir
-        project_dir = File.expand_path(@config.project_dir)
         # Dir.glob does not traverse symlinks with `**`, using this pattern
         # will at least traverse symlinks one level down.
         headers = Dir.glob(File.join(project_dir, headers_dir, '**{,/*/**}/*.h'))
@@ -245,6 +212,10 @@ EOS
       end
     end
 
+    def project_dir
+      File.expand_path(@config.project_dir)
+    end
+
     def gen_method(prefix)
       method = "#{prefix}_#{@type.to_s}".intern
       raise "Invalid vendor project type: #{@type}" unless respond_to?(method)
@@ -268,6 +239,68 @@ EOS
       else
         path
       end
+    end
+
+    def xcodeproj_path
+      @xcodeproj_path ||= begin
+        unless path = (@opts[:xcodeproj] || Dir.glob('*.xcodeproj')[0])
+          App.fail "Can't locate Xcode project file for vendor project #{@path}"
+        end
+        path
+      end
+    end
+
+    def xcodeproj_settings
+      details = {
+        :xcodeproj => xcodeproj_path,
+        :configuration => @opts[:configuration] || 'Release'
+      }
+
+      target = @opts[:target]
+      scheme = @opts[:scheme]
+      if target and scheme
+        App.fail "Both :target and :scheme are provided"
+      end
+      details[:target] = target if target
+      details[:scheme] = scheme if scheme
+
+      details
+    end
+
+    def xcodebuild(platform, action)
+      settings = xcodeproj_settings
+
+      # Unset environment variables that could potentially make the build
+      # to fail.
+      %w{CC CXX CFLAGS CXXFLAGS LDFLAGS}.each { |f| ENV[f] &&= nil }
+
+      # Build project into a build directory. We delete the build directory
+      # each time because Xcode is too stupid to be trusted to use the
+      # same build directory for different platform builds.
+      xcode_build_dir = File.expand_path(XcodeBuildDir)
+      rm_rf xcode_build_dir
+      xcopts = ''
+      xcopts << "-target \"#{settings[:target]}\" " if settings[:target]
+      xcopts << "-scheme \"#{settings[:scheme]}\" " if settings[:scheme]
+      xcconfig = "CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" "
+      case platform
+      when "MacOSX"
+        xcconfig << "MACOSX_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+      when /^iPhone/
+        xcconfig << "IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+      else
+        App.fail "Unknown platform : #{platform}"
+      end
+
+      invoke_xcodebuild("-project '#{settings[:xcodeproj]}' #{xcopts} -configuration '#{settings[:configuration]}' -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} #{xcconfig} #{action}")
+    end
+
+    def invoke_xcodebuild(cmd)
+      command = "#{XCODEBUILD_PATH} #{cmd}"
+      unless App::VERBOSE
+        command << " | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
+      end
+      sh command
     end
   end
 end; end

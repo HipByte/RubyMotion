@@ -22,6 +22,8 @@ module Motion; module Project; class Vendor;
         print_copy_strings_file(text)
       when /^ProcessInfoPlistFile/
         print_processing_info_plist(text)
+      when /^=== CLEAN TARGET/
+        print_clean_target(text)
       else
         ""
       end
@@ -34,6 +36,11 @@ module Motion; module Project; class Vendor;
     def print_build_target(text)
       info = project_build_info(text)
       format("Build", "#{format_path(info[:project])}.xcodeproj [#{info[:target]} - #{info[:configuration]}]")
+    end
+
+    def print_clean_target(text)
+      info = project_build_info(text)
+      format("Clean", "#{format_path(info[:project])}.xcodeproj [#{info[:target]} - #{info[:configuration]}]")
     end
 
     def print_processing_info_plist(text)
