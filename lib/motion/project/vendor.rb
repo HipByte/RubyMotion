@@ -41,7 +41,9 @@ module Motion; module Project;
     attr_reader :path, :libs, :bs_files, :opts
 
     def build(platform)
-      send gen_method('build'), platform, @opts.dup
+      Dir.chdir(@path) do
+        send(gen_method('build'), platform)
+      end
       if @libs.empty?
         App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
       end
@@ -62,176 +64,173 @@ module Motion; module Project;
       end
     end
 
-    def build_static(platform, opts)
+    def build_static(platform)
       App.info 'Build', @path
-      Dir.chdir(@path) do
-        build_dir = build_dir(platform)
-        libs = (opts.delete(:products) or Dir.glob('*.a'))
-        source_files = (opts.delete(:source_files) or ['**/*.{c,m,cpp,cxx,mm,h}']).map { |pattern| Dir.glob(pattern) }.flatten
-        cflags = (opts.delete(:cflags) or '')
+      build_dir = build_dir(platform)
+      libs = (@opts[:products] or Dir.glob('*.a'))
+      source_files = (@opts[:source_files] or ['**/*.{c,m,cpp,cxx,mm,h}']).map { |pattern| Dir.glob(pattern) }.flatten
+      cflags = (@opts[:cflags] or '')
 
-        source_files.each do |srcfile|
-          objfile = File.join(build_dir, srcfile + '.o')
-          next if File.exist?(objfile) and File.mtime(objfile) > File.mtime(srcfile)
-          cplusplus = false
-          compiler =
-            case File.extname(srcfile)
-              when '.c', '.m'
-                @config.locate_compiler(platform, 'clang', 'gcc')
-              when '.cpp', '.cxx', '.mm'
-                cplusplus = true
-                @config.locate_compiler(platform, 'clang++', 'g++')
-              else
-                # Not a valid source file, skip.
-                next
-            end
+      source_files.each do |srcfile|
+        objfile = File.join(build_dir, srcfile + '.o')
+        next if File.exist?(objfile) and File.mtime(objfile) > File.mtime(srcfile)
+        cplusplus = false
+        compiler =
+          case File.extname(srcfile)
+            when '.c', '.m'
+              @config.locate_compiler(platform, 'clang', 'gcc')
+            when '.cpp', '.cxx', '.mm'
+              cplusplus = true
+              @config.locate_compiler(platform, 'clang++', 'g++')
+            else
+              # Not a valid source file, skip.
+              next
+          end
 
-          pch = File.join(build_dir, File.basename(@path) + '.pch')
-          unless File.exist?(pch)
-            FileUtils.mkdir_p File.dirname(pch)
-            File.open(pch, 'w') do |io|
-              case platform
-                when "MacOSX"
-                  header =<<EOS
+        pch = File.join(build_dir, File.basename(@path) + '.pch')
+        unless File.exist?(pch)
+          FileUtils.mkdir_p File.dirname(pch)
+          File.open(pch, 'w') do |io|
+            case platform
+              when "MacOSX"
+                header =<<EOS
 #ifdef __OBJC__
 #  import <Cocoa/Cocoa.h>
 #endif
 EOS
-                when /^iPhone/
-                  header =<<EOS
+              when /^iPhone/
+                header =<<EOS
 #ifdef __OBJC__
 #  import <UIKit/UIKit.h>
 #endif
 EOS
-                else
-                  App.fail "Unknown platform : #{platform}"
-              end
-              io.puts header
+              else
+                App.fail "Unknown platform : #{platform}"
             end
+            io.puts header
           end
-
-          App.info 'Compile', File.join(@path, srcfile)
-          FileUtils.mkdir_p File.dirname(objfile)
-          sh "#{compiler} #{cflags}  #{@config.cflags(platform, cplusplus)} -I. -include \"#{pch}\" -c \"#{srcfile}\" -o \"#{objfile}\""
         end
 
-        if File.exist?(build_dir)
-          libname = 'lib' + File.basename(@path) + '.a'
-          Dir.chdir(build_dir) do
-            objs = Dir.glob('**/*.o')
-            FileUtils.rm_rf libname
-            unless objs.empty?
-              sh "#{@config.locate_binary('ar')} -rc \"#{libname}\" #{objs.join(' ')}"
-              sh "/usr/bin/ranlib \"#{libname}\""
-            end
-          end
-          libpath = File.join(build_dir, libname)
-          libs << libpath if File.exist?(libpath)
-        end
-
-        headers = source_files.select { |p| File.extname(p) == '.h' }
-        bs_files = []
-        unless headers.empty?
-          bs_file = bridgesupport_build_path(build_dir)
-          if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
-            FileUtils.mkdir_p File.dirname(bs_file)
-            bs_cflags = (opts.delete(:bridgesupport_cflags) or cflags)
-            bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
-            @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
-          end
-          bs_files << bs_file
-        end
-
-        @libs = libs.map { |x| File.expand_path(x) }
-        @bs_files = bs_files.map { |x| File.expand_path(x) }
+        App.info 'Compile', File.join(@path, srcfile)
+        FileUtils.mkdir_p File.dirname(objfile)
+        sh "#{compiler} #{cflags}  #{@config.cflags(platform, cplusplus)} -I. -include \"#{pch}\" -c \"#{srcfile}\" -o \"#{objfile}\""
       end
+
+      if File.exist?(build_dir)
+        libname = 'lib' + File.basename(@path) + '.a'
+        Dir.chdir(build_dir) do
+          objs = Dir.glob('**/*.o')
+          FileUtils.rm_rf libname
+          unless objs.empty?
+            sh "#{@config.locate_binary('ar')} -rc \"#{libname}\" #{objs.join(' ')}"
+            sh "/usr/bin/ranlib \"#{libname}\""
+          end
+        end
+        libpath = File.join(build_dir, libname)
+        libs << libpath if File.exist?(libpath)
+      end
+
+      headers = source_files.select { |p| File.extname(p) == '.h' }
+      bs_files = []
+      unless headers.empty?
+        bs_file = bridgesupport_build_path(build_dir)
+        if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
+          FileUtils.mkdir_p File.dirname(bs_file)
+          bs_cflags = (@opts[:bridgesupport_cflags] or cflags)
+          bs_exceptions = (@opts[:bridgesupport_exceptions] or [])
+          @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
+        end
+        bs_files << bs_file
+      end
+
+      @libs = libs.map { |x| File.expand_path(x) }
+      @bs_files = bs_files.map { |x| File.expand_path(x) }
     end
 
-    def build_xcode(platform, opts)
+    def build_xcode(platform)
       project_dir = File.expand_path(@config.project_dir)
-      Dir.chdir(@path) do
-          # Validate common build directory.
-          if !File.writable?(Dir.pwd)
-            $stderr.puts "Cannot write into the `#{Dir.pwd}' directory, please check permissions and try again."
-            exit 1
-          end
-
-        build_dir = build_dir(platform)
-        if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
-          FileUtils.mkdir_p build_dir
-
-          # Prepare Xcode project settings.
-          xcodeproj = opts.delete(:xcodeproj) || begin
-            projs = Dir.glob('*.xcodeproj')
-            if projs.size != 1
-              App.fail "Can't locate Xcode project file for vendor project #{@path}"
-            end
-            projs[0]
-          end
-          target = opts.delete(:target)
-          scheme = opts.delete(:scheme)
-          if target and scheme
-            App.fail "Both :target and :scheme are provided"
-          end
-          configuration = opts.delete(:configuration) || 'Release'
-
-          # Unset environment variables that could potentially make the build
-          # to fail.
-          %w{CC CXX CFLAGS CXXFLAGS LDFLAGS}.each { |f| ENV[f] &&= nil }
- 
-          # Build project into a build directory. We delete the build directory
-          # each time because Xcode is too stupid to be trusted to use the
-          # same build directory for different platform builds.
-          xcode_build_dir = File.expand_path(XcodeBuildDir)
-          rm_rf xcode_build_dir
-          xcopts = ''
-          xcopts << "-target \"#{target}\" " if target
-          xcopts << "-scheme \"#{scheme}\" " if scheme
-          xcconfig = "CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" "
-          case platform
-          when "MacOSX"
-            xcconfig << "MACOSX_DEPLOYMENT_TARGET=#{@config.deployment_target} "
-          when /^iPhone/
-            xcconfig << "IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
-          else
-            App.fail "Unknown platform : #{platform}"
-          end
-          command = "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} #{xcconfig} build"
-          unless App::VERBOSE
-            command << " | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
-          end
-          sh command
-
-          # Copy .a files into the platform build directory.
-          prods = opts.delete(:products)
-          Dir.glob(File.join(XcodeBuildDir, '*.a')).each do |lib|
-            next if prods and !prods.include?(File.basename(lib))
-            lib = File.readlink(lib) if File.symlink?(lib)
-            sh "/bin/cp \"#{lib}\" \"#{build_dir}\""
-          end
-
-          `/usr/bin/touch \"#{build_dir}\"`
-        end
-
-        # Generate the bridgesupport file if we need to.
-        bs_file = bridgesupport_build_path(build_dir)
-        headers_dir = opts.delete(:headers_dir)
-        if headers_dir
-          project_dir = File.expand_path(@config.project_dir)
-          # Dir.glob does not traverse symlinks with `**`, using this pattern
-          # will at least traverse symlinks one level down.
-          headers = Dir.glob(File.join(project_dir, headers_dir, '**{,/*/**}/*.h'))
-          if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
-            FileUtils.mkdir_p File.dirname(bs_file)
-            bs_cflags = (opts.delete(:bridgesupport_cflags) or opts.delete(:cflags) or '')
-            bs_exceptions = (opts.delete(:bridgesupport_exceptions) or [])
-            @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
-          end
-        end
-
-        @bs_files = Dir.glob("#{build_dir}/*.bridgesupport").map { |x| File.expand_path(x) }
-        @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
+      # Validate common build directory.
+      if !File.writable?(Dir.pwd)
+        $stderr.puts "Cannot write into the `#{Dir.pwd}' directory, please check permissions and try again."
+        exit 1
       end
+
+      build_dir = build_dir(platform)
+      if !File.exist?(build_dir) or Dir.glob('**/*').any? { |x| File.mtime(x) > File.mtime(build_dir) }
+        FileUtils.mkdir_p build_dir
+
+        # Prepare Xcode project settings.
+        xcodeproj = @opts[:xcodeproj] || begin
+          projs = Dir.glob('*.xcodeproj')
+          if projs.size != 1
+            App.fail "Can't locate Xcode project file for vendor project #{@path}"
+          end
+          projs[0]
+        end
+        target = @opts[:target]
+        scheme = @opts[:scheme]
+        if target and scheme
+          App.fail "Both :target and :scheme are provided"
+        end
+        configuration = @opts[:configuration] || 'Release'
+
+        # Unset environment variables that could potentially make the build
+        # to fail.
+        %w{CC CXX CFLAGS CXXFLAGS LDFLAGS}.each { |f| ENV[f] &&= nil }
+
+        # Build project into a build directory. We delete the build directory
+        # each time because Xcode is too stupid to be trusted to use the
+        # same build directory for different platform builds.
+        xcode_build_dir = File.expand_path(XcodeBuildDir)
+        rm_rf xcode_build_dir
+        xcopts = ''
+        xcopts << "-target \"#{target}\" " if target
+        xcopts << "-scheme \"#{scheme}\" " if scheme
+        xcconfig = "CONFIGURATION_BUILD_DIR=\"#{xcode_build_dir}\" "
+        case platform
+        when "MacOSX"
+          xcconfig << "MACOSX_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+        when /^iPhone/
+          xcconfig << "IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+        else
+          App.fail "Unknown platform : #{platform}"
+        end
+        command = "/usr/bin/xcodebuild -project \"#{xcodeproj}\" #{xcopts} -configuration \"#{configuration}\" -sdk #{platform.downcase}#{@config.sdk_version} #{@config.arch_flags(platform)} #{xcconfig} build"
+        unless App::VERBOSE
+          command << " | env RM_XCPRETTY_PRINTER_PROJECT_ROOT='#{project_dir}' '#{File.join(@config.motiondir, 'vendor/XCPretty/bin/xcpretty')}' --printer '#{File.join(@config.motiondir, 'lib/motion/project/vendor/xcpretty_printer.rb')}'"
+        end
+        puts command
+        sh command
+
+        # Copy .a files into the platform build directory.
+        prods = @opts[:products]
+        Dir.glob(File.join(XcodeBuildDir, '*.a')).each do |lib|
+          next if prods and !prods.include?(File.basename(lib))
+          lib = File.readlink(lib) if File.symlink?(lib)
+          sh "/bin/cp \"#{lib}\" \"#{build_dir}\""
+        end
+
+        `/usr/bin/touch \"#{build_dir}\"`
+      end
+
+      # Generate the bridgesupport file if we need to.
+      bs_file = bridgesupport_build_path(build_dir)
+      headers_dir = @opts[:headers_dir]
+      if headers_dir
+        project_dir = File.expand_path(@config.project_dir)
+        # Dir.glob does not traverse symlinks with `**`, using this pattern
+        # will at least traverse symlinks one level down.
+        headers = Dir.glob(File.join(project_dir, headers_dir, '**{,/*/**}/*.h'))
+        if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
+          FileUtils.mkdir_p File.dirname(bs_file)
+          bs_cflags = (@opts[:bridgesupport_cflags] or @opts[:cflags] or '')
+          bs_exceptions = (@opts[:bridgesupport_exceptions] or [])
+          @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
+        end
+      end
+
+      @bs_files = Dir.glob("#{build_dir}/*.bridgesupport").map { |x| File.expand_path(x) }
+      @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
     end
 
     private
