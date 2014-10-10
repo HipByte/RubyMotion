@@ -30,6 +30,48 @@ module Motion; module Project
     def codesign(config, platform)
       entitlements = File.join(config.app_bundle(platform), "Entitlements.plist")
       File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
+
+      extension_dir = config.app_bundle(platform)
+
+      # Create bundle/ResourceRules.plist.
+      resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
+      unless File.exist?(resource_rules_plist)
+        App.info 'Create', resource_rules_plist
+        File.open(resource_rules_plist, 'w') do |io|
+          io.write(<<-PLIST)
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>rules</key>
+        <dict>
+                <key>.*</key>
+                <true/>
+                <key>Info.plist</key>
+                <dict>
+                        <key>omit</key>
+                        <true/>
+                        <key>weight</key>
+                        <real>10</real>
+                </dict>
+                <key>ResourceRules.plist</key>
+                <dict>
+                        <key>omit</key>
+                        <true/>
+                        <key>weight</key>
+                        <real>100</real>
+                </dict>
+        </dict>
+</dict>
+</plist>
+PLIST
+        end
+      end
+
+      # Copy the provisioning profile
+      bundle_provision = File.join(extension_dir, "embedded.mobileprovision")
+      App.info 'Create', bundle_provision
+      FileUtils.cp config.provisioning_profile, bundle_provision
     end
 
     def build(config, platform, opts)

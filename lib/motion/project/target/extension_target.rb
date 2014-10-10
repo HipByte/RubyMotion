@@ -87,53 +87,6 @@ module Motion; module Project
 
       # Create bundle/ResourceRules.plist.
       resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
-      unless File.exist?(resource_rules_plist)
-        App.info 'Create', resource_rules_plist
-        File.open(resource_rules_plist, 'w') do |io|
-          io.write(<<-PLIST)
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-        <key>rules</key>
-        <dict>
-                <key>.*</key>
-                <true/>
-                <key>Info.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>10</real>
-                </dict>
-                <key>ResourceRules.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>100</real>
-                </dict>
-        </dict>
-</dict>
-</plist>
-PLIST
-        end
-      end
-
-      # At build time Extensions do not know the bundle indentifier of its
-      # parent app, so we have to modify their Entitlements.plist later
-      extension_dir = File.join(dest_extension_path, extension_name)
-      info_plist = File.join(extension_dir, 'Info.plist')
-      entitlements = File.join(extension_dir, 'Entitlements.plist')
-      extension_bundle_name = `/usr/libexec/PlistBuddy -c "print CFBundleName" "#{info_plist}"`.strip
-      extension_bundle_indentifer = "#{@config.identifier}.#{extension_bundle_name}"
-      application_identifier = @config.seed_id + '.' + extension_bundle_indentifer
-      `/usr/libexec/PlistBuddy -c "Add application-identifier string #{application_identifier}" #{entitlements}`
-
-      # Copy the provisioning profile
-      bundle_provision = File.join(extension_dir, "embedded.mobileprovision")
-      App.info 'Create', bundle_provision
-      FileUtils.cp @config.provisioning_profile, bundle_provision
 
       # Codesign executable
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
