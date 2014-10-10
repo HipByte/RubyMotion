@@ -129,7 +129,8 @@ module Motion; module Project
         "RM_TARGET_DEPLOYMENT_TARGET=\"#{@config.deployment_target}\"",
         "RM_TARGET_XCODE_DIR=\"#{@config.xcode_dir}\"",
         "RM_TARGET_HOST_APP_PATH=\"#{File.expand_path(@config.project_dir)}\"",
-        "RM_TARGET_BUILD=\"1\""
+        "RM_TARGET_BUILD=\"1\"",
+        "RM_TARGET_ARCHS='#{@config.archs.inspect}'"
       ].join(' ')
     end
 

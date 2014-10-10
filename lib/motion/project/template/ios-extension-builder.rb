@@ -75,10 +75,15 @@ PLIST
     end
 
     def build(config, platform, opts)
+      @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
       config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
       config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
       config.xcode_dir = ENV['RM_TARGET_XCODE_DIR'] if ENV['RM_TARGET_XCODE_DIR']
-      @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
+      if ENV['RM_TARGET_ARCHS']
+        eval(ENV['RM_TARGET_ARCHS']).each do |platform, archs|
+          config.archs[platform] = archs
+        end
+      end
 
       datadir = config.datadir
       unless File.exist?(File.join(datadir, platform))
