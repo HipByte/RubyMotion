@@ -31,7 +31,7 @@ describe "ImmediateRef" do
     ref.ruby_instance_method.should.eql ref
   end
 
-  it "is able to dispatch methods to itself", :unless => bits == 64 do
+  it "is able to dispatch methods to itself", :if => bits == 64 do
     class NSIndexPath
       def ruby_instance_method
         self.indexAtPosition(0)
@@ -39,5 +39,10 @@ describe "ImmediateRef" do
     end
     ref = NSIndexPath.indexPathWithIndex(42)
     ref.ruby_instance_method.should == 42
+  end
+
+  it "does not actually create a copy, but instead returns itself", :if => bits == 64 do
+    ref = NSIndexPath.indexPathWithIndex(42)
+    ref.object_id.should == ref.copy.object_id
   end
 end
