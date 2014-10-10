@@ -155,7 +155,12 @@ module Motion; module Project;
                 obj_path
               end
               ld_path = File.join(App.config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/ld')
-              sh "#{ld_path} \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\"" 
+              line = "#{ld_path} \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\" 2>&1"
+              # Ignore `warning: ignore debug info...' lines from the linker which seem to be caused by an Xcode bug.
+              puts line if Rake.application.options.trace
+              ld_output = `#{line}`
+              ld_output = ld_output.lines.select { |x| !x.match(/^warning: ignoring debug info with an invalid version/) }.join
+              $stderr.puts ld_output unless ld_output.strip.empty?
             else
               sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
             end
