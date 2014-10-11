@@ -824,7 +824,7 @@ start_debug_server(am_device_t dev)
 	NSString *lldb_path = [[NSString stringWithUTF8String:xcode_dir]
 	    stringByAppendingPathComponent:@"usr/bin/lldb"];
 	if (![[NSFileManager defaultManager] fileExistsAtPath:lldb_path]) {
-	    fprintf(stderr, "Can't locate either gdb or lldb within Xcode");
+	    fprintf(stderr, "Can't locate either gdb or lldb within Xcode\n");
 	    exit(1);
 	}
 
