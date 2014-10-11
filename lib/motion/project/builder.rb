@@ -133,7 +133,6 @@ module Motion; module Project;
             raise "Can't locate kernel file" unless File.exist?(kernel)
    
             # Assembly.
-            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
             arm64 = false
             compiler_exec_arch = case arch
               when /^arm/
@@ -141,26 +140,14 @@ module Motion; module Project;
               else
                 arch
             end
+            asm = File.join(files_build_dir, "#{path}.#{arch}.#{arm64 ? 'bc' : 's'}")
             sh "/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
 
             # Object 
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
             if arm64
               # At the time of this writing Apple hasn't yet contributed the source code of the LLVM backend for the "arm64" architecture, so the RubyMotion compiler can't emit proper assembly yet. We work around this limitation by generating bitcode instead and giving it to the linker. Ugly but should be temporary (right?).
-              @dummy_object_file ||= begin
-                src_path = '/tmp/__dummy_object_file__.c'
-                obj_path = '/tmp/__dummy_object_file__.o'
-                File.open(src_path, 'w') { |io| io.puts "static int foo(void) { return 42; }" }
-                sh "#{cc} -c #{src_path} -o #{obj_path} -arch arm64 -miphoneos-version-min=7.0"
-                obj_path
-              end
-              ld_path = File.join(App.config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/ld')
-              line = "#{ld_path} \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\" 2>&1"
-              # Ignore `warning: ignore debug info...' lines from the linker which seem to be caused by an Xcode bug.
-              puts line if Rake.application.options.trace
-              ld_output = `#{line}`
-              ld_output = ld_output.lines.select { |x| !x.match(/^warning: ignoring debug info with an invalid version/) }.join
-              $stderr.puts ld_output unless ld_output.strip.empty?
+              sh "#{cc} -fexceptions -c -arch #{arch} -miphoneos-version-min=7.0 \"#{asm}\" -o \"#{arch_obj}\""
             else
               sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
             end
