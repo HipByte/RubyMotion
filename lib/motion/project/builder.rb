@@ -145,12 +145,8 @@ module Motion; module Project;
 
             # Object 
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            if arm64
-              # At the time of this writing Apple hasn't yet contributed the source code of the LLVM backend for the "arm64" architecture, so the RubyMotion compiler can't emit proper assembly yet. We work around this limitation by generating bitcode instead and giving it to the linker. Ugly but should be temporary (right?).
-              sh "#{cc} -fexceptions -c -arch #{arch} -miphoneos-version-min=7.0 \"#{asm}\" -o \"#{arch_obj}\""
-            else
-              sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
-            end
+            arch_obj_flags = arm64 ? "-miphoneos-version-min=#{config.deployment_target}" : ''
+            sh "#{cc} -fexceptions -c -arch #{arch} #{arch_obj_flags} \"#{asm}\" -o \"#{arch_obj}\""
 
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
