@@ -836,6 +836,15 @@ start_debug_server(am_device_t dev)
 		[NSTemporaryDirectory() fileSystemRepresentation]);
 	assert(mktemp(lldb_socket_path) != NULL);
 
+	const char *remote_arch = getenv("RM_REMOTE_ARCH");
+	assert(remote_arch != NULL);
+	if (strcmp(remote_arch, "arm64") != 0
+		&& strcmp(remote_arch, "armv7s") != 0
+		&& strcmp(remote_arch, "armv7") != 0) {
+	    fprintf(stderr, "Invalid target architecture `%s'\n", remote_arch);
+	    exit(1);
+	}
+
 	// Prepare lldb commands file.
 	NSString *py_cmds = [NSString stringWithFormat:@""\
 	"# -*- coding: utf-8 -*-\n"\
@@ -847,7 +856,7 @@ start_debug_server(am_device_t dev)
 	"debugger = lldb.debugger\n"\
 	"debugger.SetAsync(False)\n"\
 	"error = lldb.SBError()\n"\
-	"target = debugger.CreateTarget(\"%@\", \"armv7s-apple-ios\", \"remote-ios\", False, error)\n"\
+	"target = debugger.CreateTarget(\"%@\", \"%s-apple-ios\", \"remote-ios\", False, error)\n"\
 	"module = target.FindModule(target.GetExecutable())\n"\
 	"filespec = lldb.SBFileSpec(\"%@\", False)\n"\
 	"module.SetPlatformFileSpec(filespec)\n"\
@@ -861,7 +870,9 @@ start_debug_server(am_device_t dev)
 	"process.Continue()\n"\
 	"",
 	     lldb_socket_path,
-	     app_path, app_remote_path,
+	     app_path,
+	     remote_arch,
+	     app_remote_path,
 	     device_support_path, device_support_path, device_support_path];
 	NSString *py_cmds_path = [NSString pathWithComponents:
 	    [NSArray arrayWithObjects:NSTemporaryDirectory(),
@@ -894,7 +905,9 @@ start_debug_server(am_device_t dev)
 
 	// Run lldb.
 	gdb_task = [[RMTask launchedTaskWithLaunchPath:lldb_path
-	    arguments:[NSArray arrayWithObjects:@"-s", cmds_path, nil]] retain];
+	    arguments:[NSArray arrayWithObjects:@"-s", cmds_path,
+	    @"--arch", [NSString stringWithUTF8String:remote_arch],
+	    nil]] retain];
 
 	// Connect to the lldb UNIX socket.
 	const int lldb_socket = socket(PF_LOCAL, SOCK_STREAM, 0);
