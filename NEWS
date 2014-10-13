@@ -3,6 +3,8 @@
   * Added ARM64 support (64-bit) for iOS. It is not yet enabled by default,
     in order to do so, add the following line to your project's Rakefile:
     app.archs['iPhoneOS'] |= ['arm64']
+  * iOS 4.3 and OS X 10.7 are no longer supported, due to internal changes
+    that require us to use a newer C++ standard library.
   * Fixed a bug when copying an `ImmediateRef', which isn't needed anyways,
     because a tagged pointer can not be duplicated either.
   * [Vendor] Fixed a bug where Xcode 6 would cache precompiled headers in a
