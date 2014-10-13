@@ -42,12 +42,11 @@ module Motion; module Project;
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
 
+    # App Extensions are required to include a 64-bit for App Store submission.
     def archs
       @archs ||= begin
-        # By default, do not build with 64-bit, as it's still experimental.
         archs = super
         archs['iPhoneSimulator'].delete('x86_64')
-        archs['iPhoneOS'].delete('arm64')
         archs
       end
     end

@@ -494,9 +494,42 @@ EOS
 
     attr_accessor :targets
 
+
+    # App Extensions are required to include a 64-bit slice for App Store
+    # submission, so do not exclude `arm64` by default.
+    #
+    # From https://developer.apple.com/library/prerelease/iOS/documentation/General/Conceptual/ExtensibilityPG/ExtensionCreation.html:
+    #
+    #  NOTE ABOUT 64-BIT ARCHITECTURE
+    #
+    #  An app extension target must include the arm64 (iOS) or x86_64
+    #  architecture (OS X) in its Architectures build settings or it will be
+    #  rejected by the App Store. Xcode includes the appropriate 64-bit
+    #  architecture with its “Standard architectures” setting when you create a
+    #  new app extension target.
+    #
+    #  If your containing app target links to an embedded framework, the app
+    #  must also include 64-bit architecture or it will be rejected by the App
+    #  Store.
+    #
+    # From https://developer.apple.com/library/ios/documentation/General/Conceptual/ExtensibilityPG/ExtensionScenarios.html#//apple_ref/doc/uid/TP40014214-CH21-SW5
+    #
+    #  A containing app that links to an embedded framework must include the
+    #  arm64 (iOS) or x86_64 (OS X) architecture build setting or it will be
+    #  rejected by the App Store.
+    #
     def target(path, type, opts={})
       unless File.exist?(path)
         App.fail "Could not find target of type '#{type}' at '#{path}'"
+      end
+
+      unless archs['iPhoneOS'].include?('arm64')
+        App.warn "Device builds of App Extensions and Frameworks are " \
+                 "required to have a 64-bit slice for App Store submissions " \
+                 "to be accepted."
+        App.warn "Your application will now have 64-bit enabled by default, " \
+                 "be sure to properly test it on a 64-bit device."
+        archs['iPhoneOS'] << 'arm64'
       end
 
       case type
