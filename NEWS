@@ -5,6 +5,8 @@
     app.archs['iPhoneOS'] |= ['arm64']
   * iOS 4.3 and OS X 10.7 are no longer supported, due to internal changes
     that require us to use a newer C++ standard library.
+  * [iOS] Fixed a bug where the `app.provisioning_profile' setting would not be
+    configurable in the Rakefile of App Extensions projects.
   * Fixed a bug when copying an `ImmediateRef', which isn't needed anyways,
     because a tagged pointer can not be duplicated either.
   * Fixed a bug where Xcode 6 would cache precompiled headers in a
@@ -12,8 +14,6 @@
   * Fixed a bug where a failed vendored build could cause subsequent builds to
     never actually start.
   * Fixed the build system to remove Xcode 6 noise from vendored build output.
-  * [iOS] Fixed a bug where it could not configure `app.provisioning_profile'
-    in Rakefile in App Extensions.
   * Fixed a bug where the #supportedInterfaceOrientations method would be not
     properly included.
   * Fixed a race condition bug in the runtime where a crash would occur if
