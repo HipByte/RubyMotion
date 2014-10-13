@@ -24,6 +24,9 @@ if OSX_SDK_VERSIONS.empty?
   exit 1
 end
 
+OSX_SDK_VERSIONS.delete('10.6') # 10.6 is no longer supported
+IOS_SDK_VERSIONS.delete('4.3')  # 4.3 is no longer supported
+
 if false
   # DEBUG
   IOS_SDK_VERSIONS.clear; IOS_SDK_VERSIONS << '8.0'
