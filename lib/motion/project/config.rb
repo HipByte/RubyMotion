@@ -76,7 +76,8 @@ module Motion; module Project
 
     def initialize(project_dir, build_mode)
       @project_dir = project_dir
-      @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
+      @files = []
+      @app_dir = 'app'
       @build_mode = build_mode
       @name = 'Untitled'
       @resources_dirs = [File.join(project_dir, 'resources')]
@@ -105,12 +106,32 @@ module Motion; module Project
       @setup_blocks ||= []
     end
 
+    def post_setup_blocks
+      @post_setup_blocks ||= []
+    end
+
     def setup
       if @setup_blocks
         @setup_blocks.each { |b| b.call(self) }
-        @setup_blocks = nil
+      end
+
+      if @post_setup_blocks
+        @post_setup_blocks.each { |b| b.call(self) }
+      end
+
+      # should we include a check here for "already included app/ files"? it's
+      # not necessary since this operation is idempotent.
+      Dir.glob(File.join(project_dir, "#{@app_dir}/**/*.rb")).each do |app_file|
+        @files << app_file unless @files.include?(app_file)
+      end
+
+      if @setup_blocks || @post_setup_blocks
         validate
       end
+
+      @setup_blocks = nil
+      @post_setup_blocks = nil
+
       self
     end
 
