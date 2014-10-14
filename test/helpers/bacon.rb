@@ -168,6 +168,10 @@ module Bacon
     end
   end
 
+  module SpecDoxOutput
+    attr_accessor :running_disabled_spec
+  end
+
   module TapOutput
     attr_accessor :running_disabled_spec
   end
