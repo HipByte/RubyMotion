@@ -1,3 +1,8 @@
+= RubyMotion 2.37 =
+
+  * Fixed a regression where Dispatch.once did not work correctly when it was
+    invoked in some points.
+
 = RubyMotion 2.36 =
 
   * Added ARM64 support (64-bit) for iOS. It is not yet enabled by default for
