@@ -25,6 +25,11 @@ Motion::Project::App.setup do |app|
     ENV['deployment_target'] = app.deployment_target
   end
 
+  File.open("/tmp/deployment_target.rb", "w") { |io|
+    io.puts "ENV['deployment_target'] = '#{ENV['deployment_target']}'"
+  }
+  app.files.unshift("/tmp/deployment_target.rb")
+
   app.archs[app.local_platform] = [ENV['ARCH']] if ENV['ARCH']
 
   # 10.8 and 10.9 are 64-bit only.
