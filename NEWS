@@ -4,6 +4,8 @@
     invoked in some points.
   * Fixed a bug where the compiler would crash with an assertion message
     `[BUG] Object: SubtypeUntil ...' when compiling certain Ruby files.
+  * Fixed a bug in the compiler when compiling for ARM64 where certain types
+    would still be emitted with a 32-bit architecture in mind.
 
 = RubyMotion 2.36 =
 
