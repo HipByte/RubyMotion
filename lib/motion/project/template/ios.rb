@@ -216,7 +216,6 @@ namespace :spec do
   desc "Run the test/spec suite on the device"
   task :device do
     App.config_without_setup.spec_mode = true
-    ENV['debug'] ||= '1'
     Rake::Task["device"].invoke
   end
 end
