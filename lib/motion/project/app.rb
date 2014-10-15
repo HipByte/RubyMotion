@@ -72,7 +72,7 @@ module Motion; module Project
 
       def setup(&block)
         config_without_setup.setup_blocks << block
-        config.setup
+        config
       end
 
       def pre_setup(&block)
