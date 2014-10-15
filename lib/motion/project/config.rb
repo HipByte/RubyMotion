@@ -102,6 +102,10 @@ module Motion; module Project
       map
     end
 
+    def pre_setup_blocks
+      @pre_setup_blocks ||= []
+    end
+
     def setup_blocks
       @setup_blocks ||= []
     end
@@ -112,10 +116,11 @@ module Motion; module Project
 
     def setup
       should_validate = false
-      if @setup_blocks
-        @setup_blocks.each { |b| b.call(self) }
+
+      if @pre_setup_blocks
+        @pre_setup_blocks.each { |b| b.call(self) }
         should_validate = true
-        @setup_blocks = nil
+        @pre_setup_blocks = nil
       end
 
       if @app_dir
@@ -124,6 +129,12 @@ module Motion; module Project
         end
         should_validate = true
         @app_dir = nil
+      end
+
+      if @setup_blocks
+        @setup_blocks.each { |b| b.call(self) }
+        should_validate = true
+        @setup_blocks = nil
       end
 
       if @post_setup_blocks
