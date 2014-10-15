@@ -111,26 +111,30 @@ module Motion; module Project
     end
 
     def setup
+      should_validate = false
       if @setup_blocks
         @setup_blocks.each { |b| b.call(self) }
+        should_validate = true
+        @setup_blocks = nil
+      end
+
+      if @app_dir
+        Dir.glob(File.join(project_dir, "#{@app_dir}/**/*.rb")).each do |app_file|
+          @files << app_file unless @files.include?(app_file)
+        end
+        should_validate = true
+        @app_dir = nil
       end
 
       if @post_setup_blocks
         @post_setup_blocks.each { |b| b.call(self) }
+        should_validate = true
+        @post_setup_blocks = nil
       end
 
-      # should we include a check here for "already included app/ files"? it's
-      # not necessary since this operation is idempotent.
-      Dir.glob(File.join(project_dir, "#{@app_dir}/**/*.rb")).each do |app_file|
-        @files << app_file unless @files.include?(app_file)
-      end
-
-      if @setup_blocks || @post_setup_blocks
+      if should_validate
         validate
       end
-
-      @setup_blocks = nil
-      @post_setup_blocks = nil
 
       self
     end
