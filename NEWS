@@ -6,6 +6,8 @@
     `[BUG] Object: SubtypeUntil ...' when compiling certain Ruby files.
   * Fixed a bug in the compiler when compiling for ARM64 where certain types
     would still be emitted with a 32-bit architecture in mind.
+  * Fixed a bug in the compiler when compiling for ARM64 where certain structs
+    would not be properly available (such as NSDecimal).
 
 = RubyMotion 2.36 =
 
