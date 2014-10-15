@@ -726,3 +726,14 @@ end
 
 # Do not log all exceptions when running the specs.
 Exception.log_exceptions = false
+
+unless UIDevice.currentDevice.model.match(/simulator/i)
+  module Kernel
+    def puts(*args)
+      NSLog(args.join("\n"))
+    end
+    def print(*args)
+      puts *args # TODO
+    end
+  end
+end
