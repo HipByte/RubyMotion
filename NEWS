@@ -1,3 +1,14 @@
+= RubyMotion 2.37 =
+
+  * Fixed a regression where Dispatch.once did not work correctly when it was
+    invoked in some points.
+  * Fixed a bug where the compiler would crash with an assertion message
+    `[BUG] Object: SubtypeUntil ...' when compiling certain Ruby files.
+  * Fixed a bug in the compiler when compiling for ARM64 where certain types
+    would still be emitted with a 32-bit architecture in mind.
+  * Fixed a bug in the compiler when compiling for ARM64 where certain structs
+    would not be properly available (such as NSDecimal).
+
 = RubyMotion 2.36 =
 
   * Added ARM64 support (64-bit) for iOS. It is not yet enabled by default for
