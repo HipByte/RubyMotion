@@ -1,3 +1,7 @@
+= RubyMotion 2.38 =
+
+  * Fixed a regression where `rake spec' did not work on OS X platform.
+
 = RubyMotion 2.37 =
 
   * Fixed a regression where Dispatch.once did not work correctly when it was
