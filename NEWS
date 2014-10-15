@@ -2,8 +2,8 @@
 
   * Fixed a regression where Dispatch.once did not work correctly when it was
     invoked in some points.
-  * Fixed a bug where it would causes a crash with "[BUG] Object: SubtypeUntil:..."
-    message at compilation.
+  * Fixed a bug where the compiler would crash with an assertion message
+    `[BUG] Object: SubtypeUntil ...' when compiling certain Ruby files.
 
 = RubyMotion 2.36 =
 
