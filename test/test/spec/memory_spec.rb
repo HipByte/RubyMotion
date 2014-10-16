@@ -589,6 +589,7 @@ describe "Struct" do
   end
 
   # RM-355
+  # depend on RM-634
   xit "#[]= should not released the object" do
     @foo = TestStruct.new
 
@@ -602,6 +603,7 @@ describe "Struct" do
   end
 
   # RM-356
+  # depend on RM-634
   xit "setter method should not released the object" do
     @foo = TestStruct.new
 
