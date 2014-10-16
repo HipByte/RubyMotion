@@ -1,5 +1,6 @@
 = RubyMotion 3.2 =
 
+  * Added support for class variables.
   * Fixed a crash in the REPL when accessing constant paths (ex. Foo::Bar).
   * Fixed the runtime to properly catch Java exceptions raised by Android
     APIs with the `rescue => Exception' expression.
