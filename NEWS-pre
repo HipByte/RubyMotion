@@ -14,6 +14,8 @@
     Android SDK does not support the default API version.
   * Fixed a crash in the compiler when compiling `case/when' blocks that
     create local references.
+  * Fixed a bug in the build system where the compilation of the main activity
+    class would fail due to a missing import of the `java.lang.System' class.
 
 = RubyMotion 3.1 =
 
