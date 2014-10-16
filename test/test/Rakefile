@@ -30,7 +30,10 @@ Motion::Project::App.setup do |app|
   }
   app.files.unshift("/tmp/deployment_target.rb")
 
-  app.archs[app.local_platform] = [ENV['ARCH']] if ENV['ARCH']
+  if ENV['ARCH']
+    app.archs[app.local_platform] = [ENV['ARCH']]
+    app.archs['iPhoneOS'] = [ENV['ARCH']] if ENV['ARCH'] =~ /arm/
+  end
 
   # 10.8 and 10.9 are 64-bit only.
   if ENV['PLATFORM'] == 'osx' && ENV['ARCH'] == 'i386' && %w{ 10.8 10.9 }.include?(ENV['deployment_target'])
