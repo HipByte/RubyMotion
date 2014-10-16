@@ -6,6 +6,7 @@ s3config.yaml
 bin/llc
 bin/ruby
 bin/nfd
+bin/android/repl
 bin/ios/deploy
 bin/ios/sim
 bin/osx/sim
