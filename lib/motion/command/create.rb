@@ -65,6 +65,11 @@ module Motion; class Command
     def validate!
       super
       help! "A name for the new project is required." unless @app_name
+
+      if @template == "gem" && !ENV['MOTION_ALLOW_MOTION'] && @app_name.downcase.include?("motion")
+        help! "Sorry, names including *motion* are not allowed.\nIf you still want to use this name, set the\nMOTION_ALLOW_MOTION environment variable and try again."
+      end
+      
       # TODO This needs to take into account external templates (e.g. from git
       #      or a local path.)
       #unless self.class.all_templates.include?(@template)
