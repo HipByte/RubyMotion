@@ -308,7 +308,7 @@ EOS
     end
     if name == App.config.application_class or (App.config.application_class == nil and name == App.config.main_activity)
       # We need to insert code to load the payload library. It has to be done either in the main activity class or in the custom application class (if provided), as the later will be loaded first.
-      java_file_txt << "\tstatic {\n\t\tSystem.loadLibrary(\"#{App.config.payload_library_name}\");\n\t}\n"
+      java_file_txt << "\tstatic {\n\t\tjava.lang.System.loadLibrary(\"#{App.config.payload_library_name}\");\n\t}\n"
     end
     java_file_txt << "}\n"
     java_file = File.join(java_app_package_dir, name + '.java')
