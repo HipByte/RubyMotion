@@ -32,4 +32,27 @@ autorelease_pool {
     obj.get_test2.should == 1
     obj.get_test3.should == 1
   end
+
+  # RM-628
+  it "should work just once" do
+    @sum = 0
+    5.times do
+      Dispatch.once {@sum += 2}
+      Dispatch.once {@sum += 5}
+    end
+    @sum.should == 7  #=> Expected: 7
+
+    @sum = 0
+    threads = []
+    5.times do
+      threads << Thread.new do
+        autorelease_pool {
+          Dispatch.once {@sum += 2}
+          Dispatch.once {@sum += 5}
+        }
+      end
+    end
+    threads.each { |t| t.join }
+    @sum.should == 7  #=> Expected: 7
+  end
 end
