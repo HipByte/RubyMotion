@@ -72,6 +72,19 @@ $ sudo env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin
 ```
 
 
+### Set up LLVM for Android
+
+```
+$ cd src
+$ svn checkout https://llvm.org/svn/llvm-project/llvm/branches/release_34 llvm-3.4
+$ cd llvm-3.4
+$ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ MACOSX_DEPLOYMENT_TARGET=10.6 ./configure --enable-bindings=none --enable-optimized --with-llvmgccdir=/tmp
+$ env UNIVERSAL=1 UNIVERSAL_ARCH="i386 x86_64" CC=/usr/bin/gcc CXX=/usr/bin/g++ MACOSX_DEPLOYMENT_TARGET=10.6 make
+```
+
+NOTE: **Must not** run `make install`
+
+
 ### Set up RubyMotion
 
 ```
