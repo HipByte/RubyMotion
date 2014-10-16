@@ -11,6 +11,8 @@
     `foo(1, { :x => 2, :y => 3, :z => 4 })').
   * Fixed the build system to fail with a proper error message in case the
     Android SDK does not support the default API version.
+  * Fixed a crash in the compiler when compiling `case/when' blocks that
+    create local references.
 
 = RubyMotion 3.1 =
 
