@@ -114,7 +114,6 @@ EOS
     extra_packages = App.config.vendored_projects.map { |x| x[:package] }.compact.map { |x| "--extra-packages #{x}" }.join(' ')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
 
-
     r_java = Dir.glob(java_dir + '/**/R.java')
     classes_dir = File.join(app_build_dir, 'classes')
     mkdir_p classes_dir
