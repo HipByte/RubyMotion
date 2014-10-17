@@ -3,6 +3,8 @@
   * Fixed a regression where `rake spec' did not work on OS X platform.
   * Fixed a bug where Dispatch.once did not work correctly with x86_64 on
     iPhone simulator and i386 on OS X platforms.
+  * Fixed a bug where `:cflags' for `:static' vendored projects could not
+    override those set by the toolchain by default. E.g. `-fno-modules'.
 
 = RubyMotion 2.37 =
 
