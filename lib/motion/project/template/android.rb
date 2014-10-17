@@ -131,7 +131,6 @@ EOS
 
   # Compile Ruby files.
   ruby = App.config.bin_exec('ruby')
-  init_func_n = 0
   ruby_objs = []
   bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   bs_files += App.config.vendored_bs_files
@@ -141,7 +140,7 @@ EOS
   ruby_objs_changed = false
   App.config.files.each do |ruby_path|
     bc_path = File.join(objs_build_dir, ruby_path + '.bc')
-    init_func = "InitRubyFile#{init_func_n += 1}"
+    init_func = "MREP_" + `/bin/echo \"#{File.expand_path(bc_path)}\" | /usr/bin/openssl sha1`.strip
     if !File.exist?(bc_path) \
         or File.mtime(ruby_path) > File.mtime(bc_path) \
         or File.mtime(ruby) > File.mtime(bc_path) \
