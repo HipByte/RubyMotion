@@ -452,7 +452,7 @@ def device_api_version(device_id)
   if $?.exitstatus == 0
     api_version.to_i
   else
-    App.fail "Could not retrieve the API version for USB-connected device `#{device_id}'"
+    App.fail "Could not retrieve the API version for the USB-connected device. Make sure it is properly connected and that the computer is authorized on the device to use USB debugging."
   end
 end
 
