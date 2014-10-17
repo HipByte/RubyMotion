@@ -32,11 +32,6 @@ require 'motion/project'
 require 'motion/project/template/osx/config'
 require 'motion/project/template/osx/builder'
 
-desc "Clear local build objects"
-task :clean do
-  App.config.clean_project(['MacOSX'])
-end
-
 desc "Build the project, then run it"
 task :default => :run
 

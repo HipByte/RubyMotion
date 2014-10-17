@@ -523,7 +523,3 @@ task :device => ['build', 'device:install', 'device:start']
 desc "Build the app then run it in the emulator"
 task :default => 'emulator:start'
 
-desc "Clear local build objects"
-task :clean do
-  App.config.clean_project
-end

@@ -236,7 +236,6 @@ module Motion; module Project;
     end
 
     def clean_project
-      super []
       vendored_bs_files(false).each do |path|
         if File.exist?(path)
           App.info 'Delete', path
