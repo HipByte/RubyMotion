@@ -2,6 +2,8 @@
 
   * Added support for class variables.
   * Added support for the `alias' language keyword.
+  * Added support for the `defined?' language keyword (should work on all
+    expressions except global variables and messages/super).
   * Fixed a crash in the REPL when accessing constant paths (ex. Foo::Bar).
   * Fixed the runtime to properly catch Java exceptions raised by Android
     APIs with the `rescue => Exception' expression.
