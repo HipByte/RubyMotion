@@ -16,6 +16,8 @@
     create local references.
   * Fixed a bug in the build system where the compilation of the main activity
     class would fail due to a missing import of the `java.lang.System' class.
+  * Fixed the build system to print a better message in case it cannot retrieve
+    the Android API version of the USB-connected device.
 
 = RubyMotion 3.1 =
 
