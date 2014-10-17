@@ -120,7 +120,9 @@ EOS
 
         App.info 'Compile', File.join(@path, srcfile)
         FileUtils.mkdir_p File.dirname(objfile)
-        sh "#{compiler} #{cflags}  #{@config.cflags(platform, cplusplus)} -I. -include \"#{pch}\" -c \"#{srcfile}\" -o \"#{objfile}\""
+        # Always append the user's clfags *after* ours, so that the user gets a
+        # chance to override settings that we set. E.g. `-fno-modules`.
+        sh "#{compiler} #{@config.cflags(platform, cplusplus)} #{cflags} -I. -include \"#{pch}\" -c \"#{srcfile}\" -o \"#{objfile}\""
       end
 
       if File.exist?(build_dir)
