@@ -18,6 +18,8 @@
     class would fail due to a missing import of the `java.lang.System' class.
   * Fixed the build system to print a better message in case it cannot retrieve
     the Android API version of the USB-connected device.
+  * Fixed the build system to generate better names for the init functions of
+    the Ruby source files.
 
 = RubyMotion 3.1 =
 
