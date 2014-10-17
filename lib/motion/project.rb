@@ -42,6 +42,11 @@ unless ENV['RM_TARGET_BUILD']
   system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
 end
 
+desc "Clear local build objects"
+task :clean do
+  App.config.clean_project
+end
+
 namespace :clean do
   desc "Clean all build objects"
   task :all do

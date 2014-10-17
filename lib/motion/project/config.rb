@@ -291,7 +291,7 @@ EOS
       $stderr.puts '=' * 80
     end
 
-    def clean_project(platforms)
+    def clean_project
       paths = [self.build_dir]
       paths.concat(Dir.glob(self.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }))
       paths.each do |p|
