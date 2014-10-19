@@ -4,6 +4,7 @@
   * Added support for the `alias' language keyword.
   * Added support for the `defined?' language keyword (should work on all
     expressions except global variables and messages/super).
+  * Added the following Module methods: alias_method.
   * Fixed a crash in the REPL when accessing constant paths (ex. Foo::Bar).
   * Fixed the runtime to properly catch Java exceptions raised by Android
     APIs with the `rescue => Exception' expression.
@@ -22,6 +23,7 @@
     the Android API version of the USB-connected device.
   * Fixed the build system to generate better names for the init functions of
     the Ruby source files.
+  * Fixed the runtime to properly define non-Java classes.
 
 = RubyMotion 3.1 =
 
