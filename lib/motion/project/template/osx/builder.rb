@@ -44,6 +44,16 @@ module Motion; module Project
 
     def codesign(config, platform)
       app_bundle = config.app_bundle_raw('MacOSX')
+      app_frameworks = File.join(config.app_bundle(platform), 'Frameworks')
+      config.embedded_frameworks.each do |framework|
+        framework_path = File.join(app_frameworks, File.basename(framework))
+        if File.mtime(config.project_file) > File.mtime(framework_path) \
+            or !system("/usr/bin/codesign --verify \"#{framework_path}\" >& /dev/null")
+          App.info 'Codesign', framework_path
+          sh "/usr/bin/codesign --force --sign \"#{config.codesign_certificate}\" --preserve-metadata=\"identifier,entitlements,resource-rules\" \"#{framework_path}\""
+        end
+      end
+
       entitlements = File.join(config.versionized_build_dir(platform), "Entitlements.plist")
       if File.mtime(config.project_file) > File.mtime(app_bundle) \
           or !system("/usr/bin/codesign --verify \"#{app_bundle}\" >& /dev/null")
