@@ -414,7 +414,7 @@ EOS
         certs = Util::CodeSign.identity_names(release?)
         certs = certs.grep(/#{platform} #{type}/)
         if certs.size == 0
-          App.fail "Cannot find any #{platform} #{type} certificate in the" \
+          App.fail "Cannot find any #{platform} #{type} certificate in the " \
                    "keychain"
         elsif certs.size > 1
           App.warn "Found #{certs.size} #{platform} #{type} certificates in " \
