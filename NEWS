@@ -1,5 +1,9 @@
 = RubyMotion 2.38 =
 
+  * Added support for `axel' as an alternative to `curl' when downloading
+    updates, which supports resuming and uses 10 connections to improve speed.
+    Axel is available from http://wilmer.gaast.net/main.php/axel.html or can be
+    installed through Homebrew: `$ brew install axel'.
   * Fixed a regression where `rake spec' did not work on OS X platform.
   * Fixed a bug where Dispatch.once did not work correctly with x86_64 on
     iPhone simulator and i386 on OS X platforms.
