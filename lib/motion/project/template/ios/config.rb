@@ -182,7 +182,7 @@ module Motion; module Project;
     end
 
     def bridgesupport_flags
-      extra_flags = (OSX_VERSION >= 10.7 && sdk_version < '7.0') ? '--no-64-bit' : ''
+      extra_flags = (osx_host_version >= Util::Version.new('10.7') && sdk_version < '7.0') ? '--no-64-bit' : ''
       "--format complete #{extra_flags}"
     end
 
