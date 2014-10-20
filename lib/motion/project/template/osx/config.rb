@@ -167,18 +167,19 @@ module Motion; module Project;
       ''
     end
 
+    # Defaults to the MAJOR and MINOR version of the host machine. For example,
+    # on Yosemite this defaults to `10.10`.
+    #
+    # @return [String] the lowest OS version that this target will support.
+    #
     def deployment_target
-      @deployment_target ||= osx_version
+      @deployment_target ||= osx_host_version.segments.first(2).join('.')
     end
 
     def supported_sdk_versions(versions)
       versions.reverse.find { |vers|
         Util::Version.new(deployment_target) <= Util::Version.new(vers) && File.exist?(datadir(vers))
       }
-    end
-    
-    def osx_version
-      `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
     end
 
     def main_cpp_file_txt(spec_objs)
