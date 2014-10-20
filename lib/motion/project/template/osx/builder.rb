@@ -53,6 +53,8 @@ module Motion; module Project
     #        The platform for which to build, which in this case should always
     #        be `MacOSX`.
     #
+    # @return [void]
+    #
     # @todo Do we really need the platform parameter when it's always the same?
     #
     def codesign(config, platform)
@@ -88,6 +90,8 @@ module Motion; module Project
     #        of an entitlements file, only when needed.
     #
     # @yieldreturn [String] the path to the entitlements file.
+    #
+    # @return [void]
     #
     def codesign_bundle(config, bundle)
       if File.mtime(config.project_file) > File.mtime(bundle) \
