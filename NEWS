@@ -1,5 +1,7 @@
 = RubyMotion 2.38 =
 
+  * [OSX] Fixed a bug where embedded frameworks would not be codesigned as per
+    the current requirements for the App Store.
   * Fixed a few cases where the Yosemite version number was parsed incorrectly.
   * Added support for `axel' as an alternative to `curl' when downloading
     updates, which supports resuming and uses 10 connections to improve speed.
