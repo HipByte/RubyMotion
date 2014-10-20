@@ -25,6 +25,11 @@
   * Fixed the build system to generate better names for the init functions of
     the Ruby source files.
   * Fixed the runtime to properly define non-Java classes.
+  * Fixed a bug where defining a method with the `def' keyword on a module
+    would not expose the method to classes that include such module.
+  * Fixed the build system to compile the main app file with a proper exception
+    handler, in case an exception is triggered from the main scope of a Ruby
+    source file.
 
 = RubyMotion 3.1 =
 
