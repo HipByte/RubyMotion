@@ -56,22 +56,19 @@ module Motion; module Project
     # @todo Do we really need the platform parameter when it's always the same?
     #
     def codesign(config, platform)
-      frameworks_path = File.join(config.app_bundle(platform), 'Frameworks')
-      if File.exist?(frameworks_path)
-        Dir.entries(frameworks_path).each do |framework|
-          next if framework.start_with?('.')
-          versions_path = File.join(frameworks_path, framework, 'Versions')
-          Dir.entries(versions_path).each do |version|
-            next if version.start_with?('.') || version == 'Current'
-            codesign_bundle(config, File.join(versions_path, version))
-          end
+      app_bundle = config.app_bundle(platform)
+      framework_versions = 'Frameworks/*.framework/Versions/*'
+      Dir.glob(File.join(app_bundle, framework_versions)) do |version|
+        unless version == File.basename('Current')
+          codesign_bundle(config, version)
         end
       end
 
       codesign_bundle(config, config.app_bundle_raw(platform)) do
-        entitlements_path = File.join(config.versionized_build_dir(platform), "Entitlements.plist")
-        File.open(entitlements_path, 'w') { |io| io.write(config.entitlements_data) }
-        entitlements_path
+        build_dir = config.versionized_build_dir(platform)
+        entitlements = File.join(build_dir, "Entitlements.plist")
+        File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
+        entitlements
       end
     end
 
