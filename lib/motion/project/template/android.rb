@@ -162,36 +162,50 @@ EOS
 #include <jni.h>
 #include <assert.h>
 #include <android/log.h>
+extern "C" {
+    void rb_vm_register_native_methods(void);
+    bool rb_vm_init(const char *app_package, const char *rm_env, const char *rm_version, JNIEnv *env);
+    void *rb_vm_top_self(void);
+    void rb_rb2oc_exc_handler(void);
 EOS
   ruby_objs.each do |_, init_func|
-    payload_c_txt << "void #{init_func}(void *rcv, void *sel);\n" 
+    payload_c_txt << <<EOS
+    void *#{init_func}(void *rcv, void *sel);
+EOS
   end
   payload_c_txt << <<EOS
-void rb_vm_register_native_methods(void);
-bool rb_vm_init(const char *app_package, const char *rm_env, const char *rm_version, JNIEnv *env);
+}
+extern "C"
 jint
 JNI_OnLoad(JavaVM *vm, void *reserved)
 {
     __android_log_write(ANDROID_LOG_DEBUG, "#{App.config.package_path}", "Loading payload");
     JNIEnv *env = NULL;
-    if ((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_6) != JNI_OK) {
+    if (vm->GetEnv((void **)&env, JNI_VERSION_1_6) != JNI_OK) {
 	return -1;
     }
     assert(env != NULL);
     rb_vm_init("#{App.config.package_path}", "#{App.config.rubymotion_env_value}", "#{Motion::Version}", env);
+    void *top_self = rb_vm_top_self();
+    try {
 EOS
   ruby_objs.each do |_, init_func|
-    payload_c_txt << "    (*env)->PushLocalFrame(env, 32);\n"
-    payload_c_txt << "    #{init_func}(NULL, NULL);\n"
-    payload_c_txt << "    (*env)->PopLocalFrame(env, NULL);\n"
+    payload_c_txt << "    env->PushLocalFrame(32);\n"
+    payload_c_txt << "    #{init_func}(top_self, NULL);\n"
+    payload_c_txt << "    env->PopLocalFrame(NULL);\n"
   end
   payload_c_txt << <<EOS
+    }
+    catch (...) {
+        rb_rb2oc_exc_handler();
+        return -1;
+    }
     rb_vm_register_native_methods();
     __android_log_write(ANDROID_LOG_DEBUG, "#{App.config.package_path}", "Loaded payload");
     return JNI_VERSION_1_6;
 }
 EOS
-  payload_c = File.join(app_build_dir, 'jni/payload.c')
+  payload_c = File.join(app_build_dir, 'jni/payload.cpp')
   mkdir_p File.dirname(payload_c)
   if !File.exist?(payload_c) or File.read(payload_c) != payload_c_txt
     File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
