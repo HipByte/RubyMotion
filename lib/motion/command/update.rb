@@ -88,6 +88,16 @@ module Motion; class Command
       resp
     end
 
+    def download(url, dest)
+      if system("which axel > /dev/null")
+        unless system("axel -n 10 -a -o '#{dest}' '#{url}'")
+          die "Error when connecting to the server. Check your Internet connection and try again."
+        end
+      else
+        curl("-# '#{url}' -o '#{dest}'")
+      end
+    end
+
     def perform_check
       update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
       if !File.exist?(update_check_file) or (Time.now - File.mtime(update_check_file) > 60 * 60 * 24)
@@ -123,7 +133,7 @@ module Motion; class Command
       $stderr.puts 'Downloading software update...'
       url = resp
       tmp_dest = '/tmp/_rubymotion_su.pkg'
-      curl("-# \"#{url}\" -o #{tmp_dest}")
+      download(url, tmp_dest)
 
       if @wanted_software_version or @prerelease_mode
         FileUtils.mv '/Library/RubyMotion', '/Library/RubyMotion.old'
