@@ -1,5 +1,6 @@
 = RubyMotion 2.38 =
 
+  * Fixed a few cases where the Yosemite version number was parsed incorrectly.
   * Added support for `axel' as an alternative to `curl' when downloading
     updates, which supports resuming and uses 10 connections to improve speed.
     Axel is available from http://wilmer.gaast.net/main.php/axel.html or can be

@@ -24,6 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/app'
+require 'motion/util/version'
 
 module Motion; module Project
   class Config
@@ -86,7 +87,9 @@ module Motion; module Project
       @exclude_from_detect_dependencies = []
     end
 
-    OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
+    def osx_host_version
+      @osx_host_version ||= Util::Version.new(`/usr/bin/sw_vers -productVersion`.strip)
+    end
 
     def variables
       map = {}
