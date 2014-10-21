@@ -82,7 +82,7 @@ module Motion; module Project;
       super('iPhone')
     end
 
-    def provisioning_profile(name = /iOS Team Provisioning Profile/)
+    def provisioning_profile(name = /iOS\s?Team Provisioning Profile/)
       @provisioning_profile ||= begin
         paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
           text = File.read(path)
