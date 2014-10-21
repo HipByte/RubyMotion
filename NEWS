@@ -14,6 +14,8 @@
     override those set by the toolchain by default. E.g. `-fno-modules'.
   * [iOS] Removed `Symbols not found...' message when app will be deployed into
     iOS device if Xcode dumped device symbols into user directory.
+  * [iOS] Fixed a bug which it could not recognized Provisioning Profile which
+    is generated with "iOSTeam Provisioning Profile".
 
 = RubyMotion 2.37 =
 
