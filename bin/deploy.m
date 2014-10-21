@@ -585,9 +585,34 @@ start_debug_server(am_device_t dev)
 
     if (![[NSFileManager defaultManager] fileExistsAtPath:[device_support_path
 	    stringByAppendingPathComponent:@"Symbols"]]) {
-	fprintf(stderr, "*** Symbols not found in `%s': debugger might be "\
-		"slow to attach.\n",
-		[device_support_path fileSystemRepresentation]);
+	NSString *user_device_supports_path = [@"~/Library/Developer/Xcode/iOS DeviceSupport/" stringByStandardizingPath];
+	NSString *user_device_support_path = nil;
+	for (NSString *path in [[NSFileManager defaultManager]
+		contentsOfDirectoryAtPath:user_device_supports_path error:nil]) {
+	    NSRange r = [path rangeOfString:@" "];
+	    NSString *path_version = r.location == NSNotFound
+		? path : [path substringToIndex:r.location];
+	    if ([product_version isEqualToString:path_version]) {
+		user_device_support_path =
+		    [user_device_supports_path stringByAppendingPathComponent:path];
+		break;
+	    }
+	    if ([product_version hasPrefix:path_version]
+		    && user_device_support_path == nil) {
+		user_device_support_path =
+		    [device_supports_path stringByAppendingPathComponent:path];
+	    }
+	}
+
+	if (user_device_support_path == nil ||
+	    ![[NSFileManager defaultManager] fileExistsAtPath:[user_device_support_path stringByAppendingPathComponent:@"Symbols"]]) {
+	    fprintf(stderr, "*** Symbols not found in `%s': debugger might be " \
+		    "slow to attach.\n",
+		    [device_support_path fileSystemRepresentation]);
+	}
+	else {
+	    device_support_path = user_device_support_path;
+	}
     }
 
     // Mount the .dmg remotely on the device.
