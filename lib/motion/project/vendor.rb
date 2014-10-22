@@ -47,8 +47,26 @@ module Motion; module Project;
       end
     end
 
+    # This removes the various build dirs that may exist in either `:static` or
+    # `:xcode` vendored projects.
+    #
+    # In the case of an `:xcode` vendored project, it will first run
+    # `xcodebuild clean` with the exact same options as it was build with. This
+    # to ensure that cached build artefacts that are outside of the build dir
+    # are cleaned up as well. For instance those in:
+    # `$TMPDIR/../C/com.apple.DeveloperTools/*/Xcode/SharedPrecompiledHeaders`.
+    #
+    # @param [Array<String>] platforms
+    #        The platform identifiers for which to perform a clean.
+    #
+    # @return [void]
+    #
+    # @todo Seeing as this method gets the exact platforms to clean for, we can
+    #       get rid of the list of all build dirs and ask for the exact build
+    #       dir from the `config`.
+    #
     def clean(platforms)
-      if @type == :xcode
+      if @type == :xcode && File.exist?(@path)
         Dir.chdir(@path) do
           platforms.each do |platform|
             path = relative_path("./#{xcodeproj_path}")
