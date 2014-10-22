@@ -142,7 +142,14 @@ module Motion; module Project;
     end
 
     def ndk_toolchain_bin_dir
-      File.join(ndk_path, 'toolchains/llvm-3.3/prebuilt/darwin-x86_64/bin')
+      @ndk_toolchain_bin_dir ||= begin
+        paths = ['3.3', '3.4', '3.5'].map do |x|
+          File.join(ndk_path, "toolchains/llvm-#{x}/prebuilt/darwin-x86_64/bin")
+        end
+        path = paths.find { |x| File.exist?(x) }
+        App.fail "Can't locate a proper NDK toolchain (paths tried: #{paths.join(' ')})" unless path
+        path
+      end
     end
 
     def cc
