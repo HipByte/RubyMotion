@@ -39,8 +39,8 @@ ANDROID_NDK = File.join(ENV['HOME'], 'src/android-ndk-r10c')
 ANDROID_API_VERSIONS =
   if File.exist?(ANDROID_SDK)
     Dir.glob(File.join(ANDROID_SDK, 'platforms/android-*')).map do |platform_dir|
-      platform_dir.scan(/android\-([0-9L]+)$/)[0][0]
-    end
+      platform_dir.scan(/android\-([0-9]+)$/)[0]
+    end.flatten.compact
   else
     []
   end
