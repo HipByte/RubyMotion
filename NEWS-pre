@@ -1,12 +1,14 @@
 = RubyMotion 3.2 =
 
+  * Added support for Android 5.0 (API 21).
+  * Added support for the latest Android NDK (r10c). The runtimes have also
+    been recompiled with the new NDK toolchain.
   * Added support for class variables.
   * Added support for the `alias' language keyword.
   * Added support for the `defined?' language keyword (should work on all
     expressions except global variables and messages/super).
   * Added the following Module methods: alias_method, public/private/protected
     (empty for now).
-  * Added support for the latest Android NDK.
   * Improved the build system to better detect the NDK toolchain.
   * Fixed a crash in the REPL when accessing constant paths (ex. Foo::Bar).
   * Fixed the runtime to properly catch Java exceptions raised by Android
