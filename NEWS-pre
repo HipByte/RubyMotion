@@ -5,6 +5,9 @@
     project's manifest file. The default is an empty array.
   * Fixed a bug in the runtime when calling ambiguous Java methods where a
     `nil' argument would not be considered acceptable for a Java reference.
+  * Fixed a bug in the compiler where defining the `onActivityResult' method
+    on an activity class would cause the build to fail, because the compiler
+    would try to conform to a Java interface that has a wrong method type.
 
 = RubyMotion 3.2 =
 
