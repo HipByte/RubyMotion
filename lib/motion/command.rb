@@ -80,10 +80,19 @@ module Motion
       ].concat(super)
     end
 
+    module Pre
+      path = '/Library/RubyMotionPre/lib/motion/version.rb'
+      eval(File.read(path)) if File.exist?(path)
+    end
+
     def self.run(argv)
       argv = CLAide::ARGV.new(argv)
       if argv.flag?('version')
-        $stdout.puts Motion::Version
+        if defined?(Pre::Motion::Version)
+          $stdout.puts "#{Motion::Version} (stable), #{Pre::Motion::Version} (pre-release)"
+        else
+          $stdout.puts Motion::Version
+        end
         exit 0
       end
       super(argv)
