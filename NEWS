@@ -14,6 +14,8 @@
     iPhone simulator and i386 on OS X platforms.
   * Fixed a bug where `:cflags' for `:static' vendored projects could not
     override those set by the toolchain by default. E.g. `-fno-modules'.
+  * Fixed the `motion --version' command invocation to print both the stable
+    and pre-release versions of RubyMotion.
   * [iOS] Removed `Symbols not found...' message when app will be deployed into
     iOS device if Xcode dumped device symbols into user directory.
   * [iOS] Fixed a bug which it could not recognized Provisioning Profile which
