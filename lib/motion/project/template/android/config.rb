@@ -30,7 +30,7 @@ module Motion; module Project;
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :target_api_version, :arch, :assets_dirs,
       :icon, :logs_components, :version_code, :version_name, :permissions,
-      :application_class
+      :features, :application_class
 
     def initialize(project_dir, build_mode)
       super
@@ -41,6 +41,7 @@ module Motion; module Project;
       @assets_dirs = [File.join(project_dir, 'assets')]
       @vendored_projects = []
       @permissions = []
+      @features = []
       @manifest_entries = {}
       @release_keystore_path = nil
       @release_keystore_alias = nil

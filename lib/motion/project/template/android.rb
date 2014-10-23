@@ -44,7 +44,7 @@ task :build do
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{x=App.config.version_code}" android:versionName="#{App.config.version_name}">
   <uses-sdk android:minSdkVersion="#{App.config.api_version}" android:targetSdkVersion="#{App.config.target_api_version}"/>
 EOS
-  # Application permissions
+  # Application permissions.
   permissions = Array(App.config.permissions)
   if App.config.development?
     # In development mode, we need the INTERNET permission in order to create
@@ -57,6 +57,13 @@ EOS
   <uses-permission android:name="#{permission}"></uses-permission>
 EOS
   end
+  # Application features.
+  features = Array(App.config.features)
+  features.each do |feature|
+    android_manifest_txt << <<EOS
+  <uses-feature android:name="#{feature}"></uses-feature>
+EOS
+  end
   # Custom manifest entries.
   App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
   android_manifest_txt << <<EOS
@@ -67,10 +74,10 @@ EOS
   android_manifest_txt << <<EOS
     <activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
       <intent-filter>
-                    <action android:name="android.intent.action.MAIN" />
-                    <category android:name="android.intent.category.LAUNCHER" />
-                </intent-filter>
-          </activity>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
 EOS
   # Sub-activities.
   (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
@@ -81,7 +88,7 @@ EOS
 EOS
   end
   android_manifest_txt << <<EOS
-    </application>
+  </application>
 </manifest>
 EOS
   android_manifest = File.join(app_build_dir, 'AndroidManifest.xml')
