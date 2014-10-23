@@ -1,3 +1,8 @@
+= RubyMotion 3.3 =
+
+  * Fixed a bug in the runtime when calling ambiguous Java methods where a
+    `nil' argument would not be considered acceptable for a Java reference.
+
 = RubyMotion 3.2 =
 
   * Added support for Android 5.0 (API 21).
