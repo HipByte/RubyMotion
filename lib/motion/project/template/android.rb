@@ -194,19 +194,21 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     assert(env != NULL);
     rb_vm_init("#{App.config.package_path}", "#{App.config.rubymotion_env_value}", "#{Motion::Version}", env);
     void *top_self = rb_vm_top_self();
-    try {
 EOS
-  ruby_objs.each do |_, init_func|
-    payload_c_txt << "    env->PushLocalFrame(32);\n"
-    payload_c_txt << "    #{init_func}(top_self, NULL);\n"
-    payload_c_txt << "    env->PopLocalFrame(NULL);\n"
-  end
-  payload_c_txt << <<EOS
+  ruby_objs.each do |ruby_obj, init_func|
+    payload_c_txt << <<EOS
+    try {
+	env->PushLocalFrame(32);
+	#{init_func}(top_self, NULL);
+	env->PopLocalFrame(NULL);
     }
     catch (...) {
-        rb_rb2oc_exc_handler();
-        return -1;
+	__android_log_write(ANDROID_LOG_ERROR, "#{App.config.package_path}", "Uncaught exception when initializing `#{File.basename(ruby_obj).sub(/\.bc$/, '')}' scope -- aborting");
+	return -1;
     }
+EOS
+  end
+  payload_c_txt << <<EOS
     rb_vm_register_native_methods();
     __android_log_write(ANDROID_LOG_DEBUG, "#{App.config.package_path}", "Loaded payload");
     return JNI_VERSION_1_6;
