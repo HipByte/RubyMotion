@@ -20,6 +20,8 @@
     iOS device if Xcode dumped device symbols into user directory.
   * [iOS] Fixed a bug which it could not recognized Provisioning Profile which
     is generated with "iOSTeam Provisioning Profile".
+  * [OSX] Fixed a bug where BigDecimal#inspect would return invalid string on
+    Yosemite.
 
 = RubyMotion 2.37 =
 
