@@ -151,7 +151,7 @@ end
 # https://wiki.jenkins-ci.org/display/JENKINS/Administering+Jenkins
 #
 if ENV['JENKINS_HOME'] && ENV['PLATFORM'] == 'ios'
-  stdout, stderr = '/tmp/sim-stdout.log', '/tmp/sim-stderr.log'
+  stdout, stderr = "#{Dir.pwd}/sim-stdout.log", "#{Dir.pwd}/sim-stderr.log"
   task :create_ci_output_files do
     [stdout, stderr].each do |file|
       FileUtils.rm(file) if File.exist?(file)
