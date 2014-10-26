@@ -3,6 +3,11 @@
   * Added the `app.features' variable that can accept an Array of String
     objects that will be used to generate `<uses-feature/>' elements in the
     project's manifest file. The default is an empty array.
+  * Added the `app.services' variable that can accept an Array of String
+    objects that will be used to generate the `<service/>' elements under the
+    `<application/> element of the project's manifest file. Values can be
+    either class names (ex. ".MyService") or full package paths
+    (ex. "com.yourcompany.Hello.MyService").
   * Fixed a bug in the runtime when calling ambiguous Java methods where a
     `nil' argument would not be considered acceptable for a Java reference.
   * Fixed a bug in the compiler where defining the `onActivityResult' method
