@@ -317,6 +317,15 @@ EOS
       end
     end
   end
+  App.config.files.map { |x| File.dirname(x) }.uniq.each do |path|
+    # Load extension files (any .java file inside the same directory of a .rb file).
+    Dir.glob(File.join(path, "*.java")).each do |java_ext|
+      class_name = File.basename(java_ext).sub(/\.java$/, '')
+      klass = java_classes[class_name]
+      App.fail "Java file `#{java_ext}' extends a class that was not discovered by the compiler" unless klass
+      (klass[:extensions] ||= "").concat(File.read(java_ext))
+    end
+  end
   java_classes.each do |name, klass|
     klass_super = klass[:super]
     klass_super = 'java.lang.Object' if klass_super == '$blank$'
@@ -330,6 +339,9 @@ EOS
       java_file_txt << " implements #{klass[:interfaces].join(', ')}"
     end
     java_file_txt << " {\n"
+    if ext = klass[:extensions]
+      java_file_txt << ext.gsub(/^/m, "\t")
+    end
     klass[:methods].each do |method|
       java_file_txt << "\t#{method}\n"
     end
