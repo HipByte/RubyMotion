@@ -8,6 +8,11 @@
     `<application/> element of the project's manifest file. Values can be
     either class names (ex. ".MyService") or full package paths
     (ex. "com.yourcompany.Hello.MyService").
+  * Improved the build system to let users extend classes defined in Ruby files
+    in Java. In order to do so, a .java file has to be created in a directory
+    where Ruby files reside (ex. `app'). The basename of the .java file should
+    be the name of the class to extend, and its content will be copied inside
+    the class definition. (ex. `public int foo() { return 42; }').
   * Added Array#{*, count, pop, shift, reverse, reverse!}.
   * Fixed Array#{first, last} in order to take an argument.
   * Fixed a bug in the runtime when calling ambiguous Java methods where a
