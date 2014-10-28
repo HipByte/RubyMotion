@@ -14,7 +14,7 @@ def gen_bridge_metadata(file)
     class_path = File.join(ENV['TMPDIR'], '__android_bridgesupport__', File.basename(file))
     FileUtils.rm_rf class_path
     FileUtils.mkdir_p class_path
-    puts "Extracting #{file} to #{class_path}"
+    puts "Extracting #{file} to #{class_path}" if ENV['DEBUG']
     exit 1 unless system "/usr/bin/unzip -q \"#{file}\" -d \"#{class_path}\""
 
     classes = Dir.glob(File.join(class_path ,"**/*.class")).map { |c| c.gsub(class_path, '') }
