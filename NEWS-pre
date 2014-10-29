@@ -15,6 +15,8 @@
     the class definition. (ex. `public int foo() { return 42; }'). The basename
     can also use the underscore-based notation, and the build system will then
     translate it to the actual class name (ex. `my_service.rb' -> `MyService').
+  * Added support for the translation of `foo?' to `isFoo' selector shortcut
+    in the method dispatcher.
   * Added Array#{*, count, pop, shift, reverse, reverse!}.
   * Added Kernel#raise.
   * Fixed Array#{first, last} in order to take an argument.
