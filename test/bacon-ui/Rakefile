@@ -12,6 +12,10 @@ Motion::Project::App.setup do |app|
   #app.archs['iPhoneSimulator'] = ['x86_64']
 
   app.spec_files.insert(1, *FileList['../../lib/motion/util/version.rb', '../helpers/*.rb'])
-  app.deployment_target = ENV['deployment_target'] if ENV['deployment_target']
+  if ENV['deployment_target']
+    app.deployment_target = ENV['deployment_target']
+  else
+    ENV['deployment_target'] = app.deployment_target
+  end
 end
 
