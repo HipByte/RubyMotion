@@ -109,24 +109,23 @@ EOS
   java_app_package_dir = File.join(java_dir, *App.config.package.split(/\./))
   mkdir_p java_app_package_dir
   r_bs = File.join(app_build_dir, 'R.bridgesupport')
-
   android_jar = "#{App.config.sdk_path}/platforms/android-#{App.config.target_api_version}/android.jar"
-  resources_dirs = []
-  App.config.resources_dirs.flatten.each do |dir|
-    next unless File.exist?(dir)
-    next unless File.directory?(dir)
-    resources_dirs << dir
+  grab_directories = lambda do |ary|
+    ary.flatten.select do |dir|
+      File.exist?(dir) and File.directory?(dir)
+    end
   end
+  assets_dirs = grab_directories.call(App.config.assets_dirs)
+  aapt_assets_flags = assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
+  resources_dirs = grab_directories.call(App.config.resources_dirs)
   all_resources = (resources_dirs + App.config.vendored_projects.map { |x| x[:resources] }.compact)
   aapt_resources_flags = all_resources.map { |x| '-S "' + x + '"' }.join(' ')
-
   r_java_mtime = Dir.glob(java_dir + '/**/R.java').map { |x| File.mtime(x) }.max
-
   bs_files = []
   classes_changed = false
   if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
     extra_packages = App.config.vendored_projects.map { |x| x[:package] }.compact.map { |x| "--extra-packages #{x}" }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
 
     r_java = Dir.glob(java_dir + '/**/R.java')
     classes_dir = File.join(app_build_dir, 'classes')
@@ -420,16 +419,10 @@ EOS
       or File.mtime(dex_classes) > File.mtime(archive) \
       or File.mtime(libpayload_path) > File.mtime(archive) \
       or File.mtime(android_manifest) > File.mtime(archive) \
+      or assets_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
       or resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
     App.info 'Create', archive
-    assets_dirs = []
-    App.config.assets_dirs.flatten.each do |dir|
-      next unless File.exist?(dir)
-      next unless File.directory?(dir)
-      assets_dirs << dir
-    end
-    assets_flags = assets_dirs.map { |x| '-A "' + x + '"' }.join(' ')
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
     Dir.chdir(app_build_dir) do
       [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
         line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"#{File.basename(archive)}\" \"#{file}\""
