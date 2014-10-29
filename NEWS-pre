@@ -16,6 +16,7 @@
     can also use the underscore-based notation, and the build system will then
     translate it to the actual class name (ex. `my_service.rb' -> `MyService').
   * Added Array#{*, count, pop, shift, reverse, reverse!}.
+  * Added Kernel#raise.
   * Fixed Array#{first, last} in order to take an argument.
   * Fixed a bug in the runtime when calling ambiguous Java methods where a
     `nil' argument would not be considered acceptable for a Java reference.
