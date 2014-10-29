@@ -86,13 +86,13 @@ EOS
       <meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
     </activity>
 EOS
+  end
   # Services.
   services = Array(App.config.services)
   services.each do |service|
     android_manifest_txt << <<EOS
     <service android:name="#{service}" android:exported="false"></service>
 EOS
-  end
   end
   android_manifest_txt << <<EOS
   </application>
