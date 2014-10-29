@@ -322,6 +322,11 @@ EOS
     Dir.glob(File.join(path, "*.java")).each do |java_ext|
       class_name = File.basename(java_ext).sub(/\.java$/, '')
       klass = java_classes[class_name]
+      unless klass
+        # Convert underscore-case to CamelCase (ex. my_service -> MyService).
+        class_name = class_name.split('_').map { |e| e.capitalize }.join
+        klass = java_classes[class_name]
+      end
       App.fail "Java file `#{java_ext}' extends a class that was not discovered by the compiler" unless klass
       (klass[:extensions] ||= "").concat(File.read(java_ext))
     end
