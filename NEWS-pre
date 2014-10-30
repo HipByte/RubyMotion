@@ -15,6 +15,8 @@
     the class definition. (ex. `public int foo() { return 42; }'). The basename
     can also use the underscore-based notation, and the build system will then
     translate it to the actual class name (ex. `my_service.rb' -> `MyService').
+  * Improved the compiler so that the Android R inner-classes can now be
+    accessed without the application package prefix.
   * Added support for the translation of `foo?' to `isFoo' selector shortcut
     in the method dispatcher.
   * Added Array#{*, count, pop, shift, reverse, reverse!, rindex}.
