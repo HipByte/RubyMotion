@@ -17,9 +17,9 @@
     translate it to the actual class name (ex. `my_service.rb' -> `MyService').
   * Added support for the translation of `foo?' to `isFoo' selector shortcut
     in the method dispatcher.
-  * Added Array#{*, count, pop, shift, reverse, reverse!}.
+  * Added Array#{*, count, pop, shift, reverse, reverse!, rindex}.
   * Added Kernel#raise.
-  * Fixed Array#{first, last} in order to take an argument.
+  * Fixed Array#{first, last} and String#to_i in order to take an argument.
   * Fixed a bug in the runtime when calling ambiguous Java methods where a
     `nil' argument would not be considered acceptable for a Java reference.
   * Fixed a bug in the compiler where defining the `onActivityResult' method
