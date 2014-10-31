@@ -1,6 +1,6 @@
 = RubyMotion 3.4 =
 
-  * Added Hash#{store, size, lenght, empty?, include?, member?, hash_key?, key?,
+  * Added Hash#{store, size, length, empty?, include?, member?, hash_key?, key?,
     delete}
 
 = RubyMotion 3.3 =
