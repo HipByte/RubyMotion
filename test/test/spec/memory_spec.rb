@@ -271,6 +271,12 @@ class RetainCounter
   end
 end
 
+class OverridesNewOnObjectiveCClass < CALayer
+  def self.new
+    super
+  end
+end
+
 describe "Ruby methods that return retained objects" do
   def newObject; Object.new; end
   def newbuildObject; Object.new; end
@@ -283,6 +289,10 @@ describe "Ruby methods that return retained objects" do
     lambda { newbuildRetainCounter }.should.be.autoreleased
     newRetainCounter.retain_count.should == 0
     newbuildRetainCounter.retain_count.should == 0
+  end
+
+  xit "returns an autoreleased object when overriding `::new` on an Objective-C class" do
+    lambda { OverridesNewOnObjectiveCClass.new }.should.be.autoreleased
   end
 
   it "returns a retained object if the method name starts exactly with 'new' and is called from Objective-C" do
