@@ -1,5 +1,7 @@
 = RubyMotion 2.38 =
 
+  * Fixed a bug where a compiled Core Data model would be removed when cleaning
+    when an original `xcdatamodeld' was not available.
   * Fixed a bug where in certain circumstances cleaning would try to be
     performed when the vendor dir, e.g. `vendor/Pods' did not exist.
   * [OSX] Fixed a bug where embedded frameworks would not be codesigned as per

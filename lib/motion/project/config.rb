@@ -299,6 +299,7 @@ EOS
       paths.concat(Dir.glob(self.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }))
       paths.each do |p|
         next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
+        next if File.extname(p) == ".momd" && !File.exist?(p.sub(/\.momd$/, ".xcdatamodeld"))
         App.info 'Delete', relative_path(p)
         rm_rf p
         if File.exist?(p)
