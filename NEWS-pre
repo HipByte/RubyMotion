@@ -1,3 +1,8 @@
+= RubyMotion 3.4 =
+
+  * Added Hash#{store, size, lenght, empty?, include?, member?, hash_key?, key?,
+    delete}
+
 = RubyMotion 3.3 =
 
   * Added the `app.features' variable that can accept an Array of String
