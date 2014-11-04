@@ -83,6 +83,7 @@ module Motion; module Project
       @resources_dirs = [File.join(project_dir, 'resources')]
       @build_dir = File.join(project_dir, 'build')
       @specs_dir = File.join(project_dir, 'spec')
+      @dependencies = {}
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
     end

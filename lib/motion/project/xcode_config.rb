@@ -37,7 +37,6 @@ module Motion; module Project;
     def initialize(project_dir, build_mode)
       super
       @info_plist = {}
-      @dependencies = {}
       @frameworks = []
       @weak_frameworks = []
       @embedded_frameworks = []
