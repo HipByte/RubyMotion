@@ -1,5 +1,7 @@
 = RubyMotion 2.38 =
 
+  * Optimized the app executable size when app has many Ruby files, by removing
+    unnecessary internal codes. ~60% lighter.
   * Fixed a bug where a compiled Core Data model would be removed when cleaning
     when an original `xcdatamodeld' was not available.
   * Fixed a bug where in certain circumstances cleaning would try to be
