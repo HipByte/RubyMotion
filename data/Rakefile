@@ -20,28 +20,46 @@ task :vm_files do
     sdk = File.join('osx', sdk_version, 'MacOSX')
     mkdir_p sdk
     objs = "../vm/MacOSX#{sdk_version}.objs"
+    kernels = []
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
       install path, sdk
+      arch = path.match(/kernel-(.+).bc/)[1]
+      sh "/usr/bin/clang -fexceptions -c -arch #{arch} -mmacosx-version-min=#{sdk_version} #{path} -o /tmp/kernel-#{arch}.o"
+      kernels << "/tmp/kernel-#{arch}.o"
     end
     install File.join(objs, 'librubymotion-static.a'), sdk
+    sh "/usr/bin/lipo -create #{kernels.join(' ')} -output /tmp/kernel.o"
+    install "/tmp/kernel.o", sdk
   end
 
   IOS_SDK_VERSIONS.each do |sdk_version|
     ios = File.join('ios', sdk_version, 'iPhoneOS')
     mkdir_p ios
     objs = "../vm/iPhoneOS#{sdk_version}.objs"
+    kernels = []
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
       install path, ios
+      arch = path.match(/kernel-(.+).bc/)[1]
+      sh "/usr/bin/clang -fexceptions -c -arch #{arch} -miphoneos-version-min=#{sdk_version} #{path} -o /tmp/kernel-#{arch}.o"
+      kernels << "/tmp/kernel-#{arch}.o"
     end
     install File.join(objs, 'librubymotion-static.a'), ios
+    sh "/usr/bin/lipo -create #{kernels.join(' ')} -output /tmp/kernel.o"
+    install "/tmp/kernel.o", ios
 
     sim = File.join('ios', sdk_version, 'iPhoneSimulator')
     mkdir_p sim
     objs = "../vm/iPhoneSimulator#{sdk_version}.objs"
+    kernels = []
     Dir.glob(File.join(objs, 'kernel-*.bc')).each do |path|
       install path, sim
+      arch = path.match(/kernel-(.+).bc/)[1]
+      sh "/usr/bin/clang -fexceptions -c -arch #{arch} -miphoneos-version-min=#{sdk_version} #{path} -o /tmp/kernel-#{arch}.o"
+      kernels << "/tmp/kernel-#{arch}.o"
     end
     install File.join(objs, 'librubymotion-static.a'), sim
+    sh "/usr/bin/lipo -create #{kernels.join(' ')} -output /tmp/kernel.o"
+    install "/tmp/kernel.o", sim
   end
 
   if OSX_SDK_VERSIONS.size > 1 and ENV['SDK_BETA'] == nil
