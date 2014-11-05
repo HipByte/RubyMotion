@@ -1,12 +1,11 @@
 = RubyMotion 2.38 =
 
-  * Enabled arm64 support and disabled armv7s support for iOS projects. If
-    you want to remove arm64 support or add armv7s support back, simply change
-    the `app.archs['iPhoneOS']' Array in the project's Rakefile. arm64 will be
-    mandatory for App Store submissions in February 2015, and armv7s is no
-    longer included in default Xcode builds.
   * Optimized the app executable size when a project has too many Ruby source
     files, by removing unnecessary internal code. ~30-60% lighter.
+  * Disabled armv7s support for iOS projects. If you want to add armv7s support
+    back, simply add the 'armv7s' value to the `app.archs['iPhoneOS']' config
+    in the project's Rakefile. This architecture is no longer enabled by
+    default in Xcode.
   * Fixed a bug where a compiled Core Data model would be removed when cleaning
     when an original `xcdatamodeld' was not available.
   * Fixed a bug where in certain circumstances cleaning would try to be
