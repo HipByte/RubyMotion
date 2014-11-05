@@ -1,13 +1,16 @@
 = RubyMotion 2.38 =
 
-  * Optimized the app executable size when app has many Ruby files, by removing
-    unnecessary internal codes. ~60% lighter.
+  * Enabled arm64 support and disabled armv7s support for iOS projects. If
+    you want to remove arm64 support or add armv7s support back, simply change
+    the `app.archs['iPhoneOS']' Array in the project's Rakefile. arm64 will be
+    mandatory for App Store submissions in February 2015, and armv7s is no
+    longer included in default Xcode builds.
+  * Optimized the app executable size when a project has too many Ruby source
+    files, by removing unnecessary internal code. ~30-60% lighter.
   * Fixed a bug where a compiled Core Data model would be removed when cleaning
     when an original `xcdatamodeld' was not available.
   * Fixed a bug where in certain circumstances cleaning would try to be
     performed when the vendor dir, e.g. `vendor/Pods' did not exist.
-  * [OSX] Fixed a bug where embedded frameworks would not be codesigned as per
-    the current requirements for the App Store.
   * Fixed a few cases where the Yosemite version number was parsed incorrectly.
   * Added support for `axel' as an alternative to `curl' when downloading
     updates, which supports resuming and uses 10 connections to improve speed.
@@ -20,6 +23,8 @@
     override those set by the toolchain by default. E.g. `-fno-modules'.
   * Fixed the `motion --version' command invocation to print both the stable
     and pre-release versions of RubyMotion.
+  * [OSX] Fixed a bug where embedded frameworks would not be codesigned as per
+    the current requirements for the App Store.
   * [iOS] Removed `Symbols not found...' message when app will be deployed into
     iOS device if Xcode dumped device symbols into user directory.
   * [iOS] Fixed a bug which it could not recognized Provisioning Profile which
