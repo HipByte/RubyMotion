@@ -37,7 +37,7 @@ module Motion; module Project;
         $stderr.puts "This version of RubyMotion does not support `#{platform}'"
         exit 1
       end
-      archs = config.archs[platform]
+      archs = config.archs[platform].uniq
 
       static_library = opts.delete(:static)
 
