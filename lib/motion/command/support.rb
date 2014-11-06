@@ -37,7 +37,11 @@ module Motion; class Command
 
       # Collect details about the environment.
       osx_vers = `/usr/bin/sw_vers -productVersion`.strip
-      rm_vers = Motion::Version
+      if defined?(Pre::Motion::Version)
+        rm_vers = "#{Motion::Version} (stable), #{Pre::Motion::Version} (pre-release)"
+      else
+        rm_vers = Motion::Version
+      end
       xcode_vers = begin
         xcodebuild = `which xcodebuild`.strip
         xcodebuild = '/Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild' if xcodebuild.empty?

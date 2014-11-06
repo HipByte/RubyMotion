@@ -2,6 +2,8 @@
 
   * [iOS] Fixed a regression where Extension and Frameworks could not build for
     iOS device.
+  * Fixed the `motion support' command invocation to print both the stable and
+    pre-release versions of RubyMotion.
 
 = RubyMotion 2.38 =
 
