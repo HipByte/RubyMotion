@@ -1,5 +1,8 @@
 = RubyMotion 2.39 =
 
+  * [iOS] Honour explicit `device_name` or `target` specified by user.
+    Specifying both is disallowed, because a device is configured for a
+    specific SDK.
   * [iOS] Fixed a regression where Extension and Frameworks could not build for
     iOS device.
   * [iOS] Fixed a bug where `rake spec' would return 0 as exit code even if it

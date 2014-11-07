@@ -1459,13 +1459,23 @@ main(int argc, char **argv)
 	id sim_runtime = ((id (*)(id, SEL, id))objc_msgSend)(system_root, @selector(runtime), nil);
 
 	sim_device = [sim_devices objectAtIndex:0];
+	// If either `target` or `device_name` was explicitly specified, then
+	// only compare that specific value and not the other or both.
+	BOOL specific_sdk = getenv("target") != NULL;
+	BOOL specific_device = getenv("device_name") != NULL;
+	BOOL no_specifics = !specific_sdk && !specific_device;
 	for (id device in sim_devices) {
-	    id device_runtime = ((id (*)(id, SEL, id))objc_msgSend)(device, @selector(runtime), nil);
-	    if (device_runtime == sim_runtime &&
-		[device_name compare:[device name]] == NSOrderedSame) {
-		sim_device = device;
-		break;
+	    if ((specific_device || no_specifics) && [device_name compare:[device name]] != NSOrderedSame) {
+		continue;
 	    }
+	    if (specific_sdk || no_specifics) {
+		id device_runtime = ((id (*)(id, SEL, id))objc_msgSend)(device, @selector(runtime), nil);
+		if (device_runtime != sim_runtime) {
+		    continue;
+		}
+	    }
+	    sim_device = device;
+	    break;
 	}
     }
 
