@@ -1198,6 +1198,10 @@ lldb_run_command()
 	    if (res != nil) {
 		status = [res intValue];
 	    }
+	    else {
+		// The session might be terminated with crash.
+		status = -1;
+	    }
 	    [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
 	}
 	exit(status);
