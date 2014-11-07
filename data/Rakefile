@@ -465,17 +465,24 @@ namespace :UIAutomation do
 
           content.gsub!(/(duration):\(double\)/i) { "#{$1}:(NSTimeInterval)" }
 
-          content.gsub!(/\(((float|int|unsigned int)(\s*\*)?)\)/) do
-            type = case $2
-                   when 'float'
-                     'CGFloat'
-                   when 'int'
-                     'NSInteger'
-                   when 'unsigned int'
-                     'NSUInteger'
-                   end
-            "(#{type}#{$3})"
-          end
+          content = content.each_line.inject([]) do |replaced, line|
+            if line.include?("sendTaps") or line.include?("setOrientation")
+              # The signature of these methods are same in i386 and x86_64. Should not change.
+              next (replaced << line)
+            end
+
+            replaced << line.gsub(/\(((float|int|unsigned int)(\s*\*)?)\)/) do
+              type = case $2
+                     when 'float'
+                       'CGFloat'
+                     when 'int'
+                       'NSInteger'
+                     when 'unsigned int'
+                       'NSUInteger'
+                     end
+              "(#{type}#{$3})"
+            end
+          end.join
         end
         File.open(header, 'w') { |f| f << content }
       end
