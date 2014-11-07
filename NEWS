@@ -4,6 +4,8 @@
     iOS device.
   * [iOS] Fixed a bug where `rake spec' would return 0 as exit code even if it
     will fail with crash.
+  * [iOS] Fixed a bug where #tap and #rotate_device cause a crash when it run
+    `rake spec' with x86_64.
   * Fixed the `motion support' command invocation to print both the stable and
     pre-release versions of RubyMotion.
 
