@@ -89,7 +89,7 @@ describe "Bacon::Functional::API, concerning device events" do
     controller.should.be.shaked
   end
 
-  it "sends accelerometer events" do
+  xit "sends accelerometer events" do
     with_accelerometer do
       accelerate :x => 0.5, :y => 0.5, :z => 0.5
     end
