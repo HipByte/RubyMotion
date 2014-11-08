@@ -9,7 +9,7 @@ Motion::Project::App.setup do |app|
   app.name = 'MacBacon UI'
   app.interface_orientations = [:portrait, :landscape_left, :landscape_right, :portrait_upside_down]
   app.frameworks << 'CoreGraphics'
-  #app.archs['iPhoneSimulator'] = ['x86_64']
+  app.archs['iPhoneSimulator'] = [ENV['ARCH']] if ENV['ARCH']
 
   app.spec_files.insert(1, *FileList['../../lib/motion/util/version.rb', '../helpers/*.rb'])
   if ENV['deployment_target']
