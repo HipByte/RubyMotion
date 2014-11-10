@@ -47,7 +47,7 @@ describe "Boxed" do
   end
 
   # RM-638
-  it "should be distinguished about CGSize/CLLocationCoordinate2D" do
+  it "should be distinguished about CGSize/CLLocationCoordinate2D", :if => ios? do
     rect = CGRectMake(1, 2, 3, 4)
     rect.size.class.should == CGSize
 
