@@ -52,11 +52,8 @@ module Motion; module Project;
 
     def archs
       @archs ||= begin
-        # By default, do not build with 64-bit, as it's still experimental.
         # No longer build for armv7s by default.
         archs = super
-        archs['iPhoneSimulator'].delete('x86_64')
-        archs['iPhoneOS'].delete('arm64')
         archs['iPhoneOS'].delete('armv7s')
         archs
       end
