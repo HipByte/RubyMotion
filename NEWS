@@ -9,6 +9,7 @@
     will fail with crash.
   * [iOS] Fixed a bug where #tap and #rotate_device cause a crash when it run
     `rake spec' with x86_64.
+  * Fixed a bug where wrong Boxed object will be returned from Objective-C method.
   * Fixed the `motion support' command invocation to print both the stable and
     pre-release versions of RubyMotion.
 
