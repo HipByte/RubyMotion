@@ -45,4 +45,16 @@ describe "Boxed" do
   it ".opaque?" do
     CGPoint.opaque?.should == false
   end
+
+  # RM-638
+  it "should be distinguished about CGSize/CLLocationCoordinate2D" do
+    rect = CGRectMake(1, 2, 3, 4)
+    rect.size.class.should == CGSize
+
+    latitude = 39.739188
+    longitude = -104.985223
+    location = CLLocation.alloc.initWithLatitude(latitude, longitude: longitude)
+    coord = location.coordinate
+    coord.class.should == CLLocationCoordinate2D
+  end
 end
