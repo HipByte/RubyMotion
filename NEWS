@@ -13,6 +13,8 @@
   * Fixed a bug where wrong Boxed object will be returned from Objective-C method.
   * Fixed the `motion support' command invocation to print both the stable and
     pre-release versions of RubyMotion.
+  * Fixed a bug which it would triggered "Symbol not found" when it will use a
+    constant which is not contained in older SDK.
 
 = RubyMotion 2.38 =
 
