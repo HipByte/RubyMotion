@@ -1,5 +1,7 @@
 = RubyMotion 2.39 =
 
+  * [iOS] Create a `UIViewController`, `UINavigationController`, and `UIWindow`
+    in the default new application template.
   * [iOS] Enabled arm64 support by default for iOS projects. 
   * [iOS] Honour explicit `device_name` or `target` specified by user.
     Specifying both is disallowed, because a device is configured for a
