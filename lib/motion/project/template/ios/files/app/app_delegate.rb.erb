@@ -2,7 +2,7 @@ class AppDelegate
   def application(application, didFinishLaunchingWithOptions:launchOptions)
     rootViewController = UIViewController.alloc.init
     rootViewController.title = '<%= name %>'
-    rootViewController.view.layer.backgroundColor = UIColor.whiteColor.CGColor
+    rootViewController.view.backgroundColor = UIColor.whiteColor
 
     navigationController = UINavigationController.alloc.initWithRootViewController(rootViewController)
 
