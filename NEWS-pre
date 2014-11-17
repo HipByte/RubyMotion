@@ -1,7 +1,13 @@
 = RubyMotion 3.4 =
 
   * Added Hash#{store, size, length, empty?, include?, member?, hash_key?, key?,
-    delete}
+    delete}.
+  * Fixed a bug in the compiler where DWARF metadata would not be properly
+    taken into account by newer NDK toolchains (such as LLVM 3.5).
+  * Fixed a bug in the compiler where the assembler would fail if certain
+    methods with reserved characters (ex. `#<<') are implemented in the file.
+  * Fixed a bug in the runtime where a super call in a method not implemented
+    in the receiver's class would call itself twice.
 
 = RubyMotion 3.3 =
 
