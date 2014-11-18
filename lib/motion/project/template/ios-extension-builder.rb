@@ -75,6 +75,10 @@ PLIST
     end
 
     def build(config, platform, opts)
+      unless ENV['RM_TARGET_BUILD']
+        App.fail "Extension targets must be built from an application project"
+      end
+
       @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
       config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
       config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
