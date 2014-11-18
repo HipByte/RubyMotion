@@ -29,10 +29,6 @@ require 'motion/util/version'
 App = Motion::Project::App
 App.template = :'ios-extension'
 
-unless ENV['RM_TARGET_BUILD']
-  App.fail "Extension targets must be built from an application project"
-end
-
 require 'motion/project'
 require 'motion/project/template/ios-extension-config'
 require 'motion/project/template/ios-extension-builder'

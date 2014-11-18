@@ -29,10 +29,6 @@ require 'motion/util/version'
 App = Motion::Project::App
 App.template = :'ios-framework'
 
-unless ENV['RM_TARGET_BUILD']
-  App.fail "Framework targets must be built from an application project"
-end
-
 require 'motion/project'
 require 'motion/project/template/ios-framework/config'
 require 'motion/project/template/ios-framework/builder'
