@@ -31,44 +31,7 @@ module Motion; module Project;
 
     def info_plist_data(platform)
       info_plist['CFBundleIdentifier'] = identifier + '.watchkitextension'
-      Motion::PropertyList.to_s({
-        'MinimumOSVersion' => deployment_target,
-        'CFBundleResourceSpecification' => 'ResourceRules.plist',
-        'CFBundleSupportedPlatforms' => [deploy_platform],
-        # TODO temp hack to get ints for Instruments, but strings for normal builds.
-        'UIDeviceFamily' => device_family_ints.map { |x| ENV['__USE_DEVICE_INT__'] ? x.to_i : x.to_s },
-        'DTXcode' => begin
-          vers = xcode_version[0].gsub(/\./, '')
-          if vers.length == 2
-            '0' + vers + '0'
-          else
-            '0' + vers
-          end
-        end,
-        'DTXcodeBuild' => xcode_version[1],
-        'DTSDKName' => "#{platform.downcase}#{sdk_version}",
-        'DTSDKBuild' => sdk_build_version(platform),
-        'DTPlatformName' => platform.downcase,
-        'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
-        'DTPlatformVersion' => sdk_version,
-        'DTPlatformBuild' => sdk_build_version(platform),
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist)
-       .merge({ 'CFBundlePackageType' => 'XPC!' }))
-    end
-
-    def manifest_plist_data
-      return nil if manifest_assets.empty?
-      Motion::PropertyList.to_s({
-        'items' => [
-          { 'assets' => manifest_assets,
-            'metadata' => {
-              'bundle-identifier' => identifier,
-              'bundle-version' => @version,
-              'kind' => 'software',
-              'title' => @name
-            } }
-        ]
-      })
+      super
     end
 
     def main_cpp_file_txt(spec_objs)
