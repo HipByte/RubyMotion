@@ -27,9 +27,10 @@ require 'motion/project/template/ios-extension-config'
 
 module Motion; module Project;
   class IOSWatchExtensionConfig < IOSExtensionConfig
-    register :'ios-watch-extension'
+    register :'ios-extension'
 
     def info_plist_data(platform)
+      info_plist['CFBundleIdentifier'] = identifier + '.watchkitextension'
       Motion::PropertyList.to_s({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
