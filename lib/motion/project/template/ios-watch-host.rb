@@ -27,11 +27,10 @@ require 'motion/project/app'
 require 'motion/util/version'
 
 App = Motion::Project::App
-App.template = :'ios-extension'
+App.template = :'ios-watch-host'
 
 require 'motion/project'
-require 'motion/project/template/ios-watch-extension-config'
-require 'motion/project/template/ios-watch-extension-builder'
+require 'motion/project/template/ios-watch-host-config'
 
 desc "Build the simulator version"
 task :default => :"build:simulator"
@@ -40,55 +39,38 @@ desc "Build everything"
 task :build => ['build:simulator', 'build:device']
 
 namespace :build do
-  namespace :host_app do
-    task :simulator do
-      # TODO Try to re-use the env variables used when passing build settings from apps to extensions.
-      rakefile = File.expand_path('../ios-watch-host.rb', __FILE__)
-      sh "rake -I '#{File.join(App.config.motiondir, 'lib')}' -f '#{rakefile}' build:simulator watch_app_name='#{App.config.name}' #{'--trace' if App::VERBOSE}"
-    end
-  end
+  #def pre_build_actions(platform)
+    ## TODO: Ensure Info.plist gets regenerated on each build so it has ints for
+    ## Instruments and strings for normal builds.
+    #rm_f File.join(App.config.app_bundle(platform), 'Info.plist')
 
-  def pre_build_actions(platform)
-    # TODO: Ensure Info.plist gets regenerated on each build so it has ints for
-    # Instruments and strings for normal builds.
-    rm_f File.join(App.config.app_bundle(platform), 'Info.plist')
-
-    # TODO this should go into a iOS specific Builder class which performs this
-    # check before building.
-    App.config.resources_dirs.flatten.each do |dir|
-      next unless File.exist?(dir)
-      Dir.entries(dir).grep(/^Resources$/i).each do |basename|
-        path = File.join(dir, basename)
-        if File.directory?(path)
-          suggestion = basename == 'Resources' ? 'Assets' : 'assets'
-          App.fail "An iOS application cannot be installed if it contains a " \
-                   "directory called `resources'. Please rename the " \
-                   "directory at path `#{path}' to, for instance, " \
-                   "`#{File.join(dir, suggestion)}'."
-        end
-      end
-    end
-  end
+    ## TODO this should go into a iOS specific Builder class which performs this
+    ## check before building.
+    #App.config.resources_dirs.flatten.each do |dir|
+      #next unless File.exist?(dir)
+      #Dir.entries(dir).grep(/^Resources$/i).each do |basename|
+        #path = File.join(dir, basename)
+        #if File.directory?(path)
+          #suggestion = basename == 'Resources' ? 'Assets' : 'assets'
+          #App.fail "An iOS application cannot be installed if it contains a " \
+                   #"directory called `resources'. Please rename the " \
+                   #"directory at path `#{path}' to, for instance, " \
+                   #"`#{File.join(dir, suggestion)}'."
+        #end
+      #end
+    #end
+  #end
 
   desc "Build the simulator version"
   task :simulator do
-    pre_build_actions('iPhoneSimulator')
+    #pre_build_actions('iPhoneSimulator')
     App.build('iPhoneSimulator')
   end
 
   desc "Build the device version"
   task :device do
-    pre_build_actions('iPhoneOS')
+    #pre_build_actions('iPhoneOS')
     App.build('iPhoneOS')
     App.codesign('iPhoneOS')
-  end
-end
-
-namespace :archive do
-  desc "Build for distribution (AppStore)"
-  task :distribution do
-    App.config_without_setup.build_mode = :release
-    App.config_without_setup.distribution_mode = true
-    Rake::Task["build:device"].invoke
   end
 end
