@@ -31,7 +31,7 @@ App.template = :'ios-extension'
 
 require 'motion/project'
 require 'motion/project/template/ios-watch-extension-config'
-require 'motion/project/template/ios-extension-builder'
+require 'motion/project/template/ios-watch-extension-builder'
 
 desc "Build the simulator version"
 task :default => :"build:simulator"
