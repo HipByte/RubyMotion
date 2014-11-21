@@ -35,6 +35,9 @@ module Motion; module Project
       # Copy watch app binary
       FileUtils.mkdir_p watch_app_bundle_path
       sh "/usr/bin/ditto -rsrc \"#{File.join(config.sdk(platform), "/Library/Application\ Support/SP/SP.app/SP")}\" \"#{watch_app_bundle_path}/#{watch_app_name}\""
+
+      # Compile storyboard
+      sh "/usr/bin/ibtool --errors --warnings --notices --module #{config.bundle_name.gsub(" ", "_")} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory \"#{watch_app_bundle_path}\" watch_app/Interface.storyboard"
     end
 
     def build_watch_extension(config, platform, opts)
