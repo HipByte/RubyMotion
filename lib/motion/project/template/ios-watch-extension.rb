@@ -44,7 +44,7 @@ namespace :build do
     task :simulator do
       # TODO Try to re-use the env variables used when passing build settings from apps to extensions.
       rakefile = File.expand_path('../ios-watch-host.rb', __FILE__)
-      sh "rake -I '#{File.join(App.config.motiondir, 'lib')}' -f '#{rakefile}' build:simulator watch_app_name='#{App.config.name}' #{'--trace' if App::VERBOSE}"
+      sh "rake -I '#{File.join(App.config.motiondir, 'lib')}' -f '#{rakefile}' build:simulator simulator watch_app_name='#{App.config.name}' #{'--trace' if App::VERBOSE}"
     end
   end
 
