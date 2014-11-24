@@ -85,7 +85,7 @@ PLIST
       config.xcode_dir = ENV['RM_TARGET_XCODE_DIR'] if ENV['RM_TARGET_XCODE_DIR']
       if ENV['RM_TARGET_ARCHS']
         eval(ENV['RM_TARGET_ARCHS']).each do |platform, archs|
-          config.archs[platform] = archs
+          config.archs[platform] = archs.uniq
         end
       end
 
