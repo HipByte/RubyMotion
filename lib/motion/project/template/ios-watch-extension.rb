@@ -40,14 +40,6 @@ desc "Build everything"
 task :build => ['build:simulator', 'build:device']
 
 namespace :build do
-  namespace :host_app do
-    task :simulator do
-      # TODO Try to re-use the env variables used when passing build settings from apps to extensions.
-      rakefile = File.expand_path('../ios-watch-host.rb', __FILE__)
-      sh "rake -I '#{File.join(App.config.motiondir, 'lib')}' -f '#{rakefile}' build:simulator simulator watch_app_name='#{App.config.name}' #{'--trace' if App::VERBOSE}"
-    end
-  end
-
   def pre_build_actions(platform)
     # TODO: Ensure Info.plist gets regenerated on each build so it has ints for
     # Instruments and strings for normal builds.
