@@ -31,6 +31,8 @@ module Motion; module Project
 
     attr_accessor :type
 
+    attr_reader :path
+
     def initialize(path, type, config, opts)
       @path = path
       @full_path = File.expand_path(path)

@@ -76,6 +76,46 @@ namespace :build do
   end
 end
 
+desc "Run the simulator"
+task :simulator do
+  Rake::Task["build:simulator"].invoke
+  app = App.config.watch_app_bundle('iPhoneSimulator')
+
+  if ENV['TMUX']
+    tmux_default_command = `tmux show-options -g default-command`.strip
+    unless tmux_default_command.include?("reattach-to-user-namespace")
+      App.warn(<<END
+
+    It appears you are using tmux without 'reattach-to-user-namespace', the simulator might not work properly. You can either disable tmux or run the following commands:
+
+      $ brew install reattach-to-user-namespace
+      $ echo 'set-option -g default-command "reattach-to-user-namespace -l $SHELL"' >> ~/.tmux.conf
+
+END
+      )
+    end
+  end
+
+  family_int = 1 # iPhone
+  simulate_device = 'iPhone'
+  target = App.config.sdk_version
+
+  # Launch the simulator.
+  xcode = App.config.xcode_dir
+  env = "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\""
+  env << " RM_BUILT_EXECUTABLE=\"#{File.expand_path(App.config.app_bundle_executable('iPhoneSimulator'))}\""
+  env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
+  sim = File.join(App.config.bindir, 'ios/sim')
+  debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
+  app_args = (ENV['args'] or '')
+  App.info 'Simulate', app
+  at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
+  Signal.trap(:INT) { } if ENV['debug']
+  system "#{env} #{sim} #{debug} #{family_int} \"#{simulate_device}\" #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
+  App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
+  exit($?.exitstatus)
+end
+
 namespace :archive do
   desc "Build for distribution (AppStore)"
   task :distribution do

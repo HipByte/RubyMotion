@@ -76,6 +76,16 @@ namespace :build do
   end
 end
 
+# TODO can an app bundle more than 1 watch app?
+desc "Run the watch app on the sim"
+task :simulate_watch_app do
+  # TODO need a way to identify a watch extension from other extensions
+  extension = App.config.targets.first
+  Dir.chdir extension.path do
+    sh "env #{extension.environment_variables} rake simulator"
+  end
+end
+
 desc "Run the simulator"
 task :simulator do
   deployment_target = Motion::Util::Version.new(App.config.deployment_target)

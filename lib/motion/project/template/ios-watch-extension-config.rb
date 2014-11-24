@@ -34,6 +34,14 @@ module Motion; module Project;
       super
     end
 
+    def watch_app_name
+      bundle_name.sub(" WatchKit Extension", '') + " Watch App"
+    end
+
+    def watch_app_bundle(platform)
+      File.join(app_bundle(platform), "#{watch_app_name}.app")
+    end
+
     def main_cpp_file_txt(spec_objs)
       main_txt = <<EOS
 #import <UIKit/UIKit.h>
