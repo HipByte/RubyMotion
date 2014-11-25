@@ -390,6 +390,17 @@ module Motion; module Project;
       }
     end
 
+    def icon_file_names
+      images = resources_dirs.map do |dir|
+        Dir.glob(File.join(dir, 'Icon*.png')).map do |file|
+          f = File.basename(file, File.extname(file))
+          i = f.rindex('@')
+          i ? f[0...i] : f
+        end
+      end.flatten.compact
+      images.uniq
+    end
+
     # From iOS 7 and up we try to infer the launch images by looking for png
     # files that start with 'Default'.
     #
@@ -405,6 +416,7 @@ module Motion; module Project;
     end
 
     def merged_info_plist(platform)
+      self.icons = icon_file_names if icons.empty?
       ios = {
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
