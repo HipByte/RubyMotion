@@ -15,6 +15,8 @@
   * [iOS] Fixed a bug where all rake task could not be ran in root directory of
     Extension/Framework. So, CocoaPods libraries cannot be installed.
   * [iOS] Fixed a bug where the shared framework was not built with 64-bit.
+  * [iOS] Fixed a bug where it could not customize Action and Share extension's
+    icon. Added `app.icons' property which it can use in extension's Rakefile.
   * [iOS] Added launch images for iPhone 6 and iPhone 6 Plus. Thanks to
     Hwee-Boon Yar for the patch (pull request #170).
   * Fixed a regression where it would cause a link error in Xcode project when
