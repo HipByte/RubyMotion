@@ -201,8 +201,8 @@ EOS
         # Compute the list of frameworks, including dependencies, that the project uses.
         deps = frameworks.dup.uniq
         slf = File.join(sdk(local_platform), 'System', 'Library', 'Frameworks')
-        deps.each do |framework|
-          framework_path = File.join(slf, framework + '.framework', framework)
+
+        find_dependencies = lambda { |framework_path| 
           if File.exist?(framework_path)
             `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
               # Only care about public, non-umbrella frameworks (for now).
@@ -214,6 +214,14 @@ EOS
               end
             end
           end
+        }
+        deps.each do |framework|
+          framework_path = File.join(slf, framework + '.framework', framework)
+          find_dependencies.call(framework_path)
+        end
+        embedded_frameworks.each do |framework|
+          framework_path = File.expand_path(File.join(framework, File.basename(framework, ".framework")))
+          find_dependencies.call(framework_path)
         end
 
         if @framework_search_paths.empty?

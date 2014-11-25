@@ -22,6 +22,8 @@
     pre-release versions of RubyMotion.
   * Fixed a bug which it would triggered "Symbol not found" when it will use a
     constant which is not contained in older SDK.
+  * Fixed a bug which it would not solve framework dependencies in embedded
+    frameworks.
 
 = RubyMotion 2.38 =
 
