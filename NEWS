@@ -2,6 +2,7 @@
 
   * [iOS] Create a `UIViewController`, `UINavigationController`, and `UIWindow`
     in the default new application template.
+  * [OSX] Only build for 64-bit (`x86_64`) by default.
   * [iOS] Enabled arm64 support by default for iOS projects. 
   * [iOS] Honour explicit `device_name` or `target` specified by user.
     Specifying both is disallowed, because a device is configured for a

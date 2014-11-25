@@ -56,15 +56,11 @@ module Motion; module Project;
     end
 
     def archs
-      archs = super
-      if development?
-        # We only build for the native architecture in development mode, to speed up builds.
-        native_arch = `/usr/bin/uname -m`.strip
-        if archs['MacOSX'].include?(native_arch)
-          archs['MacOSX'] = [native_arch]
-        end
+      @archs ||= begin
+        archs = super
+        archs['MacOSX'].delete('i386')
+        archs
       end
-      archs
     end
 
     def app_icons_info_plist_path(platform)
