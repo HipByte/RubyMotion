@@ -30,12 +30,13 @@ module Motion; module Project;
   class IOSExtensionConfig < XcodeConfig
     register :'ios-extension'
 
-    variable :device_family, :provisioning_profile, :manifest_assets
+    variable :device_family, :provisioning_profile, :icons, :manifest_assets
 
     def initialize(project_dir, build_mode)
       super
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @device_family = :iphone
+      @icons = []
       @manifest_assets = []
     end
 
@@ -212,6 +213,11 @@ module Motion; module Project;
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
+        'CFBundleIcons' => {
+          'CFBundlePrimaryIcon' => {
+            'CFBundleIconFiles' => icons,
+          }
+        },
         # TODO temp hack to get ints for Instruments, but strings for normal builds.
         'UIDeviceFamily' => device_family_ints.map { |x| ENV['__USE_DEVICE_INT__'] ? x.to_i : x.to_s },
         'DTXcode' => begin
