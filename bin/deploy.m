@@ -1247,7 +1247,9 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 		afc_dir));
 
     if (last_generated_path == nil) {
-	printf("Unable to find any crash report file on the device for this app that hasn't been processed yet. Already-processed crash report files for this app might be in `%s'.\n", _local_dir);
+	printf("Unable to find any crash report file on the device for this " \
+	       "app that hasn't been processed yet. Already-processed crash " \
+	       "report files for this app might be in `%s'.\n", _local_dir);
     }
 }
 
