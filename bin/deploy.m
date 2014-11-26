@@ -1153,19 +1153,34 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 		continue;
 	    }
 
-	    // Read the data. It should be a property list. The actual crash
-	    // report is a long string associated to the `description' key.
+	    // Read the crash report data.
+	    //
 	    NSData *data = read_remote_file_data(afc_conn, full_path);
+	    NSString *content = nil;
+	    // With Xcode 5 it should be a property list. The actual crash
+	    // report is a long string associated to the `description' key.
 	    id obj = [NSPropertyListSerialization propertyListWithData:data
 		options:0 format:nil error:nil];
-	    if (obj == nil || ![obj isKindOfClass:[NSDictionary class]]) {
-		fprintf(stderr,
-			"Error when parsing crash report data from `%s'\n",
-			full_path);
-		exit(1);
+	    if (obj != nil) {
+		if (![obj isKindOfClass:[NSDictionary class]]) {
+		    fprintf(stderr,
+			    "Error when parsing crash report data from `%s'\n",
+			    full_path);
+		    exit(1);
+		}
+		content = [(NSDictionary *)obj valueForKey:@"description"];
 	    }
-	    id content = [(NSDictionary *)obj
-		valueForKey:@"description"];
+	    // With Xcode 6 it should be a plain NSString.
+	    else {
+		content = [[NSString alloc] initWithData:data
+						encoding:NSUTF8StringEncoding];
+		[content autorelease];
+		if ([content characterAtIndex:0] == '{') {
+		    // First line contains encoded metadata that we don't need.
+		    NSUInteger start = [content rangeOfString:@"\n"].location+1;
+		    content = [content substringFromIndex:start];
+		}
+	    }
 	    if (content == nil || ![content isKindOfClass:[NSString class]]) {
 		fprintf(stderr,
 			"Crash report data from `%s' has no content\n",
@@ -1177,7 +1192,7 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 	    NSError *error = nil;
 	    NSString *tmp_path = [tmp_dir stringByAppendingPathComponent:
 		[local_path lastPathComponent]];
-	    if (![(NSString *)content writeToFile:tmp_path atomically:true
+	    if (![content writeToFile:tmp_path atomically:true
 		    encoding:NSUTF8StringEncoding error:&error]) {
 		fprintf(stderr,
 			"Error when writing crash report at path `%s': %s\n",
@@ -1191,7 +1206,12 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 	    char *xcode_dir = getenv("XCODE_DIR");
 	    assert(xcode_dir != NULL);
 	    snprintf(cmd_line, sizeof cmd_line, "DEVELOPER_DIR=\"%s\" %s/Platforms/iPhoneOS.platform/Developer/Library/PrivateFrameworks/DTDeviceKitBase.framework/Versions/A/Resources/symbolicatecrash -o \"%s\" \"%s\" \"%s\" >& /dev/null", xcode_dir, xcode_dir, [local_path fileSystemRepresentation], [tmp_path fileSystemRepresentation], [dsym_path fileSystemRepresentation]);
-	    system(cmd_line);
+	    if (system(cmd_line) != 0) {
+		fprintf(stderr, "Unable to symbolicate crash report.\n");
+		[[NSFileManager defaultManager] moveItemAtPath:tmp_path
+						        toPath:local_path
+							 error:nil];
+	    }
 
 	    printf("New crash report: %s\n",
 		    [local_path fileSystemRepresentation]);
