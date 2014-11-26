@@ -41,10 +41,27 @@ module Motion; module Project
       @opts = opts
     end
 
+    # This takes care of changing into the target's work directory, setting the
+    # required environment variables, and passing on whether to be verbose.
+    #
+    # @param [String] task
+    #        The rake task to invoke in the target's context.
+    #
+    # @return [Boolean] Whether or not invoking the rake task succeeded.
+    #
+    def rake(task)
+      command = "cd #{@full_path} && #{environment_variables} rake #{task}"
+      if App::VERBOSE
+        command << " --trace"
+        puts command
+      end
+      system(command)
+    end
+
     def build(platform)
       @platform = platform
 
-      command = if platform == 'iPhoneSimulator'
+      task = if platform == 'iPhoneSimulator'
         "build:simulator"
       else
         if @config.distribution_mode
@@ -54,11 +71,7 @@ module Motion; module Project
         end
       end
 
-      args = ''
-      args << " --trace" if App::VERBOSE
-
-      success = system("cd #{@full_path} && #{environment_variables} rake #{command} #{args}")
-      unless success
+      unless rake(task)
         App.fail "Target '#{@path}' failed to build"
       end
     end
@@ -106,9 +119,7 @@ module Motion; module Project
     end
 
     def clean
-      args = ''
-      args << " --trace" if App::VERBOSE
-      system("cd #{@full_path} && #{environment_variables} rake clean #{args}")
+      rake 'clean'
     end
 
     def build_dir(config, platform)
