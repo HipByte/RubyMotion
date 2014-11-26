@@ -1097,6 +1097,23 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 		root, &afc_dir));
     assert(afc_dir != NULL);
 
+    // Determine the path to the `symbolicatecrash` tool.
+    char *xcode_dir = getenv("XCODE_DIR");
+    assert(xcode_dir != NULL);
+    char *xcode5_path = "Platforms/iPhoneOS.platform/Developer/Library/" \
+			"PrivateFrameworks/DTDeviceKitBase.framework/" \
+			"Versions/A/Resources/symbolicatecrash";
+    char *xcode6_path = "../SharedFrameworks/DTDeviceKitBase.framework/" \
+			"Versions/A/Resources/symbolicatecrash";
+    char tool_path[PATH_MAX];
+    snprintf(tool_path, sizeof(tool_path), "%s/%s", xcode_dir, xcode5_path);
+    if (access(tool_path, X_OK) != 0) {
+	snprintf(tool_path, sizeof(tool_path), "%s/%s", xcode_dir, xcode6_path);
+	if (access(tool_path, X_OK) != 0) {
+	    *tool_path = '\0';
+	}
+    }
+
     NSString *last_generated_path = nil;
     while (true) {
 	// Read a directory entry, skip private files.
@@ -1157,8 +1174,8 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 	    //
 	    NSData *data = read_remote_file_data(afc_conn, full_path);
 	    NSString *content = nil;
-	    // With Xcode 5 it should be a property list. The actual crash
-	    // report is a long string associated to the `description' key.
+	    // With older iOS versions this was a property list. The actual
+	    // crash report is a string associated to the `description' key.
 	    id obj = [NSPropertyListSerialization propertyListWithData:data
 		options:0 format:nil error:nil];
 	    if (obj != nil) {
@@ -1170,7 +1187,7 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 		}
 		content = [(NSDictionary *)obj valueForKey:@"description"];
 	    }
-	    // With Xcode 6 it should be a plain NSString.
+	    // With newer iOS versions this is just a plain NSString.
 	    else {
 		content = [[NSString alloc] initWithData:data
 						encoding:NSUTF8StringEncoding];
@@ -1202,11 +1219,18 @@ recursive_retrieve_crash_reports(afc_conn_t afc_conn, const char *root,
 	    }
 
 	    // Run symbolicate.
-	    char cmd_line[5000];
-	    char *xcode_dir = getenv("XCODE_DIR");
-	    assert(xcode_dir != NULL);
-	    snprintf(cmd_line, sizeof cmd_line, "DEVELOPER_DIR=\"%s\" %s/Platforms/iPhoneOS.platform/Developer/Library/PrivateFrameworks/DTDeviceKitBase.framework/Versions/A/Resources/symbolicatecrash -o \"%s\" \"%s\" \"%s\" >& /dev/null", xcode_dir, xcode_dir, [local_path fileSystemRepresentation], [tmp_path fileSystemRepresentation], [dsym_path fileSystemRepresentation]);
-	    if (system(cmd_line) != 0) {
+	    BOOL symbolicated = NO;
+	    if (*tool_path != '\0') {
+		char cmd[5000];
+		snprintf(cmd, sizeof cmd, "DEVELOPER_DIR=\"%s\" \"%s\" -o" \
+					  "\"%s\" \"%s\" \"%s\" >& /dev/null",
+					  xcode_dir, tool_path,
+					  [local_path fileSystemRepresentation],
+					  [tmp_path fileSystemRepresentation],
+					  [dsym_path fileSystemRepresentation]);
+		symbolicated = (system(cmd) == 0);
+	    }
+	    if (!symbolicated) {
 		fprintf(stderr, "Unable to symbolicate crash report.\n");
 		[[NSFileManager defaultManager] moveItemAtPath:tmp_path
 						        toPath:local_path
