@@ -34,12 +34,41 @@ module Motion; module Project;
       super
     end
 
+    # @return [String] The name of the application.
+    #
     def watch_app_name
       bundle_name.sub(" WatchKit Extension", '') + " Watch App"
     end
 
+    # @return [String] The application bundle filename.
+    #
+    def watch_app_bundle_name
+      "#{watch_app_name}.app"
+    end
+
+    # @param [String] platform
+    #        The platform identifier that's being build for, such as
+    #        `iPhoneSimulator` or `iPhoneOS`.
+    #
+    # @return [String] The path to the application bundle in this extension's
+    #                  build directory.
+    #
     def watch_app_bundle(platform)
-      File.join(app_bundle(platform), "#{watch_app_name}.app")
+      File.join(app_bundle(platform), watch_app_bundle_name)
+    end
+
+    # @return [String] The path to the application bundle inside the host
+    #                  application in its build directory.
+    #
+    def embedded_watch_app_bundle
+      File.join(ENV['RM_TARGET_DESTINATION_BUNDLE_PATH'], watch_app_bundle_name)
+    end
+
+    # @return [String] The path to the application executable inside the host
+    #                  application in its build directory.
+    #
+    def embedded_watch_app_executable
+      File.join(embedded_watch_app_bundle, watch_app_name)
     end
 
     def main_cpp_file_txt(spec_objs)
