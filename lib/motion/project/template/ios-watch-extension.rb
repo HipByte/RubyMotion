@@ -83,8 +83,9 @@ end
 # and the normal iOS task to launch on the sim.
 desc "Run the simulator"
 task :simulator do
-  app = App.config.embedded_watch_app_bundle
-  app_executable = File.expand_path(App.config.embedded_watch_app_executable)
+  config = App.config.watch_app_config
+  app = config.embedded_app_bundle
+  app_executable = File.expand_path(config.embedded_app_bundle_executable)
 
   if ENV['TMUX']
     tmux_default_command = `tmux show-options -g default-command`.strip
