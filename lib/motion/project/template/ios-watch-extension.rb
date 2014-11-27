@@ -84,8 +84,8 @@ end
 desc "Run the simulator"
 task :simulator do
   config = App.config.watch_app_config
-  app = config.embedded_app_bundle
-  app_executable = File.expand_path(config.embedded_app_bundle_executable)
+  app = config.app_bundle('iPhoneSimulator')
+  app_executable = File.expand_path(config.app_bundle_executable('iPhoneSimulator'))
 
   if ENV['TMUX']
     tmux_default_command = `tmux show-options -g default-command`.strip
@@ -115,7 +115,7 @@ END
   env << " RM_BUILT_EXECUTABLE=\"#{app_executable}\""
   env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
   sim = File.join(App.config.bindir, 'ios/sim')
-  debug = (ENV['debug'] ? 1 : 0)
+  debug = (ENV['debug'] ? 1 : 2)
   app_args = (ENV['args'] or '')
   App.info 'Simulate', app
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
