@@ -324,8 +324,14 @@ module Motion; module Project;
       end
     end
 
+    # @param [String] platform
+    #        The platform identifier that's being build for, such as
+    #        `iPhoneSimulator` or `iPhoneOS`.
+    #
+    # @return [String] The path to the app bundle in the build directory.
+    #
     def app_bundle(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app')
+      File.join(versionized_build_dir(platform), bundle_filename)
     end
 
     def app_bundle_executable(platform)
@@ -459,7 +465,7 @@ module Motion; module Project;
               'bundle-identifier' => identifier,
               'bundle-version' => @version,
               'kind' => 'software',
-              'title' => @name
+              'title' => name
             } }
         ]
       })

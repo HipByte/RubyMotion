@@ -289,8 +289,16 @@ EOS
       common_flags(platform) + ' -Wl,-no_pie'
     end
 
+    # @return [String] The application bundle name, excluding extname.
+    #
     def bundle_name
-      @name + (spec_mode ? '_spec' : '')
+      name + (spec_mode ? '_spec' : '')
+    end
+
+    # @return [String] The application bundle filename, including extname.
+    #
+    def bundle_filename
+      bundle_name + '.app'
     end
 
     def versionized_build_dir(platform)
@@ -298,7 +306,7 @@ EOS
     end
 
     def app_bundle_dsym(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app.dSYM')
+      File.join(versionized_build_dir(platform), bundle_filename + '.dSYM')
     end
 
     def archive_extension
@@ -310,7 +318,7 @@ EOS
     end
 
     def identifier
-      @identifier ||= "com.yourcompany.#{@name.gsub(/\s/, '')}"
+      @identifier ||= "com.yourcompany.#{name.gsub(/\s/, '')}"
       spec_mode ? @identifier + '_spec' : @identifier
     end
 
@@ -326,10 +334,10 @@ EOS
       {
         'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
         'CFBundleDevelopmentRegion' => 'en',
-        'CFBundleName' => @name,
-        'CFBundleDisplayName' => @name,
+        'CFBundleName' => name,
+        'CFBundleDisplayName' => name,
         'CFBundleIdentifier' => identifier,
-        'CFBundleExecutable' => @name, 
+        'CFBundleExecutable' => name, 
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
         'CFBundleShortVersionString' => (@short_version || @version),
