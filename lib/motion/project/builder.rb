@@ -446,12 +446,7 @@ EOS
       end
 
       # Create bundle/Info.plist.
-      bundle_info_plist = File.join(bundle_path, 'Info.plist')
-      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
-        App.info 'Create', bundle_info_plist
-        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
-        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
-      end
+      generate_info_plist(config, platform)
 
       # Copy resources, handle subdirectories.
       app_resources_dir = config.app_resources_dir(platform)
@@ -569,6 +564,15 @@ EOS
       instruments_app = File.expand_path('../Applications/Instruments.app', config.xcode_dir)
       App.info('Profile', config.app_bundle(platform))
       sh "'#{File.join(config.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
+    end
+
+    def generate_info_plist(config, platform)
+      bundle_info_plist = File.join(config.app_bundle(platform), 'Info.plist')
+      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
+        App.info 'Create', bundle_info_plist
+        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
+        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
+      end
     end
 
     class << self

@@ -36,6 +36,9 @@ module Motion; module Project
 
       # Compile storyboard
       sh "/usr/bin/ibtool --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{config.app_bundle(platform)}' watch_app/Interface.storyboard"
+
+      # Create bundle/Info.plist.
+      generate_info_plist(config, platform)
     end
 
     def build_watch_extension(config, platform, opts)
