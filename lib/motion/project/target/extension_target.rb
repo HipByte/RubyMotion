@@ -78,10 +78,10 @@ module Motion; module Project
 
     def copy_products(platform)
       src_path = src_extension_path
-      dest_path = dest_extension_path
+      dest_path = destination_dir
       FileUtils.mkdir_p(File.join(@config.app_bundle(platform), 'PlugIns'))
 
-      extension_path = File.join(dest_path, extension_name)
+      extension_path = destination_bundle_path
 
       if !File.exist?(extension_path) or File.mtime(src_path) > File.mtime(extension_path)
         App.info 'Copy', src_path
@@ -89,7 +89,7 @@ module Motion; module Project
 
         # At build time Extensions do not know the bundle indentifier of its
         # parent app, so we have to modify their Info.plist later
-        extension_dir = File.join(dest_extension_path, extension_name)
+        extension_dir = File.join(destination_dir, extension_name)
         info_plist = File.join(extension_dir, 'Info.plist')
         extension_bundle_name = `/usr/libexec/PlistBuddy -c "print CFBundleName" "#{info_plist}"`.strip
         extension_bundle_indentifer = `/usr/libexec/PlistBuddy -c "print CFBundleIdentifier" "#{info_plist}"`.strip
@@ -103,7 +103,7 @@ module Motion; module Project
     end
 
     def codesign(platform)
-      extension_dir = File.join(dest_extension_path, extension_name)
+      extension_dir = destination_bundle_path
 
       # Create bundle/ResourceRules.plist.
       resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
@@ -133,8 +133,18 @@ module Motion; module Project
       end
     end
 
-    def dest_extension_path
+    # @return [String] The directory inside the application bundle where the
+    #                  extension should be located in the final product.
+    #
+    def destination_dir
       File.join(@config.app_bundle(@platform), 'PlugIns')
+    end
+
+    # @return [String] The path to the extension bundle inside the application
+    #                  bundle.
+    #
+    def destination_bundle_path
+      File.join(destination_dir, extension_name)
     end
 
     def extension_name
@@ -148,7 +158,8 @@ module Motion; module Project
         "RM_TARGET_XCODE_DIR=\"#{@config.xcode_dir}\"",
         "RM_TARGET_HOST_APP_PATH=\"#{File.expand_path(@config.project_dir)}\"",
         "RM_TARGET_BUILD=\"1\"",
-        "RM_TARGET_ARCHS='#{@config.archs.inspect}'"
+        "RM_TARGET_ARCHS='#{@config.archs.inspect}'",
+        "RM_TARGET_DESTINATION_BUNDLE_PATH='#{destination_bundle_path}'",
       ].join(' ')
     end
 
