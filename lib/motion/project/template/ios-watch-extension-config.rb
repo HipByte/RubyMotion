@@ -115,6 +115,29 @@ EOS
         @name ||= @extension_config.name.sub(" WatchKit Extension", '') + " Watch App"
       end
 
+      # @return [String] The bundle identifier of the watch application based on
+      #         the bundle identifier of the watch extension.
+      #
+      def identifier
+        @identifier ||= @extension_config.identifier + '.watchapp'
+      end
+
+      # @todo There are more differences with Xcode's Info.plist.
+      #
+      # @param [String] platform
+      #        The platform identifier that's being build for, such as
+      #        `iPhoneSimulator` or `iPhoneOS`.
+      #
+      # @return [Hash] A hash that contains all the various `Info.plist` data
+      #         merged into one hash.
+      #
+      def merged_info_plist(platform)
+        plist = super
+        plist['UIDeviceFamily'] << '4' # Probably means Apple Watch device?
+        plist['WKWatchKitApp'] = true
+        plist
+      end
+
       # @param [String] platform
       #        The platform identifier that's being build for, such as
       #        `iPhoneSimulator` or `iPhoneOS`.
