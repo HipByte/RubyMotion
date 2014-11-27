@@ -76,6 +76,8 @@ namespace :build do
   end
 end
 
+# TODO Once everything's done, see what should be abstracted between this task
+# and the normal iOS task to launch on the sim.
 desc "Run the simulator"
 task :simulator do
   Rake::Task["build:simulator"].invoke
@@ -96,8 +98,11 @@ END
     end
   end
 
-  family_int = 1 # iPhone
-  simulate_device = 'iPhone'
+  # Watch apps are iPhone only
+  family_int = 1
+  # TODO be sure to get this data in the same way we normally do when launching
+  # the sim.
+  simulate_device = 'iPhone 6'
   target = App.config.sdk_version
 
   # Launch the simulator.
@@ -106,7 +111,7 @@ END
   env << " RM_BUILT_EXECUTABLE=\"#{File.expand_path(App.config.app_bundle_executable('iPhoneSimulator'))}\""
   env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
   sim = File.join(App.config.bindir, 'ios/sim')
-  debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
+  debug = (ENV['debug'] ? 1 : 0)
   app_args = (ENV['args'] or '')
   App.info 'Simulate', app
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
