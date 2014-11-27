@@ -79,9 +79,12 @@ end
 # TODO can an app bundle more than 1 watch app?
 desc "Run the watch app on the sim"
 task :simulate_watch_app do
+  unless ENV["skip_build"]
+    Rake::Task["build:simulator"].invoke
+  end
   # TODO need a way to identify a watch extension from other extensions
-  extension = App.config.targets.first
-  extension.rake('simulator')
+  watch_extension = App.config.targets.first
+  watch_extension.rake("simulator")
 end
 
 desc "Run the simulator"
