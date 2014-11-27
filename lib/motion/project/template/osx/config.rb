@@ -122,7 +122,7 @@ module Motion; module Project;
     end
 
     def app_bundle_raw(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app')
+      File.join(versionized_build_dir(platform), bundle_filename)
     end
 
     def app_bundle(platform)
