@@ -149,20 +149,6 @@ EOS
         File.join(@extension_config.app_bundle(platform), bundle_filename)
       end
 
-      # @return [String] The path to the application bundle inside the host
-      #         application in its build directory.
-      #
-      def embedded_app_bundle
-        File.join(ENV['RM_TARGET_DESTINATION_BUNDLE_PATH'], bundle_filename)
-      end
-
-      # @return [String] The path to the application executable inside the host
-      #         application in its build directory.
-      #
-      def embedded_app_bundle_executable
-        File.join(embedded_app_bundle, name)
-      end
-
       # @return [String] The path to the SockPuppet application executable that
       #         we copy and use as-is.
       #

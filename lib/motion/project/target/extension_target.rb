@@ -127,7 +127,6 @@ module Motion; module Project
     end
 
     def src_extension_path
-      return if @platform.nil? # This is when cleaning :-/
       @src_extension_path ||= begin
         path = File.join(@path, 'build', build_dir(@config, @platform), '*.appex')
         Dir[path].sort_by{ |f| File.mtime(f) }.last
@@ -145,14 +144,14 @@ module Motion; module Project
     #         application bundle or `nil` if it has not been built yet.
     #
     def destination_bundle_path
-      File.join(destination_dir, extension_name) if extension_name
+      File.join(destination_dir, extension_name)
     end
 
     # @return [String, nil] The name of the extension or `nil` if it has not
     #         been built yet.
     #
     def extension_name
-      File.basename(src_extension_path) if src_extension_path
+      File.basename(src_extension_path)
     end
 
     def environment_variables
@@ -163,7 +162,6 @@ module Motion; module Project
         "RM_TARGET_HOST_APP_PATH=\"#{File.expand_path(@config.project_dir)}\"",
         "RM_TARGET_BUILD=\"1\"",
         "RM_TARGET_ARCHS='#{@config.archs.inspect}'",
-        "RM_TARGET_DESTINATION_BUNDLE_PATH='#{destination_bundle_path}'",
       ].join(' ')
     end
 
