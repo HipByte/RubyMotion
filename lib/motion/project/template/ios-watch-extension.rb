@@ -76,12 +76,15 @@ namespace :build do
   end
 end
 
+# This task should be called by the host application _after_ the host
+# application and its extensions (including this watch app) have been built.
+#
 # TODO Once everything's done, see what should be abstracted between this task
 # and the normal iOS task to launch on the sim.
 desc "Run the simulator"
 task :simulator do
-  Rake::Task["build:simulator"].invoke
-  app = App.config.watch_app_bundle('iPhoneSimulator')
+  app = App.config.embedded_watch_app_bundle
+  app_executable = File.expand_path(App.config.embedded_watch_app_executable)
 
   if ENV['TMUX']
     tmux_default_command = `tmux show-options -g default-command`.strip
@@ -108,7 +111,7 @@ END
   # Launch the simulator.
   xcode = App.config.xcode_dir
   env = "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\""
-  env << " RM_BUILT_EXECUTABLE=\"#{File.expand_path(App.config.app_bundle_executable('iPhoneSimulator'))}\""
+  env << " RM_BUILT_EXECUTABLE=\"#{app_executable}\""
   env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
   sim = File.join(App.config.bindir, 'ios/sim')
   debug = (ENV['debug'] ? 1 : 0)
