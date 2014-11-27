@@ -28,19 +28,19 @@ require 'motion/project/template/ios-extension-builder'
 module Motion; module Project
   class Builder
     def build_watch_app(config, platform, opts)
-      watch_app_bundle_path = config.watch_app_bundle(platform)
-
       # Copy watch app binary
-      FileUtils.mkdir_p watch_app_bundle_path
-      sh "/usr/bin/ditto -rsrc \"#{File.join(config.sdk(platform), "/Library/Application\ Support/SP/SP.app/SP")}\" \"#{watch_app_bundle_path}/#{config.watch_app_name}\""
+      FileUtils.mkdir_p config.app_bundle(platform)
+      source = config.prebuilt_app_executable(platform)
+      destination = config.app_bundle_executable(platform)
+      sh "/usr/bin/ditto -rsrc '#{source}' '#{destination}'"
 
       # Compile storyboard
-      sh "/usr/bin/ibtool --errors --warnings --notices --module #{config.bundle_name.gsub(" ", "_")} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory \"#{watch_app_bundle_path}\" watch_app/Interface.storyboard"
+      sh "/usr/bin/ibtool --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{config.app_bundle(platform)}' watch_app/Interface.storyboard"
     end
 
     def build_watch_extension(config, platform, opts)
       build_extension(config, platform, opts)
-      build_watch_app(config, platform, opts)
+      build_watch_app(config.watch_app_config, platform, opts)
     end
     alias_method "build_extension", "build"
     alias_method "build", "build_watch_extension"

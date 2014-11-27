@@ -24,6 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/template/ios-extension-config'
+require 'motion/project/template/ios/config'
 
 module Motion; module Project;
   class IOSWatchExtensionConfig < IOSExtensionConfig
@@ -34,41 +35,10 @@ module Motion; module Project;
       super
     end
 
-    # @return [String] The name of the application.
+    # @return [WatchAppConfig] A config instance for the watch application.
     #
-    def watch_app_name
-      bundle_name.sub(" WatchKit Extension", '') + " Watch App"
-    end
-
-    # @return [String] The application bundle filename.
-    #
-    def watch_app_bundle_name
-      "#{watch_app_name}.app"
-    end
-
-    # @param [String] platform
-    #        The platform identifier that's being build for, such as
-    #        `iPhoneSimulator` or `iPhoneOS`.
-    #
-    # @return [String] The path to the application bundle in this extension's
-    #                  build directory.
-    #
-    def watch_app_bundle(platform)
-      File.join(app_bundle(platform), watch_app_bundle_name)
-    end
-
-    # @return [String] The path to the application bundle inside the host
-    #                  application in its build directory.
-    #
-    def embedded_watch_app_bundle
-      File.join(ENV['RM_TARGET_DESTINATION_BUNDLE_PATH'], watch_app_bundle_name)
-    end
-
-    # @return [String] The path to the application executable inside the host
-    #                  application in its build directory.
-    #
-    def embedded_watch_app_executable
-      File.join(embedded_watch_app_bundle, watch_app_name)
+    def watch_app_config
+      @watch_app_config ||= WatchAppConfig.new(@project_dir, @build_mode, self)
     end
 
     def main_cpp_file_txt(spec_objs)
@@ -109,6 +79,83 @@ EOS
     return retval;
 }
 EOS
+    end
+
+    # This config class is mostly used to re-use existing filename/path APIs as
+    # they are in any other iOS application and to build an Info.plist.
+    #
+    # We do not actually compile this application, it's only assembled from an
+    # existing `SP.app` application template inside the SDK.
+    #
+    class WatchAppConfig < IOSConfig
+      def initialize(project_dir, build_mode, extension_config)
+        super(project_dir, build_mode)
+        @name = nil
+        @files = []
+        @resources_dirs = []
+        @specs_dir = nil
+        @detect_dependencies = false
+
+        @delegate_class = "SPApplicationDelegate"
+        @extension_config = extension_config
+      end
+
+      def sdk_version
+        @extension_config.sdk_version
+      end
+
+      def deployment_target
+        @extension_config.deployment_target
+      end
+
+      # @return [String] The name of the watch application based on the name of
+      #         the watch extension.
+      #
+      def name
+        @name ||= @extension_config.name.sub(" WatchKit Extension", '') + " Watch App"
+      end
+
+      # @param [String] platform
+      #        The platform identifier that's being build for, such as
+      #        `iPhoneSimulator` or `iPhoneOS`.
+      #
+      # @return [String] The path to the application bundle in this extension's
+      #         build directory.
+      #
+      def app_bundle(platform)
+        File.join(@extension_config.app_bundle(platform), bundle_filename)
+      end
+
+      # @return [String] The path to the application bundle inside the host
+      #         application in its build directory.
+      #
+      def embedded_app_bundle
+        File.join(ENV['RM_TARGET_DESTINATION_BUNDLE_PATH'], bundle_filename)
+      end
+
+      # @return [String] The path to the application executable inside the host
+      #         application in its build directory.
+      #
+      def embedded_app_bundle_executable
+        File.join(embedded_app_bundle, name)
+      end
+
+      # @return [String] The path to the SockPuppet application executable that
+      #         we copy and use as-is.
+      #
+      def prebuilt_app_executable(platform)
+        File.join(sdk(platform), "/Library/Application Support/SP/SP.app/SP")
+      end
+
+      # @todo Do we really need this? `man ibtool` seems to indicate it's needed
+      #       when the document references a Swift class.
+      #
+      # @return [String] The module name to include in applicable custom class
+      #         names at runtime.
+      #
+      def escaped_storyboard_module_name
+        @extension_config.bundle_name.gsub(" ", "_")
+      end
     end
   end
 end; end
