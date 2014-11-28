@@ -48,12 +48,22 @@ module Motion; module Project
     # @return [Boolean] Whether or not invoking the rake task succeeded.
     #
     def rake(task)
-      command = "cd #{@full_path} && #{environment_variables} rake #{task}"
-      if App::VERBOSE
-        command << " --trace"
-        puts command
+      Dir.chdir(@full_path) do
+        ENV["PWD"] = @full_path
+        rake = "rake"
+        if File.exist?("Gemfile") && ENV["BUNDLE_GEMFILE"]
+          ENV["BUNDLE_GEMFILE"] = File.join(@full_path, "Gemfile")
+          system(ENV, "bundle install") unless File.exist?("Gemfile.lock")
+          rake = "bundle exec rake"
+        end
+
+        command = "#{environment_variables} #{rake} #{task}"
+        if App::VERBOSE
+          command << " --trace"
+          puts command
+        end
+        system(ENV, command)
       end
-      system(command)
     end
 
     def build(platform)
