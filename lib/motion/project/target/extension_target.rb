@@ -53,7 +53,7 @@ module Motion; module Project
       Dir.chdir(@full_path) do
         ENV["PWD"] = @full_path
         rake = "rake"
-        if File.exist?("Gemfile")
+        if File.exist?("Gemfile") && ENV["BUNDLE_GEMFILE"]
           ENV["BUNDLE_GEMFILE"] = File.join(@full_path, "Gemfile")
           system(ENV, "bundle install") unless File.exist?("Gemfile.lock")
           rake = "bundle exec rake"
