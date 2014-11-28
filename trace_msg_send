@@ -1,35 +1,53 @@
 #!/usr/sbin/dtrace -s
-#pragma D option quiet
 
-/* Usage: sudo ./trace_msg_send -p PID ClassNamePartial
+/* Usage: sudo ./trace_msg_send -p PID ClassName [filter-message…]
  *
  * E.g. messages send to Xcode classes that start with `DVTiPhoneSimulator`:
  *
- *   $ sudo ./trace_msg_send -p $(pgrep '^Xcode$') DVTiPhoneSimulator
+ *   $ sudo ./trace_msg_send -p $(pgrep '^Xcode$') 'DVTiPhone*' name device \
+ *   deviceType supportedArchitectures isAvailable operatingSystemVersion \
+ *   supportedDeviceFamilies platform
 */
 
-/* From: http://stackoverflow.com/questions/16238845/show-objective-c-class-in-dtrace-output/16242756#16242756 */
+/* Based on: http://stackoverflow.com/questions/16238845/show-objective-c-class-in-dtrace-output/16242756#16242756 */
+
+#pragma D option quiet
+#pragma D option defaultargs
 
 unsigned long long indention;
 int indentation_amount;
+int filter_methods[string];
 
-BEGIN {
-  indentation_amount = 4;
+BEGIN
+{
+  indentation_amount = 2;
+  filter_methods[$$2] = 1;
+  filter_methods[$$3] = 1;
+  filter_methods[$$4] = 1;
+  filter_methods[$$5] = 1;
+  filter_methods[$$6] = 1;
+  filter_methods[$$7] = 1;
+  filter_methods[$$8] = 1;
+  filter_methods[$$9] = 1;
+}
+
+objc$target:$1::*
+{
+  self->class = probemod;
+  self->class_or_instance = probefunc[0];
+  self->selector = (string)&probefunc[1];
 }
 
 objc$target:$1::entry
+/filter_methods[self->selector] == 0/
 {
-    method = (string)&probefunc[1];
-    type = probefunc[0];
-    class = probemod;
-    printf("%*s%s %c[%s %s]\n", indention * indentation_amount, "", "->", type, class, method);
+    printf("%*s%s %c[%s %s]\n", indention * indentation_amount, "", "->", self->class_or_instance, self->class, self->selector);
     indention++;
 }
+
 objc$target:$1::return
+/filter_methods[self->selector] == 0/
 {
     indention--;
-    method = (string)&probefunc[1];
-    type = probefunc[0];
-    class = probemod;
-    printf("%*s%s %c[%s %s]\n", indention * indentation_amount, "", "<-", type, class, method);
+    printf("%*s%s %c[%s %s]\n", indention * indentation_amount, "", "<-", self->class_or_instance, self->class, self->selector);
 }
