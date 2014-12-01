@@ -99,9 +99,34 @@ module Motion; module Project;
       File.expand_path(@provisioning_profile)
     end
 
+    def read_provisioned_profile_array(key)
+      text = File.read(provisioning_profile)
+      text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+      text.scan(/<key>\s*#{key}\s*<\/key>\s*<array>(.*?)\s*<\/array>/m)[0][0].scan(/<string>(.*?)<\/string>/).map { |str| str[0].strip }
+    end
+    private :read_provisioned_profile_array
+
+    def provisioned_devices
+      @provisioned_devices ||= read_provisioned_profile_array('ProvisionedDevices')
+    end
+
+    def seed_id
+      @seed_id ||= begin
+        seed_ids = read_provisioned_profile_array('ApplicationIdentifierPrefix')
+        if seed_ids.size == 0
+          App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
+        elsif seed_ids.size > 1
+          App.warn "Found #{seed_ids.size} seed IDs in the provisioning profile. Set the `seed_id' project setting. Will use the last one: `#{seed_ids.last}'"
+        end
+        seed_ids.last
+      end
+    end
+
     def entitlements_data
       dict = entitlements
-      if !distribution_mode
+      if distribution_mode
+        dict['application-identifier'] ||= seed_id + '.' + identifier
+      else
         # Required for gdb.
         dict['get-task-allow'] = true if dict['get-task-allow'].nil?
       end
