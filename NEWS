@@ -19,7 +19,8 @@
   * [iOS] Fixed a bug where the shared framework was not built with 64-bit.
   * [iOS] Fixed a bug where it could not customize Action and Share extension's
     icon. Added `app.icons' property which it can use in extension's Rakefile.
-  * [iOS] FIxed a bug which it could not build extensions with OS X bundled Ruby.
+  * [iOS] Fixed a bug which it could not build extensions which it can't find
+    Pathname if Bundler was not installed.
   * [iOS] Added launch images for iPhone 6 and iPhone 6 Plus. Thanks to
     Hwee-Boon Yar for the patch (pull request #170).
   * [iOS] Fixed a bug where the relative path cannot be used in
