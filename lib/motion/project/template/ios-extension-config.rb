@@ -97,6 +97,7 @@ module Motion; module Project;
         end
         paths[0]
       end
+      File.expand_path(@provisioning_profile)
     end
 
     def entitlements_data
