@@ -120,6 +120,7 @@ module Motion; module Project;
         end
         paths[0]
       end
+      File.expand_path(@provisioning_profile)
     end
 
     def read_provisioned_profile_array(key)
