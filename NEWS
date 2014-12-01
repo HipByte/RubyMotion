@@ -23,6 +23,8 @@
     Pathname if Bundler was not installed.
   * [iOS] Added launch images for iPhone 6 and iPhone 6 Plus. Thanks to
     Hwee-Boon Yar for the patch (pull request #170).
+  * [iOS] Fixed an "ERROR ITMS-9000" when it would upload an app which contains
+    action extensions. Thanks to Hwee-Boon Yar for patch.
   * [iOS] Fixed a bug where the relative path cannot be used in
     `app.provisioning_profile'.
   * Fixed a regression where it would cause a link error in Xcode project when
