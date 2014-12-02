@@ -261,7 +261,7 @@ EOS
     App.info 'Create', gdbconfig_path
     File.open(gdbconfig_path, 'w') do |io|
       io.puts <<EOS
-set solib-search-path #{libs_abi_subpath}
+set solib-search-path #{libs_abi_subpath}:obj/local/#{App.config.armeabi_directory_name}
 source "#{App.config.ndk_path}/prebuilt/common/gdb/common.setup"
 directory "#{App.config.ndk_path}/platforms/android-#{App.config.api_version_ndk}/arch-arm/usr/include" jni "#{App.config.ndk_path}/sources/cxx-stl/system"
 EOS
