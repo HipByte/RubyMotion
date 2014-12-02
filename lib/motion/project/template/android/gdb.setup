@@ -1,0 +1,13 @@
+define print-ruby-object
+  print (char *)__rb_inspect_obj__($arg0)
+end
+define pro
+  print (char *)__rb_inspect_obj__($arg0)
+end
+
+document print-ruby-object
+  print-ruby-object(obj): inspects the given object
+end
+document pro
+  pro(obj): same as print-ruby-object
+end
