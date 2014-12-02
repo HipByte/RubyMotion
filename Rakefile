@@ -1,5 +1,5 @@
 PROJECT_VERSION = '2.39'
-PRE_PROJECT_VERSION = '3.4'
+PRE_PROJECT_VERSION = '3.5'
 XCODE_PLATFORMS_DIR = (ENV['XCODE_PLATFORMS_DIR'] || '/Applications/Xcode.app/Contents/Developer/Platforms')
 
 sim_sdks = Dir.glob(File.join(XCODE_PLATFORMS_DIR, 'iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator?*.sdk')).map do |path|
