@@ -1,3 +1,9 @@
+= RubyMotion 3.5 =
+
+  * Added debugging support. The `rake device' and `rake emulator' tasks will
+    now honor the `debug=1' argument, which will launch the app then connect
+    gdb to it.
+
 = RubyMotion 3.4 =
 
   * Added Hash#{store, size, length, empty?, include?, member?, hash_key?, key?,
