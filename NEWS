@@ -36,6 +36,7 @@
     constant which is not contained in older SDK.
   * Fixed a bug which it would not solve framework dependencies in embedded
     frameworks.
+  * Fixed a memory leak in where it would invoke blocks of Dispatch::Queue.
 
 = RubyMotion 2.38 =
 
