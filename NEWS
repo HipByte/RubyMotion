@@ -37,6 +37,8 @@
   * Fixed a bug which it would not solve framework dependencies in embedded
     frameworks.
   * Fixed a memory leak in where it would invoke blocks of Dispatch::Queue.
+  * Fixed a bug where `rake profile' could not launch Instruments.app when it
+    will specify Instruments template with Xcode 6.2 Beta.
 
 = RubyMotion 2.38 =
 
