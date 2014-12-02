@@ -209,7 +209,7 @@ module Motion; module Project;
     end
 
     def ldflags
-      "-Wl,-soname,#{payload_library_filename} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now"
+      "-Wl,-soname,#{payload_library_filename} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -O0 -g3"
     end
 
     def versioned_datadir
