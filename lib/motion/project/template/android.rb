@@ -500,25 +500,30 @@ def device_id
   @device_id ||= `\"#{adb_path}\" -d devices| awk 'NR==1{next} length($1)>0{printf $1; exit}'`
 end
 
+def start_activity(path, mode)
+  line = "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{path}"
+  line << " > /dev/null" unless Rake.application.options.trace
+  sh line
+end
+
 def run_apk(mode)
+  activity_path = "#{App.config.package}/.#{App.config.main_activity}"
   if ENV['debug']
-    App.fail "debug mode not implemented yet"
-=begin
-    Dir.chdir(App.config.build_dir) do
     Dir.chdir(App.config.versionized_build_dir) do
       App.info 'Debug', App.config.apk_path
-      sh "\"#{App.config.ndk_path}/ndk-gdb\" #{adb_mode_flag(mode)} --adb=\"#{adb_path}\" --start"
+      start_activity(activity_path, mode)
+      at_exit { system("/bin/stty echo") } # make sure we set terminal echo back in case ndk-gdb messes it up
+      trap('INT') { } # do nothing on ^C, since we wand ndk-gdb to handle it
+      line = "\"#{App.config.ndk_path}/ndk-gdb\" #{adb_mode_flag(mode)} --adb=\"#{adb_path}\""
+      line << " --verbose" if Rake.application.options.trace
+      sh line
     end
-=end
   else
     # Clear log.
     sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -c"
     # Start main activity.
-    activity_path = "#{App.config.package}/.#{App.config.main_activity}"
     App.info 'Start', activity_path
-    line = "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am start -a android.intent.action.MAIN -n #{activity_path}"
-    line << " > /dev/null" unless Rake.application.options.trace
-    sh line
+    start_activity(activity_path, mode)
     # Show logs in a child process.
     adb_logs_pid = spawn "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.logs_components.join(' ')}"
     at_exit do
