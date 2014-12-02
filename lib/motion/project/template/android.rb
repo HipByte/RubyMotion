@@ -262,6 +262,8 @@ EOS
     File.open(gdbconfig_path, 'w') do |io|
       io.puts <<EOS
 set solib-search-path #{libs_abi_subpath}
+source "#{App.config.ndk_path}/prebuilt/common/gdb/common.setup"
+directory "#{App.config.ndk_path}/platforms/android-#{App.config.api_version_ndk}/arch-arm/usr/include" jni "#{App.config.ndk_path}/sources/cxx-stl/system"
 EOS
     end
   end
@@ -503,6 +505,7 @@ def run_apk(mode)
     App.fail "debug mode not implemented yet"
 =begin
     Dir.chdir(App.config.build_dir) do
+    Dir.chdir(App.config.versionized_build_dir) do
       App.info 'Debug', App.config.apk_path
       sh "\"#{App.config.ndk_path}/ndk-gdb\" #{adb_mode_flag(mode)} --adb=\"#{adb_path}\" --start"
     end
