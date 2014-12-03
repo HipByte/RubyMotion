@@ -1,6 +1,6 @@
-// My env seems hosed, because I can only build with:
+// My env seems hosed, because I can only build when specifying an explicit SDKROOT:
 //
-//  $ clang -isysroot /Applications/Xcode-Beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -ObjC -fobjc-arc -framework Foundation -Xlinker -undefined -Xlinker dynamic_lookup -g -o watch-sim watch-sim.m
+//  $ clang -isysroot /Applications/Xcode-Beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -ObjC -fobjc-arc -framework Foundation -g -o watch-sim watch-sim.m
 //
 
 #import <Foundation/Foundation.h>
