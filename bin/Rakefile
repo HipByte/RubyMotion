@@ -4,7 +4,7 @@ OPTZ_LEVEL = !ENV['DEBUG'] ? '-O3' : '-O0'
 DEBUG_FLAG = !ENV['DEBUG'] ? '' : '-g'
 
 task :default => :all
-task :all => [:files, :deploy, :sim, :nfd, :instruments]
+task :all => [:files, :deploy, :sim, :watch_sim, :nfd, :instruments]
 
 STRIP = "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/strip"
 CLANG = ENV['CC'] || "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang"
@@ -36,6 +36,15 @@ task :sim do
   end
 end
 
+# TODO need to make non-ARC when sharing code with sim.m to load REPL etc.
+task :watch_sim do
+  bin = 'watch-sim'
+  if !File.exist?(bin) or File.mtime('watch-sim.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
+    sh "#{CLANG} -mmacosx-version-min=10.8 -fobjc-arc -I./src -std=c99 -Wall #{DEBUG_FLAG} #{OPTZ_LEVEL} watch-sim.m -o \"#{bin}\" -L. -ledit -Wl,-rpath,/usr/lib -I."
+    sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
+  end
+end
+
 task :nfd do
   bin = 'nfd'
   if !File.exist?(bin) or File.mtime('nfd.m') > File.mtime(bin)
@@ -60,5 +69,5 @@ task :android => [:files] do
 end
 
 task :clean do
-  %w{ruby llc ios/deploy ios/sim osx/sim ndf instruments}.each { |path| rm_rf(path) }
+  %w{ruby llc ios/deploy ios/sim osx/sim watch-sim ndf instruments}.each { |path| rm_rf(path) }
 end

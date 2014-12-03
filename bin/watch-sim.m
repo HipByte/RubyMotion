@@ -5,7 +5,6 @@
 
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
-
 #import <dlfcn.h>
 #import <libgen.h>
 
@@ -303,7 +302,7 @@ init_imported_classes(void) {
 int
 main(int argc, char **argv) {
   if (argc < 2) {
-    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app\n", basename(argv[0]));
+    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app \n", basename(argv[0]));
     return 1;
   }
 
