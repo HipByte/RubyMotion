@@ -176,6 +176,7 @@ init_imported_classes(void) {
 
 - (void)launch;
 {
+  NSLog(@"Launching application...");
   DVTXPCServiceInformation *unstartedService = [self watchKitAppInformation];
   [self.simulator debugXPCServices:@[unstartedService]];
   DTXChannel *channel = self.simulator.xpcAttachServiceChannel;
@@ -258,6 +259,7 @@ init_imported_classes(void) {
     //@"__XPC_DYLD_FRAMEWORK_PATH": self.buildDir,
     //@"__XPC_DYLD_LIBRARY_PATH": self.buildDir
   //};
+  NSLog(@"Watch app `%@`: %@", [app performSelector:@selector(fullPath)], app);
   return app;
 }
 
