@@ -83,8 +83,12 @@ task :simulate_watch_app do
     Rake::Task["build:simulator"].invoke
   end
   # TODO need a way to identify a watch extension from other extensions
-  watch_extension = App.config.targets.first
-  watch_extension.rake("simulator")
+  #watch_extension = App.config.targets.first
+  #watch_extension.rake("simulator")
+  app = App.config.app_bundle('iPhoneSimulator')
+  sim = File.join(App.config.bindir, 'watch-sim')
+  #App.info 'Simulate', app
+  sh "'#{sim}' '#{app}'"
 end
 
 desc "Run the simulator"
