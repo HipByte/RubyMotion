@@ -131,17 +131,30 @@ init_imported_classes(void) {
 // * `__shouldDispatchSelectorToObject_block_invoke_2`
 //
 
-@interface Launcher : NSObject <XCDTMobileIS_XPCDebuggingProcotol>
-@property (strong) NSString *buildDir;
-@property (strong) NSString *appPath;
-@property (strong) NSString *appBundleID;
-@property (strong) NSString *extensionBundleID;
-@property (strong) NSString *extensionBundleFilename;
-
-@property (strong, nonatomic) DVTiPhoneSimulator *simulator;
+@interface WatchKitLauncher : NSObject <XCDTMobileIS_XPCDebuggingProcotol>
+@property (readonly) NSBundle *appBundle;
+@property (readonly) NSBundle *watchKitExtensionBundle;
+@property (readonly) DVTiPhoneSimulator *simulator;
 @end
 
-@implementation Launcher
+@implementation WatchKitLauncher
+
+@synthesize watchKitExtensionBundle = _watchKitExtensionBundle;
+@synthesize simulator = _simulator;
+
++ (instancetype)launcherWithAppBundlePath:(NSString *)appBundlePath;
+{
+  return [[self alloc] initWithAppBundle:[NSBundle bundleWithPath:appBundlePath]];
+}
+
+- (instancetype)initWithAppBundle:(NSBundle *)appBundle;
+{
+  NSParameterAssert(appBundle);
+  if ((self = [super init])) {
+    _appBundle = appBundle;
+  }
+  return self;
+}
 
 // Install the application to the `device`. This could be done in any number of ways, including the
 // newly available `simctl` tool. But for now this tool replicates the behaviour seen in Xcode when
@@ -151,8 +164,8 @@ init_imported_classes(void) {
 //
 - (BOOL)installApplication;
 {
-  DVTFilePath *appFilePath = [DVTFilePathClass filePathForPathString:self.appPath];
-  NSLog(@"Installing `%@` to simulator device `%@`.", self.appPath, self.simulator.device.name);
+  DVTFilePath *appFilePath = [DVTFilePathClass filePathForPathString:self.appBundle.bundlePath];
+  NSLog(@"Installing `%@` to simulator device `%@`.", self.appBundle.bundlePath, self.simulator.device.name);
   DVTFuture *installation = [self.simulator installApplicationAtPath:appFilePath];
   [installation waitUntilFinished];
   if (installation.error != nil) {
@@ -164,54 +177,89 @@ init_imported_classes(void) {
 
 - (void)launch;
 {
-  DVTXPCServiceInformation *unstartedService = [self serviceInformationWithPID:-1];
+  DVTXPCServiceInformation *unstartedService = [self watchKitAppInformation];
   [self.simulator debugXPCServices:@[unstartedService]];
   DTXChannel *channel = self.simulator.xpcAttachServiceChannel;
   channel.dispatchTarget = self;
 
+  NSString *appBundleID = self.appBundle.bundleIdentifier;
   // Reap any existing process
-  [self.simulator terminateWatchAppForCompanionIdentifier:self.appBundleID options:@{}];
+  [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
   // Start new process
-  [self.simulator launchWatchAppForCompanionIdentifier:self.appBundleID options:@{}];
+  [self.simulator launchWatchAppForCompanionIdentifier:appBundleID options:@{}];
+}
+
+#pragma mark - Accessors
+
+- (NSBundle *)watchKitExtensionBundle;
+{
+  @synchronized(self) {
+    if (_watchKitExtensionBundle == nil) {
+      NSString *pluginsPath = self.appBundle.builtInPlugInsPath;
+      NSError *error = nil;
+      NSArray *plugins = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:pluginsPath
+                                                                             error:&error];
+      assert(error == nil);
+      for (NSString *plugin in plugins) {
+        if ([[plugin pathExtension] isEqualToString:@"appex"]) {
+          NSString *extensionPath = [pluginsPath stringByAppendingPathComponent:plugin];
+          NSBundle *extensionBundle = [NSBundle bundleWithPath:extensionPath];
+          NSDictionary *extensionInfo = extensionBundle.infoDictionary;
+          NSString *extensionType = extensionInfo[@"NSExtension"][@"NSExtensionPointIdentifier"];
+          if ([extensionType isEqualToString:@"com.apple.watchkit"]) {
+            _watchKitExtensionBundle = extensionBundle;
+            break;
+          }
+        }
+      }
+      assert(_watchKitExtensionBundle != nil);
+    }
+  }
+  return _watchKitExtensionBundle;
 }
 
 // TODO Currently hardcoded to `iPhone 6`.
 //
 - (DVTiPhoneSimulator *)simulator;
 {
-  if (_simulator == nil) {
-    SimDevice *device = nil;
-    for (SimDevice *availableDevice in [[SimDeviceSetClass defaultSet] devices]) {
-      if ([availableDevice.name isEqualToString:@"iPhone 6"]) {
-        device = availableDevice;
-        break;
+  @synchronized(self) {
+    if (_simulator == nil) {
+      SimDevice *device = nil;
+      for (SimDevice *availableDevice in [[SimDeviceSetClass defaultSet] devices]) {
+        if ([availableDevice.name isEqualToString:@"iPhone 6"]) {
+          device = availableDevice;
+          break;
+        }
       }
+      assert(device != nil);
+      _simulator = [DVTiPhoneSimulatorClass simulatorWithDevice:device];
+      assert(_simulator != nil);
     }
-    assert(device != nil);
-    _simulator = [DVTiPhoneSimulatorClass simulatorWithDevice:device];
-    assert(_simulator != nil);
   }
   return _simulator;
 }
 
-- (DVTXPCServiceInformation *)serviceInformationWithPID:(int)pid;
+// TODO Do we maybe need to set all those build paths in the env for dSYM location, or is it just in
+// case a framework is loaded and is not inside the host app bundle?
+//
+- (DVTXPCServiceInformation *)watchKitAppInformation;
 {
-  DVTXPCServiceInformation *service = nil;
-  service = [[DVTXPCServiceInformationClass alloc] initWithServiceName:self.extensionBundleID
-                                                                   pid:pid
-                                                             parentPID:0];
-  service.fullPath = [[self.appPath stringByAppendingPathComponent:@"PlugIns"]
-                                    stringByAppendingPathComponent:self.extensionBundleFilename];
-  service.startSuspended = YES;
-  service.environment = @{
-    @"NSUnbufferedIO": @"YES",
-    @"DYLD_FRAMEWORK_PATH": self.buildDir,
-    @"DYLD_LIBRARY_PATH": self.buildDir,
-    @"__XCODE_BUILT_PRODUCTS_DIR_PATHS": self.buildDir,
-    @"__XPC_DYLD_FRAMEWORK_PATH": self.buildDir,
-    @"__XPC_DYLD_LIBRARY_PATH": self.buildDir
-  };
-  return service;
+  NSString *name = self.watchKitExtensionBundle.bundleIdentifier;
+  DVTXPCServiceInformation *app = [[DVTXPCServiceInformationClass alloc] initWithServiceName:name
+                                                                                         pid:-1
+                                                                                   parentPID:0];
+  app.fullPath = self.watchKitExtensionBundle.bundlePath;
+  app.startSuspended = YES;
+  app.environment = @{ @"NSUnbufferedIO": @"YES" };
+  //app.environment = @{
+    //@"NSUnbufferedIO": @"YES",
+    //@"DYLD_FRAMEWORK_PATH": self.buildDir,
+    //@"DYLD_LIBRARY_PATH": self.buildDir,
+    //@"__XCODE_BUILT_PRODUCTS_DIR_PATHS": self.buildDir,
+    //@"__XPC_DYLD_FRAMEWORK_PATH": self.buildDir,
+    //@"__XPC_DYLD_LIBRARY_PATH": self.buildDir
+  //};
+  return app;
 }
 
 #pragma mark - XCDTMobileIS_XPCDebuggingProcotol
@@ -224,7 +272,7 @@ init_imported_classes(void) {
         requestedByProcess:(int)parentPID
                    options:(NSDictionary *)options;
 {
-  if ([observedServiceID isEqualToString:self.extensionBundleID]) {
+  if ([observedServiceID isEqualToString:self.watchKitExtensionBundle.bundleIdentifier]) {
     NSLog(@"Requested XPC service has been observed with PID: %d.", pid);
     assert(pid > 0);
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -235,7 +283,8 @@ init_imported_classes(void) {
 
       NSLog(@"Exiting...");
       // Reap process. TODO exiting immediately afterwards makes reaping not actually work.
-      [self.simulator terminateWatchAppForCompanionIdentifier:self.appBundleID options:@{}];
+      NSString *appBundleID = self.appBundle.bundleIdentifier;
+      [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
       // Exit launcher with status from LLDB. TODO Is that helpful?
       exit(status);
     });
@@ -253,28 +302,16 @@ init_imported_classes(void) {
 
 int
 main(int argc, char **argv) {
-  if (argc < 5) {
-    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app host-app.bundle.id extension.bundle.id path/to/build/WatchExtension.appex\n", basename(argv[0]));
+  if (argc < 2) {
+    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app\n", basename(argv[0]));
     return 1;
   }
 
   init_imported_classes();
 
   NSString *appPath = [NSString stringWithUTF8String:argv[1]];
-  NSString *appBundleID = [NSString stringWithUTF8String:argv[2]];
-  NSString *extensionBundleID = [NSString stringWithUTF8String:argv[3]];
-  NSString *extensionBuildPath = [NSString stringWithUTF8String:argv[4]];
 
-  NSString *extensionBundleFilename = [extensionBuildPath lastPathComponent];
-  NSString *buildDir = [appPath stringByDeletingLastPathComponent];
-
-  Launcher *launcher = [Launcher new];
-  launcher.buildDir = buildDir;
-  launcher.appPath = appPath;
-  launcher.appBundleID = appBundleID;
-  launcher.extensionBundleID = extensionBundleID;
-  launcher.extensionBundleFilename = extensionBundleFilename;
-
+  WatchKitLauncher *launcher = [WatchKitLauncher launcherWithAppBundlePath:appPath];
   assert(launcher.installApplication);
   [launcher launch];
 
