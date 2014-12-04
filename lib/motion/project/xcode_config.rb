@@ -346,6 +346,24 @@ EOS
       }
     end
 
+    # @return [Hash] A hash that contains all the various `Info.plist` data
+    #         merged into one hash.
+    #
+    def merged_info_plist(platform)
+      generic_info_plist.merge(dt_info_plist).merge(info_plist)
+    end
+
+    # @param [String] platform
+    #        The platform identifier that's being build for, such as
+    #        `iPhoneSimulator`, `iPhoneOS`, or `MacOSX`.
+    #
+    #
+    # @return [String] A serialized version of the `merged_info_plist` hash.
+    #
+    def info_plist_data(platform)
+      Motion::PropertyList.to_s(merged_info_plist(platform))
+    end
+
     # TODO
     # * Add env vars from user.
     # * Add optional Instruments template to use.

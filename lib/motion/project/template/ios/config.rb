@@ -409,7 +409,7 @@ module Motion; module Project;
     end
 
     def merged_info_plist(platform)
-      ios = {
+      plist = super.merge({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
@@ -441,19 +441,13 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }
-
-      base = info_plist
+      })
       # If the user has not explicitely specified launch images, try to find
       # them ourselves.
-      if !base.include?('UILaunchImages') && launch_images = self.launch_images
-        base['UILaunchImages'] = launch_images
+      if !plist.has_key?('UILaunchImages') && launch_images = self.launch_images
+        plist['UILaunchImages'] = launch_images
       end
-      ios.merge(generic_info_plist).merge(dt_info_plist).merge(base)
-    end
-
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s(merged_info_plist(platform))
+      plist
     end
 
     def manifest_plist_data
