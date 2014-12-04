@@ -33,6 +33,7 @@ module Motion; module Project;
     def initialize(*)
       super
       @name = nil
+      frameworks << 'WatchKit'
     end
 
     # @return [String] The name of the Watch extension is always based on that
@@ -54,14 +55,18 @@ module Motion; module Project;
       ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitextension'
     end
 
-    def info_plist_data(platform)
-      info_plist['NSExtension'] = {
-        'NSExtensionPointIdentifier' => 'com.apple.watchkit',
-        'NSExtensionAttributes' => {
-          'WKAppBundleIdentifier' => watch_app_config.identifier
+    # @see {XcodeConfig#merged_info_plist}
+    #
+    def merged_info_plist(platform)
+      super.merge({
+        'RemoteInterfacePrincipalClass' => 'InterfaceController',
+        'NSExtension' => {
+          'NSExtensionPointIdentifier' => 'com.apple.watchkit',
+          'NSExtensionAttributes' => {
+            'WKAppBundleIdentifier' => watch_app_config.identifier,
+          },
         },
-      }
-      super
+      })
     end
 
     # @return [WatchAppConfig] A config instance for the watch application.
@@ -148,12 +153,7 @@ EOS
 
       # @todo There are more differences with Xcode's Info.plist.
       #
-      # @param [String] platform
-      #        The platform identifier that's being build for, such as
-      #        `iPhoneSimulator` or `iPhoneOS`.
-      #
-      # @return [Hash] A hash that contains all the various `Info.plist` data
-      #         merged into one hash.
+      # @see {XcodeConfig#merged_info_plist}
       #
       def merged_info_plist(platform)
         plist = super
