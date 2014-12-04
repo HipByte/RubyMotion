@@ -32,16 +32,29 @@ module Motion; module Project;
 
     def initialize(*)
       super
+      @name = nil
+    end
+
+    # @return [String] The name of the Watch extension is always based on that
+    #         of the host application.
+    #
+    def name
       @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit Extension'
     end
 
     def name=(name)
-      App.fail 'You cannot give a Watch app a custom name, it will ' \
+      App.fail 'You cannot give a Watch application a custom name, it will ' \
                'automatically be named after the host application.'
     end
 
+    # @return [String] The bundle identifier of the watch extension based on the
+    #         bundle identifier of the host application.
+    #
+    def identifier
+      ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitextension'
+    end
+
     def info_plist_data(platform)
-      info_plist['CFBundleIdentifier'] = identifier + '.watchkitextension'
       info_plist['NSExtension'] = {
         'NSExtensionPointIdentifier' => 'com.apple.watchkit',
         'NSExtensionAttributes' => {
@@ -114,6 +127,8 @@ EOS
 
         @delegate_class = "SPApplicationDelegate"
         @extension_config = extension_config
+
+        @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' Watch App'
       end
 
       def sdk_version
@@ -124,18 +139,11 @@ EOS
         @extension_config.deployment_target
       end
 
-      # @return [String] The name of the watch application based on the name of
-      #         the watch extension.
-      #
-      def name
-        @name ||= @extension_config.name.sub(" WatchKit Extension", '') + " Watch App"
-      end
-
       # @return [String] The bundle identifier of the watch application based on
-      #         the bundle identifier of the watch extension.
+      #         the bundle identifier of the host application.
       #
       def identifier
-        @identifier ||= @extension_config.identifier + '.watchapp'
+        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchapp'
       end
 
       # @todo There are more differences with Xcode's Info.plist.
