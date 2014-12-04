@@ -204,8 +204,8 @@ module Motion; module Project;
       app_bundle(platform)
     end
 
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s({
+    def merged_info_plist(platform)
+      super.merge({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
@@ -226,8 +226,8 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist)
-       .merge({ 'CFBundlePackageType' => 'XPC!' }))
+        'CFBundlePackageType' => 'XPC!'
+      })
     end
 
     def manifest_plist_data
