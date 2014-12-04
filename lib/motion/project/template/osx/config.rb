@@ -151,14 +151,6 @@ module Motion; module Project;
       })
     end
 
-    def merged_info_plist
-      generic_info_plist.merge(dt_info_plist).merge(info_plist)
-    end
-
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s(merged_info_plist)
-    end
-
     def strip_args
       ''
     end
