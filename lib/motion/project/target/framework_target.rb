@@ -23,67 +23,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/project/builder'
+require 'motion/project/target'
 
 module Motion; module Project
-  class FrameworkTarget
-    include Rake::DSL if Object.const_defined?(:Rake) && Rake.const_defined?(:DSL)
-
-    attr_accessor :type
-
-    def initialize(path, type, config, opts)
-      @path = path
-      @full_path = File.expand_path(path)
-      @type = type
-      @config = config
-      @opts = opts
-    end
-
-    # This takes care of changing into the target's work directory, setting the
-    # required environment variables, and passing on whether to be verbose.
-    #
-    # @param [String] task
-    #        The rake task to invoke in the target's context.
-    #
-    # @return [Boolean] Whether or not invoking the rake task succeeded.
-    #
-    def rake(task)
-      Dir.chdir(@full_path) do
-        ENV["PWD"] = @full_path
-        rake = "rake"
-        if File.exist?("Gemfile") && ENV["BUNDLE_GEMFILE"]
-          ENV["BUNDLE_GEMFILE"] = File.join(@full_path, "Gemfile")
-          system(ENV, "bundle install") unless File.exist?("Gemfile.lock")
-          rake = "bundle exec rake"
-        end
-
-        command = "#{environment_variables} #{rake} #{task}"
-        if App::VERBOSE
-          command << " --trace"
-          puts command
-        end
-        system(ENV, command)
-      end
-    end
-
-    def build(platform)
-      @platform = platform
-
-      task = if platform == 'iPhoneSimulator'
-        "build:simulator"
-      else
-        if @config.distribution_mode
-          "archive:distribution"
-        else
-          "build:device"
-        end
-      end
-
-      unless rake(task)
-        App.fail "Target '#{@path}' failed to build"
-      end
-    end
-
+  class FrameworkTarget < Target
     def copy_products(platform)
       src_path = framework_path
       dest_framework_dir = File.join(@config.app_bundle(platform), 'Frameworks')
@@ -93,7 +36,7 @@ module Motion; module Project
         App.info 'Copy', src_path
         FileUtils.mkdir_p(dest_framework_dir)
         FileUtils.cp_r(src_path, dest_framework_dir)
-      end 
+      end
     end
 
     def codesign(platform)
@@ -142,17 +85,9 @@ PLIST
       end
     end
 
-    def clean
-      rake 'clean'
-    end
-
-    def build_dir(config, platform)
-      platform + '-' + config.deployment_target + '-' + config.build_mode_name
-    end
-
     def framework_path
       @framework_path ||= begin
-        path = File.join(@path, 'build', build_dir(@config, @platform), '*.framework')
+        path = File.join(build_dir, '*.framework')
         Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end
@@ -165,17 +100,5 @@ PLIST
     def load?
       @opts[:load]
     end
-
-    def environment_variables
-      [
-        "RM_TARGET_SDK_VERSION=\"#{@config.sdk_version}\"",
-        "RM_TARGET_DEPLOYMENT_TARGET=\"#{@config.deployment_target}\"",
-        "RM_TARGET_XCODE_DIR=\"#{@config.xcode_dir}\"",
-        "RM_TARGET_HOST_APP_PATH=\"#{File.expand_path(@config.project_dir)}\"",
-        "RM_TARGET_BUILD=\"1\"",
-        "RM_TARGET_ARCHS='#{@config.archs.inspect}'"
-      ].join(' ')
-    end
-
   end
 end;end
