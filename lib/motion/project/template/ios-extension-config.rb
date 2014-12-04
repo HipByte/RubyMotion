@@ -183,6 +183,16 @@ module Motion; module Project;
       ary.map { |family| device_family_int(family) }
     end
 
+    # @todo Is it correct that a bundle identifier may contain spaces? Because
+    #       the `bundle_name` definitely can contain spaces.
+    #
+    # @return [String] The bundle identifier of the application extension based
+    #         on the bundle identifier of the host application.
+    #
+    def identifier
+      ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.' + bundle_name
+    end
+
     def app_bundle(platform)
       File.join(versionized_build_dir(platform), bundle_name + '.appex')
     end
