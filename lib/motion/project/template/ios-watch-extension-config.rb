@@ -30,8 +30,24 @@ module Motion; module Project;
   class IOSWatchExtensionConfig < IOSExtensionConfig
     register :'ios-extension'
 
+    def initialize(*)
+      super
+      @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit Extension'
+    end
+
+    def name=(name)
+      App.fail 'You cannot give a Watch app a custom name, it will ' \
+               'automatically be named after the host application.'
+    end
+
     def info_plist_data(platform)
       info_plist['CFBundleIdentifier'] = identifier + '.watchkitextension'
+      info_plist['NSExtension'] = {
+        'NSExtensionPointIdentifier' => 'com.apple.watchkit',
+        'NSExtensionAttributes' => {
+          'WKAppBundleIdentifier' => watch_app_config.identifier
+        },
+      }
       super
     end
 
@@ -135,6 +151,7 @@ EOS
         plist = super
         plist['UIDeviceFamily'] << '4' # Probably means Apple Watch device?
         plist['WKWatchKitApp'] = true
+        plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
         plist.delete('UIBackgroundModes')
         plist.delete('UIStatusBarStyle')
         plist
