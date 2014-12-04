@@ -134,6 +134,7 @@ init_imported_classes(void) {
 @property (readonly) NSBundle *appBundle;
 @property (readonly) NSBundle *watchKitExtensionBundle;
 @property (readonly) DVTiPhoneSimulator *simulator;
+@property (assign) BOOL verbose;
 @end
 
 @implementation WatchKitLauncher
@@ -163,12 +164,17 @@ init_imported_classes(void) {
 //
 - (BOOL)installApplication;
 {
+  if (self.verbose) {
+    const char *appPath = [self.appBundle.bundlePath UTF8String];
+    const char *simDeviceName = [self.simulator.device.name UTF8String];
+    printf("-> Installing `%s` to simulator device `%s`.\n", appPath, simDeviceName);
+  }
   DVTFilePath *appFilePath = [DVTFilePathClass filePathForPathString:self.appBundle.bundlePath];
-  NSLog(@"Installing `%@` to simulator device `%@`.", self.appBundle.bundlePath, self.simulator.device.name);
   DVTFuture *installation = [self.simulator installApplicationAtPath:appFilePath];
   [installation waitUntilFinished];
   if (installation.error != nil) {
-    NSLog(@"[!] An error occurred while installing the application (%@)", installation.error);
+    const char *error = [[installation.error description] UTF8String];
+    fprintf(stderr, "[!] An error occurred while installing the application (%s)\n", error);
     return NO;
   }
   return YES;
@@ -176,7 +182,9 @@ init_imported_classes(void) {
 
 - (void)launch;
 {
-  NSLog(@"Launching application...");
+  if (self.verbose) {
+    printf("-> Launching application...\n");
+  }
   DVTXPCServiceInformation *unstartedService = [self watchKitAppInformation];
   [self.simulator debugXPCServices:@[unstartedService]];
   DTXChannel *channel = self.simulator.xpcAttachServiceChannel;
@@ -259,7 +267,6 @@ init_imported_classes(void) {
     //@"__XPC_DYLD_FRAMEWORK_PATH": self.buildDir,
     //@"__XPC_DYLD_LIBRARY_PATH": self.buildDir
   //};
-  NSLog(@"Watch app `%@`: %@", [app performSelector:@selector(fullPath)], app);
   return app;
 }
 
@@ -274,15 +281,21 @@ init_imported_classes(void) {
                    options:(NSDictionary *)options;
 {
   if ([observedServiceID isEqualToString:self.watchKitExtensionBundle.bundleIdentifier]) {
-    NSLog(@"Requested XPC service has been observed with PID: %d.", pid);
+    if (self.verbose) {
+      printf("Requested XPC service has been observed with PID: %d.\n", pid);
+    }
     assert(pid > 0);
     dispatch_async(dispatch_get_main_queue(), ^{
-      NSLog(@"Attaching debugger...");
+      if (self.verbose) {
+        printf("Attaching debugger...\n");
+      }
       char command[1024];
       sprintf(command, "lldb -p %d", pid);
       int status = system(command);
 
-      NSLog(@"Exiting...");
+      if (self.verbose) {
+        printf("Exiting...\n");
+      }
       // Reap process. TODO exiting immediately afterwards makes reaping not actually work.
       NSString *appBundleID = self.appBundle.bundleIdentifier;
       [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
@@ -303,16 +316,18 @@ init_imported_classes(void) {
 
 int
 main(int argc, char **argv) {
-  if (argc < 2) {
-    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app \n", basename(argv[0]));
+  if (argc != 3) {
+    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app 1\n", basename(argv[0]));
     return 1;
   }
 
   init_imported_classes();
 
   NSString *appPath = [NSString stringWithUTF8String:argv[1]];
+  BOOL verbose = atoi(argv[2]) != 0;
 
   WatchKitLauncher *launcher = [WatchKitLauncher launcherWithAppBundlePath:appPath];
+  launcher.verbose = verbose;
   assert(launcher.installApplication);
   [launcher launch];
 
