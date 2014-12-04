@@ -13,6 +13,9 @@ Motion::Project::App.setup do |app|
   app.name = '<%= name %> WatchKit Extension'
   app.frameworks << "WatchKit"
   app.info_plist['NSExtension'] = {
+    'NSExtensionAttributes' => {
+      'WKAppBundleIdentifier' => app.identifier + '.watchapp'
+    },
     'NSExtensionPointIdentifier' => 'com.apple.watchkit'
   }
   app.info_plist['RemoteInterfacePrincipalClass'] = 'InterfaceController'

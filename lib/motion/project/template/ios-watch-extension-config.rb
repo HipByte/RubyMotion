@@ -135,6 +135,8 @@ EOS
         plist = super
         plist['UIDeviceFamily'] << '4' # Probably means Apple Watch device?
         plist['WKWatchKitApp'] = true
+        plist.delete('UIBackgroundModes')
+        plist.delete('UIStatusBarStyle')
         plist
       end
 
