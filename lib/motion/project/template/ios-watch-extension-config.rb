@@ -33,7 +33,7 @@ module Motion; module Project;
     def initialize(*)
       super
       @name = nil
-      frameworks << 'WatchKit'
+      @frameworks = ['WatchKit', 'Foundation', 'CoreGraphics']
     end
 
     # @return [String] The name of the Watch extension is always based on that
