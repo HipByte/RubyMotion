@@ -76,55 +76,6 @@ namespace :build do
   end
 end
 
-# This task should be called by the host application _after_ the host
-# application and its extensions (including this watch app) have been built.
-#
-# TODO Once everything's done, see what should be abstracted between this task
-# and the normal iOS task to launch on the sim.
-desc "Run the simulator"
-task :simulator do
-  config = App.config.watch_app_config
-  app = config.app_bundle('iPhoneSimulator')
-  app_executable = File.expand_path(config.app_bundle_executable('iPhoneSimulator'))
-
-  if ENV['TMUX']
-    tmux_default_command = `tmux show-options -g default-command`.strip
-    unless tmux_default_command.include?("reattach-to-user-namespace")
-      App.warn(<<END
-
-    It appears you are using tmux without 'reattach-to-user-namespace', the simulator might not work properly. You can either disable tmux or run the following commands:
-
-      $ brew install reattach-to-user-namespace
-      $ echo 'set-option -g default-command "reattach-to-user-namespace -l $SHELL"' >> ~/.tmux.conf
-
-END
-      )
-    end
-  end
-
-  # Watch apps are iPhone only
-  family_int = 1
-  # TODO be sure to get this data in the same way we normally do when launching
-  # the sim.
-  simulate_device = 'iPhone 6'
-  target = App.config.sdk_version
-
-  # Launch the simulator.
-  xcode = App.config.xcode_dir
-  env = "DYLD_FRAMEWORK_PATH=\"#{xcode}/../Frameworks\":\"#{xcode}/../OtherFrameworks\""
-  env << " RM_BUILT_EXECUTABLE=\"#{app_executable}\""
-  env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
-  sim = File.join(App.config.bindir, 'ios/sim')
-  debug = (ENV['debug'] ? 1 : 2)
-  app_args = (ENV['args'] or '')
-  App.info 'Simulate', app
-  at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
-  Signal.trap(:INT) { } if ENV['debug']
-  system "#{env} #{sim} #{debug} #{family_int} \"#{simulate_device}\" #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
-  App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
-  exit($?.exitstatus)
-end
-
 namespace :archive do
   desc "Build for distribution (AppStore)"
   task :distribution do
