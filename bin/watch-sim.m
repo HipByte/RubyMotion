@@ -135,6 +135,7 @@ init_imported_classes(void) {
 @property (readonly) NSBundle *watchKitExtensionBundle;
 @property (readonly) DVTiPhoneSimulator *simulator;
 @property (assign) BOOL verbose;
+@property (assign) BOOL startSuspended;
 @end
 
 @implementation WatchKitLauncher
@@ -195,6 +196,43 @@ init_imported_classes(void) {
   [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
   // Start new process
   [self.simulator launchWatchAppForCompanionIdentifier:appBundleID options:@{}];
+}
+
+// TODO use mkstemp instead of tmpnam
+- (void)attachDebuggerToPID:(int)pid;
+{
+  NSString *commands = [NSString stringWithFormat:@"" \
+                         "process attach -p %d\n" \
+                         "command script import /Library/RubyMotion/lldb/lldb.py\n" \
+                         "breakpoint set --name rb_exc_raise\n" \
+                         "breakpoint set --name malloc_error_break\n", pid];
+  if (!self.startSuspended) {
+    commands = [commands stringByAppendingString:@"continue\n"];
+  }
+  NSString *file = [NSString stringWithUTF8String:tmpnam(NULL)];
+  NSError *error = nil;
+  if (![commands writeToFile:file atomically:YES encoding:NSASCIIStringEncoding error:&error]) {
+    fprintf(stderr, "[!] Unable to save debugger commands file to %s (%s)\n",
+                    [file UTF8String], [[error description] UTF8String]);
+    exit(1);
+  }
+
+  if (self.verbose) {
+    printf("-> Attaching debugger...\n");
+  }
+  char command[1024];
+  sprintf(command, "lldb -s %s", [file UTF8String]);
+  int status = system(command);
+
+  if (self.verbose) {
+    printf("-> Exiting...\n");
+  }
+
+  // Reap process. TODO exiting immediately afterwards makes reaping not actually work.
+  NSString *appBundleID = self.appBundle.bundleIdentifier;
+  [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
+  // Exit launcher with status from LLDB. TODO Is that helpful?
+  exit(status);
 }
 
 #pragma mark - Accessors
@@ -286,21 +324,7 @@ init_imported_classes(void) {
     }
     assert(pid > 0);
     dispatch_async(dispatch_get_main_queue(), ^{
-      if (self.verbose) {
-        printf("-> Attaching debugger...\n");
-      }
-      char command[1024];
-      sprintf(command, "lldb -p %d", pid);
-      int status = system(command);
-
-      if (self.verbose) {
-        printf("-> Exiting...\n");
-      }
-      // Reap process. TODO exiting immediately afterwards makes reaping not actually work.
-      NSString *appBundleID = self.appBundle.bundleIdentifier;
-      [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
-      // Exit launcher with status from LLDB. TODO Is that helpful?
-      exit(status);
+      [self attachDebuggerToPID:pid];
     });
   }
 }
@@ -316,8 +340,8 @@ init_imported_classes(void) {
 
 int
 main(int argc, char **argv) {
-  if (argc != 3) {
-    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app 1\n", basename(argv[0]));
+  if (argc != 4) {
+    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app verbose start-suspended\n", basename(argv[0]));
     return 1;
   }
 
@@ -325,9 +349,11 @@ main(int argc, char **argv) {
 
   NSString *appPath = [NSString stringWithUTF8String:argv[1]];
   BOOL verbose = atoi(argv[2]) != 0;
+  BOOL startSuspended = atoi(argv[3]) != 0;
 
   WatchKitLauncher *launcher = [WatchKitLauncher launcherWithAppBundlePath:appPath];
   launcher.verbose = verbose;
+  launcher.startSuspended = startSuspended;
   assert(launcher.installApplication);
   [launcher launch];
 
