@@ -1,8 +1,8 @@
 define print-ruby-object
-  print (char *)__rb_inspect_obj__($arg0)
+  printf "%s\n", (char *)__rb_inspect_obj__($arg0)
 end
 define pro
-  print (char *)__rb_inspect_obj__($arg0)
+  printf "%s\n", (char *)__rb_inspect_obj__($arg0)
 end
 
 document print-ruby-object
@@ -10,4 +10,12 @@ document print-ruby-object
 end
 document pro
   pro(obj): same as print-ruby-object
+end
+
+define print-ruby-ivars
+  printf "%s\n", (char*)__rb_list_ivars__(_self)
+end
+
+document print-ruby-ivars
+  print-ruby-ivars: dump all instance variables of the current 'self' reference
 end
