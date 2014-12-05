@@ -106,8 +106,9 @@ EOS
     RubyMotionInit(argc, argv);
 EOS
     main_txt << <<EOS
-    dlopen("/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit", 0x2);
-    retval = ((int(*)(id, SEL, int, char**))objc_msgSend)(NSClassFromString(@"PKService"), @selector(_defaultRun:arguments:), argc, argv);
+    void *WatchKit = dlopen("/System/Library/Frameworks/WatchKit.framework/WatchKit", 0x2);
+    int (*real_main)(void) = (int (*)(void))dlsym(WatchKit, "main");
+    retval = real_main();
     rb_exit(retval);
     [pool release];
     return retval;
