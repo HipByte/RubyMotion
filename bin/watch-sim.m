@@ -282,19 +282,19 @@ init_imported_classes(void) {
 {
   if ([observedServiceID isEqualToString:self.watchKitExtensionBundle.bundleIdentifier]) {
     if (self.verbose) {
-      printf("Requested XPC service has been observed with PID: %d.\n", pid);
+      printf("-> Requested XPC service has been observed with PID: %d.\n", pid);
     }
     assert(pid > 0);
     dispatch_async(dispatch_get_main_queue(), ^{
       if (self.verbose) {
-        printf("Attaching debugger...\n");
+        printf("-> Attaching debugger...\n");
       }
       char command[1024];
       sprintf(command, "lldb -p %d", pid);
       int status = system(command);
 
       if (self.verbose) {
-        printf("Exiting...\n");
+        printf("-> Exiting...\n");
       }
       // Reap process. TODO exiting immediately afterwards makes reaping not actually work.
       NSString *appBundleID = self.appBundle.bundleIdentifier;
