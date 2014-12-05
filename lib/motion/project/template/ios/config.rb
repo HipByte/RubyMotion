@@ -265,7 +265,7 @@ module Motion; module Project;
       when '4'
         ' 5s'
       else
-        (family == 1) ? ' 6' : ' Retina'
+        (family == 1) ? ' 6' : ' Air'
       end
     end
 
