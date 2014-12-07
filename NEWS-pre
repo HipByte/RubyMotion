@@ -3,6 +3,10 @@
   * Added debugging support. The `rake device' and `rake emulator' tasks will
     now honor the `debug=1' argument, which will launch the app then connect
     gdb to it.
+  * Added Integer#{to_i, to_int}.
+  * Added Float#{to_i, to_int, trunctate}.
+  * Added Hash#{each, each_pair, each_key, each_value, to_hash, to_a, inspect,
+    to_s, key, index, has_value?, value?, delete_if, reject, reject!}.
 
 = RubyMotion 3.4 =
 
