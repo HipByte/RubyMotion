@@ -492,7 +492,7 @@ def device_api_version(device_id)
   if $?.exitstatus == 0
     api_version.to_i
   else
-    App.fail "Could not retrieve the API version for the USB-connected device. Make sure that the cable is properly connected and that the computer is authorized on the device to use USB debugging."
+    App.fail "Could not retrieve the API version for the USB-connected device. Make sure that the cable is properly connected and that the computer is authorized on the device to use USB debugging. Alternatively, try running the `#{adb_path} -d logcat' command in another terminal then run this task again."
   end
 end
 
