@@ -6,7 +6,9 @@
   * Added Integer#{to_i, to_int}.
   * Added Float#{to_i, to_int, trunctate}.
   * Added Hash#{each, each_pair, each_key, each_value, to_hash, to_a, inspect,
-    to_s, key, index, has_value?, value?, delete_if, reject, reject!}.
+    to_s, key, index, has_value?, value?, delete_if, reject, reject!, keep_if,
+    select, select!, invert, update, merge, merge!, shift, replace, assoc rassoc,
+    fetch}.
 
 = RubyMotion 3.4 =
 
