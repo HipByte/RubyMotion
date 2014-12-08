@@ -365,42 +365,7 @@ EOS
       preserve_resources = []
 
       # Compile Asset Catalog bundles.
-      assets_bundles = config.assets_bundles
-      unless assets_bundles.empty?
-        app_icons_asset_bundle = config.app_icons_asset_bundle
-        if app_icons_asset_bundle
-          app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
-          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
-                              "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
-        end
-
-        App.info 'Compile', assets_bundles.join(", ")
-        app_resources_dir = File.expand_path(config.app_resources_dir(platform))
-        FileUtils.mkdir_p(app_resources_dir)
-        cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
-              "--notices --warnings --platform #{config.deploy_platform.downcase} " \
-              "--minimum-deployment-target #{config.deployment_target} " \
-              "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-              "#{app_icons_options} --compress-pngs --compile \"#{app_resources_dir}\" " \
-              "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
-        $stderr.puts(cmd) if App::VERBOSE
-        actool_output = `#{cmd} 2>&1`
-        $stderr.puts(actool_output) if App::VERBOSE
-
-        # Split output in warnings and compiled files
-        actool_output, actool_compilation_results = actool_output.split('/* com.apple.actool.compilation-results */')
-        actool_compiled_files = actool_compilation_results.strip.split("\n")
-        if actool_document_warnings = actool_output.split('/* com.apple.actool.document.warnings */').last
-          # Propagate warnings to the user.
-          actool_document_warnings.strip.split("\n").each { |w| App.warn(w) }
-        end
-
-        # Remove the partial Info.plist line and preserve all other assets.
-        actool_compiled_files.delete(app_icons_info_plist_path) if app_icons_asset_bundle
-        preserve_resources.concat(actool_compiled_files.map { |f| File.basename(f) })
-
-        config.configure_app_icons_from_asset_bundle(platform) if app_icons_asset_bundle
-      end
+      preserve_resources.concat(compile_asset_bundles(config, platform))
 
       # Compile CoreData Model resources and SpriteKit atlas files.
       config.resources_dirs.each do |dir|
@@ -572,6 +537,51 @@ EOS
         App.info 'Create', bundle_info_plist
         File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
         sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
+      end
+    end
+
+    # @return [Array] A list of produced resources which should be preserved.
+    #
+    def compile_asset_bundles(config, platform)
+      assets_bundles = config.assets_bundles
+      if assets_bundles.empty?
+        []
+      else
+        if config.respond_to?(:app_icons_asset_bundle)
+          app_icons_asset_bundle = config.app_icons_asset_bundle
+        end
+        if app_icons_asset_bundle
+          app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
+          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
+                              "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
+        end
+
+        App.info 'Compile', assets_bundles.join(", ")
+        app_resources_dir = File.expand_path(config.app_resources_dir(platform))
+        FileUtils.mkdir_p(app_resources_dir)
+        cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
+              "--notices --warnings --platform #{config.deploy_platform.downcase} " \
+              "--minimum-deployment-target #{config.deployment_target} " \
+              "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
+              "#{app_icons_options} --compress-pngs --compile \"#{app_resources_dir}\" " \
+              "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
+        $stderr.puts(cmd) if App::VERBOSE
+        actool_output = `#{cmd} 2>&1`
+        $stderr.puts(actool_output) if App::VERBOSE
+
+        # Split output in warnings and compiled files
+        actool_output, actool_compilation_results = actool_output.split('/* com.apple.actool.compilation-results */')
+        actool_compiled_files = actool_compilation_results.strip.split("\n")
+        if actool_document_warnings = actool_output.split('/* com.apple.actool.document.warnings */').last
+          # Propagate warnings to the user.
+          actool_document_warnings.strip.split("\n").each { |w| App.warn(w) }
+        end
+
+        config.configure_app_icons_from_asset_bundle(platform) if app_icons_asset_bundle
+
+        # Remove the partial Info.plist line and return the produced resources.
+        actool_compiled_files.delete(app_icons_info_plist_path) if app_icons_asset_bundle
+        produced_resources = actool_compiled_files.map { |f| File.basename(f) }
       end
     end
 

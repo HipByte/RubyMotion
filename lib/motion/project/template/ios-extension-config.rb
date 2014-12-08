@@ -52,6 +52,9 @@ module Motion; module Project;
       end
     end
 
+    # An extension cannot have app icons.
+    undef_method :app_icons_asset_bundle
+
     def validate
       # manifest_assets
       if !(manifest_assets.is_a?(Array) and manifest_assets.all? { |x| x.is_a?(Hash) and x.keys.include?(:kind) and x.keys.include?(:url) })

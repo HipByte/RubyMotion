@@ -127,7 +127,7 @@ EOS
         super(project_dir, build_mode)
         @name = nil
         @files = []
-        @resources_dirs = []
+        @resources_dirs = ['watch_app']
         @specs_dir = nil
         @detect_dependencies = false
 
@@ -136,6 +136,9 @@ EOS
 
         @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' Watch App'
       end
+
+      # TODO How does one provide an icon for a Watch app?
+      # undef_method :app_icons_asset_bundle
 
       def sdk_version
         @extension_config.sdk_version
