@@ -9,6 +9,8 @@
     to_s, key, index, has_value?, value?, delete_if, reject, reject!, keep_if,
     select, select!, invert, update, merge, merge!, shift, replace, assoc rassoc,
     fetch}.
+  * Improved Hash by using LinkedHashMap instead of HashMap in order to retrive
+    elements with inserted order.
 
 = RubyMotion 3.4 =
 
