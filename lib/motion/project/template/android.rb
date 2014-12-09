@@ -151,8 +151,8 @@ EOS
   objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   kernel_bc = App.config.kernel_path
   ruby_objs_changed = false
-  App.config.files.each do |ruby_path|
-    bc_path = File.join(objs_build_dir, ruby_path + '.bc')
+  ((App.config.spec_mode ? App.config.spec_files : []) + App.config.files).each do |ruby_path|
+    bc_path = File.join(objs_build_dir, File.expand_path(ruby_path) + '.bc')
     init_func = "MREP_" + `/bin/echo \"#{File.expand_path(bc_path)}\" | /usr/bin/openssl sha1`.strip
     if !File.exist?(bc_path) \
         or File.mtime(ruby_path) > File.mtime(bc_path) \
@@ -574,3 +574,19 @@ task :device => ['build', 'device:install', 'device:start']
 desc "Build the app then run it in the emulator"
 task :default => 'emulator:start'
 
+desc "Same as 'spec:emulator'"
+task :spec => 'spec:emulator'
+
+namespace 'spec' do
+  desc "Run the test/spec suite on the device"
+  task :device do
+    App.config.spec_mode = true
+    Rake::Task["device"].invoke
+  end
+
+  desc "Run the test/spec suite on the emulator"
+  task :emulator do
+    App.config.spec_mode = true
+    Rake::Task["emulator"].invoke
+  end
+end
