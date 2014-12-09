@@ -500,7 +500,7 @@ module Bacon
     @contexts[current_context_index]
   end
 
-  def self.run
+  def self.run(arg=nil)
     unless respond_to?(:handle_specification_begin)
       extend(Outputs[ENV['output']] || SpecDoxOutput)
     end
@@ -511,8 +511,14 @@ module Bacon
     if defined?(NSObject)
       current_context.performSelector("run", withObject:nil, afterDelay:0)
     else
+      @main_activity = arg
       current_context.run
     end
+  end
+
+  # Android-only.
+  def self.main_activity
+    @main_activity
   end
 
   def self.context_did_finish(context)
@@ -630,6 +636,9 @@ module Bacon
     def change?(*args, &block); block.change?(*args); end
 
     alias_method :context, :describe
+
+    # Android-only.
+    def main_activity; Bacon.main_activity; end
   end
 end
 
