@@ -6,7 +6,6 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <dlfcn.h>
-#import <libgen.h>
 
 // CoreSimulator
 
@@ -50,6 +49,16 @@
 //
 - (void)setDispatchTarget:(id <XCDTMobileIS_XPCDebuggingProcotol>)target;
 @end
+
+// IDEFounation
+
+// There is no option for ‘interface’ launch mode, the key should simply be omitted completely, in
+// which case it will be the default way the application is launched.
+//
+NSString * const kIDEWatchLaunchModeKey = @"IDEWatchLaunchMode";
+NSString * const kIDEWatchLaunchModeGlance = @"IDEWatchLaunchMode-Glance";
+NSString * const kIDEWatchLaunchModeNotification = @"IDEWatchLaunchMode-Notification";
+NSString * const kIDEWatchNotificationPayloadKey = @"IDEWatchNotificationPayload";
 
 // IDEiOSSupportCore
 
@@ -181,7 +190,15 @@ init_imported_classes(void) {
   return YES;
 }
 
-- (void)launch;
+// `launchMode` can be:
+// * `nil`: the normal ‘interface’ application is launched.
+// * `kIDEWatchLaunchModeGlance`: the ‘glance’ application is launched.
+// * `kIDEWatchLaunchModeNotification`: the ‘notification’ application is launched. TODO payload!
+//
+// `notificationPayload` should be specified if `launchMode` is `kIDEWatchLaunchModeNotification`.
+//
+- (void)launchWithMode:(NSString *)launchMode
+   notificationPayload:(NSDictionary *)notificationPayload;
 {
   if (self.verbose) {
     printf("-> Launching application...\n");
@@ -194,8 +211,17 @@ init_imported_classes(void) {
   NSString *appBundleID = self.appBundle.bundleIdentifier;
   // Reap any existing process
   [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
+
   // Start new process
-  [self.simulator launchWatchAppForCompanionIdentifier:appBundleID options:@{}];
+  NSMutableDictionary *options = [NSMutableDictionary new];
+  if (launchMode) {
+    options[kIDEWatchLaunchModeKey] = launchMode;
+    if ([launchMode isEqualToString:kIDEWatchLaunchModeNotification]) {
+      NSParameterAssert(notificationPayload);
+      options[kIDEWatchNotificationPayloadKey] = notificationPayload;
+    }
+  }
+  [self.simulator launchWatchAppForCompanionIdentifier:appBundleID options:options];
 }
 
 // TODO use mkstemp instead of tmpnam
@@ -212,7 +238,7 @@ init_imported_classes(void) {
   NSString *file = [NSString stringWithUTF8String:tmpnam(NULL)];
   NSError *error = nil;
   if (![commands writeToFile:file atomically:YES encoding:NSASCIIStringEncoding error:&error]) {
-    fprintf(stderr, "[!] Unable to save debugger commands file to %s (%s)\n",
+    fprintf(stderr, "[!] Unable to save debugger commands file to `%s` (%s)\n",
                     [file UTF8String], [[error description] UTF8String]);
     exit(1);
   }
@@ -231,6 +257,7 @@ init_imported_classes(void) {
   // Reap process. TODO exiting immediately afterwards makes reaping not actually work.
   NSString *appBundleID = self.appBundle.bundleIdentifier;
   [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
+
   // Exit launcher with status from LLDB. TODO Is that helpful?
   exit(status);
 }
@@ -338,24 +365,76 @@ init_imported_classes(void) {
 
 @end
 
+void
+print_help_banner(void) {
+  fprintf(stderr, "Usage: watch-sim path/to/build/WatchHost.app -type [Glance|Notification] " \
+                  "-notification-payload [path/to/payload.json] -verbose [YES|NO] " \
+                  "-start-suspended [YES|NO]\n");
+}
+
 int
 main(int argc, char **argv) {
-  if (argc != 4) {
-    fprintf(stderr, "Usage: %s path/to/build/WatchHost.app verbose start-suspended\n", basename(argv[0]));
+  NSArray *allArguments = [NSProcessInfo processInfo].arguments;
+  NSMutableArray *arguments = [NSMutableArray new];
+  for (NSInteger i = 1; i < argc; i++) {
+    NSString *argument = allArguments[i];
+    if ([argument hasPrefix:@"-"]) {
+      // Skip next argument, which is the value for this option.
+      i++;
+    } else {
+      [arguments addObject:argument];
+    }
+  }
+
+  if (arguments.count != 1) {
+    print_help_banner();
     return 1;
+  }
+  NSString *appPath = arguments[0];
+
+  NSUserDefaults *options = [NSUserDefaults standardUserDefaults];
+  BOOL verbose = [options boolForKey:@"verbose"];
+  BOOL startSuspended = [options boolForKey:@"start-suspended"];
+  NSString *launchMode = nil;
+  NSDictionary *notificationPayload = nil;
+  NSString *type = [[options valueForKey:@"type"] lowercaseString];
+  if (type != nil) {
+    if ([type isEqualToString:@"glance"]) {
+      launchMode = kIDEWatchLaunchModeGlance;
+    } else if ([type isEqualToString:@"notification"]) {
+      // Get the obligatory notification payload (JSON) data.
+      launchMode = kIDEWatchLaunchModeNotification;
+      NSString *payloadFile = [options valueForKey:@"notification-payload"];
+      if (payloadFile == nil) {
+        fprintf(stderr, "[!] A `-notification-payload` is required with `-type Notification`.\n");
+        print_help_banner();
+        return 1;
+      }
+      NSData *payloadData = [NSData dataWithContentsOfFile:payloadFile];
+      NSError *error = nil;
+      notificationPayload = [NSJSONSerialization JSONObjectWithData:payloadData
+                                                            options:0
+                                                              error:&error];
+      if (error != nil) {
+        fprintf(stderr, "[!] Unable to load notification payload file `%s` (%s)\n",
+                        [payloadFile UTF8String], [[error description] UTF8String]);
+        return 1;
+      }
+      assert([notificationPayload isKindOfClass:[NSDictionary class]]);
+    } else {
+      fprintf(stderr, "[!] Unknown application type `%s`.\n", [type UTF8String]);
+      print_help_banner();
+      return 1;
+    }
   }
 
   init_imported_classes();
-
-  NSString *appPath = [NSString stringWithUTF8String:argv[1]];
-  BOOL verbose = atoi(argv[2]) != 0;
-  BOOL startSuspended = atoi(argv[3]) != 0;
 
   WatchKitLauncher *launcher = [WatchKitLauncher launcherWithAppBundlePath:appPath];
   launcher.verbose = verbose;
   launcher.startSuspended = startSuspended;
   assert(launcher.installApplication);
-  [launcher launch];
+  [launcher launchWithMode:launchMode notificationPayload:notificationPayload];
 
   CFRunLoopRun();
 
