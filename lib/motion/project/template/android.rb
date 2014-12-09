@@ -522,25 +522,36 @@ def run_apk(mode)
       sh line
     end
   else
-    # Clear log.
+    # Clear logs.
     sh "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -c"
     # Start main activity.
     App.info 'Start', activity_path
     start_activity(activity_path, mode)
-    # Show logs in a child process.
-    adb_logs_pid = spawn "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.logs_components.join(' ')}"
-    at_exit do
-      # Kill the logcat process.
-      Process.kill('KILL', adb_logs_pid)
-      # Kill the app (if it's still active).
-      if `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
-        sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
+    # Show logs.
+    adb_logs = "\"#{adb_path}\" #{adb_mode_flag(mode)} logcat -s #{App.config.logs_components.join(' ')}"
+    adb_logs_pid = spawn adb_logs
+    if App.config.spec_mode
+      # In spec mode, we print the logs until we determine that the app is no longer alive.
+      while true
+        break unless `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
+        sleep 1
       end
+      Process.kill('KILL', adb_logs_pid)
+    else
+      # Show logs in a child process.
+      at_exit do
+        # Kill the logcat process.
+        Process.kill('KILL', adb_logs_pid)
+        # Kill the app (if it's still active).
+        if `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
+          sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
+        end
+      end
+      # Enable port forwarding for the REPL socket.
+      sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:33333 tcp:33333"
+      # Launch the REPL.
+      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path}\" 0.0.0.0 33333"
     end
-    # Enable port forwarding for the REPL socket.
-    sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:33333 tcp:33333"
-    # Launch the REPL.
-    sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path}\" 0.0.0.0 33333"
   end
 end
 
