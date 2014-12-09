@@ -132,7 +132,8 @@ module Motion; module Project;
     end
 
     def versionized_build_dir
-      File.join(build_dir, build_mode_name + '-' + api_version)
+      sep = spec_mode ? 'Testing' : build_mode_name
+      File.join(build_dir, sep + '-' + api_version)
     end
 
     def build_tools_dir
