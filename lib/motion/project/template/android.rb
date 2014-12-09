@@ -435,7 +435,9 @@ EOS
 
     App.info 'Sign', archive
     if App.config.development?
-      sh "/usr/bin/jarsigner -digestalg SHA1 -storepass android -keystore \"#{keystore}\" \"#{archive}\" androiddebugkey"
+      line = "/usr/bin/jarsigner -digestalg SHA1 -storepass android -keystore \"#{keystore}\" \"#{archive}\" androiddebugkey"
+      line << " >& /dev/null" unless Rake.application.options.trace
+      sh line
     else
       sh "/usr/bin/jarsigner -sigalg SHA1withRSA -digestalg SHA1 -keystore \"#{keystore}\" \"#{archive}\" \"#{App.config.release_keystore_alias}\""
     end
