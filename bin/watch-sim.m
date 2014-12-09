@@ -241,11 +241,16 @@ init_imported_classes(void) {
   if (!self.startSuspended) {
     commands = [commands stringByAppendingString:@"continue\n"];
   }
-  NSString *file = [NSString stringWithUTF8String:tmpnam(NULL)];
+  char path[PATH_MAX];
+  snprintf(path, PATH_MAX, "%s/watch-sim-debugger-commands.XXXXXX", (getenv("TMPDIR") ?: "/tmp"));
+  assert(mktemp(path) != NULL);
   NSError *error = nil;
-  if (![commands writeToFile:file atomically:YES encoding:NSASCIIStringEncoding error:&error]) {
-    fprintf(stderr, "[!] Unable to save debugger commands file to `%s` (%s)\n",
-                    [file UTF8String], [[error description] UTF8String]);
+  if (![commands writeToFile:[NSString stringWithUTF8String:path]
+                  atomically:YES
+                    encoding:NSASCIIStringEncoding
+                       error:&error]) {
+    fprintf(stderr, "[!] Unable to save debugger commands file to `%s` (%s)\n", path,
+                    [[error description] UTF8String]);
     exit(1);
   }
 
@@ -253,7 +258,7 @@ init_imported_classes(void) {
     printf("-> Attaching debugger...\n");
   }
   char command[1024];
-  sprintf(command, "lldb -s %s", [file UTF8String]);
+  sprintf(command, "lldb -s %s", path);
   int status = system(command);
 
   if (self.verbose) {
@@ -353,7 +358,7 @@ init_imported_classes(void) {
 {
   if ([observedServiceID isEqualToString:self.watchKitExtensionBundle.bundleIdentifier]) {
     if (self.verbose) {
-      printf("-> Requested XPC service has been observed with PID: %d.\n", pid);
+      printf("-> Requested XPC service has been observed with PID: %d\n", pid);
     }
     assert(pid > 0);
     dispatch_async(dispatch_get_main_queue(), ^{
