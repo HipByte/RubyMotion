@@ -1,6 +1,6 @@
 // My env seems hosed, because I can only build when specifying an explicit SDKROOT:
 //
-//  $ clang -isysroot /Applications/Xcode-Beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk -ObjC -fobjc-arc -framework Foundation -g -o watch-sim watch-sim.m
+//  $ clang -isysroot path/to/MacOSX10.9.sdk -ObjC -fobjc-arc -framework Foundation -g watch-sim.m
 //
 
 #import <Foundation/Foundation.h>
@@ -50,7 +50,7 @@
 - (void)setDispatchTarget:(id <XCDTMobileIS_XPCDebuggingProcotol>)target;
 @end
 
-// IDEFounation
+// IDEFoundation
 
 // There is no option for ‘interface’ launch mode, the key should simply be omitted completely, in
 // which case it will be the default way the application is launched.
@@ -66,23 +66,24 @@ NSString * const kIDEWatchNotificationPayloadKey = @"IDEWatchNotificationPayload
 + (instancetype)simulatorWithDevice:(SimDevice *)device;
 - (DVTFuture *)installApplicationAtPath:(DVTFilePath *)path;
 - (void)debugXPCServices:(NSArray *)services;
-// @property(retain) DTXChannel *xpcAttachServiceChannel; // @synthesize xpcAttachServiceChannel=_xpcAttachServiceChannel;
 - (DTXChannel *)xpcAttachServiceChannel;
-// @property(retain) SimDevice *device;
 - (SimDevice *)device;
 
 // Actually defined in DVTDevice, so probably works on a physical device as
 // well.
-- (void)terminateWatchAppForCompanionIdentifier:(NSString *)bundleID options:(NSDictionary *)options;
-- (void)launchWatchAppForCompanionIdentifier:(NSString *)bundleID options:(NSDictionary *)options;
+- (void)terminateWatchAppForCompanionIdentifier:(NSString *)ID options:(NSDictionary *)options;
+- (void)launchWatchAppForCompanionIdentifier:(NSString *)ID options:(NSDictionary *)options;
 @end
 
 @protocol DTXAllowedRPC <NSObject>
 @end
 
 @protocol XCDTMobileIS_XPCDebuggingProcotol <DTXAllowedRPC>
-- (void)outputReceived:(id)arg1 fromProcess:(int)arg2 atTime:(unsigned long long)arg3;
-- (void)xpcServiceObserved:(id)arg1 withProcessIdentifier:(int)arg2 requestedByProcess:(int)arg3 options:(id)arg4;
+- (void)outputReceived:(NSString *)output fromProcess:(int)pid atTime:(unsigned long long)time;
+- (void)xpcServiceObserved:(NSString *)observedServiceID
+     withProcessIdentifier:(int)pid
+        requestedByProcess:(int)parentPID
+                   options:(NSDictionary *)options;
 @end
 
 // Imported classes
@@ -96,28 +97,35 @@ static Class DTXChannelClass = nil;
 
 static void
 init_imported_classes(void) {
-  void *CoreSimulator = dlopen("/Applications/Xcode-Beta.app/Contents/Developer/Library/PrivateFrameworks/CoreSimulator.framework/CoreSimulator", RTLD_NOW);
+  void *CoreSimulator = dlopen("/Applications/Xcode-Beta.app/Contents/Developer/Library/" \
+                               "PrivateFrameworks/CoreSimulator.framework/CoreSimulator", RTLD_NOW);
   assert(CoreSimulator != NULL);
   SimDeviceSetClass = objc_getClass("SimDeviceSet");
   assert(SimDeviceSetClass != nil);
   SimDeviceClass = objc_getClass("SimDevice");
   assert(SimDeviceClass != nil);
 
-  void *DVTFoundation = dlopen("/Applications/Xcode-Beta.app/Contents/SharedFrameworks/DVTFoundation.framework/Versions/A/DVTFoundation", RTLD_NOW);
+  void *DVTFoundation = dlopen("/Applications/Xcode-Beta.app/Contents/SharedFrameworks/" \
+                               "DVTFoundation.framework/Versions/A/DVTFoundation", RTLD_NOW);
   assert(DVTFoundation != NULL);
   DVTFilePathClass = objc_getClass("DVTFilePath");
   assert(DVTFilePathClass != nil);
   DVTXPCServiceInformationClass = objc_getClass("DVTXPCServiceInformation");
   assert(DVTXPCServiceInformationClass != nil);
 
-  void *DevToolsCore = dlopen("/Applications/Xcode-Beta.app/Contents/OtherFrameworks/DevToolsCore.framework/DevToolsCore", RTLD_NOW);
+  void *DevToolsCore = dlopen("/Applications/Xcode-Beta.app/Contents/OtherFrameworks/" \
+                              "DevToolsCore.framework/DevToolsCore", RTLD_NOW);
   assert(DevToolsCore != NULL);
-  void *IDEiOSSupportCore = dlopen("/Applications/Xcode-Beta.app/Contents/PlugIns/IDEiOSSupportCore.ideplugin/Contents/MacOS/IDEiOSSupportCore", RTLD_NOW);
+  void *IDEiOSSupportCore = dlopen("/Applications/Xcode-Beta.app/Contents/PlugIns/" \
+                                   "IDEiOSSupportCore.ideplugin/Contents/MacOS/IDEiOSSupportCore",
+                                   RTLD_NOW);
   assert(IDEiOSSupportCore != NULL);
   DVTiPhoneSimulatorClass = objc_getClass("DVTiPhoneSimulator");
   assert(DVTiPhoneSimulatorClass != nil);
 
-  void *DTXConnectionServices = dlopen("/Applications/Xcode-Beta.app/Contents/SharedFrameworks/DTXConnectionServices.framework/Versions/A/DTXConnectionServices", RTLD_NOW);
+  void *DTXConnectionServices = dlopen("/Applications/Xcode-Beta.app/Contents/SharedFrameworks/" \
+                                       "DTXConnectionServices.framework/Versions/A/" \
+                                       "DTXConnectionServices", RTLD_NOW);
   assert(DTXConnectionServices != NULL);
   DTXChannelClass = objc_getClass("DTXChannel");
   assert(DTXChannelClass != nil);
@@ -170,8 +178,6 @@ init_imported_classes(void) {
 // newly available `simctl` tool. But for now this tool replicates the behaviour seen in Xcode when
 // launching extensions.
 //
-// TODO: Return error?
-//
 - (BOOL)installApplication;
 {
   if (self.verbose) {
@@ -193,7 +199,7 @@ init_imported_classes(void) {
 // `launchMode` can be:
 // * `nil`: the normal ‘interface’ application is launched.
 // * `kIDEWatchLaunchModeGlance`: the ‘glance’ application is launched.
-// * `kIDEWatchLaunchModeNotification`: the ‘notification’ application is launched. TODO payload!
+// * `kIDEWatchLaunchModeNotification`: the ‘notification’ application is launched.
 //
 // `notificationPayload` should be specified if `launchMode` is `kIDEWatchLaunchModeNotification`.
 //
@@ -326,11 +332,11 @@ init_imported_classes(void) {
   app.environment = @{ @"NSUnbufferedIO": @"YES" };
   //app.environment = @{
     //@"NSUnbufferedIO": @"YES",
-    //@"DYLD_FRAMEWORK_PATH": self.buildDir,
-    //@"DYLD_LIBRARY_PATH": self.buildDir,
-    //@"__XCODE_BUILT_PRODUCTS_DIR_PATHS": self.buildDir,
-    //@"__XPC_DYLD_FRAMEWORK_PATH": self.buildDir,
-    //@"__XPC_DYLD_LIBRARY_PATH": self.buildDir
+    //@"DYLD_FRAMEWORK_PATH": buildDir,
+    //@"DYLD_LIBRARY_PATH": buildDir,
+    //@"__XCODE_BUILT_PRODUCTS_DIR_PATHS": buildDir,
+    //@"__XPC_DYLD_FRAMEWORK_PATH": buildDir,
+    //@"__XPC_DYLD_LIBRARY_PATH": buildDir
   //};
   return app;
 }
