@@ -87,7 +87,7 @@ task :simulate_watch_app do
   app = App.config.app_bundle('iPhoneSimulator')
   sim = File.join(App.config.bindir, 'watch-sim')
   App.info 'Simulate', watch_extension.destination_bundle_path
-  sh "'#{sim}' '#{app}' #{App::VERBOSE ? '1' : '0'} #{ENV['no_continue'] ? '1' : '0'}"
+  sh "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
 end
 
 desc "Run the simulator"
