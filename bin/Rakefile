@@ -40,7 +40,7 @@ end
 task :watch_sim do
   bin = 'watch-sim'
   if !File.exist?(bin) or File.mtime('watch-sim.m') > File.mtime(bin) or File.mtime('builtin_debugger_cmds.h') > File.mtime(bin)
-    sh "#{CLANG} -mmacosx-version-min=10.8 -fobjc-arc -I./src -std=c99 -Wall #{DEBUG_FLAG} #{OPTZ_LEVEL} watch-sim.m -o \"#{bin}\" -L. -ledit -Wl,-rpath,/usr/lib -I."
+    sh "#{CLANG} -mmacosx-version-min=10.8 -fobjc-arc -I./src -std=c99 -Wall #{DEBUG_FLAG} #{OPTZ_LEVEL} watch-sim.m -o \"#{bin}\" -framework Foundation -L. -ledit -Wl,-rpath,/usr/lib -I."
     sh "#{STRIP} -x \"#{bin}\"" if NEED_STRIP
   end
 end

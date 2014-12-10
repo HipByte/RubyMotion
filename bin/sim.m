@@ -1335,8 +1335,10 @@ main(int argc, char **argv)
 #if defined(SIMULATOR_IOS)
     // Load the frameworks.
     [[NSBundle bundleWithPath:[xcode_path stringByAppendingPathComponent:@"../SharedFrameworks/DVTFoundation.framework"]] load];
+    // Xcode 5 location
     NSString *framework_path = [xcode_path stringByAppendingPathComponent:@"Platforms/iPhoneSimulator.platform/Developer/Library/PrivateFrameworks/DVTiPhoneSimulatorRemoteClient.framework"];
     if (![[NSFileManager defaultManager] fileExistsAtPath:framework_path]) {
+	// Xcode 6 location
 	framework_path = [xcode_path stringByAppendingPathComponent:@"../SharedFrameworks/DVTiPhoneSimulatorRemoteClient.framework"];
     }
     [[NSBundle bundleWithPath:framework_path] load];

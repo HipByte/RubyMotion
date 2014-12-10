@@ -38,6 +38,10 @@
 - (void)setEnvironment:(NSDictionary *)environment;
 @end
 
+@interface DVTPlatform : NSObject
++ (BOOL)loadAllPlatformsReturningError:(NSError **)error;
+@end
+
 // DTXConnectionServices
 
 @protocol XCDTMobileIS_XPCDebuggingProcotol;
@@ -86,49 +90,76 @@ NSString * const kIDEWatchNotificationPayloadKey = @"IDEWatchNotificationPayload
                    options:(NSDictionary *)options;
 @end
 
+@class DTiPhoneSimulatorSession;
+
+@protocol DTiPhoneSimulatorSessionDelegate
+- (void)session:(DTiPhoneSimulatorSession *)session didEndWithError:(NSError *)error;
+- (void)session:(DTiPhoneSimulatorSession *)session
+       didStart:(BOOL)didStart
+      withError:(NSError *)error;
+@end
+
+// DVTiPhoneSimulatorRemoteClient
+
+@interface DTiPhoneSimulatorSessionConfig : NSObject
+- (void)setDevice:(SimDevice *)device;
+@end
+
+@interface DTiPhoneSimulatorSession : NSObject
+- (void)setDelegate:(id <DTiPhoneSimulatorSessionDelegate>) delegate;
+- (BOOL)requestStartWithConfig:(DTiPhoneSimulatorSessionConfig *)config
+                       timeout:(double)timeout
+                         error:(NSError **)error;
+@end
+
 // Imported classes
 
 static Class SimDeviceSetClass = nil;
 static Class SimDeviceClass = nil;
 static Class DVTFilePathClass = nil;
 static Class DVTXPCServiceInformationClass = nil;
+static Class DVTPlatformClass = nil;
 static Class DVTiPhoneSimulatorClass = nil;
+static Class DTiPhoneSimulatorSessionClass = nil;
+static Class DTiPhoneSimulatorSessionConfigClass = nil;
 static Class DTXChannelClass = nil;
 
 static void
-init_imported_classes(void) {
-  void *CoreSimulator = dlopen("/Applications/Xcode-Beta.app/Contents/Developer/Library/" \
-                               "PrivateFrameworks/CoreSimulator.framework/CoreSimulator", RTLD_NOW);
+InitImportedClasses(NSString *developerDir) {
+  void *CoreSimulator = dlopen([[developerDir stringByAppendingPathComponent:@"Library/PrivateFrameworks/CoreSimulator.framework/CoreSimulator"] UTF8String], RTLD_NOW);
   assert(CoreSimulator != NULL);
   SimDeviceSetClass = objc_getClass("SimDeviceSet");
   assert(SimDeviceSetClass != nil);
   SimDeviceClass = objc_getClass("SimDevice");
   assert(SimDeviceClass != nil);
 
-  void *DVTFoundation = dlopen("/Applications/Xcode-Beta.app/Contents/SharedFrameworks/" \
-                               "DVTFoundation.framework/Versions/A/DVTFoundation", RTLD_NOW);
+  void *DVTFoundation = dlopen([[developerDir stringByAppendingPathComponent:@"../SharedFrameworks/DVTFoundation.framework/Versions/A/DVTFoundation"] UTF8String], RTLD_NOW);
   assert(DVTFoundation != NULL);
   DVTFilePathClass = objc_getClass("DVTFilePath");
   assert(DVTFilePathClass != nil);
   DVTXPCServiceInformationClass = objc_getClass("DVTXPCServiceInformation");
   assert(DVTXPCServiceInformationClass != nil);
+  DVTPlatformClass = objc_getClass("DVTPlatform");
+  assert(DVTPlatformClass != nil);
 
-  void *DevToolsCore = dlopen("/Applications/Xcode-Beta.app/Contents/OtherFrameworks/" \
-                              "DevToolsCore.framework/DevToolsCore", RTLD_NOW);
+  void *DevToolsCore = dlopen([[developerDir stringByAppendingPathComponent:@"../OtherFrameworks/DevToolsCore.framework/DevToolsCore"] UTF8String], RTLD_NOW);
   assert(DevToolsCore != NULL);
-  void *IDEiOSSupportCore = dlopen("/Applications/Xcode-Beta.app/Contents/PlugIns/" \
-                                   "IDEiOSSupportCore.ideplugin/Contents/MacOS/IDEiOSSupportCore",
-                                   RTLD_NOW);
+  void *IDEiOSSupportCore = dlopen([[developerDir stringByAppendingPathComponent:@"../PlugIns/IDEiOSSupportCore.ideplugin/Contents/MacOS/IDEiOSSupportCore"] UTF8String], RTLD_NOW);
   assert(IDEiOSSupportCore != NULL);
   DVTiPhoneSimulatorClass = objc_getClass("DVTiPhoneSimulator");
   assert(DVTiPhoneSimulatorClass != nil);
 
-  void *DTXConnectionServices = dlopen("/Applications/Xcode-Beta.app/Contents/SharedFrameworks/" \
-                                       "DTXConnectionServices.framework/Versions/A/" \
-                                       "DTXConnectionServices", RTLD_NOW);
+  void *DTXConnectionServices = dlopen([[developerDir stringByAppendingPathComponent:@"../SharedFrameworks/DTXConnectionServices.framework/Versions/A/DTXConnectionServices"] UTF8String], RTLD_NOW);
   assert(DTXConnectionServices != NULL);
   DTXChannelClass = objc_getClass("DTXChannel");
   assert(DTXChannelClass != nil);
+
+  void *DVTiPhoneSimulatorRemoteClient = dlopen([[developerDir stringByAppendingPathComponent:@"../SharedFrameworks/DVTiPhoneSimulatorRemoteClient.framework/Versions/A/DVTiPhoneSimulatorRemoteClient"] UTF8String], RTLD_NOW);
+  assert(DVTiPhoneSimulatorRemoteClient != NULL);
+  DTiPhoneSimulatorSessionConfigClass = objc_getClass("DTiPhoneSimulatorSessionConfig");
+  assert(DTiPhoneSimulatorSessionConfigClass != nil);
+  DTiPhoneSimulatorSessionClass = objc_getClass("DTiPhoneSimulatorSession");
+  assert(DTiPhoneSimulatorSessionClass != nil);
 }
 
 
@@ -147,12 +178,25 @@ init_imported_classes(void) {
 // * `__shouldDispatchSelectorToObject_block_invoke_2`
 //
 
-@interface WatchKitLauncher : NSObject <XCDTMobileIS_XPCDebuggingProcotol>
+@interface WatchKitLauncher : NSObject <XCDTMobileIS_XPCDebuggingProcotol, DTiPhoneSimulatorSessionDelegate>
+// `launchMode` can be:
+// * `nil`: the normal ‘interface’ application is launched.
+// * `kIDEWatchLaunchModeGlance`: the ‘glance’ application is launched.
+// * `kIDEWatchLaunchModeNotification`: the ‘notification’ application is launched.
+//
+// `notificationPayload` should be specified if `launchMode` is `kIDEWatchLaunchModeNotification`.
+//
+@property (strong) NSString *launchMode;
+@property (strong) NSDictionary *notificationPayload;
+@property (assign) BOOL verbose;
+@property (assign) BOOL startSuspended;
+@end
+
+@interface WatchKitLauncher ()
 @property (readonly) NSBundle *appBundle;
 @property (readonly) NSBundle *watchKitExtensionBundle;
 @property (readonly) DVTiPhoneSimulator *simulator;
-@property (assign) BOOL verbose;
-@property (assign) BOOL startSuspended;
+@property (strong) DTiPhoneSimulatorSession *session;
 @end
 
 @implementation WatchKitLauncher
@@ -174,41 +218,67 @@ init_imported_classes(void) {
   return self;
 }
 
+// Launch flow is as follows:
+// * ensure simulator is running and with correct device
+// * install application
+// * actually launch application
+// * attach debugger
+//
+- (void)launch;
+{
+  if (self.verbose) {
+    printf("-> Launching simulator with device `%s`...\n", [self.simulator.device.name UTF8String]);
+  }
+
+  NSError *error = nil;
+  if (![DVTPlatformClass loadAllPlatformsReturningError:&error]) {
+    fprintf(stderr, "[!] Unable to initialize Dev Tools (%s).\n", [[error description] UTF8String]);
+    exit(1);
+  }
+
+  DTiPhoneSimulatorSessionConfig *config = [DTiPhoneSimulatorSessionConfigClass new];
+  config.device = self.simulator.device;
+  self.session = [DTiPhoneSimulatorSessionClass new];
+  self.session.delegate = self;
+  if (![self.session requestStartWithConfig:config timeout:0 error:&error]) {
+    fprintf(stderr, "[!] Unable to launch the Simulator (%s).\n", [[error description] UTF8String]);
+    exit(1);
+  }
+}
+
+// Called from `session:didStart:withError:` once the simulator is running.
+//
+- (void)continueLaunch;
+{
+  [self installApplication];
+  [self actuallyLaunch];
+}
+
 // Install the application to the `device`. This could be done in any number of ways, including the
 // newly available `simctl` tool. But for now this tool replicates the behaviour seen in Xcode when
 // launching extensions.
 //
-- (BOOL)installApplication;
+- (void)installApplication;
 {
   if (self.verbose) {
-    const char *appPath = [self.appBundle.bundlePath UTF8String];
-    const char *simDeviceName = [self.simulator.device.name UTF8String];
-    printf("-> Installing `%s` to simulator device `%s`.\n", appPath, simDeviceName);
+    printf("-> Installing `%s`...\n", [self.appBundle.bundlePath UTF8String]);
   }
   DVTFilePath *appFilePath = [DVTFilePathClass filePathForPathString:self.appBundle.bundlePath];
   DVTFuture *installation = [self.simulator installApplicationAtPath:appFilePath];
   [installation waitUntilFinished];
   if (installation.error != nil) {
-    const char *error = [[installation.error description] UTF8String];
-    fprintf(stderr, "[!] An error occurred while installing the application (%s)\n", error);
-    return NO;
+    fprintf(stderr, "[!] An error occurred while installing the application (%s)\n",
+                    [[installation.error description] UTF8String]);
+    exit(1);
   }
-  return YES;
 }
 
-// `launchMode` can be:
-// * `nil`: the normal ‘interface’ application is launched.
-// * `kIDEWatchLaunchModeGlance`: the ‘glance’ application is launched.
-// * `kIDEWatchLaunchModeNotification`: the ‘notification’ application is launched.
-//
-// `notificationPayload` should be specified if `launchMode` is `kIDEWatchLaunchModeNotification`.
-//
-- (void)launchWithMode:(NSString *)launchMode
-   notificationPayload:(NSDictionary *)notificationPayload;
+- (void)actuallyLaunch;
 {
   if (self.verbose) {
     printf("-> Launching application...\n");
   }
+
   DVTXPCServiceInformation *unstartedService = [self watchKitAppInformation];
   [self.simulator debugXPCServices:@[unstartedService]];
   DTXChannel *channel = self.simulator.xpcAttachServiceChannel;
@@ -217,20 +287,10 @@ init_imported_classes(void) {
   NSString *appBundleID = self.appBundle.bundleIdentifier;
   // Reap any existing process
   [self.simulator terminateWatchAppForCompanionIdentifier:appBundleID options:@{}];
-
   // Start new process
-  NSMutableDictionary *options = [NSMutableDictionary new];
-  if (launchMode) {
-    options[kIDEWatchLaunchModeKey] = launchMode;
-    if ([launchMode isEqualToString:kIDEWatchLaunchModeNotification]) {
-      NSParameterAssert(notificationPayload);
-      options[kIDEWatchNotificationPayloadKey] = notificationPayload;
-    }
-  }
-  [self.simulator launchWatchAppForCompanionIdentifier:appBundleID options:options];
+  [self.simulator launchWatchAppForCompanionIdentifier:appBundleID options:self.launchOptions];
 }
 
-// TODO use mkstemp instead of tmpnam
 - (void)attachDebuggerToPID:(int)pid;
 {
   NSString *commands = [NSString stringWithFormat:@"" \
@@ -346,6 +406,40 @@ init_imported_classes(void) {
   return app;
 }
 
+- (NSDictionary *)launchOptions;
+{
+  NSMutableDictionary *options = [NSMutableDictionary new];
+  if (self.launchMode) {
+    options[kIDEWatchLaunchModeKey] = self.launchMode;
+    if ([self.launchMode isEqualToString:kIDEWatchLaunchModeNotification]) {
+      NSParameterAssert(self.notificationPayload);
+      options[kIDEWatchNotificationPayloadKey] = self.notificationPayload;
+    }
+  }
+  return [options copy];
+}
+
+#pragma mark - DTiPhoneSimulatorSessionDelegate
+
+- (void)session:(DTiPhoneSimulatorSession *)session didEndWithError:(NSError *)error;
+{
+  if (error != nil) {
+    fprintf(stderr, "[!] Ended Simulator session (%s).\n", [[error description] UTF8String]);
+    exit(1);
+  }
+}
+
+- (void)session:(DTiPhoneSimulatorSession *)session
+       didStart:(BOOL)didStart
+      withError:(NSError *)error;
+{
+  if (!didStart) {
+    fprintf(stderr, "[!] Unable to launch the Simulator (%s).\n", [[error description] UTF8String]);
+    exit(1);
+  }
+  [self continueLaunch];
+}
+
 #pragma mark - XCDTMobileIS_XPCDebuggingProcotol
 
 // If our service has started, connect to it with LLDB from the main thread. Do not block the XPC
@@ -380,7 +474,7 @@ void
 print_help_banner(void) {
   fprintf(stderr, "Usage: watch-sim path/to/build/WatchHost.app -type [Glance|Notification] " \
                   "-notification-payload [path/to/payload.json] -verbose [YES|NO] " \
-                  "-start-suspended [YES|NO]\n");
+                  "-start-suspended [YES|NO] -developer-dir [Xcode.app/Contents/Developer]\n");
 }
 
 int
@@ -439,15 +533,34 @@ main(int argc, char **argv) {
     }
   }
 
-  init_imported_classes();
+  NSString *developerDir = [options valueForKey:@"developer-dir"];
+  if (developerDir == nil) {
+    char *dir = getenv("DEVELOPER_DIR");
+    if (dir == NULL) {
+      FILE *pipe = popen("/usr/bin/xcode-select -p", "r");
+      assert(pipe != NULL);
+      char buffer[PATH_MAX];
+      assert(fgets(buffer, PATH_MAX, pipe) != NULL);
+      pclose(pipe);
+      dir = buffer;
+    }
+    NSCharacterSet *whitespace = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+    developerDir = [[NSString stringWithUTF8String:dir] stringByTrimmingCharactersInSet:whitespace];
+  }
+
+  InitImportedClasses(developerDir);
 
   WatchKitLauncher *launcher = [WatchKitLauncher launcherWithAppBundlePath:appPath];
   launcher.verbose = verbose;
   launcher.startSuspended = startSuspended;
-  assert(launcher.installApplication);
-  [launcher launchWithMode:launchMode notificationPayload:notificationPayload];
+  launcher.launchMode = launchMode;
+  launcher.notificationPayload = notificationPayload;
+  [launcher launch];
 
-  CFRunLoopRun();
+  while (1) {
+    CFRunLoopRun();
+  }
 
-  return 0;
+  // This should never be reached.
+  return 1;
 }
