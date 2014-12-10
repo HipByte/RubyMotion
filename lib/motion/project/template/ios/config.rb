@@ -547,7 +547,7 @@ EOS
         spec_objs.each do |_, init_func|
           main_txt << "#{init_func}(self, 0);\n"
         end
-        main_txt << "[NSClassFromString(@\"Bacon\") performSelector:@selector(run)];\n"
+        main_txt << "[NSClassFromString(@\"Bacon\") performSelector:@selector(run) withObject:nil];\n"
         main_txt << <<EOS
 }
 
