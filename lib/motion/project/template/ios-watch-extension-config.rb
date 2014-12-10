@@ -148,6 +148,12 @@ EOS
         @extension_config.deployment_target
       end
 
+      # Ensure that we also compile assets with `actool` for the watch.
+      #
+      def device_family
+        [:iphone, :watch]
+      end
+
       # @return [String] The bundle identifier of the watch application based on
       #         the bundle identifier of the host application.
       #
