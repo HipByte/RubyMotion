@@ -533,7 +533,7 @@ def run_apk(mode)
     if App.config.spec_mode
       # In spec mode, we print the logs until we determine that the app is no longer alive.
       while true
-        break unless `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
+        break unless `\"#{adb_path}\" #{adb_mode_flag(mode)} shell ps`.include?(App.config.package)
         sleep 1
       end
       Process.kill('KILL', adb_logs_pid)
