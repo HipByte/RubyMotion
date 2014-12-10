@@ -87,7 +87,13 @@ task :simulate_watch_app do
   app = App.config.app_bundle('iPhoneSimulator')
   sim = File.join(App.config.bindir, 'watch-sim')
   App.info 'Simulate', watch_extension.destination_bundle_path
-  sh "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
+  command = "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
+  command << " -type #{ENV['type']}" if ENV['type']
+  if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
+    App.fail '[!] The `notification` option is required with `type=notification`.'
+  end
+  command << " -notification-payload '#{ENV['payload']}'" if ENV['payload']
+  sh(command)
 end
 
 desc "Run the simulator"
