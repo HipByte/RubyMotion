@@ -579,11 +579,14 @@ namespace 'device' do
   end
 end
 
+desc "Build the app then run it in the emulator"
+task :emulator => ['build', 'emulator:install', 'emulator:start']
+
 desc "Build the app then run it in the device"
 task :device => ['build', 'device:install', 'device:start']
 
-desc "Build the app then run it in the emulator"
-task :default => 'emulator:start'
+desc "Same as 'rake emulator'"
+task :default => :emulator
 
 desc "Same as 'spec:emulator'"
 task :spec => 'spec:emulator'
