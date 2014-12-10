@@ -1,6 +1,8 @@
 = RubyMotion 2.39 =
 
   * [iOS] Fix `rake crashlog:device' crash report symbolication.
+  * [iOS] Fixed a bug where Bundler wouldn't be used when it will build
+    Extensions and Frameworks.
   * [iOS] Create a `UIViewController`, `UINavigationController`, and `UIWindow`
     in the default new application template.
   * [OSX] Only build for 64-bit (`x86_64`) by default.

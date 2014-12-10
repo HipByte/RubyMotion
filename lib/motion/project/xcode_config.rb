@@ -289,8 +289,16 @@ EOS
       common_flags(platform) + ' -Wl,-no_pie'
     end
 
+    # @return [String] The application bundle name, excluding extname.
+    #
     def bundle_name
-      @name + (spec_mode ? '_spec' : '')
+      name + (spec_mode ? '_spec' : '')
+    end
+
+    # @return [String] The application bundle filename, including extname.
+    #
+    def bundle_filename
+      bundle_name + '.app'
     end
 
     def versionized_build_dir(platform)
@@ -298,7 +306,7 @@ EOS
     end
 
     def app_bundle_dsym(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app.dSYM')
+      File.join(versionized_build_dir(platform), bundle_filename + '.dSYM')
     end
 
     def archive_extension
@@ -310,7 +318,7 @@ EOS
     end
 
     def identifier
-      @identifier ||= "com.yourcompany.#{@name.gsub(/\s/, '')}"
+      @identifier ||= "com.yourcompany.#{name.gsub(/\s/, '')}"
       spec_mode ? @identifier + '_spec' : @identifier
     end
 
@@ -326,16 +334,34 @@ EOS
       {
         'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
         'CFBundleDevelopmentRegion' => 'en',
-        'CFBundleName' => @name,
-        'CFBundleDisplayName' => @name,
+        'CFBundleName' => name,
+        'CFBundleDisplayName' => name,
         'CFBundleIdentifier' => identifier,
-        'CFBundleExecutable' => @name, 
+        'CFBundleExecutable' => name, 
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
         'CFBundleShortVersionString' => (@short_version || @version),
         'CFBundleSignature' => @bundle_signature,
         'CFBundleVersion' => @version
       }
+    end
+
+    # @return [Hash] A hash that contains all the various `Info.plist` data
+    #         merged into one hash.
+    #
+    def merged_info_plist(platform)
+      generic_info_plist.merge(dt_info_plist).merge(info_plist)
+    end
+
+    # @param [String] platform
+    #        The platform identifier that's being build for, such as
+    #        `iPhoneSimulator`, `iPhoneOS`, or `MacOSX`.
+    #
+    #
+    # @return [String] A serialized version of the `merged_info_plist` hash.
+    #
+    def info_plist_data(platform)
+      Motion::PropertyList.to_s(merged_info_plist(platform))
     end
 
     # TODO

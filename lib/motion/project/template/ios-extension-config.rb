@@ -53,6 +53,9 @@ module Motion; module Project;
       end
     end
 
+    # An extension cannot have app icons.
+    undef_method :app_icons_asset_bundle
+
     def validate
       # manifest_assets
       if !(manifest_assets.is_a?(Array) and manifest_assets.all? { |x| x.is_a?(Hash) and x.keys.include?(:kind) and x.keys.include?(:url) })
@@ -183,6 +186,16 @@ module Motion; module Project;
       ary.map { |family| device_family_int(family) }
     end
 
+    # @todo Is it correct that a bundle identifier may contain spaces? Because
+    #       the `bundle_name` definitely can contain spaces.
+    #
+    # @return [String] The bundle identifier of the application extension based
+    #         on the bundle identifier of the host application.
+    #
+    def identifier
+      ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.' + bundle_name
+    end
+
     def app_bundle(platform)
       File.join(versionized_build_dir(platform), bundle_name + '.appex')
     end
@@ -195,8 +208,8 @@ module Motion; module Project;
       app_bundle(platform)
     end
 
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s({
+    def merged_info_plist(platform)
+      super.merge({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
@@ -222,8 +235,8 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist)
-       .merge({ 'CFBundlePackageType' => 'XPC!' }))
+        'CFBundlePackageType' => 'XPC!'
+      })
     end
 
     def manifest_plist_data
@@ -296,7 +309,7 @@ EOS
 EOS
     main_txt << <<EOS
     dlopen("/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit", 0x2);
-    retval = ((int(*)(id, SEL, int, char**))objc_msgSend)(NSClassFromString(@"PKService"), @selector(_defaultRun:arguments:), argc, argv);
+    retval = ((int(*)(id, SEL))objc_msgSend)(NSClassFromString(@"PKService"), @selector(run));
     rb_exit(retval);
     [pool release];
     return retval;

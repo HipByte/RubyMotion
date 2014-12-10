@@ -122,7 +122,7 @@ module Motion; module Project;
     end
 
     def app_bundle_raw(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app')
+      File.join(versionized_build_dir(platform), bundle_filename)
     end
 
     def app_bundle(platform)
@@ -149,14 +149,6 @@ module Motion; module Project;
         'LSMinimumSystemVersion' => deployment_target,
         'LSApplicationCategoryType' => (@category.start_with?('public.app-category') ? @category : 'public.app-category.' + @category)
       })
-    end
-
-    def merged_info_plist
-      generic_info_plist.merge(dt_info_plist).merge(info_plist)
-    end
-
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s(merged_info_plist)
     end
 
     def strip_args
