@@ -121,12 +121,12 @@ end
 
 desc "Install"
 task :install do
-  ship_android_support = ENV['PRE_BUILD']
+  ship_android_support = true # ENV['PRE_BUILD']
   public_binaries = ['./bin/motion']
   binaries = public_binaries.dup.concat(['./bin/ios/deploy', './bin/ios/sim',
     './bin/osx/sim', './bin/ruby', './bin/ctags', './bin/nfd', './bin/gen_bridge_metadata',
-    './bin/instruments', 'lib/yard/bin/yard', 'lib/yard/bin/yardoc', 'lib/yard/bin/yri',
-    './lldb/lldb.py'])
+    './bin/instruments', './bin/watch-sim', 'lib/yard/bin/yard', 'lib/yard/bin/yardoc',
+    'lib/yard/bin/yri', './lldb/lldb.py'])
   if ship_android_support
     binaries << './bin/android/gen_bridge_metadata'
     binaries << './bin/android/repl'
@@ -540,7 +540,7 @@ end
 
 desc "Build Android support (experimental)"
 task "android" do
-  ENV['PRE_BUILD'] = '1'
+  # ENV['PRE_BUILD'] = '1'
 
   if ANDROID_API_VERSIONS.empty?
     $stderr.puts "Android SDK does not exist or does not have platforms class paths"
