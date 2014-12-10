@@ -44,6 +44,7 @@ namespace :build do
     # TODO: Ensure Info.plist gets regenerated on each build so it has ints for
     # Instruments and strings for normal builds.
     rm_f File.join(App.config.app_bundle(platform), 'Info.plist')
+    rm_f File.join(App.config.watch_app_config.app_bundle(platform), 'Info.plist')
 
     # TODO this should go into a iOS specific Builder class which performs this
     # check before building.
