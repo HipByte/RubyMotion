@@ -210,7 +210,7 @@ EOS
           main_txt << "#{init_func}(self, 0);\n"
         end
         main_txt << <<EOS
-        [NSClassFromString(@\"Bacon\") performSelector:@selector(run)];
+        [NSClassFromString(@\"Bacon\") performSelector:@selector(run) withObject:nil];
 }
 
 - (void)appLaunched:(NSNotification *)notification
