@@ -227,7 +227,7 @@ EOS
     end
     main_txt << <<EOS
     RubyMotionInit(argc, argv);
-    NSApplication *app = [NSClassFromString(@"#{merged_info_plist['NSPrincipalClass']}") sharedApplication];
+    NSApplication *app = [NSClassFromString(@"#{merged_info_plist('MacOSX')['NSPrincipalClass']}") sharedApplication];
     [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
 EOS
     if spec_mode
@@ -250,7 +250,7 @@ EOS
     # If the user specifies a custom principal class the NSApplicationMain()
     # function will only work if they have also specified a nib or storyboard.
     def use_application_main_function?
-      info = merged_info_plist
+      info = merged_info_plist('MacOSX')
       if info['NSPrincipalClass'] == 'NSApplication'
         true
       else
