@@ -76,25 +76,41 @@ namespace :build do
   end
 end
 
-# TODO can an app bundle more than 1 watch app?
-desc "Run the watch app on the sim"
-task :simulate_watch_app do
-  unless ENV["skip_build"]
-    Rake::Task["build:simulator"].invoke
+namespace :watch do
+  desc "Run the Watch application on the simulator"
+  task :simulator do
+    unless ENV["skip_build"]
+      Rake::Task["build:simulator"].invoke
+    end
+    # TODO need a way to identify a watch extension from other extensions
+    watch_extension = App.config.targets.first
+    app = App.config.app_bundle('iPhoneSimulator')
+    sim = File.join(App.config.bindir, 'watch-sim')
+
+    command = "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
+    command << " -type #{ENV['type']}" if ENV['type']
+    if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
+      App.fail '[!] The `notification` option is required with `type=notification`.'
+    end
+    command << " -notification-payload '#{ENV['payload']}'" if ENV['payload']
+
+    if App::VERBOSE
+      puts command
+    else
+      App.info 'Simulate', watch_extension.destination_bundle_path
+    end
+    system(command)
+    exit($?.exitstatus)
   end
-  # TODO need a way to identify a watch extension from other extensions
-  watch_extension = App.config.targets.first
-  app = App.config.app_bundle('iPhoneSimulator')
-  sim = File.join(App.config.bindir, 'watch-sim')
-  App.info 'Simulate', watch_extension.destination_bundle_path
-  command = "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
-  command << " -type #{ENV['type']}" if ENV['type']
-  if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
-    App.fail '[!] The `notification` option is required with `type=notification`.'
-  end
-  command << " -notification-payload '#{ENV['payload']}'" if ENV['payload']
-  sh(command)
+
+  # TODO add shortcut task to invoke the IB rake task of the watch app target.
+  # desc "Open the Watch application's Storyboard in Interface Builder"
+  # task :ib do
+  # end
 end
+
+desc "Same as 'watch:simulator'"
+task :watch => 'watch:simulator'
 
 desc "Run the simulator"
 task :simulator do
