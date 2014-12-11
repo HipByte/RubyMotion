@@ -101,7 +101,14 @@ NSString * const kIDEWatchNotificationPayloadKey = @"IDEWatchNotificationPayload
 
 // DVTiPhoneSimulatorRemoteClient
 
+typedef NS_ENUM(NSInteger, DVTiPhoneSimulatorExternalDisplayType) {
+  DVTiPhoneSimulatorWatchRegularExternalDisplayType = 1,
+  DVTiPhoneSimulatorWatchCompactExternalDisplayType = 2,
+  DVTiPhoneSimulatorCarPlayExternalDisplayType = 3
+};
+
 @interface DTiPhoneSimulatorSessionConfig : NSObject
+- (void)setExternalDisplayType:(DVTiPhoneSimulatorExternalDisplayType)type;
 - (void)setDevice:(SimDevice *)device;
 @end
 
@@ -190,6 +197,7 @@ InitImportedClasses(NSString *developerDir) {
 @property (strong) NSDictionary *notificationPayload;
 @property (assign) BOOL verbose;
 @property (assign) BOOL startSuspended;
+@property (assign) DVTiPhoneSimulatorExternalDisplayType externalDisplayType;
 @end
 
 @interface WatchKitLauncher ()
@@ -214,6 +222,7 @@ InitImportedClasses(NSString *developerDir) {
   NSParameterAssert(appBundle);
   if ((self = [super init])) {
     _appBundle = appBundle;
+    _externalDisplayType = DVTiPhoneSimulatorWatchRegularExternalDisplayType;
   }
   return self;
 }
@@ -238,6 +247,7 @@ InitImportedClasses(NSString *developerDir) {
 
   DTiPhoneSimulatorSessionConfig *config = [DTiPhoneSimulatorSessionConfigClass new];
   config.device = self.simulator.device;
+  config.externalDisplayType = self.externalDisplayType;
   self.session = [DTiPhoneSimulatorSessionClass new];
   self.session.delegate = self;
   if (![self.session requestStartWithConfig:config timeout:0 error:&error]) {
@@ -472,9 +482,10 @@ InitImportedClasses(NSString *developerDir) {
 
 void
 print_help_banner(void) {
-  fprintf(stderr, "Usage: watch-sim path/to/build/WatchHost.app -type [Glance|Notification] " \
-                  "-notification-payload [path/to/payload.json] -verbose [YES|NO] " \
-                  "-start-suspended [YES|NO] -developer-dir [Xcode.app/Contents/Developer]\n");
+  fprintf(stderr, "Usage: watch-sim path/to/build/WatchHost.app -display [Compact|Regular] " \
+                  "-type [Glance|Notification] -notification-payload [path/to/payload.json] " \
+                  "-verbose [YES|NO] -start-suspended [YES|NO] " \
+                  "-developer-dir [Xcode.app/Contents/Developer]\n");
 }
 
 int
@@ -500,13 +511,28 @@ main(int argc, char **argv) {
   NSUserDefaults *options = [NSUserDefaults standardUserDefaults];
   BOOL verbose = [options boolForKey:@"verbose"];
   BOOL startSuspended = [options boolForKey:@"start-suspended"];
+
+  DVTiPhoneSimulatorExternalDisplayType externalDisplayType = 0;
+  NSString *displayType = [[options valueForKey:@"display"] lowercaseString];
+  if (displayType != nil) {
+    if ([displayType isEqualToString:@"regular"]) {
+      externalDisplayType = DVTiPhoneSimulatorWatchRegularExternalDisplayType;
+    } else if ([displayType isEqualToString:@"compact"]) {
+      externalDisplayType = DVTiPhoneSimulatorWatchCompactExternalDisplayType;
+    } else {
+      fprintf(stderr, "[!] Unknown external display type `%s`.\n", [displayType UTF8String]);
+      print_help_banner();
+      return 1;
+    }
+  }
+
   NSString *launchMode = nil;
   NSDictionary *notificationPayload = nil;
-  NSString *type = [[options valueForKey:@"type"] lowercaseString];
-  if (type != nil) {
-    if ([type isEqualToString:@"glance"]) {
+  NSString *appType = [[options valueForKey:@"type"] lowercaseString];
+  if (appType != nil) {
+    if ([appType isEqualToString:@"glance"]) {
       launchMode = kIDEWatchLaunchModeGlance;
-    } else if ([type isEqualToString:@"notification"]) {
+    } else if ([appType isEqualToString:@"notification"]) {
       // Get the obligatory notification payload (JSON) data.
       launchMode = kIDEWatchLaunchModeNotification;
       NSString *payloadFile = [options valueForKey:@"notification-payload"];
@@ -527,7 +553,7 @@ main(int argc, char **argv) {
       }
       assert([notificationPayload isKindOfClass:[NSDictionary class]]);
     } else {
-      fprintf(stderr, "[!] Unknown application type `%s`.\n", [type UTF8String]);
+      fprintf(stderr, "[!] Unknown application type `%s`.\n", [appType UTF8String]);
       print_help_banner();
       return 1;
     }
@@ -555,6 +581,9 @@ main(int argc, char **argv) {
   launcher.startSuspended = startSuspended;
   launcher.launchMode = launchMode;
   launcher.notificationPayload = notificationPayload;
+  if (externalDisplayType != 0) {
+    launcher.externalDisplayType = externalDisplayType;
+  }
   [launcher launch];
 
   while (1) {
