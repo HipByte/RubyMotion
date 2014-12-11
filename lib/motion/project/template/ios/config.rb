@@ -59,15 +59,55 @@ module Motion; module Project;
       end
     end
 
-    def app_icons_info_plist_path(platform)
-      File.expand_path(File.join(versionized_build_dir(platform), 'AppIcon.plist'))
+    # @return [String, nil] The path to the asset bundle that contains launch
+    #         images, if any.
+    #
+    def launch_images_asset_bundle
+      launch_images_asset_bundles = assets_bundles.map { |b| Dir.glob(File.join(b, '*.launchimage')) }.flatten
+      if launch_images_asset_bundles.size > 1
+        App.warn "Found #{launch_images_asset_bundles.size} launch image sets across all " \
+                 "xcasset bundles. Only the first one (alphabetically) will be used."
+      end
+      launch_images_asset_bundles.sort.first
     end
 
-    def configure_app_icons_from_asset_bundle(platform)
-      path = app_icons_info_plist_path(platform)
-      if File.exist?(path)
-        content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{path}"`.strip
-        self.icons = content.split("\n")[1..-2].map(&:strip)
+    # @return [String, nil] The name of the launch image set, without any
+    #         extension.
+    #
+    def launch_image_name_from_asset_bundle
+      if bundle = launch_images_asset_bundle
+        File.basename(bundle, '.launchimage')
+      end
+    end
+
+    # Assigns the launch image information, found in the `Info.plist` generated
+    # by compiling the asset bundles, to the `info_plist`’s `UILaunchImages`.
+    #
+    # @return [void]
+    #
+    def add_images_from_asset_bundles(platform)
+      super
+      if launch_images_asset_bundle
+        path = asset_bundle_partial_info_plist_path(platform)
+        if File.exist?(path)
+          content = `/usr/libexec/PlistBuddy -c 'Print :UILaunchImages' "#{path}"`.strip
+          images = []
+          current_image = nil
+          content.split("\n")[1..-2].each do |line|
+            case line.strip
+            when 'Dict {'
+              current_image = {}
+            when '}'
+              images << current_image
+              current_image = nil
+            when /(\w+) = (.+)/
+              current_image[$1] = $2
+            end
+          end
+          unless images.empty?
+            info_plist['UILaunchImages'] = images
+          end
+        end
       end
     end
 
@@ -400,7 +440,7 @@ module Motion; module Project;
     def launch_images
       if Util::Version.new(deployment_target) >= Util::Version.new('7')
         images = resources_dirs.map do |dir|
-          Dir.glob(File.join(dir, 'Default*.png')).map do |file|
+          Dir.glob(File.join(dir, '{Default,LaunchImage}*.png')).map do |file|
             launch_image_metadata(file)
           end
         end.flatten.compact
