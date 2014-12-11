@@ -79,6 +79,10 @@ end
 namespace :watch do
   desc "Run the Watch application on the simulator"
   task :simulator do
+    if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
+      App.fail 'The `payload=path/to/payload.json` option is required with `type=notification`.'
+    end
+
     unless ENV["skip_build"]
       Rake::Task["build:simulator"].invoke
     end
@@ -90,9 +94,6 @@ namespace :watch do
     command = "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
     command << " -display #{ENV['display']}" if ENV['display']
     command << " -type #{ENV['type']}" if ENV['type']
-    if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
-      App.fail '[!] The `notification` option is required with `type=notification`.'
-    end
     command << " -notification-payload '#{ENV['payload']}'" if ENV['payload']
 
     if App::VERBOSE
