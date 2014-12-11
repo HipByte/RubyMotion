@@ -79,6 +79,15 @@ end
 namespace :watch do
   desc "Run the Watch application on the simulator"
   task :simulator do
+    watch_extension = App.config.targets.find do |target|
+      File.exist?(File.join(target.path, 'watch_app'))
+    end
+    unless watch_extension
+      App.fail 'You can only use this task with a WatchKit application ' \
+               'configured. To configure one use ' \
+               '`app.target "path/to/MyWatchApp", :extension`.'
+    end
+
     if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
       App.fail 'The `payload=path/to/payload.json` option is required with `type=notification`.'
     end
@@ -86,8 +95,7 @@ namespace :watch do
     unless ENV["skip_build"]
       Rake::Task["build:simulator"].invoke
     end
-    # TODO need a way to identify a watch extension from other extensions
-    watch_extension = App.config.targets.first
+
     app = App.config.app_bundle('iPhoneSimulator')
     sim = File.join(App.config.bindir, 'watch-sim')
 
