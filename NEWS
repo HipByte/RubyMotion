@@ -1,5 +1,21 @@
 = RubyMotion 2.39 =
 
+  * [iOS] Added support for WatchKit applications.
+
+    Add a target to your iOS application by creating a WatchKit project with the
+    command: `$ motion create MyWatchApp --template=ios-watch-extension` and
+    then configure your iOS application by adding:
+    `app.target 'path/to/MyWatchApp', :extension`
+
+    Then from the root of your iOS application, *not* the WatchKit application,
+    invoke `$ rake watch` to build your iOS and WatchKit applications and launch
+    the WatchKit application on the simulator.
+
+    Additional launch options are `type=glance` for Glance applications,
+    `type=notification payload=path/to/payload.json` for Notification
+    applications, and `display=regular` or `display=compact` to launch the 42mm
+    or 38mm Watch displays respectively.
+
   * [iOS] Added support for specifying launch images from asset catalogs.
   * Added support for iOS 8.2 (beta). You will need to install an Xcode 6.2
     beta to support it.
