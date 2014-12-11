@@ -534,8 +534,10 @@ EOS
       if app_icons_asset_bundle
         path = asset_bundle_partial_info_plist_path(platform)
         if File.exist?(path)
-          content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{path}"`.strip
-          self.icons = content.split("\n")[1..-2].map(&:strip)
+          content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{path}" 2>&1`.strip
+          if $?.success?
+            self.icons = content.split("\n")[1..-2].map(&:strip)
+          end
         end
       end
     end
