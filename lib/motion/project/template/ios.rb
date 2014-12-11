@@ -88,6 +88,7 @@ namespace :watch do
     sim = File.join(App.config.bindir, 'watch-sim')
 
     command = "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
+    command << " -display #{ENV['display']}" if ENV['display']
     command << " -type #{ENV['type']}" if ENV['type']
     if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
       App.fail '[!] The `notification` option is required with `type=notification`.'
