@@ -11,6 +11,7 @@ bin/ios/deploy
 bin/ios/sim
 bin/osx/sim
 bin/instruments
+bin/watch-sim
 bin/**/*.dSYM
 
 data/android
