@@ -85,7 +85,7 @@ namespace :watch do
     unless watch_extension
       App.fail 'You can only use this task with a WatchKit application ' \
                'configured. To configure one use ' \
-               '`app.target "path/to/MyWatchApp", :extension`.'
+               '`app.target \'path/to/MyWatchApp\', :extension`.'
     end
 
     if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
