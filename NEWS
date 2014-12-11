@@ -1,5 +1,7 @@
 = RubyMotion 2.39 =
 
+  * Added support for iOS 8.2 (beta). You will need to install an Xcode 6.2
+    beta to support it.
   * [iOS] Fix `rake crashlog:device' crash report symbolication.
   * [iOS] Fixed a bug where Bundler wouldn't be used when it will build
     Extensions and Frameworks.
