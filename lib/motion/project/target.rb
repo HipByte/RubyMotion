@@ -122,8 +122,16 @@ module Motion; module Project
         env_description = env.map { |k,v| "#{k}='#{v}'" }.join(' ')
         puts "cd '#{@full_path}' && env #{env_description} #{command}"
       end
-      Dir.chdir(@full_path) do
-        super(env, command)
+      if use_gemfile?
+        Bundler.with_clean_env do
+          Dir.chdir(@full_path) do
+            super(env, command)
+          end
+        end
+      else
+        Dir.chdir(@full_path) do
+          super(env, command)
+        end
       end
     end
 
