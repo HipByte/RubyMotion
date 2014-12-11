@@ -90,22 +90,24 @@ module Motion; module Project;
       if launch_images_asset_bundle
         path = asset_bundle_partial_info_plist_path(platform)
         if File.exist?(path)
-          content = `/usr/libexec/PlistBuddy -c 'Print :UILaunchImages' "#{path}"`.strip
-          images = []
-          current_image = nil
-          content.split("\n")[1..-2].each do |line|
-            case line.strip
-            when 'Dict {'
-              current_image = {}
-            when '}'
-              images << current_image
-              current_image = nil
-            when /(\w+) = (.+)/
-              current_image[$1] = $2
+          content = `/usr/libexec/PlistBuddy -c 'Print :UILaunchImages' "#{path}" 2>&1`.strip
+          if $?.success?
+            images = []
+            current_image = nil
+            content.split("\n")[1..-2].each do |line|
+              case line.strip
+              when 'Dict {'
+                current_image = {}
+              when '}'
+                images << current_image
+                current_image = nil
+              when /(\w+) = (.+)/
+                current_image[$1] = $2
+              end
             end
-          end
-          unless images.empty?
-            info_plist['UILaunchImages'] = images
+            unless images.empty?
+              info_plist['UILaunchImages'] = images
+            end
           end
         end
       end
