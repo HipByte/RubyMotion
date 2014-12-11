@@ -547,13 +547,16 @@ EOS
       if assets_bundles.empty?
         []
       else
-        if config.respond_to?(:app_icons_asset_bundle)
-          app_icons_asset_bundle = config.app_icons_asset_bundle
+        app_icon_and_launch_image_options = ''
+        if config.respond_to?(:app_icons_asset_bundle) && bundle_name = config.app_icon_name_from_asset_bundle
+          app_icon_and_launch_image_options << " --app-icon '#{bundle_name}'"
         end
-        if app_icons_asset_bundle
-          app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
-          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
-                              "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
+        if config.respond_to?(:launch_images_asset_bundle) && bundle_name = config.launch_image_name_from_asset_bundle
+          app_icon_and_launch_image_options << " --launch-image '#{bundle_name}'"
+        end
+        unless app_icon_and_launch_image_options.empty?
+          partial_info_plist = config.asset_bundle_partial_info_plist_path(platform)
+          app_icon_and_launch_image_options << " --output-partial-info-plist '#{partial_info_plist}'"
         end
 
         App.info 'Compile', assets_bundles.join(", ")
@@ -563,7 +566,8 @@ EOS
               "--notices --warnings --platform #{config.deploy_platform.downcase} " \
               "--minimum-deployment-target #{config.deployment_target} " \
               "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-              "#{app_icons_options} --compress-pngs --compile \"#{app_resources_dir}\" " \
+              "#{app_icon_and_launch_image_options} --compress-pngs " \
+              "--compile \"#{app_resources_dir}\" " \
               "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
         $stderr.puts(cmd) if App::VERBOSE
         actool_output = `#{cmd} 2>&1`
@@ -577,10 +581,10 @@ EOS
           actool_document_warnings.strip.split("\n").each { |w| App.warn(w) }
         end
 
-        config.configure_app_icons_from_asset_bundle(platform) if app_icons_asset_bundle
-
-        # Remove the partial Info.plist line and return the produced resources.
-        actool_compiled_files.delete(app_icons_info_plist_path) if app_icons_asset_bundle
+        unless app_icon_and_launch_image_options.empty?
+          config.add_images_from_asset_bundles(platform)
+          actool_compiled_files.delete(partial_info_plist)
+        end
         produced_resources = actool_compiled_files.map { |f| File.basename(f) }
       end
     end
