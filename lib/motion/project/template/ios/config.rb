@@ -483,7 +483,7 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      })
+      }) {|key, oldval, newval| oldval }
       # If the user has not explicitely specified launch images, try to find
       # them ourselves.
       if !plist.has_key?('UILaunchImages') && launch_images = self.launch_images
