@@ -1,3 +1,8 @@
+= RubyMotion 3.1 =
+
+  * [iOS] Fixed a regression where wrong info.plist would be genrated wchich
+    related to Background Fetch.
+
 = RubyMotion 3.0 =
 
   * [Android] RubyMotion for Android support has been merged. Please refer to the
