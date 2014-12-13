@@ -329,6 +329,21 @@ module Motion; module Project;
       end
     end
 
+    def background_modes_consts
+      @background_modes.map do |mode|
+        case mode
+          when :audio then 'audio'
+          when :location then 'location'
+          when :voip then 'voip'
+          when :newsstand_content then 'newsstand-content'
+          when :external_accessory then 'external-accessory'
+          when :bluetooth_central then 'bluetooth-central'
+          else
+            App.fail "Unknown background_modes value: `#{mode}'"
+        end
+      end
+    end
+
     def status_bar_style_const
       case @status_bar_style
         when :default then 'UIStatusBarStyleDefault'
@@ -452,6 +467,7 @@ module Motion; module Project;
         'UIDeviceFamily' => device_family_ints.map { |x| ENV['__USE_DEVICE_INT__'] ? x.to_i : x.to_s },
         'UISupportedInterfaceOrientations' => interface_orientations_consts,
         'UIStatusBarStyle' => status_bar_style_const,
+        'UIBackgroundModes' => background_modes_consts,
         'DTXcode' => begin
           vers = xcode_version[0].gsub(/\./, '')
           if vers.length == 2
