@@ -1221,6 +1221,9 @@ lldb_run_command()
 	exit(1);
     }
 
+    int pidNumber = ((int (*)(id, SEL))objc_msgSend)(session,
+	@selector(simulatedApplicationPID));
+
     // Open simulator to the foreground.
     if (!spec_mode) {
 	NSArray *ary = [NSRunningApplication runningApplicationsWithBundleIdentifier:
@@ -1234,12 +1237,19 @@ lldb_run_command()
 		[running_app activateWithOptions:
 		    NSApplicationActivateIgnoringOtherApps];
 	    }
+	    else if (NSClassFromString(@"SimDevice")) {
+		// With Xcode 6.x, it moves app into background and sends `fetch' event for `background fetch'.
+		id messenger = ((id (*)(id, SEL))objc_msgSend)(session,
+		    @selector(messenger));
+		((void (*)(id, SEL, int))objc_msgSend)(messenger,
+		    @selector(backgroundAllApps:), pidNumber);
+		((void (*)(id, SEL, int))objc_msgSend)(messenger,
+		    @selector(doFetchEventForPID:), pidNumber);
+	    }
 	}
     }
 
     if (debug_mode == DEBUG_GDB) {
-	int pidNumber = ((int (*)(id, SEL))objc_msgSend)(session,
-		@selector(simulatedApplicationPID));
 	if (pidNumber == 0) {
 	    fprintf(stderr, "*** Cannot get simulated application PID\n");
 	    exit(1);

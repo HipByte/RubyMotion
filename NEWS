@@ -2,6 +2,8 @@
 
   * [iOS] Fixed a regression where wrong info.plist would be genrated wchich
     related to Background Fetch.
+  * [iOS] Fixed a bug where `rake background_fetch=1' for background fetch would
+    not work with Xcode 6.x.
 
 = RubyMotion 3.0 =
 
