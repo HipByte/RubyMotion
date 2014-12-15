@@ -1,6 +1,7 @@
 = RubyMotion 3.1 =
 
-  * [iOS] Fixed a regression where wrong info.plist would be genrated wchich
+  * [iOS] Fixed a regression that made extensions crash at startup.
+  * [iOS] Fixed a regression where a wrong info.plist would be generated which
     related to Background Fetch.
   * [iOS] Fixed a bug where `rake background_fetch=1' for background fetch would
     not work with Xcode 6.x.
