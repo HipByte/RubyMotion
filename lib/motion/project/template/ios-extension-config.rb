@@ -309,7 +309,7 @@ EOS
 EOS
     main_txt << <<EOS
     dlopen("/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit", 0x2);
-    retval = ((int(*)(id, SEL))objc_msgSend)(NSClassFromString(@"PKService"), @selector(run));
+    retval = ((int(*)(id, SEL, int, char**))objc_msgSend)(NSClassFromString(@"PKService"), @selector(_defaultRun:arguments:), argc, argv);
     rb_exit(retval);
     [pool release];
     return retval;
