@@ -135,8 +135,9 @@ module Motion; module Project
       end
     end
 
-    # @return [Hash] The environment variables that describes the current host
-    #         application and which the target's build system depends on.
+    # @return [Hash] The current environment variables onto which the variables
+    #         that describe the current host application are merged, which the
+    #         target's build system depends on.
     #
     def environment_variables
       env = {
@@ -151,7 +152,7 @@ module Motion; module Project
         "RM_TARGET_ARCHS" => @config.archs.inspect,
       }
       env["BUNDLE_GEMFILE"] = gemfile_path if use_gemfile?
-      env
+      ENV.to_hash.merge(env)
     end
 
     # --------------------------------------------------------------------------
