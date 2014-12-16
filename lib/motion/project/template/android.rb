@@ -66,8 +66,31 @@ EOS
   end
   # Custom manifest entries.
   App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
+  # <application> optional attributes
+  opt_application_attributes = []
+  opt_attributes_list = [:icon, :application_class, :allowTaskReparenting, :allowBackup, :backupAgent, :banner,
+    :description, :enabled, :hasCode, :hardwareAccelerated,
+    :isGame, :killAfterRestore, :largeHeap, :logo,
+    :manageSpaceActivity, :permission, :persistent, :process,
+    :restoreAnyVersion, :requiredAccountType, :restrictedAccountType,
+    :supportsRtl, :taskAffinity, :testOnly, :theme, :uiOptions, :vmSafeMode]
+    
+    opt_attributes_list.each do |opt_attr|
+    unless App.config.send(opt_attr).nil?
+      case opt_attr
+      when :icon, :banner, :logo
+        opt_application_attributes << "android:#{opt_attr.to_s}=\"@drawable/" + App.config.send(opt_attr) + '"'
+      when :application_class
+        opt_application_attributes << 'android:name="' + App.config.application_class + '"'
+      when :description
+        opt_application_attributes << 'android:description=@string/"' + App.config.description + '"'
+      else
+        opt_application_attributes << "android:#{opt_attr.to_s}=\"" + App.config.send(opt_attr) + '"'
+      end
+    end
+  end
   android_manifest_txt << <<EOS
-  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''} #{App.config.application_class ? ('android:name="' + App.config.application_class + '"') : ''}>
+  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{opt_application_attributes.join(" ")}>
 EOS
   App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
   # Main activity.
