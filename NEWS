@@ -1,19 +1,20 @@
 = RubyMotion 3.1 =
 
-  * [iOS] Fixed a validation error when submitting an extension related to API.
-  * [iOS] Fixed a refression that made it impossible to set environment
+  * [iOS] Fixed an API validation error when submitting an application that
+    contains an extension.
+  * [iOS] Fixed a regression that made it impossible to set environment
     variables from a host application and propagate them to extensions.
   * [iOS] Fixed a regression that made extensions crash at startup.
-  * [iOS] Fixed a regression where a wrong info.plist would be generated which
-    related to Background Fetch.
-  * [iOS] Fixed a bug where `rake background_fetch=1' for background fetch would
-    not work with Xcode 6.x.
+  * [iOS] Fixed a regression where a Info.plist file would be generated
+    with wrong details for Background Fetch.
+  * [iOS] Fixed a bug where `rake background_fetch=1' for background fetch
+    would not work with Xcode 6.x.
 
 = RubyMotion 3.0 =
 
-  * [Android] RubyMotion for Android support has been merged. Please refer to the
-    pre-release NEWS file for past changes, and check out our developer guides for
-    more information about this new platform support.
+  * [Android] RubyMotion for Android support has been merged. Please refer to
+    the pre-release NEWS file for past changes, and check out our developer
+    guides for more information about this new platform support.
   * [iOS] Added support for WatchKit applications.
     Add a target to your iOS application by creating a WatchKit project with the
     command: `$ motion create MyWatchApp --template=ios-watch-extension` and
