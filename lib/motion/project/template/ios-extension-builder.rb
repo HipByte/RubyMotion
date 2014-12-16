@@ -343,7 +343,9 @@ EOS
           end
         end || ""
         kernel = File.join(datadir, platform, "kernel.o")
-        sh "#{cxx} -o \"#{main_exec}\" \"#{kernel}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        # Use the `-no_implicit_dylibs` linker option to hide the fact that it
+        # links against `libextension.dylib` which contains `NSExtensionMain`.
+        sh "#{cxx} -o \"#{main_exec}\" \"#{kernel}\" #{objs_list} #{config.sdk(platform)}/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit -fobjc-link-runtime -fapplication-extension -Xlinker -no_implicit_dylibs #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
       end
 
