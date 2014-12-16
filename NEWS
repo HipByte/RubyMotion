@@ -9,6 +9,10 @@
     with wrong details for Background Fetch.
   * [iOS] Fixed a bug where `rake background_fetch=1' for background fetch
     would not work with Xcode 6.x.
+  * [Android] Added Fixnum#{~,&,|,^,<<,>>,+@,integer?,odd?,even?}.
+  * [Android] Added Float#+@.
+  * [Android] Added Bignum#integer?.
+  * [Android] Fixed Fixnum#times to return an Enumerator when no block is given.
 
 = RubyMotion 3.0 =
 
