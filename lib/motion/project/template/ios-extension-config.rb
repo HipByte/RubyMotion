@@ -288,11 +288,9 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
-EOS
-      main_txt << <<EOS
+    int NSExtensionMain(int argc, char **argv);
 }
-EOS
-      main_txt << <<EOS
+
 int
 main(int argc, char **argv)
 {
@@ -306,10 +304,7 @@ EOS
     end
     main_txt << <<EOS
     RubyMotionInit(argc, argv);
-EOS
-    main_txt << <<EOS
-    dlopen("/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit", 0x2);
-    retval = ((int(*)(id, SEL, int, char**))objc_msgSend)(NSClassFromString(@"PKService"), @selector(_defaultRun:arguments:), argc, argv);
+    retval = NSExtensionMain(argc, argv);
     rb_exit(retval);
     [pool release];
     return retval;

@@ -1,5 +1,6 @@
 = RubyMotion 3.1 =
 
+  * [iOS] Fixed a validation error when submitting an extension related to API.
   * [iOS] Fixed a refression that made it impossible to set environment
     variables from a host application and propagate them to extensions.
   * [iOS] Fixed a regression that made extensions crash at startup.
