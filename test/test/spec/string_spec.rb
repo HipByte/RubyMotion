@@ -67,3 +67,13 @@ describe "String#getCharacters:range:" do
     end
   end
 end
+
+# RM-684
+describe "NSString#initWithXXX" do
+  it "should not causes a crash even if NSTaggedPointerString is created" do
+    data = "Hello".dataUsingEncoding(NSUTF8StringEncoding)
+    string = NSString.alloc.initWithData(data, encoding:NSUTF8StringEncoding)
+    string.should == "Hello"
+  end
+end
+
