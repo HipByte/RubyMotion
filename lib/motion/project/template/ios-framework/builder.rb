@@ -36,7 +36,6 @@ module Motion; module Project
       @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
       config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
       config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
-      config.xcode_dir = ENV['RM_TARGET_XCODE_DIR'] if ENV['RM_TARGET_XCODE_DIR']
       if ENV['RM_TARGET_ARCHS']
         eval(ENV['RM_TARGET_ARCHS']).each do |platform, archs|
           config.archs[platform] = archs.uniq
@@ -259,7 +258,7 @@ EOS
           ib_resources.each do |src, dest|
             if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
               App.info 'Compile', relative_path(src)
-              sh "/usr/bin/ibtool --compile \"#{dest}\" \"#{src}\""
+              sh "'#{File.join(config.xcode_dir, '/usr/bin/ibtool')}' --compile \"#{File.expand_path(dest)}\" \"#{File.expand_path(src)}\""
             end
           end
         end

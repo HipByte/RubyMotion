@@ -99,7 +99,9 @@ namespace :watch do
     app = App.config.app_bundle('iPhoneSimulator')
     sim = File.join(App.config.bindir, 'watch-sim')
 
-    command = "'#{sim}' '#{app}' -verbose #{App::VERBOSE ? 'YES' : 'NO'} -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
+    command = "'#{sim}' '#{app}' -developer-dir '#{App.config.xcode_dir}'"
+    command << " -verbose #{App::VERBOSE ? 'YES' : 'NO'}"
+    command << " -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
     command << " -display #{ENV['display']}" if ENV['display']
     command << " -type #{ENV['type']}" if ENV['type']
     command << " -notification-payload '#{ENV['payload']}'" if ENV['payload']

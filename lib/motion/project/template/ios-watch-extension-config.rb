@@ -137,9 +137,6 @@ EOS
         @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' Watch App'
       end
 
-      # TODO How does one provide an icon for a Watch app?
-      # undef_method :app_icons_asset_bundle
-
       def sdk_version
         @extension_config.sdk_version
       end
