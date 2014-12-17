@@ -35,7 +35,7 @@ module Motion; module Project
       sh "/usr/bin/ditto -rsrc '#{source}' '#{destination}'"
 
       # Compile storyboard
-      sh "/usr/bin/ibtool --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{config.app_bundle(platform)}' watch_app/Interface.storyboard"
+      sh "'#{File.join(config.xcode_dir, '/usr/bin/ibtool')}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{config.app_bundle(platform)}' watch_app/Interface.storyboard"
 
       # Compile asset bundles
       compile_asset_bundles(config, platform)

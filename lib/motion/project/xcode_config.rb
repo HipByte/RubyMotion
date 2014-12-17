@@ -56,15 +56,18 @@ module Motion; module Project;
     def xcode_dir
       @xcode_version = nil
       @xcode_dir ||= begin
-        xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
+        if ENV['RM_TARGET_XCODE_DIR']
+          ENV['RM_TARGET_XCODE_DIR']
+        else
+          xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
 
-        # First, honor /usr/bin/xcode-select
-        xcodeselect = '/usr/bin/xcode-select'
-        if File.exist?(xcodeselect)
-          path = `#{xcodeselect} -print-path`.strip
-          if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
-            @xcode_error_printed ||= false
-            $stderr.puts(<<EOS) unless @xcode_error_printed
+          # First, honor /usr/bin/xcode-select
+          xcodeselect = '/usr/bin/xcode-select'
+          if File.exist?(xcodeselect)
+            path = `#{xcodeselect} -print-path`.strip
+            if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
+              @xcode_error_printed ||= false
+              $stderr.puts(<<EOS) unless @xcode_error_printed
 ===============================================================================
 It appears that you have a version of Xcode installed in /Applications that has
 not been set as the default version. It is possible that RubyMotion may be
@@ -74,16 +77,17 @@ To fix this problem, you can type the following command in the terminal:
     $ sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
 ===============================================================================
 EOS
-            @xcode_error_printed = true
+              @xcode_error_printed = true
+            end
+            return path if File.exist?(path)
           end
-          return path if File.exist?(path)
+
+          # Since xcode-select is borked, we assume the user installed Xcode
+          # as an app (new in Xcode 4.3).
+          return xcode_dot_app_path if File.exist?(xcode_dot_app_path)
+
+          App.fail "Can't locate any version of Xcode on the system."
         end
-
-        # Since xcode-select is borked, we assume the user installed Xcode
-        # as an app (new in Xcode 4.3).
-        return xcode_dot_app_path if File.exist?(xcode_dot_app_path)
-
-        App.fail "Can't locate any version of Xcode on the system."
       end
       unescape_path(@xcode_dir)
     end

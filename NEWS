@@ -1,5 +1,6 @@
 = RubyMotion 3.2 =
 
+  * [iOS] Fixed a bug where WatchKit applications did not honor `xcode_dir`.
   * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
     free.
 
