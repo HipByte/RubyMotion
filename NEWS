@@ -1,3 +1,8 @@
+= RubyMotion 3.2 =
+
+  * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
+    free.
+
 = RubyMotion 3.1 =
 
   * [iOS] Fixed an API validation error when submitting an application that
