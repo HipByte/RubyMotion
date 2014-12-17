@@ -30,7 +30,12 @@ module Motion; module Project;
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :target_api_version, :arch, :assets_dirs,
       :icon, :logs_components, :version_code, :version_name, :permissions,
-      :features, :services, :application_class
+      :features, :services, :application_class, :allowTaskReparenting,
+      :allowBackup, :backupAgent, :banner, :description, :enabled,
+      :hasCode, :hardwareAccelerated, :isGame, :killAfterRestore, :largeHeap,
+      :logo, :manageSpaceActivity, :permission, :persistent, :process,
+      :restoreAnyVersion, :requiredAccountType, :restrictedAccountType,
+      :supportsRtl, :taskAffinity, :testOnly, :theme, :uiOptions, :vmSafeMode
 
     def initialize(project_dir, build_mode)
       super
