@@ -144,8 +144,13 @@ module Motion; module Project;
       '.ipa'
     end
 
+    # The codesign certificate, where certificates prefixed with `iOS` are
+    # preferred over those prefixed with `iPhone`.
+    #
+    # @return [String] The name of the certificate.
+    #
     def codesign_certificate
-      super('iPhone')
+      super('iOS', 'iPhone')
     end
 
     def provisioning_profile(name = /iOS\s?Team Provisioning Profile/)

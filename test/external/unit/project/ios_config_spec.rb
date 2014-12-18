@@ -6,6 +6,45 @@ require 'tempfile'
 
 module Motion; module Project
   describe IOSConfig do
+    describe "concerning codesign certificates" do
+      def config_with_ios_certificates(*ios_certificates)
+        mac_certificates = ['Mac Developer: Eloy Duran (K5B8YH2WD5)']
+        Util::CodeSign.stubs(:identity_names).with(anything).returns(mac_certificates + ios_certificates)
+        App.stubs(:warn)
+        IOSConfig.new(Dir.tmpdir, :development)
+      end
+
+      it "finds old-style certificates" do
+        config = config_with_ios_certificates('iPhone Developer: Eloy Duran (K5B8YH2WD5)', 'iPhone Distribution: Eloy Duran (K5B8YH2WD5)')
+        config.codesign_certificate.should == 'iPhone Developer: Eloy Duran (K5B8YH2WD5)'
+
+        config.distribution_mode = true
+        config.codesign_certificate = nil
+        config.codesign_certificate.should == 'iPhone Distribution: Eloy Duran (K5B8YH2WD5)'
+      end
+
+      it "finds and new-style certificates" do
+        config = config_with_ios_certificates('iOS Developer: Eloy Duran (K5B8YH2WD5)', 'iOS Distribution: Eloy Duran (K5B8YH2WD5)')
+        config.codesign_certificate.should == 'iOS Developer: Eloy Duran (K5B8YH2WD5)'
+
+        config.distribution_mode = true
+        config.codesign_certificate = nil
+        config.codesign_certificate.should == 'iOS Distribution: Eloy Duran (K5B8YH2WD5)'
+      end
+
+      it "prefers new-style certificates over old-style certificates" do
+        config = config_with_ios_certificates(
+          'iPhone Developer: Eloy Duran (K5B8YH2WD5)', 'iPhone Distribution: Eloy Duran (K5B8YH2WD5)',
+          'iOS Developer: Eloy Duran (K5B8YH2WD5)', 'iOS Distribution: Eloy Duran (K5B8YH2WD5)'
+        )
+        config.codesign_certificate.should == 'iOS Developer: Eloy Duran (K5B8YH2WD5)'
+
+        config.distribution_mode = true
+        config.codesign_certificate = nil
+        config.codesign_certificate.should == 'iOS Distribution: Eloy Duran (K5B8YH2WD5)'
+      end
+    end
+
     describe "concerning UILaunchImages" do
       before do
         @config = IOSConfig.new(Dir.tmpdir, :development)

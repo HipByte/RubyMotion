@@ -1,5 +1,6 @@
 = RubyMotion 3.2 =
 
+  * [iOS] Pick-up new certificates prefixed with `iOS` instead of `iPhone`.
   * [iOS] Fixed a bug where WatchKit applications did not honor `xcode_dir`.
   * [iOS] Fixed a bug where it couldn't debug with `rake device debug=1' on
     device. Now, debugging only support `armv7' in `app.archs['iPhoneOS']'.

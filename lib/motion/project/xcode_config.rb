@@ -446,19 +446,37 @@ EOS
       "AAPL#{@bundle_signature}"
     end
 
-    def codesign_certificate(platform)
+    # Unless a certificate has been assigned by the user, this method tries to
+    # find the certificate for the current configuration, based on the platform
+    # prefix used in the certificate name and whether or not the current mode is
+    # set to release.
+    #
+    # @param [Array<String>] platform_prefixes
+    #        The prefixes used in the certificate name, specified in the
+    #        preferred order.
+    #
+    # @return [String] The name of the certificate.
+    #
+    def codesign_certificate(*platform_prefixes)
       @codesign_certificate ||= begin
         type = (distribution_mode ? 'Distribution' : 'Developer')
-        certs = Util::CodeSign.identity_names(release?)
-        certs = certs.grep(/#{platform} #{type}/)
+        regex = /(#{platform_prefixes.join('|')}) #{type}/
+        certs = Util::CodeSign.identity_names(release?).grep(regex)
+        if platform_prefixes.size > 1
+          certs = certs.sort do |x, y|
+            x_index = platform_prefixes.index(x.match(regex)[1])
+            y_index = platform_prefixes.index(y.match(regex)[1])
+            x_index <=> y_index
+          end
+        end
         if certs.size == 0
-          App.fail "Cannot find any #{platform} #{type} certificate in the " \
-                   "keychain"
+          App.fail "Cannot find any #{platform_prefixes.join('/')} #{type} " \
+                   "certificate in the keychain."
         elsif certs.size > 1
-          App.warn "Found #{certs.size} #{platform} #{type} certificates in " \
-                   "the keychain. Set the `codesign_certificate' project " \
-                   "setting to explicitely use one of (defaults to the " \
-                   "first): #{certs.join(', ')}"
+          App.warn "Found #{certs.size} #{platform_prefixes.join('/')} " \
+                   "#{type} certificates in the keychain. Set the " \
+                   "`codesign_certificate' project setting to explicitely " \
+                   "use one of (defaults to the first): #{certs.join(', ')}"
         end
         certs.first
       end
