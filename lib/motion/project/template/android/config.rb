@@ -30,7 +30,7 @@ module Motion; module Project;
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :target_api_version, :arch, :assets_dirs,
       :icon, :logs_components, :version_code, :version_name, :permissions,
-      :features, :services, :application_class
+      :features, :services, :application_class, :manifest
 
     def initialize(project_dir, build_mode)
       super
@@ -49,6 +49,7 @@ module Motion; module Project;
       @version_code = '1'
       @version_name = '1.0'
       @application_class = nil
+      @manifest = {:application => {}}
 
       if path = ENV['RUBYMOTION_ANDROID_SDK']
         @sdk_path = File.expand_path(path)
