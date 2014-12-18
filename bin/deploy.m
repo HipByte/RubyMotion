@@ -389,9 +389,6 @@ static id gdb_task = nil;
 static void
 sigforwarder(int sig)
 {
-    if (gdb_task != nil) {
-	kill([gdb_task processIdentifier], sig);
-    }
 }
 
 #define WITH_DEBUG 1
@@ -892,7 +889,6 @@ start_debug_server(am_device_t dev)
 	"lldb.debugger.HandleCommand(\"process plugin packet send 'QSetEnableAsyncProfiling;enable:1;interval_usec:1000000;scan_type:0xfffffeff;'\")\n"\
 	"error = lldb.SBError()\n"\
 	"process.RemoteLaunch(None, None, None, None, None, None, 0, False, error)\n"\
-	"process.Continue()\n"\
 	"",
 	     lldb_socket_path,
 	     app_path,
