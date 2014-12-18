@@ -1,6 +1,9 @@
 = RubyMotion 3.2 =
 
   * [iOS] Fixed a bug where WatchKit applications did not honor `xcode_dir`.
+  * [iOS] Fixed a bug where it couldn't debug with `rake device debug=1' on
+    device. Now, debugging only support `armv7' in `app.archs['iPhoneOS']'.
+    (i.e. app.archs['iPhoneOS'] = ['armv7'])
   * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
     free.
 
