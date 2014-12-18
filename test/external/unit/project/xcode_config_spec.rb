@@ -10,8 +10,10 @@ module Motion; module Project
       before do
         Util::CodeSign.stubs(:identity_names).with(false).returns([
           'iPhone Developer: Eloy Duran (K5B8YH2WD5)',
+          'iPhone Distribution: Eloy Duran (K5B8YH2WD5)',
           'Mac Developer Self-Signed for Eloy Durán',
           'Mac Developer: Eloy Duran (K5B8YH2WD5)',
+          'Mac Distribution: Eloy Duran (K5B8YH2WD5)',
         ])
         App.stubs(:warn)
         @config = XcodeConfig.new(Dir.tmpdir, :development)
@@ -19,10 +21,18 @@ module Motion; module Project
 
       it "selects an identity meant for codesigning iPhone apps" do
         @config.codesign_certificate('iPhone').should == 'iPhone Developer: Eloy Duran (K5B8YH2WD5)'
+
+        @config.distribution_mode = true
+        @config.codesign_certificate = nil
+        @config.codesign_certificate('iPhone').should == 'iPhone Distribution: Eloy Duran (K5B8YH2WD5)'
       end
 
       it "selects an identity meant for codesigning Mac apps" do
         @config.codesign_certificate('Mac').should == 'Mac Developer Self-Signed for Eloy Durán'
+
+        @config.distribution_mode = true
+        @config.codesign_certificate = nil
+        @config.codesign_certificate('Mac').should == 'Mac Distribution: Eloy Duran (K5B8YH2WD5)'
       end
 
       it "warns when there are multiple matching identities" do
