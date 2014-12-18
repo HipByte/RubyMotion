@@ -19,7 +19,7 @@ module Motion; module Project
       end
 
       it "infers the launch images from the specified resources by the Default prefix and png extname" do
-        Dir.expects(:glob).with(File.join(@config.resources_dirs.first, 'Default*.png')).returns(['resources/Default.png'])
+        Dir.expects(:glob).with(File.join(@config.resources_dirs.first, '{Default,LaunchImage}*.png')).returns(['resources/Default.png'])
         @config.expects(:launch_image_metadata).with('resources/Default.png')
         @config.launch_images
       end
