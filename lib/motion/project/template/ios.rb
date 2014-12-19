@@ -300,6 +300,7 @@ end
 
 desc "Create a .a static library"
 task :static do
+  App.config.archs['iPhoneSimulator'] << 'i386'
   libs = %w{iPhoneSimulator iPhoneOS}.map do |platform|
     '"' + App.build(platform, :static => true) + '"'
   end
