@@ -5,6 +5,8 @@
   * [iOS] Fixed a bug where it couldn't debug with `rake device debug=1' on
     device. Now, debugging only support `armv7' in `app.archs['iPhoneOS']'.
     (i.e. app.archs['iPhoneOS'] = ['armv7'])
+  * [iOS] Removed compiling `i386' for iOS simulator in order to reduce compile
+    time. By default, `x86_64' only will be built for simulator.
   * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
     free.
 
