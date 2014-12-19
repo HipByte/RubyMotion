@@ -54,7 +54,7 @@ module Motion; module Project;
       @archs ||= begin
         # No longer build for i386 and armv7s by default.
         archs = super
-        archs['iPhoneSimulator'].delete('i386')
+        archs['iPhoneSimulator'].delete('i386') if archs['iPhoneSimulator'].include?('x86_64')
         archs['iPhoneOS'].delete('armv7s')
         archs
       end
