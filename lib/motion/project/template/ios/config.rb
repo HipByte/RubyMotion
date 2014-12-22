@@ -195,9 +195,8 @@ module Motion; module Project;
 
     def entitlements_data
       dict = entitlements
-      if distribution_mode
-        dict['application-identifier'] ||= seed_id + '.' + identifier
-      else
+      dict['application-identifier'] ||= seed_id + '.' + identifier
+      unless distribution_mode
         # Required for gdb.
         dict['get-task-allow'] = true if dict['get-task-allow'].nil?
       end
