@@ -29,6 +29,9 @@ def gen_bridge_metadata(file)
   classes = classes.map { |x| x.gsub('/', '.').gsub('$', '.').sub(/\.class$/, '') }
   txt = `/usr/bin/javap -classpath "#{class_path}" -s #{classes.join(' ')}`
 
+  # Remove static initializers which can mess up the parsing.
+  txt.gsub!(/\n\s+static\s+{};\n\s+(Signature|descriptor):[^\n]+\n/, '')
+
   # Create the BridgeSupport text.
   res = txt.scan(/(class)\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
   res += txt.scan(/(class)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
