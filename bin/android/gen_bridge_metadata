@@ -41,12 +41,12 @@ def gen_bridge_metadata(file)
 EOS
     body_txt.strip.split(/\n/).each_cons(2) do |elem_line, signature_line|
       signature_line = encode_xml(signature_line.strip)
-      md = signature_line.match(/^Signature:\s+(.+)$/)
+      md = signature_line.match(/^(?:Signature|descriptor):\s+(.+)$/)
       next unless md
       signature = md[1]
 
       elem_line = encode_xml(elem_line.strip)
-      if md = elem_line.match(/\s([^(\s]+)\(/)
+      if md = elem_line.match(/([^(\s]+)\(/)
         # A method.
         method = md[1]
         if method == elem
