@@ -33,6 +33,7 @@ def gen_bridge_metadata(file)
   res = txt.scan(/(class)\s+([^\s]+)\s+extends\s+[^{]+\s*\{([^}]+)\}/)
   res += txt.scan(/(class)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab classes without superclasses (ex. java.lang.Object)
   res += txt.scan(/(interface)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab interfaces
+  res += txt.scan(/(class)\s+([^\s]+)\s+implements\s+[^{]+\s*\{([^}]+)\}/) # Also grab classes that implement interfaces
   res.each do |type, elem, body_txt|
     elem_path = encode_xml(elem.gsub(/\./, '/'))
     @bs_data << <<EOS
