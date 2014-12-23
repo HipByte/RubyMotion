@@ -241,6 +241,19 @@ EOS
     sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs}"
   end
 
+  # Install native shared libraries.
+  native_libs = []
+  App.config.vendored_projects.map { |x| x[:native] }.compact.flatten.each do |native_lib_src|
+    native_lib_subpath = "#{libs_abi_subpath}/#{File.basename(native_lib_src)}"
+    native_lib_path = "#{app_build_dir}/#{native_lib_subpath}"
+    native_libs << native_lib_subpath
+    if !File.exists?(native_lib_path) \
+      or File.mtime(native_lib_src) > File.mtime(native_lib_path)
+      App.info 'Create', native_lib_path
+      sh "/usr/bin/install -p #{native_lib_src} #{File.dirname(native_lib_path)}"
+    end
+  end
+
   # Create a build/libs -> build/lib symlink (important for ndk-gdb).
   Dir.chdir(app_build_dir) { ln_s 'lib', 'libs' unless File.exist?('libs') }
 
@@ -423,11 +436,12 @@ EOS
       or File.mtime(libpayload_path) > File.mtime(archive) \
       or File.mtime(android_manifest) > File.mtime(archive) \
       or assets_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
-      or resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) }
+      or resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
+      or native_libs.any? { |x| File.mtime("#{app_build_dir}/#{x}") > File.mtime(archive) }
     App.info 'Create', archive
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
     Dir.chdir(app_build_dir) do
-      [File.basename(dex_classes), libpayload_subpath, gdbserver_subpath].each do |file|
+      [File.basename(dex_classes), libpayload_subpath, *native_libs, gdbserver_subpath].each do |file|
         line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"#{File.basename(archive)}\" \"#{file}\""
         line << " > /dev/null" unless Rake.application.options.trace
         sh line
