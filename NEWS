@@ -12,7 +12,9 @@
   * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
     free.
   * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
-    to_i,to_int,to_f}
+    to_i,to_int,to_f}.
+  * [Android] Fixed a bug where Java classes that implement interfaces would
+    not be properly parsed by the build system (gen_bridge_metadata).
 
 = RubyMotion 3.1 =
 
