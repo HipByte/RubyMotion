@@ -55,13 +55,15 @@ end
 
 verbose(true)
 
+require 'rbconfig'
+
 def rake(dir, cmd='all')
   Dir.chdir(dir) do
     debug = ENV['DEBUG'] ? 'optz_level=0' : ''
     sdk_beta = ENV['SDK_BETA'] ? 'sdk_beta=1' : ''
     project_vers = ENV['PRE_BUILD'] ? PRE_PROJECT_VERSION : PROJECT_VERSION
     trace = Rake.application.options.trace
-    sh "rake xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" android_ndk=\"#{ANDROID_NDK}\" project_version=\"#{project_vers}\" android_archs=\"#{ANDROID_ARCHS.join(',')}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
+    sh "'#{File.join(RbConfig::CONFIG['bindir'], 'ruby')}' '#{File.join(RbConfig::CONFIG['bindir'], 'rake')}' xcode_platforms_dir=\"#{XCODE_PLATFORMS_DIR}\" ios_sdk_versions=\"#{IOS_SDK_VERSIONS.join(',')}\" osx_sdk_versions=\"#{OSX_SDK_VERSIONS.join(',')}\" android_sdk=\"#{ANDROID_SDK}\" android_api_versions=\"#{ANDROID_API_VERSIONS.join(',')}\" android_ndk=\"#{ANDROID_NDK}\" project_version=\"#{project_vers}\" android_archs=\"#{ANDROID_ARCHS.join(',')}\" #{debug} #{sdk_beta} #{cmd} #{trace ? '--trace' : ''}"
   end
 end
 
