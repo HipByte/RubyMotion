@@ -20,6 +20,8 @@
     to "Theo" for the detective work and the patch.
   * [Android] Fixed a bug where gen_bridge_metadata would emit template
     information in class/interface names, which would then break the compiler.
+  * [Android] Fixed a bug where gen_bridge_metadata would fail to emit proper
+    list of methods for a class that had a static initializer.
 
 = RubyMotion 3.1 =
 
