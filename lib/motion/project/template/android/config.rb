@@ -262,9 +262,13 @@ module Motion; module Project;
       App.fail "Expected `:jar' key/value pair in `#{opt}'" unless jar
       res = opt.delete(:resources)
       manifest = opt.delete(:manifest)
+      native = opt.delete(:native) || []
       App.fail "Expected `:manifest' key/value pair when `:resources' is given" if res and !manifest
       App.fail "Expected `:resources' key/value pair when `:manifest' is given" if manifest and !res
       App.fail "Unused arguments: `#{opt}'" unless opt.empty?
+      native.each do |native_lib|
+        App.fail "Expected '#{native_lib}' to target #{arch}, arm shared libraries are currently supported" unless native_lib =~ /\/#{arch}|armeabi\//
+      end
 
       package = nil
       if manifest
@@ -272,7 +276,7 @@ module Motion; module Project;
         App.fail "Given manifest `#{manifest}' does not have a `package' attribute in the top-level element" if $?.to_i != 0
         package = line.match(/package=\"(.+)\"$/)[1]
       end
-      @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest, :package => package }
+      @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest, :package => package, :native => native }
     end
 
     def vendored_bs_files(create=true)
