@@ -11,6 +11,8 @@
   * [iOS] Fixed a bug where it could not deploy app which contained Watch app.
   * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
     free.
+  * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
+    to_i,to_int,to_f}
 
 = RubyMotion 3.1 =
 
