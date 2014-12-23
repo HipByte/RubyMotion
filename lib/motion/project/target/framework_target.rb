@@ -96,9 +96,20 @@ PLIST
       File.basename(framework_path)
     end
 
-    # Indicates wether to load the framework at runtime or not
+    # Indicates whether to load the framework at runtime or not
     def load?
       @opts[:load]
+    end
+
+    # @return [Array<String>] A list of symbols that the framework requires the
+    #         host application or extension to provide and should not strip.
+    #
+    def required_symbols
+      executable_filename = File.basename(framework_path, '.framework')
+      executable = File.join(framework_path, executable_filename)
+      cmd = "/usr/bin/nm -ju '#{executable}' | /usr/bin/grep -E '^_(rb|vm)_'"
+      puts cmd if App::VERBOSE
+      `#{cmd}`.strip.split("\n")
     end
   end
 end;end

@@ -583,7 +583,6 @@ EOS
 
     attr_accessor :targets
 
-
     # App Extensions are required to include a 64-bit slice for App Store
     # submission, so do not exclude `arm64` by default.
     #
@@ -630,6 +629,29 @@ EOS
       else
         App.fail("Unsupported target type '#{type}'")
       end
+    end
+
+    # Creates a temporary file that lists all the symbols that the application
+    # (or extension) should not strip.
+    #
+    # At the moment these are only symbols that an iOS framework depends on.
+    #
+    # @return [String] Extra arguments for the `strip` command.
+    #
+    def strip_args
+      args = super
+
+      frameworks = targets.select { |t| t.type == :framework }
+      required_symbols = frameworks.map(&:required_symbols).flatten.uniq.sort
+      unless required_symbols.empty?
+        require 'tempfile'
+        required_symbols_file = Tempfile.new('required-framework-symbols')
+        required_symbols.each { |symbol| required_symbols_file.puts(symbol) }
+        required_symbols_file.close
+        args << " -s '#{required_symbols_file.path}'"
+      end
+
+      args
     end
   end
 end; end
