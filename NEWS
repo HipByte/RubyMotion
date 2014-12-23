@@ -22,6 +22,9 @@
     information in class/interface names, which would then break the compiler.
   * [Android] Fixed a bug where gen_bridge_metadata would fail to emit proper
     list of methods for a class that had a static initializer.
+  * [Android] Added the `:native' parameter for `app.vendor_project' which can
+    be used to specify a 3rd-party shared library to include in the app.
+    Thanks to René Köcher for the patch.
 
 = RubyMotion 3.1 =
 
