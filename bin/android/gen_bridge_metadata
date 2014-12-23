@@ -35,7 +35,9 @@ def gen_bridge_metadata(file)
   res += txt.scan(/(interface)\s([^\s{]+)\s*\{([^}]+)\}/) # Also grab interfaces
   res += txt.scan(/(class)\s+([^\s]+)\s+implements\s+[^{]+\s*\{([^}]+)\}/) # Also grab classes that implement interfaces
   res.each do |type, elem, body_txt|
-    elem_path = encode_xml(elem.gsub(/\./, '/'))
+    elem_path = elem.gsub(/\./, '/') # Switch to JVM path
+    elem_path.sub!(/<[^>]+>$/, '') # Remove template parts
+    elem_path = encode_xml(elem_path)
     @bs_data << <<EOS
 <#{type} name=\"#{elem_path}\">
 EOS
