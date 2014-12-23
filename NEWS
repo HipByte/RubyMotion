@@ -15,6 +15,9 @@
     to_i,to_int,to_f}.
   * [Android] Fixed a bug where Java classes that implement interfaces would
     not be properly parsed by the build system (gen_bridge_metadata).
+  * [Android] Fixed a bug where gen_bridge_metadata would not work if the user
+    had java 8.0 installed (`javap' was emitting unrecognized syntax). Thanks
+    to "Theo" for the detective work and the patch.
 
 = RubyMotion 3.1 =
 
