@@ -1,5 +1,7 @@
 = RubyMotion 3.2 =
 
+  * [iOS] Fixed a bug where RubyMotion frameworks could not be loaded due to
+    required RubyMotion symbols being stripped from application/extension.
   * [iOS] Pick-up new certificates prefixed with `iOS` instead of `iPhone`.
   * [iOS] Fixed a bug where WatchKit applications did not honor `xcode_dir`.
   * [iOS] Fixed a bug where it couldn't debug with `rake device debug=1' on
