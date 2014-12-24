@@ -503,7 +503,7 @@ EOS
       # Strip all symbols. Only in distribution mode.
       if main_exec_created and (config.distribution_mode or ENV['__strip__'])
         App.info "Strip", relative_path(main_exec)
-        sh "#{config.locate_binary('strip')} #{config.strip_args} \"#{main_exec}\""
+        silent_execute_and_capture "#{config.locate_binary('strip')} #{config.strip_args} '#{main_exec}'"
       end
     end
 

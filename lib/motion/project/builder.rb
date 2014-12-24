@@ -482,7 +482,7 @@ EOS
       # Strip all symbols. Only in distribution mode.
       if main_exec_created and (config.distribution_mode or ENV['__strip__'])
         App.info "Strip", main_exec
-        sh "#{config.locate_binary('strip')} #{config.strip_args} \"#{main_exec}\""
+        silent_execute_and_capture "#{config.locate_binary('strip')} #{config.strip_args} '#{main_exec}'"
       end
     end
 
@@ -540,6 +540,14 @@ EOS
       end
     end
 
+    def silent_execute_and_capture(command)
+      $stderr.puts(command) if App::VERBOSE
+      output = `#{command} 2>&1`
+      $stderr.puts(output) if App::VERBOSE
+      raise "Failed to execute: #{command}" unless $?.success?
+      output
+    end
+
     # @return [Array] A list of produced resources which should be preserved.
     #
     def compile_asset_bundles(config, platform)
@@ -569,9 +577,7 @@ EOS
               "#{app_icon_and_launch_image_options} --compress-pngs " \
               "--compile \"#{app_resources_dir}\" " \
               "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
-        $stderr.puts(cmd) if App::VERBOSE
-        actool_output = `#{cmd} 2>&1`
-        $stderr.puts(actool_output) if App::VERBOSE
+        actool_output = silent_execute_and_capture(cmd)
 
         # Split output in warnings and compiled files
         actool_output, actool_compilation_results = actool_output.split('/* com.apple.actool.compilation-results */')
