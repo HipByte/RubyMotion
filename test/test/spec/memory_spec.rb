@@ -119,6 +119,28 @@ describe "dealloc" do
     $dealloc_test.should == true
   end
 
+  # RM-703
+  it "should work with #init(arg)", :if => ios? do
+    class DeallocTestView < UIView
+      def init(arg)
+        super()
+      end
+
+      def self.test_init_arg
+        obj = DeallocTestView.alloc.init("test")
+      end
+
+      def dealloc
+        super
+        $dealloc_test = true
+      end
+    end
+
+    DeallocTestView.performSelectorOnMainThread(:'test_init_arg', withObject:nil, waitUntilDone:false)
+    NSRunLoop.currentRunLoop.runUntilDate(NSDate.dateWithTimeIntervalSinceNow(0.1))
+    $dealloc_test.should == true
+  end
+
 end
 
 $retain_test = false
