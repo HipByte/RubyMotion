@@ -17,6 +17,9 @@
     was created by #init(arg) and super() method.
   * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
     to_i,to_int,to_f}.
+  * [Android] Added Time#{to_s, inspect}.
+  * [Android] Improve Fixnum#{%, <=>, &, |, ^, <<, >>} to take a Bignum in 
+    argument.
   * [Android] Fixed a bug where gen_bridge_metadata would not detect classes
     that implement interfaces.
   * [Android] Fixed a bug where gen_bridge_metadata would not work if the user
