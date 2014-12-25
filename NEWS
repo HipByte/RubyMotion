@@ -13,6 +13,8 @@
   * [iOS] Fixed a bug where it could not deploy app which contained Watch app.
   * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
     free.
+  * [iOS, OSX] Fixed a bug where the view object wouldn't be released when it
+    was created by #init(arg) and super() method.
   * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
     to_i,to_int,to_f}.
   * [Android] Fixed a bug where gen_bridge_metadata would not detect classes
