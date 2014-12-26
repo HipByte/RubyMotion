@@ -15,6 +15,7 @@
     free.
   * [iOS, OSX] Fixed a bug where the view object wouldn't be released when it
     was created by #init(arg) and super() method.
+  * [iOS, OSX] Fixed a memory leak when invoking blocks with Dispatch::Queue.
   * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
     to_i,to_int,to_f}.
   * [Android] Added Time#{to_s, inspect}.
