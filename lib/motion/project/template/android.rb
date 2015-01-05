@@ -124,7 +124,7 @@ EOS
   bs_files = []
   classes_changed = false
   if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
-    extra_packages = App.config.vendored_projects.map { |x| x[:package] }.compact.map { |x| "--extra-packages #{x}" }.join(' ')
+    extra_packages = '--extra-packages ' + App.config.vendored_projects.map { |x| x[:package] }.compact.join(':')
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
 
     r_java = Dir.glob(java_dir + '/**/R.java')
