@@ -19,8 +19,8 @@
   * [iOS, OSX] Fixed a bug where Marshal.dump would trigger a crash.
   * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
     to_i,to_int,to_f}.
-  * [Android] Added Time#{to_s, inspect}.
-  * [Android] Improve Fixnum#{%, <=>, &, |, ^, <<, >>} to take a Bignum in 
+  * [Android] Added Time#{to_s, to_i, inspect} and Time.at.
+  * [Android] Improved Fixnum#{%, <=>, &, |, ^, <<, >>} to take a Bignum in
     argument.
   * [Android] Fixed a bug where gen_bridge_metadata would not detect classes
     that implement interfaces.
