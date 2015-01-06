@@ -64,9 +64,6 @@ namespace :build do
 
   desc "Build the simulator version"
   task :simulator do
-    # No longer build for i386 by default.
-    App.config.archs['iPhoneSimulator'].delete('i386') if App.config.archs['iPhoneSimulator'].include?('x86_64')
-
     pre_build_actions('iPhoneSimulator')
     App.build('iPhoneSimulator')
   end
