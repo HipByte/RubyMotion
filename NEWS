@@ -35,6 +35,8 @@
   * [Android] Added the `:native' parameter for `app.vendor_project' which can
     be used to specify a 3rd-party shared library to include in the app.
     Thanks to René Köcher for the patch.
+  * [Android] Fixed the extra-packages argument to work with multiple packages.
+    Thanks to Tom Carey for the patch (pull request #185).
 
 = RubyMotion 3.1 =
 
