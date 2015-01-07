@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -114,7 +114,7 @@ EOS
         sdk_path = File.join(platforms_dir, platform + '.platform',
             "Developer/SDKs/#{platform}#{sdk_version}.sdk")
         unless File.exist?(sdk_path)
-          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
+          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'"
         end
       end
 
@@ -206,7 +206,7 @@ EOS
         deps = frameworks.dup.uniq
         slf = File.join(sdk(local_platform), 'System', 'Library', 'Frameworks')
 
-        find_dependencies = lambda { |framework_path| 
+        find_dependencies = lambda { |framework_path|
           if File.exist?(framework_path)
             `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
               # Only care about public, non-umbrella frameworks (for now).
@@ -341,7 +341,7 @@ EOS
         'CFBundleName' => name,
         'CFBundleDisplayName' => name,
         'CFBundleIdentifier' => identifier,
-        'CFBundleExecutable' => name, 
+        'CFBundleExecutable' => name,
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
         'CFBundleShortVersionString' => (@short_version || @version),
@@ -648,7 +648,10 @@ EOS
         required_symbols_file = Tempfile.new('required-framework-symbols')
         required_symbols.each { |symbol| required_symbols_file.puts(symbol) }
         required_symbols_file.close
-        args << " -s '#{required_symbols_file.path}'"
+        # Note: If the symbols file contains a symbol that is not present, or
+        # is present but undefined (U) in the executable to strip, the command
+        # fails. The '-i' option ignores this error.
+        args << " -i -s '#{required_symbols_file.path}'"
       end
 
       args
