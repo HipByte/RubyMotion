@@ -13,6 +13,8 @@
     free.
   * [iOS, OSX] Fixed a bug where the view object wouldn't be released when it
     was created by #init(arg) and super() method.
+  * [iOS, OSX] Fixed a bug where `nil.isEqual(nil)' would not return `true'.
+    was created by #init(arg) and super() method.
   * [iOS, OSX] Fixed a memory leak when invoking blocks with Dispatch::Queue.
   * [iOS, OSX] Fixed a bug where Marshal.dump would trigger a crash.
   * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
