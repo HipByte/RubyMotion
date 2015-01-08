@@ -51,8 +51,8 @@ module Motion; module Project
       if File.mtime(@config.project_file) > File.mtime(extension_dir) \
           or !system("#{codesign_cmd} --verify \"#{extension_dir}\" >& /dev/null")
         App.info 'Codesign', extension_dir
-        entitlements = File.join(extension_dir, "Entitlements.plist").shellescape
-        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{extension_dir}\""
+        entitlements = File.join(extension_dir, "Entitlements.plist")
+        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements \"#{entitlements}\" \"#{extension_dir}\""
       end
     end
 
