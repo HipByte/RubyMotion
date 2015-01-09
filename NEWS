@@ -1,3 +1,43 @@
+= RubyMotion 3.2 =
+
+  * [iOS] Fixed a bug where RubyMotion frameworks could not be loaded due to
+    required RubyMotion symbols being stripped from application/extension.
+  * [iOS] Pick-up new certificates prefixed with `iOS` instead of `iPhone`.
+  * [iOS] Fixed a bug where WatchKit applications did not honor `xcode_dir`.
+  * [iOS] Fixed a bug where it couldn't debug with `rake device debug=1' on
+    device. Now, debugging only support `armv7' in `app.archs['iPhoneOS']'.
+    (i.e. app.archs['iPhoneOS'] = ['armv7'])
+  * [iOS] Fixed a bug where it could not deploy app to iOS 8.2 beta 3 device.
+  * [iOS] Fixed a bug where it could not deploy app which contained Watch app.
+  * [OSX] Fixed a bug where NSString#initWithXXX would trigger a crash by double
+    free.
+  * [iOS, OSX] Fixed a bug where the view object wouldn't be released when it
+    was created by #init(arg) and super() method.
+  * [iOS, OSX] Fixed a bug where `nil.isEqual(nil)' would not return `true'.
+    was created by #init(arg) and super() method.
+  * [iOS, OSX] Fixed a memory leak when invoking blocks with Dispatch::Queue.
+  * [iOS, OSX] Fixed a bug where Marshal.dump would trigger a crash.
+  * [Android] Added Bignum#{+@,-@,%,modulo,&,|,^,~,<<,>>,<,<=,>,>=,<=>,abs,
+    to_i,to_int,to_f}.
+  * [Android] Added Time#{to_s, to_i, inspect, <, <=, >, >=, <=>, ==, !=} and
+    Time.at.
+  * [Android] Improved Fixnum#{%, <=>, &, |, ^, <<, >>} to take a Bignum in
+    argument.
+  * [Android] Fixed a bug where gen_bridge_metadata would not detect classes
+    that implement interfaces.
+  * [Android] Fixed a bug where gen_bridge_metadata would not work if the user
+    had java 8.0 installed (`javap' was emitting unrecognized syntax). Thanks
+    to "Theo" for the detective work and the patch.
+  * [Android] Fixed a bug where gen_bridge_metadata would emit template
+    information in class/interface names, which would then break the compiler.
+  * [Android] Fixed a bug where gen_bridge_metadata would fail to emit proper
+    list of methods for a class that had a static initializer.
+  * [Android] Added the `:native' parameter for `app.vendor_project' which can
+    be used to specify a 3rd-party shared library to include in the app.
+    Thanks to René Köcher for the patch.
+  * [Android] Fixed the extra-packages argument to work with multiple packages.
+    Thanks to Tom Carey for the patch (pull request #185).
+
 = RubyMotion 3.1 =
 
   * [iOS] Fixed an API validation error when submitting an application that
