@@ -66,8 +66,11 @@ EOS
   end
   # Custom manifest entries.
   App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
+  # <application> attributes
+  App.config.icon ? (App.config.manifest[:application]['android:icon'] = '@drawable/' + App.config.icon) : nil
+  App.config.application_class ? (App.config.manifest[:application]['android:name'] = App.config.application_class) : nil
   android_manifest_txt << <<EOS
-  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''} #{App.config.application_class ? ('android:name="' + App.config.application_class + '"') : ''}>
+  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{ App.config.manifest[:application].map { |k,v| "#{k}=\"#{v}\""  }.join(" ") }>
 EOS
   App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
   # Main activity.
