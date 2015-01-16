@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -124,7 +124,8 @@ EOS
   bs_files = []
   classes_changed = false
   if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
-    extra_packages = '--extra-packages ' + App.config.vendored_projects.map { |x| x[:package] }.compact.join(':')
+    packages_list = App.config.vendored_projects.map { |x| x[:package] }.compact.join(':')
+    extra_packages = packages_list.empty? ? '' : '--extra-packages ' + packages_list
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
 
     r_java = Dir.glob(java_dir + '/**/R.java')
@@ -323,7 +324,7 @@ EOS
           else
             # Probably something else (what could it be?).
             add_method = true
-          end 
+          end
         end
         current_class[:methods] << method_line if add_method
       else
