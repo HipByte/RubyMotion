@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -37,7 +37,6 @@ module Motion; module Project;
     def initialize(project_dir, build_mode)
       super
       @info_plist = {}
-      @dependencies = {}
       @frameworks = []
       @weak_frameworks = []
       @embedded_frameworks = []
@@ -57,15 +56,18 @@ module Motion; module Project;
     def xcode_dir
       @xcode_version = nil
       @xcode_dir ||= begin
-        xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
+        if ENV['RM_TARGET_XCODE_DIR']
+          ENV['RM_TARGET_XCODE_DIR']
+        else
+          xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
 
-        # First, honor /usr/bin/xcode-select
-        xcodeselect = '/usr/bin/xcode-select'
-        if File.exist?(xcodeselect)
-          path = `#{xcodeselect} -print-path`.strip
-          if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
-            @xcode_error_printed ||= false
-            $stderr.puts(<<EOS) unless @xcode_error_printed
+          # First, honor /usr/bin/xcode-select
+          xcodeselect = '/usr/bin/xcode-select'
+          if File.exist?(xcodeselect)
+            path = `#{xcodeselect} -print-path`.strip
+            if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
+              @xcode_error_printed ||= false
+              $stderr.puts(<<EOS) unless @xcode_error_printed
 ===============================================================================
 It appears that you have a version of Xcode installed in /Applications that has
 not been set as the default version. It is possible that RubyMotion may be
@@ -75,16 +77,17 @@ To fix this problem, you can type the following command in the terminal:
     $ sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
 ===============================================================================
 EOS
-            @xcode_error_printed = true
+              @xcode_error_printed = true
+            end
+            return path if File.exist?(path)
           end
-          return path if File.exist?(path)
+
+          # Since xcode-select is borked, we assume the user installed Xcode
+          # as an app (new in Xcode 4.3).
+          return xcode_dot_app_path if File.exist?(xcode_dot_app_path)
+
+          App.fail "Can't locate any version of Xcode on the system."
         end
-
-        # Since xcode-select is borked, we assume the user installed Xcode
-        # as an app (new in Xcode 4.3).
-        return xcode_dot_app_path if File.exist?(xcode_dot_app_path)
-
-        App.fail "Can't locate any version of Xcode on the system."
       end
       unescape_path(@xcode_dir)
     end
@@ -111,7 +114,7 @@ EOS
         sdk_path = File.join(platforms_dir, platform + '.platform',
             "Developer/SDKs/#{platform}#{sdk_version}.sdk")
         unless File.exist?(sdk_path)
-          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
+          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'"
         end
       end
 
@@ -144,17 +147,46 @@ EOS
 
     def sdk_version
       @sdk_version ||= begin
-        versions = Dir.glob(File.join(platforms_dir, "#{deploy_platform}.platform/Developer/SDKs/#{deploy_platform}*.sdk")).map do |path|
+        versions = Dir.glob(File.join(platforms_dir, "#{deploy_platform}.platform/Developer/SDKs/#{deploy_platform}[1-9]*.sdk")).map do |path|
           File.basename(path).scan(/#{deploy_platform}(.*)\.sdk/)[0][0]
         end
         if versions.size == 0
           App.fail "Can't find an iOS SDK in `#{platforms_dir}'"
         end
-        supported_vers = supported_sdk_versions(versions)
-        unless supported_vers
-          App.fail "The requested SDK (#{deployment_target}) is not available or supported by RubyMotion at this time. Supported and available SDKs are: #{versions.join(', ')}."
+        supported_version = supported_sdk_versions(versions)
+        unless supported_version
+          # We don't have BridgeSupport data for any of the available SDKs. So
+          # use the latest available SDK of which the major version is the same
+          # as the latest available BridgeSupport version.
+
+          supported_sdks = supported_versions.map do |version|
+            Util::Version.new(version)
+          end.sort.reverse
+          available_sdks = versions.map do |version|
+            Util::Version.new(version)
+          end.sort.reverse
+
+          available_sdks.each do |available_sdk|
+            major_version = available_sdk.segments.first
+            compatible_sdk = supported_sdks.find do |supported_sdk|
+              supported_sdk.segments.first == major_version
+            end
+            if compatible_sdk
+              # Never override a user's setting!
+              @deployment_target ||= compatible_sdk.to_s
+              supported_version = available_sdk.to_s
+              App.warn("The available SDK (#{available_sdk}) is newer than " \
+                       "the latest available RubyMotion BridgeSupport " \
+                       "metadata (#{compatible_sdk}). The `sdk_version` and " \
+                       "`deployment_target` settings will be configured " \
+                       "accordingly.")
+              break
+            end
+          end
         end
-        supported_vers
+        supported_version || App.fail("The requested deployment target SDK " \
+                                      "is not available or supported by " \
+                                      "RubyMotion at this time.")
       end
     end
 
@@ -173,8 +205,8 @@ EOS
         # Compute the list of frameworks, including dependencies, that the project uses.
         deps = frameworks.dup.uniq
         slf = File.join(sdk(local_platform), 'System', 'Library', 'Frameworks')
-        deps.each do |framework|
-          framework_path = File.join(slf, framework + '.framework', framework)
+
+        find_dependencies = lambda { |framework_path|
           if File.exist?(framework_path)
             `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
               # Only care about public, non-umbrella frameworks (for now).
@@ -186,6 +218,14 @@ EOS
               end
             end
           end
+        }
+        deps.each do |framework|
+          framework_path = File.join(slf, framework + '.framework', framework)
+          find_dependencies.call(framework_path)
+        end
+        embedded_frameworks.each do |framework|
+          framework_path = File.expand_path(File.join(framework, File.basename(framework, ".framework")))
+          find_dependencies.call(framework_path)
         end
 
         if @framework_search_paths.empty?
@@ -253,8 +293,16 @@ EOS
       common_flags(platform) + ' -Wl,-no_pie'
     end
 
+    # @return [String] The application bundle name, excluding extname.
+    #
     def bundle_name
-      @name + (spec_mode ? '_spec' : '')
+      name + (spec_mode ? '_spec' : '')
+    end
+
+    # @return [String] The application bundle filename, including extname.
+    #
+    def bundle_filename
+      bundle_name + '.app'
     end
 
     def versionized_build_dir(platform)
@@ -262,7 +310,7 @@ EOS
     end
 
     def app_bundle_dsym(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.dSYM')
+      File.join(versionized_build_dir(platform), bundle_filename + '.dSYM')
     end
 
     def archive_extension
@@ -274,7 +322,7 @@ EOS
     end
 
     def identifier
-      @identifier ||= "com.yourcompany.#{@name.gsub(/\s/, '')}"
+      @identifier ||= "com.yourcompany.#{name.gsub(/\s/, '')}"
       spec_mode ? @identifier + '_spec' : @identifier
     end
 
@@ -290,16 +338,34 @@ EOS
       {
         'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
         'CFBundleDevelopmentRegion' => 'en',
-        'CFBundleName' => @name,
-        'CFBundleDisplayName' => @name,
+        'CFBundleName' => name,
+        'CFBundleDisplayName' => name,
         'CFBundleIdentifier' => identifier,
-        'CFBundleExecutable' => @name, 
+        'CFBundleExecutable' => name,
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
         'CFBundleShortVersionString' => (@short_version || @version),
         'CFBundleSignature' => @bundle_signature,
         'CFBundleVersion' => @version
       }
+    end
+
+    # @return [Hash] A hash that contains all the various `Info.plist` data
+    #         merged into one hash.
+    #
+    def merged_info_plist(platform)
+      generic_info_plist.merge(dt_info_plist).merge(info_plist)
+    end
+
+    # @param [String] platform
+    #        The platform identifier that's being build for, such as
+    #        `iPhoneSimulator`, `iPhoneOS`, or `MacOSX`.
+    #
+    #
+    # @return [String] A serialized version of the `merged_info_plist` hash.
+    #
+    def info_plist_data(platform)
+      Motion::PropertyList.to_s(merged_info_plist(platform))
     end
 
     # TODO
@@ -321,7 +387,8 @@ EOS
         else
           App.fail("Invalid Instruments template path or name.")
         end
-        if xcode_version[0] >= '6.0'
+        if xcode_version[0] >= '6.0' && xcode_version[0] < '6.2'
+          # workaround for RM-599 and RM-672
           template_path = File.expand_path("#{xcode_dir}/../Applications/Instruments.app/Contents/Resources/templates/#{template_path}.tracetemplate")
         end
         optional_data['XrayTemplatePath'] = template_path
@@ -379,19 +446,37 @@ EOS
       "AAPL#{@bundle_signature}"
     end
 
-    def codesign_certificate(platform)
+    # Unless a certificate has been assigned by the user, this method tries to
+    # find the certificate for the current configuration, based on the platform
+    # prefix used in the certificate name and whether or not the current mode is
+    # set to release.
+    #
+    # @param [Array<String>] platform_prefixes
+    #        The prefixes used in the certificate name, specified in the
+    #        preferred order.
+    #
+    # @return [String] The name of the certificate.
+    #
+    def codesign_certificate(*platform_prefixes)
       @codesign_certificate ||= begin
         type = (distribution_mode ? 'Distribution' : 'Developer')
-        certs = Util::CodeSign.identity_names(release?)
-        certs = certs.grep(/#{platform} #{type}/)
+        regex = /(#{platform_prefixes.join('|')}) #{type}/
+        certs = Util::CodeSign.identity_names(release?).grep(regex)
+        if platform_prefixes.size > 1
+          certs = certs.sort do |x, y|
+            x_index = platform_prefixes.index(x.match(regex)[1])
+            y_index = platform_prefixes.index(y.match(regex)[1])
+            x_index <=> y_index
+          end
+        end
         if certs.size == 0
-          App.fail "Cannot find any #{platform} #{type} certificate in the" \
-                   "keychain"
+          App.fail "Cannot find any #{platform_prefixes.join('/')} #{type} " \
+                   "certificate in the keychain."
         elsif certs.size > 1
-          App.warn "Found #{certs.size} #{platform} #{type} certificates in " \
-                   "the keychain. Set the `codesign_certificate' project " \
-                   "setting to explicitely use one of (defaults to the " \
-                   "first): #{certs.join(', ')}"
+          App.warn "Found #{certs.size} #{platform_prefixes.join('/')} " \
+                   "#{type} certificates in the keychain. Set the " \
+                   "`codesign_certificate' project setting to explicitely " \
+                   "use one of (defaults to the first): #{certs.join(', ')}"
         end
         certs.first
       end
@@ -432,6 +517,17 @@ EOS
       xcassets_bundles
     end
 
+    # @return [String] The path to the `Info.plist` file that gets generated by
+    #         compiling the asset bundles and contains the data that should be
+    #         merged into the final `Info.plist` file.
+    #
+    def asset_bundle_partial_info_plist_path(platform)
+      File.expand_path(File.join(versionized_build_dir(platform), 'AssetCatalog-Info.plist'))
+    end
+
+    # @return [String, nil] The path to the asset bundle that contains
+    #         application icons, if any.
+    #
     def app_icons_asset_bundle
       app_icons_asset_bundles = assets_bundles.map { |b| Dir.glob(File.join(b, '*.appiconset')) }.flatten
       if app_icons_asset_bundles.size > 1
@@ -442,8 +538,30 @@ EOS
       app_icons_asset_bundles.sort.first
     end
 
+    # @return [String, nil] The name of the application icon set, without any
+    #         extension.
+    #
     def app_icon_name_from_asset_bundle
-      File.basename(app_icons_asset_bundle, '.appiconset')
+      if bundle = app_icons_asset_bundle
+        File.basename(bundle, '.appiconset')
+      end
+    end
+
+    # Assigns the application icon information, found in the `Info.plist`
+    # generated by compiling the asset bundles, to the configuration’s `icons`.
+    #
+    # @return [void]
+    #
+    def add_images_from_asset_bundles(platform)
+      if app_icons_asset_bundle
+        path = asset_bundle_partial_info_plist_path(platform)
+        if File.exist?(path)
+          content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{path}" 2>&1`.strip
+          if $?.success?
+            self.icons = content.split("\n")[1..-2].map(&:strip)
+          end
+        end
+      end
     end
 
     attr_reader :vendor_projects
@@ -459,15 +577,47 @@ EOS
 
     def clean_project
       super
-      @vendor_projects.each { |vendor| vendor.clean }
+      @vendor_projects.each { |vendor| vendor.clean(platforms) }
       @targets.each { |target| target.clean }
     end
 
     attr_accessor :targets
 
+    # App Extensions are required to include a 64-bit slice for App Store
+    # submission, so do not exclude `arm64` by default.
+    #
+    # From https://developer.apple.com/library/prerelease/iOS/documentation/General/Conceptual/ExtensibilityPG/ExtensionCreation.html:
+    #
+    #  NOTE ABOUT 64-BIT ARCHITECTURE
+    #
+    #  An app extension target must include the arm64 (iOS) or x86_64
+    #  architecture (OS X) in its Architectures build settings or it will be
+    #  rejected by the App Store. Xcode includes the appropriate 64-bit
+    #  architecture with its “Standard architectures” setting when you create a
+    #  new app extension target.
+    #
+    #  If your containing app target links to an embedded framework, the app
+    #  must also include 64-bit architecture or it will be rejected by the App
+    #  Store.
+    #
+    # From https://developer.apple.com/library/ios/documentation/General/Conceptual/ExtensibilityPG/ExtensionScenarios.html#//apple_ref/doc/uid/TP40014214-CH21-SW5
+    #
+    #  A containing app that links to an embedded framework must include the
+    #  arm64 (iOS) or x86_64 (OS X) architecture build setting or it will be
+    #  rejected by the App Store.
+    #
     def target(path, type, opts={})
       unless File.exist?(path)
         App.fail "Could not find target of type '#{type}' at '#{path}'"
+      end
+
+      unless archs['iPhoneOS'].include?('arm64')
+        App.warn "Device builds of App Extensions and Frameworks are " \
+                 "required to have a 64-bit slice for App Store submissions " \
+                 "to be accepted."
+        App.warn "Your application will now have 64-bit enabled by default, " \
+                 "be sure to properly test it on a 64-bit device."
+        archs['iPhoneOS'] << 'arm64'
       end
 
       case type
@@ -479,6 +629,32 @@ EOS
       else
         App.fail("Unsupported target type '#{type}'")
       end
+    end
+
+    # Creates a temporary file that lists all the symbols that the application
+    # (or extension) should not strip.
+    #
+    # At the moment these are only symbols that an iOS framework depends on.
+    #
+    # @return [String] Extra arguments for the `strip` command.
+    #
+    def strip_args
+      args = super
+
+      frameworks = targets.select { |t| t.type == :framework }
+      required_symbols = frameworks.map(&:required_symbols).flatten.uniq.sort
+      unless required_symbols.empty?
+        require 'tempfile'
+        required_symbols_file = Tempfile.new('required-framework-symbols')
+        required_symbols.each { |symbol| required_symbols_file.puts(symbol) }
+        required_symbols_file.close
+        # Note: If the symbols file contains a symbol that is not present, or
+        # is present but undefined (U) in the executable to strip, the command
+        # fails. The '-i' option ignores this error.
+        args << " -i -s '#{required_symbols_file.path}'"
+      end
+
+      args
     end
   end
 end; end

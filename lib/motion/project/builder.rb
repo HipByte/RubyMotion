@@ -37,7 +37,7 @@ module Motion; module Project;
         $stderr.puts "This version of RubyMotion does not support `#{platform}'"
         exit 1
       end
-      archs = config.archs[platform]
+      archs = config.archs[platform].uniq
 
       static_library = opts.delete(:static)
 
@@ -133,7 +133,6 @@ module Motion; module Project;
             raise "Can't locate kernel file" unless File.exist?(kernel)
    
             # Assembly.
-            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
             arm64 = false
             compiler_exec_arch = case arch
               when /^arm/
@@ -141,24 +140,13 @@ module Motion; module Project;
               else
                 arch
             end
+            asm = File.join(files_build_dir, "#{path}.#{arch}.#{arm64 ? 'bc' : 's'}")
             sh "/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
 
             # Object 
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            if arm64
-              # At the time of this writing Apple hasn't yet contributed the source code of the LLVM backend for the "arm64" architecture, so the RubyMotion compiler can't emit proper assembly yet. We work around this limitation by generating bitcode instead and giving it to the linker. Ugly but should be temporary (right?).
-              @dummy_object_file ||= begin
-                src_path = '/tmp/__dummy_object_file__.c'
-                obj_path = '/tmp/__dummy_object_file__.o'
-                File.open(src_path, 'w') { |io| io.puts "static int foo(void) { return 42; }" }
-                sh "#{cc} -c #{src_path} -o #{obj_path} -arch arm64 -miphoneos-version-min=7.0"
-                obj_path
-              end
-              ld_path = File.join(App.config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/ld')
-              sh "#{ld_path} \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\"" 
-            else
-              sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
-            end
+            arch_obj_flags = arm64 ? "-miphoneos-version-min=#{config.deployment_target}" : ''
+            sh "#{cc} -fexceptions -c -arch #{arch} #{arch_obj_flags} \"#{asm}\" -o \"#{arch_obj}\""
 
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
@@ -270,8 +258,9 @@ EOS
         # Create a static archive with all object files + the runtime.
         lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
         App.info 'Create', lib
+        kernel = File.join(datadir, platform, "kernel.o")
         objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        sh "/usr/bin/libtool -static \"#{librubymotion}\" #{objs_list} -o \"#{lib}\""
+        sh "/usr/bin/libtool -static \"#{librubymotion}\" \"#{kernel}\" #{objs_list} -o \"#{lib}\""
         return lib
       end
 
@@ -329,7 +318,8 @@ EOS
         objs_file = Tempfile.new('linker-objs-list')
         objs_list.each { |obj| objs_file.puts(obj) }
         objs_file.close # flush
-        sh "#{cxx} -o \"#{main_exec}\" -filelist \"#{objs_file.path}\" #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        kernel = File.join(datadir, platform, "kernel.o")
+        sh "#{cxx} -o \"#{main_exec}\" \"#{kernel}\" -filelist \"#{objs_file.path}\" #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
 
         # Change the install name of embedded frameworks.
@@ -366,7 +356,7 @@ EOS
           ib_resources.each do |src, dest|
             if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
               App.info 'Compile', src
-              sh "/usr/bin/ibtool --compile \"#{dest}\" \"#{src}\""
+              sh "'#{File.join(config.xcode_dir, '/usr/bin/ibtool')}' --compile \"#{dest}\" \"#{src}\""
             end
           end
         end
@@ -375,42 +365,7 @@ EOS
       preserve_resources = []
 
       # Compile Asset Catalog bundles.
-      assets_bundles = config.assets_bundles
-      unless assets_bundles.empty?
-        app_icons_asset_bundle = config.app_icons_asset_bundle
-        if app_icons_asset_bundle
-          app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
-          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
-                              "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
-        end
-
-        App.info 'Compile', assets_bundles.join(", ")
-        app_resources_dir = File.expand_path(config.app_resources_dir(platform))
-        FileUtils.mkdir_p(app_resources_dir)
-        cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
-              "--notices --warnings --platform #{config.deploy_platform.downcase} " \
-              "--minimum-deployment-target #{config.deployment_target} " \
-              "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-              "#{app_icons_options} --compress-pngs --compile \"#{app_resources_dir}\" " \
-              "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
-        $stderr.puts(cmd) if App::VERBOSE
-        actool_output = `#{cmd} 2>&1`
-        $stderr.puts(actool_output) if App::VERBOSE
-
-        # Split output in warnings and compiled files
-        actool_output, actool_compilation_results = actool_output.split('/* com.apple.actool.compilation-results */')
-        actool_compiled_files = actool_compilation_results.strip.split("\n")
-        if actool_document_warnings = actool_output.split('/* com.apple.actool.document.warnings */').last
-          # Propagate warnings to the user.
-          actool_document_warnings.strip.split("\n").each { |w| App.warn(w) }
-        end
-
-        # Remove the partial Info.plist line and preserve all other assets.
-        actool_compiled_files.delete(app_icons_info_plist_path) if app_icons_asset_bundle
-        preserve_resources.concat(actool_compiled_files.map { |f| File.basename(f) })
-
-        config.configure_app_icons_from_asset_bundle(platform) if app_icons_asset_bundle
-      end
+      preserve_resources.concat(compile_asset_bundles(config, platform))
 
       # Compile CoreData Model resources and SpriteKit atlas files.
       config.resources_dirs.each do |dir|
@@ -456,12 +411,7 @@ EOS
       end
 
       # Create bundle/Info.plist.
-      bundle_info_plist = File.join(bundle_path, 'Info.plist')
-      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
-        App.info 'Create', bundle_info_plist
-        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
-        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
-      end
+      generate_info_plist(config, platform)
 
       # Copy resources, handle subdirectories.
       app_resources_dir = config.app_resources_dir(platform)
@@ -532,7 +482,7 @@ EOS
       # Strip all symbols. Only in distribution mode.
       if main_exec_created and (config.distribution_mode or ENV['__strip__'])
         App.info "Strip", main_exec
-        sh "#{config.locate_binary('strip')} #{config.strip_args} \"#{main_exec}\""
+        silent_execute_and_capture "#{config.locate_binary('strip')} #{config.strip_args} '#{main_exec}'"
       end
     end
 
@@ -579,6 +529,70 @@ EOS
       instruments_app = File.expand_path('../Applications/Instruments.app', config.xcode_dir)
       App.info('Profile', config.app_bundle(platform))
       sh "'#{File.join(config.bindir, 'instruments')}' '#{instruments_app}' '#{plist_path}'"
+    end
+
+    def generate_info_plist(config, platform)
+      bundle_info_plist = File.join(config.app_bundle(platform), 'Info.plist')
+      if !File.exist?(bundle_info_plist) or File.mtime(config.project_file) > File.mtime(bundle_info_plist)
+        App.info 'Create', bundle_info_plist
+        File.open(bundle_info_plist, 'w') { |io| io.write(config.info_plist_data(platform)) }
+        sh "/usr/bin/plutil -convert binary1 \"#{bundle_info_plist}\""
+      end
+    end
+
+    def silent_execute_and_capture(command)
+      $stderr.puts(command) if App::VERBOSE
+      output = `#{command} 2>&1`
+      $stderr.puts(output) if App::VERBOSE
+      raise "Failed to execute: #{command}" unless $?.success?
+      output
+    end
+
+    # @return [Array] A list of produced resources which should be preserved.
+    #
+    def compile_asset_bundles(config, platform)
+      assets_bundles = config.assets_bundles
+      if assets_bundles.empty?
+        []
+      else
+        app_icon_and_launch_image_options = ''
+        if config.respond_to?(:app_icons_asset_bundle) && bundle_name = config.app_icon_name_from_asset_bundle
+          app_icon_and_launch_image_options << " --app-icon '#{bundle_name}'"
+        end
+        if config.respond_to?(:launch_images_asset_bundle) && bundle_name = config.launch_image_name_from_asset_bundle
+          app_icon_and_launch_image_options << " --launch-image '#{bundle_name}'"
+        end
+        unless app_icon_and_launch_image_options.empty?
+          partial_info_plist = config.asset_bundle_partial_info_plist_path(platform)
+          app_icon_and_launch_image_options << " --output-partial-info-plist '#{partial_info_plist}'"
+        end
+
+        App.info 'Compile', assets_bundles.join(", ")
+        app_resources_dir = File.expand_path(config.app_resources_dir(platform))
+        FileUtils.mkdir_p(app_resources_dir)
+        cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
+              "--notices --warnings --platform #{config.deploy_platform.downcase} " \
+              "--minimum-deployment-target #{config.deployment_target} " \
+              "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
+              "#{app_icon_and_launch_image_options} --compress-pngs " \
+              "--compile \"#{app_resources_dir}\" " \
+              "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
+        actool_output = silent_execute_and_capture(cmd)
+
+        # Split output in warnings and compiled files
+        actool_output, actool_compilation_results = actool_output.split('/* com.apple.actool.compilation-results */')
+        actool_compiled_files = actool_compilation_results.strip.split("\n")
+        if actool_document_warnings = actool_output.split('/* com.apple.actool.document.warnings */').last
+          # Propagate warnings to the user.
+          actool_document_warnings.strip.split("\n").each { |w| App.warn(w) }
+        end
+
+        unless app_icon_and_launch_image_options.empty?
+          config.add_images_from_asset_bundles(platform)
+          actool_compiled_files.delete(partial_info_plist)
+        end
+        produced_resources = actool_compiled_files.map { |f| File.basename(f) }
+      end
     end
 
     class << self

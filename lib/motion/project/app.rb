@@ -119,6 +119,7 @@ module Motion; module Project
 
       def fail(msg)
         log 'ERROR!', msg
+        $stderr.puts caller if VERBOSE
         exit 1
       end
 

@@ -56,15 +56,11 @@ module Motion; module Project;
     end
 
     def archs
-      archs = super
-      if development?
-        # We only build for the native architecture in development mode, to speed up builds.
-        native_arch = `/usr/bin/uname -m`.strip
-        if archs['MacOSX'].include?(native_arch)
-          archs['MacOSX'] = [native_arch]
-        end
+      @archs ||= begin
+        archs = super
+        archs['MacOSX'].delete('i386')
+        archs
       end
-      archs
     end
 
     def app_icons_info_plist_path(platform)
@@ -126,7 +122,7 @@ module Motion; module Project;
     end
 
     def app_bundle_raw(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app')
+      File.join(versionized_build_dir(platform), bundle_filename)
     end
 
     def app_bundle(platform)
@@ -155,30 +151,23 @@ module Motion; module Project;
       })
     end
 
-    def merged_info_plist
-      generic_info_plist.merge(dt_info_plist).merge(info_plist)
-    end
-
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s(merged_info_plist)
-    end
-
     def strip_args
       ''
     end
 
+    # Defaults to the MAJOR and MINOR version of the host machine. For example,
+    # on Yosemite this defaults to `10.10`.
+    #
+    # @return [String] the lowest OS version that this target will support.
+    #
     def deployment_target
-      @deployment_target ||= osx_version
+      @deployment_target ||= osx_host_version.segments.first(2).join('.')
     end
 
     def supported_sdk_versions(versions)
       versions.reverse.find { |vers|
         Util::Version.new(deployment_target) <= Util::Version.new(vers) && File.exist?(datadir(vers))
       }
-    end
-    
-    def osx_version
-      `sw_vers -productVersion`.strip.match(/((\d+).(\d+))/)[0]
     end
 
     def main_cpp_file_txt(spec_objs)
@@ -213,7 +202,7 @@ EOS
           main_txt << "#{init_func}(self, 0);\n"
         end
         main_txt << <<EOS
-        [NSClassFromString(@\"Bacon\") performSelector:@selector(run)];
+        [NSClassFromString(@\"Bacon\") performSelector:@selector(run) withObject:nil];
 }
 
 - (void)appLaunched:(NSNotification *)notification
@@ -238,7 +227,7 @@ EOS
     end
     main_txt << <<EOS
     RubyMotionInit(argc, argv);
-    NSApplication *app = [NSClassFromString(@"#{merged_info_plist['NSPrincipalClass']}") sharedApplication];
+    NSApplication *app = [NSClassFromString(@"#{merged_info_plist('MacOSX')['NSPrincipalClass']}") sharedApplication];
     [app setDelegate:[NSClassFromString(@"#{delegate_class}") new]];
 EOS
     if spec_mode
@@ -261,7 +250,7 @@ EOS
     # If the user specifies a custom principal class the NSApplicationMain()
     # function will only work if they have also specified a nib or storyboard.
     def use_application_main_function?
-      info = merged_info_plist
+      info = merged_info_plist('MacOSX')
       if info['NSPrincipalClass'] == 'NSApplication'
         true
       else

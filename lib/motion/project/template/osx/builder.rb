@@ -42,14 +42,66 @@ module Motion; module Project
       end
     end
 
+    # First signs all frameworks (and the individual versions therein) that it
+    # finds in the `Frameworks` directory of the application bundle in the build
+    # directory and then signs the application bundle itself.
+    #
+    # @param [OSXConfig] config
+    #        The configuration for this build.
+    #
+    # @param [String] config
+    #        The platform for which to build, which in this case should always
+    #        be `MacOSX`.
+    #
+    # @return [void]
+    #
+    # @todo Do we really need the platform parameter when it's always the same?
+    #
     def codesign(config, platform)
-      app_bundle = config.app_bundle_raw('MacOSX')
-      entitlements = File.join(config.versionized_build_dir(platform), "Entitlements.plist")
-      if File.mtime(config.project_file) > File.mtime(app_bundle) \
-          or !system("/usr/bin/codesign --verify \"#{app_bundle}\" >& /dev/null")
-        App.info 'Codesign', app_bundle
+      app_bundle = config.app_bundle(platform)
+      framework_versions = 'Frameworks/*.framework/Versions/*'
+      Dir.glob(File.join(app_bundle, framework_versions)) do |version|
+        unless version == File.basename('Current')
+          codesign_bundle(config, version)
+        end
+      end
+
+      codesign_bundle(config, config.app_bundle_raw(platform)) do
+        build_dir = config.versionized_build_dir(platform)
+        entitlements = File.join(build_dir, "Entitlements.plist")
         File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
-        sh "/usr/bin/codesign --force --sign \"#{config.codesign_certificate}\" --entitlements \"#{entitlements}\" \"#{app_bundle}\""
+        entitlements
+      end
+    end
+
+    private
+
+    # Signs an individual bundle.
+    #
+    # @param [OSXConfig] config
+    #        The configuration for this build.
+    #
+    # @param [String] bundle
+    #        The path to the bundle on disk. In case of a framework, this should
+    #        be to the specific version directory inside the `Versions`
+    #        directory of the bundle.
+    #
+    # @yield If a block is given, this will be yielded to allow the generation
+    #        of an entitlements file, only when needed.
+    #
+    # @yieldreturn [String] the path to the entitlements file.
+    #
+    # @return [void]
+    #
+    def codesign_bundle(config, bundle)
+      if File.mtime(config.project_file) > File.mtime(bundle) \
+          or !system("/usr/bin/codesign --verify '#{bundle}' >& /dev/null")
+        App.info 'Codesign', bundle
+        entitlements_path = yield if block_given?
+        command = "/usr/bin/codesign --force --sign '#{config.codesign_certificate}' "
+        command << "--entitlements '#{entitlements_path}' " if entitlements_path
+        command << "'#{bundle}'"
+        sh(command)
       end
     end
   end

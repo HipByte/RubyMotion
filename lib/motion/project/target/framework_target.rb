@@ -23,53 +23,20 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/project/builder'
+require 'motion/project/target'
 
 module Motion; module Project
-  class FrameworkTarget
-    include Rake::DSL if Object.const_defined?(:Rake) && Rake.const_defined?(:DSL)
-
-    attr_accessor :type
-
-    def initialize(path, type, config, opts)
-      @path = path
-      @full_path = File.expand_path(path)
-      @type = type
-      @config = config
-      @opts = opts
-    end
-
-    def build(platform)
-      @platform = platform
-
-      command = if platform == 'iPhoneSimulator'
-        "build:simulator"
-      else
-        if @config.distribution_mode
-          "archive:distribution"
-        else
-          "build:device"
-        end
-      end
-
-      args = ''
-      args << " --trace" if App::VERBOSE
-
-      success = system("cd #{@full_path} && #{environment_variables} rake #{command} #{args}")
-      unless success
-        App.fail "Target '#{@path}' failed to build"
-      end
-    end
-
+  class FrameworkTarget < Target
     def copy_products(platform)
       src_path = framework_path
-      dest_path = File.join(@config.app_bundle(platform), 'Frameworks', framework_name)
-      FileUtils.mkdir_p(File.join(@config.app_bundle(platform), 'Frameworks'))
+      dest_framework_dir = File.join(@config.app_bundle(platform), 'Frameworks')
+      dest_path = File.join(dest_framework_dir, framework_name)
 
       if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
         App.info 'Copy', src_path
-        FileUtils.cp_r(src_path, dest_path)
-      end 
+        FileUtils.mkdir_p(dest_framework_dir)
+        FileUtils.cp_r(src_path, dest_framework_dir)
+      end
     end
 
     def codesign(platform)
@@ -118,19 +85,9 @@ PLIST
       end
     end
 
-    def clean
-      args = ''
-      args << " --trace" if App::VERBOSE
-      system("cd #{@full_path} && #{environment_variables} rake clean #{args}")
-    end
-
-    def build_dir(config, platform)
-      platform + '-' + config.deployment_target + '-' + config.build_mode_name
-    end
-
     def framework_path
       @framework_path ||= begin
-        path = File.join(@path, 'build', build_dir(@config, @platform), '*.framework')
+        path = File.join(build_dir, '*.framework')
         Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end
@@ -139,20 +96,20 @@ PLIST
       File.basename(framework_path)
     end
 
-    # Indicates wether to load the framework at runtime or not
+    # Indicates whether to load the framework at runtime or not
     def load?
       @opts[:load]
     end
 
-    def environment_variables
-      [
-        "RM_TARGET_SDK_VERSION=\"#{@config.sdk_version}\"",
-        "RM_TARGET_DEPLOYMENT_TARGET=\"#{@config.deployment_target}\"",
-        "RM_TARGET_XCODE_DIR=\"#{@config.xcode_dir}\"",
-        "RM_TARGET_HOST_APP_PATH=\"#{File.expand_path(@config.project_dir)}\"",
-        "RM_TARGET_BUILD=\"1\""
-      ].join(' ')
+    # @return [Array<String>] A list of symbols that the framework requires the
+    #         host application or extension to provide and should not strip.
+    #
+    def required_symbols
+      executable_filename = File.basename(framework_path, '.framework')
+      executable = File.join(framework_path, executable_filename)
+      cmd = "/usr/bin/nm -ju '#{executable}' | /usr/bin/grep -E '^_(rb|vm)_'"
+      puts cmd if App::VERBOSE
+      `#{cmd}`.strip.split("\n")
     end
-
   end
 end;end

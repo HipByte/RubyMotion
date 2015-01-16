@@ -52,23 +52,64 @@ module Motion; module Project;
 
     def archs
       @archs ||= begin
-        # By default, do not build with 64-bit, as it's still experimental.
+        # No longer build for armv7s by default.
         archs = super
-        archs['iPhoneSimulator'].delete('x86_64')
-        archs['iPhoneOS'].delete('arm64')
+        archs['iPhoneOS'].delete('armv7s')
         archs
       end
     end
 
-    def app_icons_info_plist_path(platform)
-      File.expand_path(File.join(versionized_build_dir(platform), 'AppIcon.plist'))
+    # @return [String, nil] The path to the asset bundle that contains launch
+    #         images, if any.
+    #
+    def launch_images_asset_bundle
+      launch_images_asset_bundles = assets_bundles.map { |b| Dir.glob(File.join(b, '*.launchimage')) }.flatten
+      if launch_images_asset_bundles.size > 1
+        App.warn "Found #{launch_images_asset_bundles.size} launch image sets across all " \
+                 "xcasset bundles. Only the first one (alphabetically) will be used."
+      end
+      launch_images_asset_bundles.sort.first
     end
 
-    def configure_app_icons_from_asset_bundle(platform)
-      path = app_icons_info_plist_path(platform)
-      if File.exist?(path)
-        content = `/usr/libexec/PlistBuddy -c 'Print :CFBundleIcons:CFBundlePrimaryIcon:CFBundleIconFiles' "#{path}"`.strip
-        self.icons = content.split("\n")[1..-2].map(&:strip)
+    # @return [String, nil] The name of the launch image set, without any
+    #         extension.
+    #
+    def launch_image_name_from_asset_bundle
+      if bundle = launch_images_asset_bundle
+        File.basename(bundle, '.launchimage')
+      end
+    end
+
+    # Assigns the launch image information, found in the `Info.plist` generated
+    # by compiling the asset bundles, to the `info_plist`’s `UILaunchImages`.
+    #
+    # @return [void]
+    #
+    def add_images_from_asset_bundles(platform)
+      super
+      if launch_images_asset_bundle
+        path = asset_bundle_partial_info_plist_path(platform)
+        if File.exist?(path)
+          content = `/usr/libexec/PlistBuddy -c 'Print :UILaunchImages' "#{path}" 2>&1`.strip
+          if $?.success?
+            images = []
+            current_image = nil
+            content.split("\n")[1..-2].each do |line|
+              case line.strip
+              when 'Dict {'
+                current_image = {}
+              when '}'
+                images << current_image
+                current_image = nil
+              when /(\w+) = (.+)/
+                current_image[$1] = $2
+              end
+            end
+            unless images.empty?
+              info_plist['UILaunchImages'] = images
+            end
+          end
+        end
       end
     end
 
@@ -103,11 +144,16 @@ module Motion; module Project;
       '.ipa'
     end
 
+    # The codesign certificate, where certificates prefixed with `iOS` are
+    # preferred over those prefixed with `iPhone`.
+    #
+    # @return [String] The name of the certificate.
+    #
     def codesign_certificate
-      super('iPhone')
+      super('iOS', 'iPhone')
     end
 
-    def provisioning_profile(name = /iOS Team Provisioning Profile/)
+    def provisioning_profile(name = /iOS\s?Team Provisioning Profile/)
       @provisioning_profile ||= begin
         paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
           text = File.read(path)
@@ -121,6 +167,7 @@ module Motion; module Project;
         end
         paths[0]
       end
+      File.expand_path(@provisioning_profile)
     end
 
     def read_provisioned_profile_array(key)
@@ -148,9 +195,8 @@ module Motion; module Project;
 
     def entitlements_data
       dict = entitlements
-      if distribution_mode
-        dict['application-identifier'] ||= seed_id + '.' + identifier
-      else
+      dict['application-identifier'] ||= seed_id + '.' + identifier
+      unless distribution_mode
         # Required for gdb.
         dict['get-task-allow'] = true if dict['get-task-allow'].nil?
       end
@@ -182,7 +228,7 @@ module Motion; module Project;
     end
 
     def bridgesupport_flags
-      extra_flags = (OSX_VERSION >= 10.7 && sdk_version < '7.0') ? '--no-64-bit' : ''
+      extra_flags = (osx_host_version >= Util::Version.new('10.7') && sdk_version < '7.0') ? '--no-64-bit' : ''
       "--format complete #{extra_flags}"
     end
 
@@ -265,7 +311,7 @@ module Motion; module Project;
       when '4'
         ' 5s'
       else
-        (family == 1) ? ' 6' : ' Retina'
+        (family == 1) ? ' 6' : ' Air'
       end
     end
 
@@ -324,8 +370,14 @@ module Motion; module Project;
       end
     end
 
+    # @param [String] platform
+    #        The platform identifier that's being build for, such as
+    #        `iPhoneSimulator` or `iPhoneOS`.
+    #
+    # @return [String] The path to the app bundle in the build directory.
+    #
     def app_bundle(platform)
-      File.join(versionized_build_dir(platform), bundle_name + '.app')
+      File.join(versionized_build_dir(platform), bundle_filename)
     end
 
     def app_bundle_executable(platform)
@@ -394,7 +446,7 @@ module Motion; module Project;
     def launch_images
       if Util::Version.new(deployment_target) >= Util::Version.new('7')
         images = resources_dirs.map do |dir|
-          Dir.glob(File.join(dir, 'Default*.png')).map do |file|
+          Dir.glob(File.join(dir, '{Default,LaunchImage}*.png')).map do |file|
             launch_image_metadata(file)
           end
         end.flatten.compact
@@ -403,7 +455,7 @@ module Motion; module Project;
     end
 
     def merged_info_plist(platform)
-      ios = {
+      plist = super.merge({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
@@ -435,19 +487,13 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }
-
-      base = info_plist
+      }) {|key, oldval, newval| oldval }
       # If the user has not explicitely specified launch images, try to find
       # them ourselves.
-      if !base.include?('UILaunchImages') && launch_images = self.launch_images
-        base['UILaunchImages'] = launch_images
+      if !plist.has_key?('UILaunchImages') && launch_images = self.launch_images
+        plist['UILaunchImages'] = launch_images
       end
-      ios.merge(generic_info_plist).merge(dt_info_plist).merge(base)
-    end
-
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s(merged_info_plist(platform))
+      plist
     end
 
     def manifest_plist_data
@@ -459,7 +505,7 @@ module Motion; module Project;
               'bundle-identifier' => identifier,
               'bundle-version' => @version,
               'kind' => 'software',
-              'title' => @name
+              'title' => name
             } }
         ]
       })
@@ -547,7 +593,7 @@ EOS
         spec_objs.each do |_, init_func|
           main_txt << "#{init_func}(self, 0);\n"
         end
-        main_txt << "[NSClassFromString(@\"Bacon\") performSelector:@selector(run)];\n"
+        main_txt << "[NSClassFromString(@\"Bacon\") performSelector:@selector(run) withObject:nil];\n"
         main_txt << <<EOS
 }
 

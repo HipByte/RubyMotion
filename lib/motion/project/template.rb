@@ -33,12 +33,18 @@ module Motion; module Project
     # for ERB
     attr_reader :name
 
+    local_templates = File.expand_path(File.join(__FILE__, '../template'))
     Paths = [
-      File.expand_path(File.join(__FILE__, '../template')),
+      local_templates,
       File.expand_path(File.join(ENV['HOME'], 'Library/RubyMotion/template'))
     ]
-    pre_templates = '/Library/RubyMotionPre/lib/motion/project/template'
-    Paths << pre_templates if File.exist?(pre_templates)
+
+    # Do not override the template location when using a development version of
+    # RubyMotion which does have all the templates.
+    unless File.exist?(File.join(local_templates, 'android.rb'))
+      pre_templates = '/Library/RubyMotionPre/lib/motion/project/template'
+      Paths << pre_templates if File.exist?(pre_templates)
+    end
 
     # TODO Caching these and making it based on the Paths constant makes it
     #      less simple to register plugin templates, because you cannot add

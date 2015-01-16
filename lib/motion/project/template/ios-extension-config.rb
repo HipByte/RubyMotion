@@ -24,17 +24,19 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/xcode_config'
+require 'motion/util/version'
 
 module Motion; module Project;
   class IOSExtensionConfig < XcodeConfig
     register :'ios-extension'
 
-    variable :device_family, :manifest_assets
+    variable :device_family, :provisioning_profile, :icons, :manifest_assets
 
     def initialize(project_dir, build_mode)
       super
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
       @device_family = :iphone
+      @icons = []
       @manifest_assets = []
     end
 
@@ -42,15 +44,17 @@ module Motion; module Project;
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
 
+    # App Extensions are required to include a 64-bit for App Store submission.
     def archs
       @archs ||= begin
-        # By default, do not build with 64-bit, as it's still experimental.
         archs = super
         archs['iPhoneSimulator'].delete('x86_64')
-        archs['iPhoneOS'].delete('arm64')
         archs
       end
     end
+
+    # An extension cannot have app icons.
+    undef_method :app_icons_asset_bundle
 
     def validate
       # manifest_assets
@@ -82,9 +86,50 @@ module Motion; module Project;
       super('iPhone')
     end
 
+    def provisioning_profile(name = /iOS\s?Team Provisioning Profile/)
+      @provisioning_profile ||= begin
+        paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
+          text = File.read(path)
+          text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+          text.scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0].match(name)
+        end
+        if paths.size == 0
+          App.fail "Can't find a provisioning profile named `#{name}'"
+        elsif paths.size > 1
+          App.warn "Found #{paths.size} provisioning profiles named `#{name}'. Set the `provisioning_profile' project setting. Will use the first one: `#{paths[0]}'"
+        end
+        paths[0]
+      end
+      File.expand_path(@provisioning_profile)
+    end
+
+    def read_provisioned_profile_array(key)
+      text = File.read(provisioning_profile)
+      text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+      text.scan(/<key>\s*#{key}\s*<\/key>\s*<array>(.*?)\s*<\/array>/m)[0][0].scan(/<string>(.*?)<\/string>/).map { |str| str[0].strip }
+    end
+    private :read_provisioned_profile_array
+
+    def provisioned_devices
+      @provisioned_devices ||= read_provisioned_profile_array('ProvisionedDevices')
+    end
+
+    def seed_id
+      @seed_id ||= begin
+        seed_ids = read_provisioned_profile_array('ApplicationIdentifierPrefix')
+        if seed_ids.size == 0
+          App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
+        elsif seed_ids.size > 1
+          App.warn "Found #{seed_ids.size} seed IDs in the provisioning profile. Set the `seed_id' project setting. Will use the last one: `#{seed_ids.last}'"
+        end
+        seed_ids.last
+      end
+    end
+
     def entitlements_data
       dict = entitlements
-      if !distribution_mode
+      dict['application-identifier'] ||= seed_id + '.' + identifier
+      unless distribution_mode
         # Required for gdb.
         dict['get-task-allow'] = true if dict['get-task-allow'].nil?
       end
@@ -116,7 +161,7 @@ module Motion; module Project;
     end
 
     def bridgesupport_flags
-      extra_flags = (OSX_VERSION >= 10.7 && sdk_version < '7.0') ? '--no-64-bit' : ''
+      extra_flags = (osx_host_version >= Util::Version.new('10.7') && sdk_version < '7.0') ? '--no-64-bit' : ''
       "--format complete #{extra_flags}"
     end
 
@@ -140,6 +185,16 @@ module Motion; module Project;
       ary.map { |family| device_family_int(family) }
     end
 
+    # @todo Is it correct that a bundle identifier may contain spaces? Because
+    #       the `bundle_name` definitely can contain spaces.
+    #
+    # @return [String] The bundle identifier of the application extension based
+    #         on the bundle identifier of the host application.
+    #
+    def identifier
+      ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.' + bundle_name
+    end
+
     def app_bundle(platform)
       File.join(versionized_build_dir(platform), bundle_name + '.appex')
     end
@@ -152,11 +207,16 @@ module Motion; module Project;
       app_bundle(platform)
     end
 
-    def info_plist_data(platform)
-      Motion::PropertyList.to_s({
+    def merged_info_plist(platform)
+      super.merge({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
+        'CFBundleIcons' => {
+          'CFBundlePrimaryIcon' => {
+            'CFBundleIconFiles' => icons,
+          }
+        },
         # TODO temp hack to get ints for Instruments, but strings for normal builds.
         'UIDeviceFamily' => device_family_ints.map { |x| ENV['__USE_DEVICE_INT__'] ? x.to_i : x.to_s },
         'DTXcode' => begin
@@ -174,8 +234,8 @@ module Motion; module Project;
         'DTCompiler' => 'com.apple.compilers.llvm.clang.1_0',
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
-      }.merge(generic_info_plist).merge(dt_info_plist).merge(info_plist)
-       .merge({ 'CFBundlePackageType' => 'XPC!' }))
+        'CFBundlePackageType' => 'XPC!'
+      })
     end
 
     def manifest_plist_data
@@ -227,11 +287,9 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
-EOS
-      main_txt << <<EOS
+    int NSExtensionMain(int argc, char **argv);
 }
-EOS
-      main_txt << <<EOS
+
 int
 main(int argc, char **argv)
 {
@@ -245,10 +303,7 @@ EOS
     end
     main_txt << <<EOS
     RubyMotionInit(argc, argv);
-EOS
-    main_txt << <<EOS
-    dlopen("/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit", 0x2);
-    retval = ((int(*)(id, SEL, int, char**))objc_msgSend)(NSClassFromString(@"PKService"), @selector(_defaultRun:arguments:), argc, argv);
+    retval = NSExtensionMain(argc, argv);
     rb_exit(retval);
     [pool release];
     return retval;

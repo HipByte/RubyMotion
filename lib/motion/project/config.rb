@@ -23,7 +23,9 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'pathname'
 require 'motion/project/app'
+require 'motion/util/version'
 
 module Motion; module Project
   class Config
@@ -83,11 +85,14 @@ module Motion; module Project
       @resources_dirs = [File.join(project_dir, 'resources')]
       @build_dir = File.join(project_dir, 'build')
       @specs_dir = File.join(project_dir, 'spec')
+      @dependencies = {}
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
     end
 
-    OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
+    def osx_host_version
+      @osx_host_version ||= Util::Version.new(`/usr/bin/sw_vers -productVersion`.strip)
+    end
 
     def variables
       map = {}
@@ -171,7 +176,7 @@ module Motion; module Project
     end
 
     def supported_versions
-      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', template.to_s, '*')).select{|path| File.directory?(path)}.map do |path|
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', template.to_s, '[1-9]*')).select{|path| File.directory?(path)}.map do |path|
         File.basename path
       end
     end
@@ -332,6 +337,7 @@ EOS
       paths.concat(Dir.glob(self.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }))
       paths.each do |p|
         next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
+        next if File.extname(p) == ".momd" && !File.exist?(p.sub(/\.momd$/, ".xcdatamodeld"))
         App.info 'Delete', relative_path(p)
         rm_rf p
         if File.exist?(p)

@@ -76,6 +76,54 @@ namespace :build do
   end
 end
 
+namespace :watch do
+  desc "Run the Watch application on the simulator"
+  task :simulator do
+    watch_extension = App.config.targets.find do |target|
+      File.exist?(File.join(target.path, 'watch_app'))
+    end
+    unless watch_extension
+      App.fail 'You can only use this task with a WatchKit application ' \
+               'configured. To configure one use ' \
+               '`app.target \'path/to/MyWatchApp\', :extension`.'
+    end
+
+    if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
+      App.fail 'The `payload=path/to/payload.json` option is required with `type=notification`.'
+    end
+
+    unless ENV["skip_build"]
+      Rake::Task["build:simulator"].invoke
+    end
+
+    app = App.config.app_bundle('iPhoneSimulator')
+    sim = File.join(App.config.bindir, 'watch-sim')
+
+    command = "'#{sim}' '#{app}' -developer-dir '#{App.config.xcode_dir}'"
+    command << " -verbose #{App::VERBOSE ? 'YES' : 'NO'}"
+    command << " -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
+    command << " -display #{ENV['display']}" if ENV['display']
+    command << " -type #{ENV['type']}" if ENV['type']
+    command << " -notification-payload '#{ENV['payload']}'" if ENV['payload']
+
+    if App::VERBOSE
+      puts command
+    else
+      App.info 'Simulate', watch_extension.destination_bundle_path
+    end
+    system(command)
+    exit($?.exitstatus)
+  end
+
+  # TODO add shortcut task to invoke the IB rake task of the watch app target.
+  # desc "Open the Watch application's Storyboard in Interface Builder"
+  # task :ib do
+  # end
+end
+
+desc "Same as 'watch:simulator'"
+task :watch => 'watch:simulator'
+
 desc "Run the simulator"
 task :simulator do
   deployment_target = Motion::Util::Version.new(App.config.deployment_target)
@@ -84,6 +132,9 @@ task :simulator do
   if target && Motion::Util::Version.new(target) < deployment_target
     App.fail "It is not possible to simulate an SDK version (#{target}) " \
              "lower than the app's deployment target (#{deployment_target})"
+  end
+  if target && ENV['device_name']
+    App.fail "It is not possible to specify both `device_name' and `target'"
   end
   target ||= App.config.sdk_version
 
@@ -211,7 +262,6 @@ namespace :spec do
   desc "Run the test/spec suite on the device"
   task :device do
     App.config_without_setup.spec_mode = true
-    ENV['debug'] ||= '1'
     Rake::Task["device"].invoke
   end
 end
@@ -226,6 +276,17 @@ task :device => :archive do
     App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
+  if ENV['debug']
+    unless remote_arch = ENV['arch']
+      ary = App.config.archs['iPhoneOS']
+      remote_arch = ary.last
+      if ary.size > 1
+        $stderr.puts "*** Application is built for multiple architectures (#{ary.join(', ')}), the debugger will target #{remote_arch}. Pass the `arch' option in order to specify which one to use (ex. rake device debug=1 arch=arm64)."
+      end
+    end
+    env << " RM_REMOTE_ARCH=\"#{remote_arch}\""
+  end
+
   deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   Signal.trap(:INT) { } if ENV['debug']

@@ -24,6 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'motion/project/xcode_config'
+require 'motion/util/version'
 
 module Motion; module Project;
   class IOSFrameworkConfig < XcodeConfig
@@ -42,12 +43,11 @@ module Motion; module Project;
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
 
+    # Frameworks are required to include a 64-bit for App Store submission.
     def archs
       @archs ||= begin
-        # By default, do not build with 64-bit, as it's still experimental.
         archs = super
         archs['iPhoneSimulator'].delete('x86_64')
-        archs['iPhoneOS'].delete('arm64')
         archs
       end
     end
@@ -111,7 +111,7 @@ module Motion; module Project;
     end
 
     def bridgesupport_flags
-      extra_flags = (OSX_VERSION >= 10.7 && sdk_version < '7.0') ? '--no-64-bit' : ''
+      extra_flags = (osx_host_version >= Util::Version.new('10.7') && sdk_version < '7.0') ? '--no-64-bit' : ''
       "--format complete #{extra_flags}"
     end
 

@@ -23,6 +23,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'pathname'
 require 'motion/project/builder'
 
 module Motion; module Project
@@ -30,13 +31,63 @@ module Motion; module Project
     def codesign(config, platform)
       entitlements = File.join(config.app_bundle(platform), "Entitlements.plist")
       File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
+
+      extension_dir = config.app_bundle(platform)
+
+      # Create bundle/ResourceRules.plist.
+      resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
+      unless File.exist?(resource_rules_plist)
+        App.info 'Create', resource_rules_plist
+        File.open(resource_rules_plist, 'w') do |io|
+          io.write(<<-PLIST)
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+        <key>rules</key>
+        <dict>
+                <key>.*</key>
+                <true/>
+                <key>Info.plist</key>
+                <dict>
+                        <key>omit</key>
+                        <true/>
+                        <key>weight</key>
+                        <real>10</real>
+                </dict>
+                <key>ResourceRules.plist</key>
+                <dict>
+                        <key>omit</key>
+                        <true/>
+                        <key>weight</key>
+                        <real>100</real>
+                </dict>
+        </dict>
+</dict>
+</plist>
+PLIST
+        end
+      end
+
+      # Copy the provisioning profile
+      bundle_provision = File.join(extension_dir, "embedded.mobileprovision")
+      App.info 'Create', bundle_provision
+      FileUtils.cp config.provisioning_profile, bundle_provision
     end
 
     def build(config, platform, opts)
+      unless ENV['RM_TARGET_BUILD']
+        App.fail "Extension targets must be built from an application project"
+      end
+
+      @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
       config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
       config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET'] if ENV['RM_TARGET_DEPLOYMENT_TARGET']
-      config.xcode_dir = ENV['RM_TARGET_XCODE_DIR'] if ENV['RM_TARGET_XCODE_DIR']
-      @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
+      if ENV['RM_TARGET_ARCHS']
+        eval(ENV['RM_TARGET_ARCHS']).each do |platform, archs|
+          config.archs[platform] = archs.uniq
+        end
+      end
 
       datadir = config.datadir
       unless File.exist?(File.join(datadir, platform))
@@ -121,7 +172,6 @@ module Motion; module Project
             raise "Can't locate kernel file" unless File.exist?(kernel)
    
             # Assembly.
-            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
             arm64 = false
             compiler_exec_arch = case arch
               when /^arm/
@@ -129,24 +179,13 @@ module Motion; module Project
               else
                 arch
             end
+            asm = File.join(files_build_dir, "#{path}.#{arch}.#{arm64 ? 'bc' : 's'}")
             sh "/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
 
             # Object 
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            if arm64
-              # At the time of this writing Apple hasn't yet contributed the source code of the LLVM backend for the "arm64" architecture, so the RubyMotion compiler can't emit proper assembly yet. We work around this limitation by generating bitcode instead and giving it to the linker. Ugly but should be temporary (right?).
-              @dummy_object_file ||= begin
-                src_path = '/tmp/__dummy_object_file__.c'
-                obj_path = '/tmp/__dummy_object_file__.o'
-                File.open(src_path, 'w') { |io| io.puts "static int foo(void) { return 42; }" }
-                sh "#{cc} -c #{src_path} -o #{obj_path} -arch arm64 -miphoneos-version-min=7.0"
-                obj_path
-              end
-              ld_path = File.join(App.config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/ld')
-              sh "#{ld_path} \"#{asm}\" \"#{@dummy_object_file}\" -arch arm64 -r -o \"#{arch_obj}\"" 
-            else
-              sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
-            end
+            arch_obj_flags = arm64 ? "-miphoneos-version-min=#{config.deployment_target}" : ''
+            sh "#{cc} -fexceptions -c -arch #{arch} #{arch_obj_flags} \"#{asm}\" -o \"#{arch_obj}\""
 
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
@@ -302,7 +341,10 @@ EOS
             "-stdlib=libstdc++"
           end
         end || ""
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        kernel = File.join(datadir, platform, "kernel.o")
+        # Use the `-no_implicit_dylibs` linker option to hide the fact that it
+        # links against `libextension.dylib` which contains `NSExtensionMain`.
+        sh "#{cxx} -o \"#{main_exec}\" \"#{kernel}\" #{objs_list} #{config.sdk(platform)}/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit -fobjc-link-runtime -fapplication-extension -Xlinker -no_implicit_dylibs #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
       end
 
@@ -315,7 +357,7 @@ EOS
           ib_resources.each do |src, dest|
             if !File.exist?(dest) or File.mtime(src) > File.mtime(dest)
               App.info 'Compile', relative_path(src)
-              sh "/usr/bin/ibtool --compile \"#{File.expand_path(dest)}\" \"#{File.expand_path(src)}\""
+              sh "'#{File.join(config.xcode_dir, '/usr/bin/ibtool')}' --compile \"#{File.expand_path(dest)}\" \"#{File.expand_path(src)}\""
             end
           end
         end
@@ -461,7 +503,7 @@ EOS
       # Strip all symbols. Only in distribution mode.
       if main_exec_created and (config.distribution_mode or ENV['__strip__'])
         App.info "Strip", relative_path(main_exec)
-        sh "#{config.locate_binary('strip')} #{config.strip_args} \"#{main_exec}\""
+        silent_execute_and_capture "#{config.locate_binary('strip')} #{config.strip_args} '#{main_exec}'"
       end
     end
 
