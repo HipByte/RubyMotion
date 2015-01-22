@@ -151,6 +151,7 @@ EOS
   objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   kernel_bc = App.config.kernel_path
   ruby_objs_changed = false
+  App.config.files.flatten!
   ((App.config.spec_mode ? App.config.spec_files : []) + App.config.files).each do |ruby_path|
     bc_path = File.join(objs_build_dir, File.expand_path(ruby_path) + '.bc')
     init_func = "MREP_" + `/bin/echo \"#{File.expand_path(bc_path)}\" | /usr/bin/openssl sha1`.strip
