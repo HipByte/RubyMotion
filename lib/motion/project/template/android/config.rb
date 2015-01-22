@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,13 +24,78 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion; module Project;
+
+  class AndroidManifest < Hash
+
+    attr_reader :name
+
+    def initialize(name = 'manifest')
+      @name = name
+      @children = []
+    end
+
+    def add_child(name, properties = {}, &block)
+      nested = AndroidManifest.new(name)
+      nested.merge!(properties)
+      block.call(nested) if block
+      @children << nested
+      nested
+    end
+
+    def child(name, &block)
+      child = children(name).first
+      block.call(child) if block
+      child
+    end
+
+    def children(name)
+      @children.select { |c| c.name == name }
+    end
+
+    def to_xml(depth = 0)
+      str = "#{'  ' * depth}<#{@name} "
+
+      str << map do |key, value|
+        v = evaluate(value)
+        # Some properties fail to compile if they are nil, so we clean them
+        v.nil? ? nil : "#{key}=\"#{v}\""
+      end.compact.join(' ')
+
+      if @children.empty?
+        str << " />\n"
+      else
+        str << " >\n"
+
+        # children
+        str << @children.map { |c| c.to_xml(depth + 1) }.join('')
+
+        xml_lines_name = @name == "manifest" ? nil : @name
+        str << App.config.manifest_xml_lines(xml_lines_name).map { |line| "#{'  ' * (depth + 1) }#{line}\n" }.join('')
+
+        str << "#{'  ' * depth}</#{@name}>\n"
+      end
+      str
+    end
+
+    private
+
+    def evaluate(value)
+      if value.is_a? Proc
+        value.call
+      else
+        value
+      end
+    end
+
+  end
+
   class AndroidConfig < Config
     register :android
 
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :target_api_version, :arch, :assets_dirs,
       :icon, :logs_components, :version_code, :version_name, :permissions,
-      :features, :services, :application_class
+      :features, :services, :application_class, :manifest
 
     def initialize(project_dir, build_mode)
       super
@@ -50,11 +115,44 @@ module Motion; module Project;
       @version_name = '1.0'
       @application_class = nil
 
+      @manifest = AndroidManifest.new
+      construct_manifest
+
       if path = ENV['RUBYMOTION_ANDROID_SDK']
         @sdk_path = File.expand_path(path)
       end
       if path = ENV['RUBYMOTION_ANDROID_NDK']
         @ndk_path = File.expand_path(path)
+      end
+    end
+
+    def construct_manifest
+      manifest = @manifest
+
+      manifest['xmlns:android'] = 'http://schemas.android.com/apk/res/android'
+      manifest['package'] = -> { package }
+
+      manifest['android:versionCode'] = -> { "#{version_code}" }
+      manifest['android:versionName'] = -> { "#{version_name}" }
+
+      manifest.add_child('uses-sdk') do |uses_sdk|
+        uses_sdk['android:minSdkVersion'] = -> { "#{api_version}" }
+        uses_sdk['android:targetSdkVersion'] = -> { "#{target_api_version}" }
+      end
+
+      manifest.add_child('application') do |application|
+        application['android:label'] = -> { "#{name}" }
+        application['android:debuggable'] = -> { "#{development? ? 'true' : 'false'}" }
+        application['android:icon'] = -> { icon ? "@drawable/#{icon}" : nil }
+        application['android:name'] = -> { application_class ? application_class : nil }
+        application.add_child('activity') do |activity|
+          activity['android:name'] = -> { main_activity }
+          activity['android:label'] = -> { name }
+          activity.add_child('intent-filter') do |filter|
+            filter.add_child('action', 'android:name' => 'android.intent.action.MAIN' )
+            filter.add_child('category', 'android:name' => 'android.intent.category.LAUNCHER' )
+          end
+        end
       end
     end
 
@@ -68,7 +166,7 @@ module Motion; module Project;
       end
 
       if api_version == nil or !File.exist?("#{sdk_path}//platforms/android-#{api_version}")
-        App.fail "The Android SDK installed on your system does not support " + (api_version == nil ? "any API level" : "API level #{api_version}") + ". Run the `#{sdk_path}/tools/android' program to install missing API levels." 
+        App.fail "The Android SDK installed on your system does not support " + (api_version == nil ? "any API level" : "API level #{api_version}") + ". Run the `#{sdk_path}/tools/android' program to install missing API levels."
       end
 
       if !File.exist?("#{ndk_path}/platforms/android-#{api_version_ndk}")
@@ -234,7 +332,7 @@ module Motion; module Project;
           'armeabi-v7a'
         else
           raise "Invalid arch `#{arch}'"
-      end 
+      end
     end
 
     def bin_exec(name)

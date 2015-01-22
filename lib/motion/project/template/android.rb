@@ -37,14 +37,7 @@ task :build do
   app_build_dir = App.config.versionized_build_dir
   mkdir_p app_build_dir
 
-  # Generate the Android manifest file.
-  android_manifest_txt = ''
-  android_manifest_txt << <<EOS
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{x=App.config.version_code}" android:versionName="#{App.config.version_name}">
-  <uses-sdk android:minSdkVersion="#{App.config.api_version}" android:targetSdkVersion="#{App.config.target_api_version}"/>
-EOS
-  # Application permissions.
+  # permissions
   permissions = Array(App.config.permissions)
   if App.config.development?
     # In development mode, we need the INTERNET permission in order to create
@@ -53,51 +46,39 @@ EOS
   end
   permissions.each do |permission|
     permission = "android.permission.#{permission.to_s.upcase}" if permission.is_a?(Symbol)
-    android_manifest_txt << <<EOS
-  <uses-permission android:name="#{permission}"></uses-permission>
-EOS
+    App.config.manifest.add_child('uses-permission', 'android:name' => "#{permission}")
   end
-  # Application features.
-  features = Array(App.config.features)
-  features.each do |feature|
-    android_manifest_txt << <<EOS
-  <uses-feature android:name="#{feature}"></uses-feature>
-EOS
+
+  # features
+  App.config.features.each do |feature|
+    App.config.manifest.child('application').add_child('uses-feature', 'android:name' => "#{feature}")
   end
-  # Custom manifest entries.
-  App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
-  android_manifest_txt << <<EOS
-  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''} #{App.config.application_class ? ('android:name="' + App.config.application_class + '"') : ''}>
-EOS
-  App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
-  # Main activity.
-  android_manifest_txt << <<EOS
-    <activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </activity>
-EOS
-  # Sub-activities.
+
+  # sub activities
   (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
-    android_manifest_txt << <<EOS
-    <activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
-      <meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
-    </activity>
-EOS
+
+    App.config.manifest.child('application').add_child('activity') do |sub_activity|
+
+      sub_activity['android:name'] = "#{activity}"
+      sub_activity['android:label'] = "#{activity}"
+      sub_activity['android:parentActivityName'] = -> { "#{App.config.main_activity}" }
+
+      sub_activity.add_child('meta-data') do |meta|
+        meta['android:name'] = 'android.support.PARENT_ACTIVITY'
+        meta['android:value'] = -> { "#{App.config.main_activity}" }
+      end
+    end
   end
-  # Services.
-  services = Array(App.config.services)
-  services.each do |service|
-    android_manifest_txt << <<EOS
-    <service android:name="#{service}" android:exported="false"></service>
-EOS
+
+  # services
+  App.config.services.each do |service|
+    App.config.manifest.child('application').add_child('service', 'android:name' => "#{service}", 'android:exported' => 'false')
   end
-  android_manifest_txt << <<EOS
-  </application>
-</manifest>
-EOS
+
+  # generate AndroidManifest.xml
+  android_manifest_txt = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+  android_manifest_txt << App.config.manifest.to_xml
+
   android_manifest = File.join(app_build_dir, 'AndroidManifest.xml')
   if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
     App.info 'Create', android_manifest
