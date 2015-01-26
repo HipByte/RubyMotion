@@ -279,14 +279,7 @@ task :device => :archive do
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
   if ENV['debug']
-    unless remote_arch = ENV['arch']
-      ary = App.config.archs['iPhoneOS']
-      remote_arch = ary.last
-      if ary.size > 1
-        $stderr.puts "*** Application is built for multiple architectures (#{ary.join(', ')}), the debugger will target #{remote_arch}. Pass the `arch' option in order to specify which one to use (ex. rake device debug=1 arch=arm64)."
-      end
-    end
-    env << " RM_REMOTE_ARCH=\"#{remote_arch}\""
+    env << " RM_AVAILABLE_ARCHS='#{App.config.archs['iPhoneOS'].join(':')}'"
   end
 
   deploy = File.join(App.config.bindir, 'ios/deploy')
