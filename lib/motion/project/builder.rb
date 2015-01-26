@@ -484,6 +484,10 @@ EOS
       if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
         App.info "Create", dsym_path
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
+
+        # TODO only in debug mode
+        dest_path = File.join(app_resources_dir, File.basename(dsym_path))
+        copy_resource(dsym_path, dest_path)
       end
 
       # Strip all symbols. Only in distribution mode.
