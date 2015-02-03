@@ -97,6 +97,8 @@ module Motion; module Project;
       :logs_components, :version_code, :version_name, :permissions, :features,
       :services, :application_class, :manifest, :theme
 
+    attr_accessor :vm_debug_logs # Non-public.
+
     def initialize(project_dir, build_mode)
       super
       @main_activity = 'MainActivity'
@@ -114,6 +116,7 @@ module Motion; module Project;
       @version_name = '1.0'
       @application_class = nil
       @theme = "@android:style/Theme.Holo"
+      @vm_debug_logs = false
 
       @manifest = AndroidManifest.new
       construct_manifest

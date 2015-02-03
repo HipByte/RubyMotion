@@ -170,6 +170,7 @@ EOS
   end
   payload_c_txt << <<EOS
 }
+extern bool ruby_vm_debug_logs;
 extern "C"
 jint
 JNI_OnLoad(JavaVM *vm, void *reserved)
@@ -180,6 +181,7 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
 	return -1;
     }
     assert(env != NULL);
+    #{App.config.vm_debug_logs ? 'ruby_vm_debug_logs = true;' : ''}
     rb_vm_init("#{App.config.package_path}", "#{App.config.rubymotion_env_value}", "#{Motion::Version}", env);
     void *top_self = rb_vm_top_self();
 EOS
