@@ -95,7 +95,7 @@ module Motion; module Project;
     variable :sdk_path, :ndk_path, :avd_config, :package, :main_activity,
       :sub_activities, :api_version, :target_api_version, :arch, :assets_dirs,
       :icon, :logs_components, :version_code, :version_name, :permissions,
-      :features, :services, :application_class, :manifest
+      :features, :services, :application_class, :manifest, :theme
 
     def initialize(project_dir, build_mode)
       super
@@ -114,6 +114,7 @@ module Motion; module Project;
       @version_code = '1'
       @version_name = '1.0'
       @application_class = nil
+      @theme = "@android:style/Theme.Holo"
 
       @manifest = AndroidManifest.new
       construct_manifest
@@ -145,6 +146,7 @@ module Motion; module Project;
         application['android:debuggable'] = -> { "#{development? ? 'true' : 'false'}" }
         application['android:icon'] = -> { icon ? "@drawable/#{icon}" : nil }
         application['android:name'] = -> { application_class ? application_class : nil }
+        application['android:theme'] = -> { "#{theme}" }
         application.add_child('activity') do |activity|
           activity['android:name'] = -> { main_activity }
           activity['android:label'] = -> { name }
