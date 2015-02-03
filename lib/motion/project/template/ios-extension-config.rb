@@ -44,10 +44,6 @@ module Motion; module Project;
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
 
-    def deployment_target
-      @deployment_target
-    end
-
     # App Extensions are required to include a 64-bit for App Store submission.
     def archs
       @archs ||= begin
