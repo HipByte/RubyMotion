@@ -511,7 +511,7 @@ module Bacon
     if defined?(NSObject)
       current_context.performSelector("run", withObject:nil, afterDelay:0)
     else
-      @main_activity = arg
+      @main_activity ||= arg
       current_context.run
     end
   end
