@@ -187,7 +187,7 @@ EOS
       #         we copy and use as-is.
       #
       def prebuilt_app_executable(platform)
-        File.join(sdk(platform), "/Library/Application Support/SP/SP.app/SP")
+        File.join(sdk(platform), "/Library/Application Support/WatchKit/WK")
       end
 
       # @todo Do we really need this? `man ibtool` seems to indicate it's needed
