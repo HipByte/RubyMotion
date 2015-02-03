@@ -78,9 +78,10 @@ module Motion; module Project
     # @return [String] The path to the platform + configuration based directory.
     #
     def build_dir
-      File.join(@path, 'build', @platform +
-                                '-' + @config.deployment_target +
-                                '-' + @config.build_mode_name)
+      @build_dir ||= begin
+        build_path = File.join(@path, 'build', '*')
+        Dir[build_path].sort_by{ |f| File.mtime(f) }.last
+      end
     end
 
     # --------------------------------------------------------------------------
