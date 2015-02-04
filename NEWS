@@ -1,3 +1,43 @@
+= RubyMotion 3.4 =
+
+  * [iOS] Fixed a bug where iOS 8 extensions and their host app could not have
+    different deployment_target values.
+  * [iOS] Fixed a bug where an incorrect architecture would be chosen when
+    debugging on a device. Now defaults to the device architecture.
+  * [iOS, OSX] Fixed a bug where small structure types couldn't be returned
+    from Objective-C methods in 64-bit.
+  * [Android] Added Bundler support to the project template.
+  * [Android] Added the `app.theme' Rakefile variable to set up the theme of
+    the app. The default value is `Theme.Holo'.
+  * [Android] Added Array#{flatten, flatten!, slice, slice!}.
+  * [Android] Added Enumerable#{reverse_each, each_with_object, each_entry,
+    each_slice, each_cons, collect, map, count, find, detect, grep, find_index,
+    flat_map, collect_concat, partition, group_by, first, all?, any?, one?,
+    none?, min, max, minmax, min_by, max_by, minmax_by, member?, include?}.
+  * [Android] Improved Array#[] for CRuby compatibility.
+  * [Android] Disabled internal/debug VM logs since they impact launch time and
+    general performance. If you want to set them back on (for debugging), the
+    `app.vm_debug_logs' variable can be set to `true'.
+  * [Android] Fixed a bug where Fixnum#* would cause a runtime crash if the
+    receiver was zero.
+  * [Android] Fixed a bug where an `ensure' statement would cause the project
+    to fail to build, due to a linking error.
+  * [Android] Fixed a bug in the Java method dispatcher where it would fail
+    to call methods returning arrays of non-object types (ex. the `getBytes'
+    method of java.lang.String).
+  * [Android] Fixed a bug where trying to set/assign a value to a Java object
+    field would cause a NoMethodError.
+  * [Android] Fixed Enumerable#{each_with_index, select} to return an Enumerator
+    when if no block is given.
+  * [Android] Fixed a bug where Enumerable methods would be taken in priority
+    over Hash methods (ex. `select'), due to the fact that the module was
+    included in the wrong class.
+  * [Android] Fixed a bug where the use of the `break' keyword inside a block
+    would cause a compilation crash.
+  * [Android] Fixed a bug in the spec framework where the `main_activity'
+    helper method would only work as expected in the first spec file, and
+    return nil in other spec files.
+
 = RubyMotion 3.3 =
 
   * [iOS] Fixed a bug where a WatchKit application could be launched on an iOS
