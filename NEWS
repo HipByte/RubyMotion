@@ -1,3 +1,8 @@
+= RubyMotion 3.5 =
+
+  * [iOS, OSX] Fixed a regression introduced by the previous release where the
+    REPL would not work.
+
 = RubyMotion 3.4 =
 
   * [iOS] Fixed a bug where iOS 8 extensions and their host app could not have
