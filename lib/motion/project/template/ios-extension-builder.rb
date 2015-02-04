@@ -83,7 +83,7 @@ PLIST
       @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
       config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
       if ENV['RM_TARGET_DEPLOYMENT_TARGET'] && \
-         Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET']) < Util::Version.new(App.config.deployment_target)
+         Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET']) > Util::Version.new(App.config.deployment_target)
         App.config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET']
       end
       if ENV['RM_TARGET_ARCHS']
