@@ -79,6 +79,7 @@ end
 namespace :watch do
   desc "Run the Watch application on the simulator"
   task :simulator do
+    ENV['__USE_DEVICE_INT__'] = '1'
     watch_extension = App.config.targets.find do |target|
       File.exist?(File.join(target.path, 'watch_app'))
     end
