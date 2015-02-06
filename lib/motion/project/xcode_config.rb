@@ -295,7 +295,12 @@ EOS
 
     def xcode_debug_info_version
       @debug_info_version ||= begin
-        `echo '' | xcrun clang -c -xc -g -emit-llvm -S -o /dev/stdout - | grep 'Debug Info Version'`.match(/\d{9}/)[0]
+        if m = `echo '' | xcrun clang -c -xc -g -emit-llvm -S -o /dev/stdout - | grep 'Debug Info Version'`.match(/\d{9}/)
+          m[0]
+        else
+          # Return dummy 'Debug Info Version' because Xcode 5 or older doesn't return it. 
+          "1"
+        end
       end
     end
 
