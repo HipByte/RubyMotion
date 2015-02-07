@@ -57,7 +57,7 @@ module Motion; module Project
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
-      :template, :detect_dependencies, :exclude_from_detect_dependencies
+      :template, :detect_dependencies, :exclude_from_detect_dependencies, :opt_level
 
     ConfigTemplates = {}
 
