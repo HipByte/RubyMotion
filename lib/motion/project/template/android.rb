@@ -118,7 +118,7 @@ task :build do
     end
 
     r_classes = Dir.glob(classes_dir + '/**/R\$*[a-z]*.class').map { |c| "'#{c}'" }
-    sh "#{App.config.bin_exec('android/gen_bridge_metadata')} #{r_classes.join(' ')} -o \"#{r_bs}\" "
+    sh "RUBYOPT='' #{App.config.bin_exec('android/gen_bridge_metadata')} #{r_classes.join(' ')} -o \"#{r_bs}\" "
 
     classes_changed = true
   end
