@@ -79,7 +79,6 @@ end
 namespace :watch do
   desc "Run the Watch application on the simulator"
   task :simulator do
-    ENV['__USE_DEVICE_INT__'] = '1'
     watch_extension = App.config.targets.find do |target|
       File.exist?(File.join(target.path, 'watch_app'))
     end
@@ -333,7 +332,6 @@ end
 namespace :profile do
   desc "Run a build on the simulator through Instruments"
   task :simulator do
-    ENV['__USE_DEVICE_INT__'] = '1'
     Rake::Task['build:simulator'].invoke
 
     target = ENV['target'] || App.config.sdk_version
@@ -367,8 +365,6 @@ namespace :profile do
 
   desc "Run a build on the device through Instruments"
   task :device do
-    ENV['__USE_DEVICE_INT__'] = '1'
-
     # Create a build that allows debugging but doesn't start a debugger on deploy.
     App.config.entitlements['get-task-allow'] = true
     ENV['install_only'] = '1'
