@@ -134,18 +134,20 @@ task :build do
   kernel_bc = App.config.kernel_path
   ruby_objs_changed = false
   ((App.config.spec_mode ? App.config.spec_files : []) + App.config.files).each do |ruby_path|
-    bc_path = File.join(objs_build_dir, File.expand_path(ruby_path) + '.bc')
-    init_func = "MREP_" + `/bin/echo \"#{File.expand_path(bc_path)}\" | /usr/bin/openssl sha1`.strip
-    if !File.exist?(bc_path) \
-        or File.mtime(ruby_path) > File.mtime(bc_path) \
-        or File.mtime(ruby) > File.mtime(bc_path) \
-        or File.mtime(kernel_bc) > File.mtime(bc_path)
+    ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.o')
+    init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
+    if !File.exist?(ruby_obj) \
+        or File.mtime(ruby_path) > File.mtime(ruby_obj) \
+        or File.mtime(ruby) > File.mtime(ruby_obj) \
+        or File.mtime(kernel_bc) > File.mtime(ruby_obj)
       App.info 'Compile', ruby_path
-      FileUtils.mkdir_p(File.dirname(bc_path))
-      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{bc_path}\" #{init_func} \"#{ruby_path}\""
+      ruby_bc = ruby_obj + '.bc'
+      FileUtils.mkdir_p(File.dirname(ruby_bc))
+      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{ruby_bc}\" #{init_func} \"#{ruby_path}\""
+      sh "#{App.config.cc} #{App.config.asflags} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
       ruby_objs_changed = true
     end
-    ruby_objs << [bc_path, init_func]
+    ruby_objs << [ruby_obj, init_func]
   end
 
   # Generate payload main file.
