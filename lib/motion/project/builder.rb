@@ -396,7 +396,23 @@ EOS
         FileUtils.mkdir_p(app_frameworks)
         embedded_frameworks.each do |src_path|
           dest_path = File.join(app_frameworks, File.basename(src_path))
-          if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
+
+          # If the framework changed -- for example, it was recompiled or
+          # updated to a newer version -- then we need to first remove the old
+          # version from the app bundle in the build folder.
+          #
+          # Otherwise the copy command below copies the new framework version
+          # as a *subfolder* of the old one.
+          #
+          # Also, we can't simply pass `remove_destination: true` to the copy
+          # command below because that only works if the destination is a
+          # regular file, and not a directory.
+          if File.exist?(dest_path) and File.mtime(src_path) > File.mtime(dest_path)
+            App.info 'Remove', dest_path
+            FileUtils.rm_r dest_path if File.exist?(dest_path)
+          end
+
+          if !File.exist?(dest_path)
             App.info 'Copy', src_path
             FileUtils.cp_r(src_path, dest_path)
           end 
