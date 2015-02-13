@@ -1,3 +1,40 @@
+= RubyMotion 3.6 =
+
+  * [iOS] Added support for iOS 8.3. Xcode 6.3 beta is required.
+  * [iOS, OSX] Fixed a bug where the build would fail when using Xcode 5.
+  * [iOS] Fixed a bug where WatchKit applications could not be launched with
+    Xcode 6.2 beta 5.
+  * [iOS] Fixed a bug where device log wouldn't be displayed with `rake device'
+    if `CFBundleName' property was changed.
+  * [Android] Improved the build time of projects, by not compiling the
+    internal bitcode of Ruby files that have not changed.
+  * [Android] Added Math module.
+  * [Android] Added Time#{+, -}.
+  * [Android] Added Hash#{default, default=, default_proc, default_proc=}.
+  * [Android] Added String#{[]=, slice!, chop, chop!, chomp, chomp!, sub, sub!,
+    gsub, gsub!, split}.
+  * [Android] Improved Float#to_s, String#[], Array#{[]=, values_at} for CRuby
+    compatibility.
+  * [Android] Improved Hash#{shift, replace} for CRuby compatibility.
+  * [Android] Fixed a build error in a Bundler environment.
+  * [Android] Fixed a bug where Array#[] would crash when returning a large
+    array.
+  * [Android] Fixed a bug where Array#delete would crash when removing a lot of
+    elements.
+  * [Android] Fixed a bug where Array#[start, length]= would crash when
+    providing a large start position.
+  * [Android] Fixed a bug where Array#pop(number) would crash when specifying
+    a large number.
+  * [Android] Fixed a bug where Array#flatten would crash when used on a large
+    array.
+  * [Android] Fixed a bug where String#scan would crash if many elements would
+    be matched.
+  * [Android] Fixed a bug where String#scan returned the wrong value if the
+    Regexp group would be passed as argument.
+  * [Android] Fixed a bug where attempting to retrieve a Java field on an
+    inner Java class would always return null/zero on Android 21 / ART,
+    apparently due to a JNI regression (we added a workaround).
+
 = RubyMotion 3.5 =
 
   * [iOS, OSX] Fixed a regression introduced by the previous release where the
