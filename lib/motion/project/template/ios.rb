@@ -133,9 +133,6 @@ task :simulator do
     App.fail "It is not possible to simulate an SDK version (#{target}) " \
              "lower than the app's deployment target (#{deployment_target})"
   end
-  if target && ENV['device_name']
-    App.fail "It is not possible to specify both `device_name' and `target'"
-  end
   target ||= App.config.sdk_version
 
   # May be overridden on Xcode <= 5 with the `device_family' option (see below)
