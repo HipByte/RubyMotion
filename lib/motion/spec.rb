@@ -488,6 +488,12 @@ module Bacon
     end
   end
 
+  class Platform
+    def self.android?
+      defined?(NSObject) ? false : true
+    end
+  end
+
   def self.add_context(context)
     (@contexts ||= []) << context
   end
@@ -557,13 +563,16 @@ module Bacon
       # TODO
       #return  unless name =~ RestrictContext
 
-      if spec = current_specification
-        if defined?(NSObject)
+      unless Platform.android?
+        if spec = current_specification
           spec.performSelector("run", withObject:nil, afterDelay:0)
         else
-          spec.run
+          Bacon.context_did_finish(self)
         end
       else
+        @specifications.each do |spec|
+          spec.run
+        end
         Bacon.context_did_finish(self)
       end
     end
@@ -573,11 +582,13 @@ module Bacon
     end
 
     def specification_did_finish(spec)
-      if (@current_specification_index + 1) < @specifications.size
-        @current_specification_index += 1
-        run
-      else
-        Bacon.context_did_finish(self)
+      unless Platform.android?
+        if (@current_specification_index + 1) < @specifications.size
+          @current_specification_index += 1
+          run
+        else
+          Bacon.context_did_finish(self)
+        end
       end
     end
 
