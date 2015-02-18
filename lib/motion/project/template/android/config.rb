@@ -161,11 +161,11 @@ module Motion; module Project;
     end
 
     def validate
-      if !sdk_path or !File.exist?(sdk_path)
+      if !sdk_path or !File.exist?("#{sdk_path}/platforms")
         App.fail "app.sdk_path should point to a valid Android SDK directory."
       end
 
-      if !ndk_path or !File.exist?(ndk_path)
+      if !ndk_path or !File.exist?("#{ndk_path}/platforms")
         App.fail "app.ndk_path should point to a valid Android NDK directory."
       end
 
