@@ -57,7 +57,8 @@ module Motion; module Project
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
-      :template, :detect_dependencies, :exclude_from_detect_dependencies, :opt_level
+      :template, :detect_dependencies, :exclude_from_detect_dependencies,
+      :opt_level, :custom_init_funcs
 
     ConfigTemplates = {}
 
@@ -87,6 +88,7 @@ module Motion; module Project
       @dependencies = {}
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
+      @custom_init_funcs = []
     end
 
     def osx_host_version

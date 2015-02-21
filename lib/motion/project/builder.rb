@@ -198,6 +198,9 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
 EOS
+      config.custom_init_funcs.each do |init_func|
+        init_txt << "void #{init_func}(void);\n"
+      end
       app_objs.each do |_, init_func|
         init_txt << "void #{init_func}(void *, void *);\n"
       end
@@ -230,6 +233,9 @@ EOS
         end
       end
 
+      config.custom_init_funcs.each do |init_func|
+        init_txt << "#{init_func}();\n"
+      end
       app_objs.each do |_, init_func|
         init_txt << "#{init_func}(self, 0);\n"
       end
