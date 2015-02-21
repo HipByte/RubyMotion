@@ -473,10 +473,12 @@ EOS
       end
 
       # Generate dSYM.
-      dsym_path = config.app_bundle_dsym(platform)
-      if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
-        App.info "Create", dsym_path
-        sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
+      unless ENV["skip_dsym"]
+        dsym_path = config.app_bundle_dsym(platform)
+        if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
+          App.info "Create", dsym_path
+          sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
+        end
       end
 
       # Strip all symbols. Only in distribution mode.
