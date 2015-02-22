@@ -60,7 +60,7 @@ module Motion
     self.command = 'motion'
     self.plugin_prefix = 'motion'
 
-    self.description = 'RubyMotion lets you develop native iOS and OS X ' \
+    self.description = 'RubyMotion lets you develop native iOS, OS X and Android ' \
                        'applications using the awesome Ruby language.'
 
     # TODO remove in RM 3.
