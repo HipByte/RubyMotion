@@ -165,6 +165,9 @@ extern "C" {
     void *rb_vm_top_self(void);
     void rb_rb2oc_exc_handler(void);
 EOS
+  App.config.custom_init_funcs.each do |init_func|
+    payload_c_txt << "    void #{init_func}(void);\n"
+  end
   ruby_objs.each do |_, init_func|
     payload_c_txt << <<EOS
     void *#{init_func}(void *rcv, void *sel);
@@ -187,6 +190,9 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     rb_vm_init("#{App.config.package_path}", "#{App.config.rubymotion_env_value}", "#{Motion::Version}", env);
     void *top_self = rb_vm_top_self();
 EOS
+  App.config.custom_init_funcs.each do |init_func|
+    payload_c_txt << "    #{init_func}();\n"
+  end
   ruby_objs.each do |ruby_obj, init_func|
     payload_c_txt << <<EOS
     try {
