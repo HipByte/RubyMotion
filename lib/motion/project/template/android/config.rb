@@ -325,9 +325,13 @@ module Motion; module Project;
       "#{versioned_datadir}/#{arch}"
     end
 
-    def ldlibs
+    def ldlibs_pre
       # The order of the libraries matters here.
-      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir}\" -lrubymotion-static -L#{ndk_path}/sources/cxx-stl/stlport/libs/armeabi -lstlport_static"
+      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir}\" -lrubymotion-static"
+    end
+
+    def ldlibs_post
+      "-L#{ndk_path}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi -lgnustl_static"
     end
 
     def armeabi_directory_name

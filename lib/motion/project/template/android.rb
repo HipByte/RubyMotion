@@ -234,7 +234,7 @@ EOS
     App.info 'Create', libpayload_path
     FileUtils.mkdir_p(File.dirname(libpayload_path))
     sh "#{App.config.cc} #{App.config.cflags} -c \"#{payload_c}\" -o \"#{payload_o}\""
-    sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs} #{App.config.libs.join(' ')}"
+    sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs_pre} #{App.config.libs.join(' ')} #{App.config.ldlibs_post}"
   end
 
   # Install native shared libraries.
