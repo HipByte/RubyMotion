@@ -191,7 +191,11 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     void *top_self = rb_vm_top_self();
 EOS
   App.config.custom_init_funcs.each do |init_func|
-    payload_c_txt << "    #{init_func}();\n"
+    payload_c_txt << <<EOS
+    env->PushLocalFrame(32);
+    #{init_func}();
+    env->PopLocalFrame(NULL);
+EOS
   end
   ruby_objs.each do |ruby_obj, init_func|
     payload_c_txt << <<EOS
