@@ -486,7 +486,9 @@ EOS
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
 
         # TODO only in debug mode
-        copy_resource(dsym_path, app_resources_dir)
+        dest_path = File.join(app_resources_dir, File.basename(dsym_path))
+        FileUtils.rm_rf(dest_path)
+        copy_resource(dsym_path, dest_path)
       end
 
       # Strip all symbols. Only in distribution mode.
