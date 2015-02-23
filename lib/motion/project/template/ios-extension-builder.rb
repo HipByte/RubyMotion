@@ -498,14 +498,13 @@ EOS
       end
 
       # Generate dSYM.
-      dsym_path = config.app_bundle_dsym(platform)
-      if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
+      if any_obj_file_built
+        dsym_path = config.app_bundle_dsym(platform)
         App.info "Create", relative_path(dsym_path)
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
 
         # TODO only in debug mode
-        dest_path = File.join(app_resources_dir, File.basename(dsym_path))
-        copy_resource(dsym_path, dest_path)
+        copy_resource(dsym_path, app_resources_dir)
       end
 
       # Strip all symbols. Only in distribution mode.
