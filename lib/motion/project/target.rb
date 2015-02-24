@@ -151,6 +151,7 @@ module Motion; module Project
         "RM_TARGET_HOST_APP_PATH" => File.expand_path(@config.project_dir),
         "RM_TARGET_BUILD" => '1',
         "RM_TARGET_ARCHS" => @config.archs.inspect,
+        "RM_TARGET_EMBED_DSYM" => @config.embed_dsym.inspect,
       }
       env["BUNDLE_GEMFILE"] = gemfile_path if use_gemfile?
       ENV.to_hash.merge(env)
