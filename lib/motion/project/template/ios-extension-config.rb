@@ -44,6 +44,19 @@ module Motion; module Project;
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
 
+    def embed_dsym
+      if ENV['RM_TARGET_EMBED_DSYM']
+        ENV['RM_TARGET_EMBED_DSYM'] == "true" ? true : false
+      else
+        @embed_dsym
+      end
+    end
+
+    def embed_dsym=(boolean)
+      ENV.delete('RM_TARGET_EMBED_DSYM')
+      @embed_dsym = boolean
+    end
+
     # App Extensions are required to include a 64-bit for App Store submission.
     def archs
       @archs ||= begin

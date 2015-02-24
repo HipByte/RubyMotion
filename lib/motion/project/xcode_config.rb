@@ -281,19 +281,6 @@ EOS
       archs[platform].map { |x| "-arch #{x}" }.join(' ')
     end
 
-    def embed_dsym
-      if ENV['RM_TARGET_EMBED_DSYM']
-        ENV['RM_TARGET_EMBED_DSYM'] == "true" ? true : false
-      else
-        @embed_dsym
-      end
-    end
-
-    def embed_dsym=(boolean)
-      ENV.delete('RM_TARGET_EMBED_DSYM')
-      @embed_dsym = boolean
-    end
-
     def common_flags(platform)
       "#{arch_flags(platform)} -isysroot \"#{unescape_path(sdk(platform))}\" -F#{sdk(platform)}/System/Library/Frameworks"
     end
