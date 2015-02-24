@@ -49,7 +49,7 @@ module Motion; module Project;
       @entitlements = {}
       @delegate_class = 'AppDelegate'
       @spec_mode = false
-      @embed_dsym = true
+      @embed_dsym = (development? ? true : false)
       @vendor_projects = []
       @version = '1.0'
     end
