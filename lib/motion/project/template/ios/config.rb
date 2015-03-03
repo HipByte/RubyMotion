@@ -575,7 +575,7 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
-    void Init_DeviceREPL(void);
+    void ruby_init_device_repl(void);
 EOS
       if spec_mode
         spec_objs.each do |_, init_func|
@@ -652,7 +652,7 @@ EOS
 EOS
     if development?
       main_txt << <<EOS
-    Init_DeviceREPL();
+    ruby_init_device_repl();
 EOS
     end
     main_txt << <<EOS
