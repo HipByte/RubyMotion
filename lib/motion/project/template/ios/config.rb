@@ -575,6 +575,7 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
+    void Init_DeviceREPL(void);
 EOS
       if spec_mode
         spec_objs.each do |_, init_func|
@@ -649,6 +650,11 @@ EOS
     main_txt << <<EOS
     RubyMotionInit(argc, argv);
 EOS
+    if development?
+      main_txt << <<EOS
+    Init_DeviceREPL();
+EOS
+    end
     main_txt << <<EOS
     retval = UIApplicationMain(argc, argv, nil, @"#{delegate_class}");
     rb_exit(retval);
