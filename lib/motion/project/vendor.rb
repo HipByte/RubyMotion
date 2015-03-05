@@ -167,7 +167,7 @@ EOS
       headers = source_files.select { |p| File.extname(p) == '.h' }
       bs_files = []
       unless headers.empty?
-        bs_file = bridgesupport_build_path(build_dir)
+        bs_file = bridgesupport_build_path
         if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
           FileUtils.mkdir_p File.dirname(bs_file)
           bs_cflags = (@opts[:bridgesupport_cflags] or cflags)
@@ -209,7 +209,7 @@ EOS
       end
 
       # Generate the bridgesupport file if we need to.
-      bs_file = bridgesupport_build_path(build_dir)
+      bs_file = bridgesupport_build_path
       headers_dir = @opts[:headers_dir]
       if headers_dir
         # Dir.glob does not traverse symlinks with `**`, using this pattern
@@ -250,10 +250,10 @@ EOS
     # First check if an explicit metadata file exists and, if so, write
     # the new file to that same location. Otherwise fall back to the
     # platform-specific build dir.
-    def bridgesupport_build_path(build_dir)
+    def bridgesupport_build_path
       bs_file = File.basename(@path) + '.bridgesupport'
       unless File.exist?(bs_file)
-        bs_file = File.join(build_dir, bs_file)
+        bs_file = File.join(Builder.common_build_dir, File.expand_path(@path) + '.bridgesupport')
       end
       bs_file
     end
