@@ -133,7 +133,7 @@ task :build do
   objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   kernel_bc = App.config.kernel_path
   ruby_objs_changed = false
-  ((App.config.spec_mode ? App.config.spec_files : []) + App.config.files).each do |ruby_path|
+  ((App.config.spec_mode ? App.config.spec_files : []) + App.config.ordered_build_files).each do |ruby_path|
     ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.o')
     init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
     if !File.exist?(ruby_obj) \
