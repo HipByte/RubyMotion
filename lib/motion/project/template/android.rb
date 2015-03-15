@@ -363,7 +363,6 @@ EOS
   end
 
   # Compile java files.
-  classes_changed = false
   vendored_jars = App.config.vendored_projects.map { |x| x[:jar] }
   vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
   classes_dir = File.join(app_build_dir, 'classes')
