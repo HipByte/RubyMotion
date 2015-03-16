@@ -19,10 +19,10 @@ module Bacon
     raise NameError, "no such context: #{name.inspect}"
   }
 
-  RestrictName    = //  unless defined? RestrictName
-  RestrictContext = //  unless defined? RestrictContext
+  RestrictName    = //  unless defined?(RestrictName) && RestrictName
+  RestrictContext = //  unless defined?(RestrictContext) && RestrictContext
 
-  Backtraces = true  unless defined? Backtraces
+  Backtraces = true  unless defined?(Backtraces) && Backtraces
 
   module RubyMineOutput
     @@entered = false
@@ -335,7 +335,7 @@ module Bacon
       # If an exception occurred, we definitely don't need to schedule any more blocks
       unless @exception_occurred
         @postponed_blocks_count += 1
-        if defined?(NSObject)
+        if defined?(NSObject) && NSObject
           performSelector("run_postponed_block:", withObject:block, afterDelay:seconds)
         else
           sleep seconds
@@ -352,7 +352,7 @@ module Bacon
         else
           @postponed_blocks_count += 1
           @postponed_block = block
-          if defined?(NSObject)
+          if defined?(NSObject) && NSObject
             performSelector("postponed_block_timeout_exceeded", withObject:nil, afterDelay:timeout)
           else
             sleep timeout
@@ -372,7 +372,7 @@ module Bacon
           @postponed_block = block
           @observed_object_and_key_path = [object_to_observe, key_path]
           object_to_observe.addObserver(self, forKeyPath:key_path, options:0, context:nil)
-          if defined?(NSObject)
+          if defined?(NSObject) && NSObject
             performSelector("postponed_change_block_timeout_exceeded", withObject:nil, afterDelay:timeout)
           else
             sleep timeout
@@ -407,7 +407,7 @@ module Bacon
     end
 
     def resume
-      if defined?(NSObject)
+      if defined?(NSObject) && NSObject
         NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:'postponed_block_timeout_exceeded', object:nil)
         NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:'postponed_change_block_timeout_exceeded', object:nil)
       end
@@ -441,7 +441,7 @@ module Bacon
     end
 
     def cancel_scheduled_requests!
-      if defined?(NSObject)
+      if defined?(NSObject) && NSObject
         NSObject.cancelPreviousPerformRequestsWithTarget(@context)
         NSObject.cancelPreviousPerformRequestsWithTarget(self)
       end
@@ -468,7 +468,7 @@ module Bacon
           }
           ErrorLog << "\n"
         else
-          if defined?(NSException)
+          if defined?(NSException) && NSException
             # Pure NSException.
             ErrorLog << "#{e.name}: #{e.reason}\n"
           else
@@ -508,7 +508,7 @@ module Bacon
     @timer ||= Time.now
     Counter[:context_depth] += 1
     handle_specification_begin(current_context.name)
-    if defined?(NSObject)
+    if defined?(NSObject) && NSObject
       current_context.performSelector("run", withObject:nil, afterDelay:0)
     else
       @main_activity ||= arg
@@ -530,7 +530,7 @@ module Bacon
     else
       # DONE
       handle_summary
-      if defined?(NSObject)
+      if defined?(NSObject) && NSObject
         exit(Counter.values_at(:failed, :errors).inject(:+))
       else
         # In Android there is no need to exit as we terminate the activity right after Bacon.
@@ -558,7 +558,7 @@ module Bacon
       #return  unless name =~ RestrictContext
 
       if spec = current_specification
-        if defined?(NSObject)
+        if defined?(NSObject) && NSObject
           spec.performSelector("run", withObject:nil, afterDelay:0)
         else
           spec.run
@@ -772,7 +772,7 @@ end
 # Do not log all exceptions when running the specs.
 Exception.log_exceptions = false
 
-if defined?(UIDevice) && !UIDevice.currentDevice.model.match(/simulator/i)
+if defined?(UIDevice) && UIDevice && !UIDevice.currentDevice.model.match(/simulator/i)
   module Kernel
     def puts(*args)
       NSLog(args.join("\n"))
