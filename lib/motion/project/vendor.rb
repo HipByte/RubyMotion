@@ -222,7 +222,7 @@ EOS
           @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
         end
       end
-      @bs_files << bs_file
+      @bs_files << File.expand_path(bs_file)
     end
 
     private
