@@ -126,14 +126,14 @@ task :build do
 
   # Compile Ruby files.
   ruby = App.config.bin_exec('ruby')
-  ruby_objs = []
   bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   bs_files += App.config.vendored_bs_files
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   kernel_bc = App.config.kernel_path
   ruby_objs_changed = false
-  ((App.config.spec_mode ? App.config.spec_files : []) + App.config.files).each do |ruby_path|
+
+  build_file = Proc.new do |files_build_dir, ruby_path|
     ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.o')
     init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
     if !File.exist?(ruby_obj) \
@@ -147,8 +147,27 @@ task :build do
       sh "#{App.config.cc} #{App.config.asflags} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
       ruby_objs_changed = true
     end
-    ruby_objs << [ruby_obj, init_func]
+    [ruby_obj, init_func]
   end
+
+  # Resolve file dependencies.
+  if App.config.detect_dependencies == true
+    App.config.dependencies = Motion::Project::Dependency.new(App.config.files - App.config.exclude_from_detect_dependencies, App.config.dependencies).run
+  end
+
+  parallel = Motion::Project::ParallelBuilder.new(objs_build_dir, build_file)
+  parallel.files = App.config.ordered_build_files
+  parallel.files += App.config.spec_files if App.config.spec_mode
+  parallel.run
+
+  ruby_objs = app_objs = parallel.objects
+  spec_objs = []
+  if App.config.spec_mode
+    app_objs = objs[0...App.config.ordered_build_files.size]
+    spec_objs = objs[-(App.config.spec_files.size)..-1]
+  end
+
+  FileUtils.touch(objs_build_dir) if ruby_objs_changed
 
   # Generate payload main file.
   payload_c_txt = <<EOS
