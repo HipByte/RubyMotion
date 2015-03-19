@@ -102,7 +102,7 @@ module Motion; class Command
 
     def setup_sdk
       $stderr.puts("-- Setup SDK...")
-      if system("which #{android_executable} > /dev/null")
+      if File.exist?(android_executable)
         $stderr.puts("Found installed SDK, trying to update...")
       else
         $stderr.puts("Installing SDK : version #{@sdk_version}")
@@ -126,7 +126,7 @@ module Motion; class Command
 
     def check_java
       $stderr.puts("-- Checking Java is installed...")
-      unless system("which /usr/bin/javac > /dev/null")
+      unless File.exist?('/usr/bin/java')
         die("[error] Couldn't find Java, please make sure you have java installed, we recommend java 1.6")
       end
     end
