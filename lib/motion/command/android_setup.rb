@@ -34,6 +34,7 @@ module Motion; class Command
     # use `tools/android list sdk --extended --all`
     # to get a list of available packages
     PACKAGES_LIST = %w{
+      tool
       platform-tools
       build-tools-22.0.0
       android-22
