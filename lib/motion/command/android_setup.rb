@@ -152,8 +152,9 @@ module Motion; class Command
     end
 
     def download(url, dest)
-      if system("which axel > /dev/null")
-        unless system("axel -n 10 -a -o '#{dest}' '#{url}'")
+      axel_path = `/usr/bin/which axel`
+      if $?.success?
+        unless system("#{axel_path.strip} -n 10 -a -o '#{dest}' '#{url}'")
           die("Error when connecting to the server. Check your Internet connection and try again.")
         end
       else
