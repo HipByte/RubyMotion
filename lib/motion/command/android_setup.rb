@@ -97,10 +97,7 @@ module Motion; class Command
     end
 
     def current_ndk_version
-      file = File.open(File.join(@ndk_directory, 'RELEASE.TXT'), "rb")
-      version = file.read.strip.split(' ')[0]
-      file.close
-      version
+      File.read(File.join(@ndk_directory, 'RELEASE.TXT'). strip.split(' ')[0]
     end
 
     def setup_sdk
