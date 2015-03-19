@@ -88,8 +88,8 @@ module Motion; class Command
         ndk_url = File.join(DL_GOOGLE, 'ndk', "android-ndk-#{@ndk_version}-darwin-x86_64.bin")
         ndk_bin = File.join(@tmp_directory, 'ndk.bin')
         download(ndk_url, ndk_bin)
-        system("chmod +x #{ndk_bin}")
-        system("cd #{@tmp_directory} && #{ndk_bin}")
+        system("chmod +x \"#{ndk_bin}\"")
+        system("cd \"#{@tmp_directory}\" && \"#{ndk_bin}\"")
         FileUtils.mv(File.join(@tmp_directory, "android-ndk-#{@ndk_version}"), @ndk_directory)
       else
         $stderr.puts("Installed NDK is up to date.")
@@ -110,11 +110,11 @@ module Motion; class Command
         zipped_sdk = File.join(@tmp_directory, "sdk.zip")
         download(sdk_url, zipped_sdk)
         extracted_sdk = File.join(@tmp_directory, 'sdk')
-        system("/usr/bin/unzip -q -a #{zipped_sdk} -d #{extracted_sdk}")
+        system("/usr/bin/unzip -q -a \"#{zipped_sdk}\" -d \"#{extracted_sdk}\"")
         FileUtils.mv(File.join(extracted_sdk, 'android-sdk-macosx'), @sdk_directory)
       end
       
-      system("#{android_executable} update sdk --no-ui --filter #{PACKAGES_LIST.join(',')}")
+      system("\"#{android_executable}\" update sdk --no-ui --filter #{PACKAGES_LIST.join(',')}")
     end
 
     def create_directory_structure
