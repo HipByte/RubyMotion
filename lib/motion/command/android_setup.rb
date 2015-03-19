@@ -25,7 +25,7 @@
 
 module Motion; class Command
   class AndroidSetup < Command
-    DefaultDirectory = File.join(Dir.home, 'rubymotion-android-test')
+    DefaultDirectory = File.join(Dir.home, '.rubymotion-android')
     DefaultSDKVersion = '24.1.2'
     DefaultNDKVersion = 'r10d'
 
