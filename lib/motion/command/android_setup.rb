@@ -89,7 +89,7 @@ module Motion; class Command
         ndk_bin = File.join(@tmp_directory, 'ndk.bin')
         download(ndk_url, ndk_bin)
         system("chmod +x \"#{ndk_bin}\"")
-        system("cd \"#{@tmp_directory}\" && \"#{ndk_bin}\"")
+        Dir.chdir(@tmp_directory) { system(ndk_bin) }
         FileUtils.mv(File.join(@tmp_directory, "android-ndk-#{@ndk_version}"), @ndk_directory)
       else
         $stderr.puts("Installed NDK is up to date.")
