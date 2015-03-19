@@ -1,3 +1,48 @@
+= Rubymotion 3.7 =
+
+  * Fixed a bug where the `motion' command would not work as expected if Ruby
+    was installed with rbenv/RVM.
+  * [iOS] Fix a bug where the build system would not detect the properties of
+    the running simulator if it existed with a different version of iOS.
+  * [iOS] Fixed a bug where a WatchKit app would not launch on the simulator
+    if it was built with x86_64 (64-bit Intel) only.
+  * [iOS, OSX] Improved the symbolication of exception backtraces. Backtraces
+    are now properly symbolicated when running on the device. This is done by
+    parsing the dSYM bundle at runtime. For this to work, in development mode,
+    the dSYM will be embedded within the application bundle. (This is disabled
+    in release mode). You can control this setting with the `app.embed_dsym'
+    variable in the project's Rakefile.
+  * [iOS, OSX] Improved performance when creating empty Hash objects.
+    ~2 times faster.
+  * [iOS, OSX] Improved performance when creating very small Array objects.
+    ~30% faster.
+  * [iOS, OSX] Bridgesupport files for vendor projects are now generated in the
+    common build directory (~/Library/Rubymotion/build). This fixes a problem
+    when vendoring the Reveal framework.
+  * [iOS, OSX] Added a feature to disable capturing view (command key + moving
+    mouse over) in iOS simulator or OS X app. To enable/disable capturing view,
+    run `enable_capture' or `disable_capture' commands in REPL. If you want to
+    disable capturing before the application is launched, you can set the
+    DISABLE_CAPTURE environment variable when you will run the `rake' command.
+    (ex. `$ rake DISABLE_CAPTURE=1').
+  * [Android] The runtime is now using the GNU C++ stdlib for better internal
+    support and also upcoming new features.
+  * [Android] Improved compilation time, compiling multiple files in parallel.
+  * [Android] Support for defining manual file dependencies via
+    'app.files_dependencies'.
+  * [Android] Added Module#module_function.
+  * [Android] Added Symbol#to_sym.
+  * [Android] Added Time#usec.
+  * [Android] Object#send now accepts strings.
+  * [Android] Improved Kernel#rand to accept ranges (of fixnums and floats).
+  * [Android] Fixed a bug where undefined local variables or methods returned
+    false instead of raising an exception.
+  * [Android] Fixed a bug where Java getter/setter shortcuts would sometimes
+    not work.
+  * [Android] Fixed a bug where a crash would happen when running a spec with
+    a lot of test cases.
+  * [Android] Fixed memory leaks when symbolicating an exception backtrace.
+
 = RubyMotion 3.6 =
 
   * [iOS] Added support for iOS 8.3. Xcode 6.3 beta is required.
