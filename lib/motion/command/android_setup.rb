@@ -37,7 +37,7 @@ module Motion; class Command
       platform-tools
       build-tools-22.0.0
       android-22
-      system-image
+      sys-img-armeabi-v7a-addon-google_apis-google-22
       extra-android-support
     }
 
