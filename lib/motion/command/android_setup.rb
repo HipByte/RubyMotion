@@ -115,7 +115,7 @@ module Motion; class Command
         FileUtils.mv(File.join(extracted_sdk, 'android-sdk-macosx'), @sdk_directory)
       end
       
-      system("\"#{android_executable}\" update sdk --no-ui --filter #{PACKAGES_LIST.join(',')}")
+      system("\"#{android_executable}\" update sdk --all --no-ui --filter #{PACKAGES_LIST.join(',')}")
     end
 
     def create_directory_structure
