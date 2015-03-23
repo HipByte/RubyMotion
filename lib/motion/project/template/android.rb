@@ -37,6 +37,17 @@ task :build do
   app_build_dir = App.config.versionized_build_dir
   mkdir_p app_build_dir
 
+  # support libraries
+  extras_folder = File.join(App.config.sdk_path, 'extras')
+  App.config.support_libraries.each do |support_library|
+    library_folder = File.join(extras_folder, support_library.split('-'), "\"#{support_library}\".jar")
+    if File.exist?(library_folder)
+      App.config.vendor_project(:jar => library_folder)
+    else
+      App.fail "We couldn’t fail #{support_library} in #{extras_folder}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
+    end
+  end
+
   # permissions
   permissions = Array(App.config.permissions)
   if App.config.development?
