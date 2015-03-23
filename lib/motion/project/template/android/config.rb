@@ -414,6 +414,15 @@ module Motion; module Project;
       end
     end
 
+    def ctags_files
+      ctags_files = vendored_bs_files + files.flatten
+      ctags_files += Dir.glob(File.join(versioned_datadir, 'BridgeSupport/*.bridgesupport'))
+    end
+
+    def ctags_config_file
+      File.join(motiondir, 'data', 'bridgesupport-ctags-android.cfg')
+    end
+
     attr_reader :manifest_entries
 
     def manifest_entry(toplevel_element=nil, element, attributes)

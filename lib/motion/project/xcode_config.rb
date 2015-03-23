@@ -668,5 +668,15 @@ EOS
 
       args
     end
+
+    def ctags_files
+      ctags_files = bridgesupport_files
+      ctags_files += config.vendor_projects.map { |p| Dir.glob(File.join(p.path, '*.bridgesupport')) }.flatten
+      ctags_files += config.files.flatten
+    end
+
+    def ctags_config_file
+      File.join(motiondir, 'data', 'bridgesupport-ctags.cfg')
+    end
   end
 end; end
