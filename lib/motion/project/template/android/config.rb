@@ -95,7 +95,7 @@ module Motion; module Project;
     variable :sdk_path, :ndk_path, :package, :main_activity, :sub_activities,
       :api_version, :target_api_version, :arch, :assets_dirs, :icon,
       :logs_components, :version_code, :version_name, :permissions, :features,
-      :services, :application_class, :manifest, :theme
+      :services, :application_class, :manifest, :theme, :support_libraries
 
     # Non-public.
     attr_accessor :vm_debug_logs, :libs
@@ -233,6 +233,10 @@ module Motion; module Project;
 
     def target_api_version
       @target_api_version ||= latest_api_version
+    end
+
+    def support_libraries
+      @support_libraries ||= []
     end
 
     def versionized_build_dir
