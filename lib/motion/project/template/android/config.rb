@@ -164,19 +164,19 @@ module Motion; module Project;
 
     def validate
       if !sdk_path or !File.exist?("#{sdk_path}/platforms")
-        App.fail "app.sdk_path should point to a valid Android SDK directory."
+        App.fail "app.sdk_path should point to a valid Android SDK directory. Run 'motion android-setup' to install the latest SDK version."
       end
 
       if !ndk_path or !File.exist?("#{ndk_path}/platforms")
-        App.fail "app.ndk_path should point to a valid Android NDK directory."
+        App.fail "app.ndk_path should point to a valid Android NDK directory. Run 'motion android-setup' to install the latest NDK version."
       end
 
       if api_version == nil or !File.exist?("#{sdk_path}//platforms/android-#{api_version}")
-        App.fail "The Android SDK installed on your system does not support " + (api_version == nil ? "any API level" : "API level #{api_version}") + ". Run the `#{sdk_path}/tools/android' program to install missing API levels."
+        App.fail "The Android SDK installed on your system does not support " + (api_version == nil ? "any API level. Run 'motion android-setup' to install the latest API level." : "API level #{api_version}") + ". Run 'motion android-setup --api_version=#{api_version}' to install it."
       end
 
       if !File.exist?("#{ndk_path}/platforms/android-#{api_version_ndk}")
-        App.fail "The Android NDK installed on your system does not support API level #{api_version}. Switch to a lower API level or install a more recent NDK."
+        App.fail "The Android NDK installed on your system does not support API level #{api_version}. Run 'motion android-setup' to install a more recen NDK version."
       end
 
       super

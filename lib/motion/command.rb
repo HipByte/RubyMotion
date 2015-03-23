@@ -55,6 +55,7 @@ module Motion
     require 'motion/command/ri'
     require 'motion/command/support'
     require 'motion/command/update'
+    require 'motion/command/android_setup'
 
     self.abstract_command = true
     self.command = 'motion'
