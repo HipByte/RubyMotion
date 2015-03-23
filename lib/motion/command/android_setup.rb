@@ -36,10 +36,10 @@ module Motion; class Command
     PACKAGES_LIST = %w{
       tool
       platform-tools
-      build-tools-22.0.0
-      android-22
-      addon-google_apis-google-22
-      sys-img-armeabi-v7a-addon-google_apis-google-22
+      build-tools-21.0.0
+      android-21
+      addon-google_apis-google-21
+      sys-img-armeabi-v7a-addon-google_apis-google-21
       extra-android-support
     }
 
