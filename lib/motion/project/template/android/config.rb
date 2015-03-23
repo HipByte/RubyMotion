@@ -176,7 +176,7 @@ module Motion; module Project;
       end
 
       if !File.exist?("#{ndk_path}/platforms/android-#{api_version_ndk}")
-        App.fail "The Android NDK installed on your system does not support API level #{api_version}. Run 'motion android-setup' to install a more recen NDK version."
+        App.fail "The Android NDK installed on your system does not support API level #{api_version}. Run 'motion android-setup' to install a more recent NDK version."
       end
 
       super
