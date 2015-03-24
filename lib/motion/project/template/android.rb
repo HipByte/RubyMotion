@@ -38,13 +38,13 @@ task :build do
   mkdir_p app_build_dir
 
   # support libraries
-  extras_folder = File.join(App.config.sdk_path, 'extras')
+  extras_path = File.join(App.config.sdk_path, 'extras')
   App.config.support_libraries.each do |support_library|
-    library_folder = File.join(extras_folder, support_library.split('-'), "\"#{support_library}\".jar")
-    if File.exist?(library_folder)
-      App.config.vendor_project(:jar => library_folder)
+    library_path = File.join(extras_path, support_library.split('-'), "\"#{support_library}\".jar")
+    if File.exist?(library_path)
+      App.config.vendor_project(:jar => library_path)
     else
-      App.fail "We couldn't find #{support_library} in #{extras_folder}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
+      App.fail "We couldn't find #{support_library} in #{extras_path}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
     end
   end
 
