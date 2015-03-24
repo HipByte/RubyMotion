@@ -446,7 +446,8 @@ EOS
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
         convert_filesystem_encoding(config.name)
       ]
-      resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld', '.atlas', '.xcassets']
+      resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld',
+                                    '.atlas', '.xcassets', '.strings']
       resources_paths = []
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
@@ -472,8 +473,20 @@ EOS
       end
 
       # Compile all .strings files
-      Dir.glob(File.join(app_resources_dir, '{,**/}*.strings')).each do |strings_file|
-        compile_resource_to_binary_plist(strings_file)
+      config.resources_dirs.each do |dir|
+        if File.exist?(dir)
+          Dir.glob(File.join(dir, '{,**/}*.strings')).each do |strings_path|
+            res_path = strings_path
+            dest_path = path_on_resources_dirs(config.resources_dirs, res_path)
+
+            if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+              unless File.size(res_path) == 0
+                App.info 'Compile', dest_path
+                sh "/usr/bin/plutil -convert binary1 \"#{res_path}\" -o \"#{dest_path}\""
+              end
+            end
+          end
+        end
       end
 
       # Optional support for #eval (OSX-only).
@@ -513,13 +526,6 @@ EOS
       if main_exec_created and (config.distribution_mode or ENV['__strip__'])
         App.info "Strip", relative_path(main_exec)
         silent_execute_and_capture "#{config.locate_binary('strip')} #{config.strip_args} '#{main_exec}'"
-      end
-    end
-
-    def compile_resource_to_binary_plist(path)
-      unless File.size(path) == 0
-        App.info 'Compile', relative_path(path)
-        sh "/usr/bin/plutil -convert binary1 \"#{path}\""
       end
     end
 
