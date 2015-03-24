@@ -34,25 +34,26 @@ module Motion; class Command
 
     # use `tools/android list sdk --extended --all`
     # to get a list of available packages
-    def packages_list
-      %W{
-        platform-tools
-        build-tools-22.0.1
-        android-#{@api_version}
-        addon-google_apis-google-#{@api_version}
-        sys-img-armeabi-v7a-addon-google_apis-google-#{@api_version}
-        extra-android-support
-      }
+    def sdk_packages
+      [
+        ["platform-tools", 'platform-tools'],
+        ["build-tools-22.0.1", 'build-tools/22.0.1'],
+        ["android-#{@api_version}", 'platforms/android-22'],
+        ["addon-google_apis-google-#{@api_version}", 'add-ons/addon-google_apis-google-22'],
+        ["sys-img-armeabi-v7a-addon-google_apis-google-#{@api_version}", 'system-images/android-22/google_apis/armeabi-v7a'],
+        ["extra-android-support", 'extras/android/support']
+      ]
     end
 
-    self.summary = 'Setup android.'
-    self.description = 'Setup the android environnement : sdk/ndk.'
+    self.summary = 'Setup the Android environment.'
+    self.description = 'Setup the Android environment (SDK and NDK).'
 
     def initialize(argv)
       @directory = argv.option('directory') || DefaultDirectory
       @sdk_version = argv.option('sdk_version') || DefaultSDKVersion
       @ndk_version = argv.option('ndk_version') || DefaultNDKVersion
       @api_version = argv.option('api_version') || DefaultAPIVersion
+      @force = argv.flag?('force', false)
       @ndk_directory = File.join(@directory, 'ndk')
       @sdk_directory = File.join(@directory, 'sdk')
       @tmp_directory = File.join(@directory, 'tmp')
@@ -61,10 +62,11 @@ module Motion; class Command
 
     def self.options
       [
-        ['--directory=[PATH]', "The android install directory."],
-        ['--sdk_version=[VERSION]', "The android SDK version (Default: #{DefaultSDKVersion})."],
-        ['--ndk_version=[VERSION]', "The android NDK version (Default: #{DefaultNDKVersion})."],
-        ['--api_version=[VERSION]', "The android API version (Default: #{DefaultAPIVersion})."]
+        ['--directory=[PATH]', "The android install directory (default: #{DefaultDirectory})."],
+        ['--sdk_version=[VERSION]', "The android SDK version (default: #{DefaultSDKVersion})."],
+        ['--ndk_version=[VERSION]', "The android NDK version (default: #{DefaultNDKVersion})."],
+        ['--api_version=[VERSION]', "The android API version (default: #{DefaultAPIVersion})."],
+        ['--force', "Force the SDK and NDK re-installation."]
       ].concat(super)
     end
 
@@ -75,6 +77,7 @@ module Motion; class Command
       setup_ndk
       check_env_variables
       open_gui
+      FileUtils.rm_rf @tmp_directory
     end
 
     protected
@@ -88,9 +91,8 @@ module Motion; class Command
     end
 
     def setup_ndk
-      $stderr.puts("-- Setup NDK...")
-      if !File.exist?(@ndk_directory) || @ndk_version != current_ndk_version
-        $stderr.puts("Installing NDK : version #{@ndk_version}")
+      if !File.exist?(@ndk_directory) || @ndk_version != current_ndk_version || @force
+        puts("Installing NDK : version #{@ndk_version}")
         ndk_url = File.join(DL_GOOGLE, 'ndk', "android-ndk-#{@ndk_version}-darwin-x86_64.bin")
         ndk_bin = File.join(@tmp_directory, 'ndk.bin')
         download(ndk_url, ndk_bin)
@@ -98,7 +100,7 @@ module Motion; class Command
         Dir.chdir(@tmp_directory) { system(ndk_bin) }
         FileUtils.mv(File.join(@tmp_directory, "android-ndk-#{@ndk_version}"), @ndk_directory)
       else
-        $stderr.puts("Installed NDK is up to date.")
+        puts("Installed NDK is up-to-date.")
       end
     end
 
@@ -107,38 +109,39 @@ module Motion; class Command
     end
 
     def setup_sdk
-      $stderr.puts("-- Setup SDK...")
-      if File.exist?(android_executable)
-        $stderr.puts("Found installed SDK, trying to update...")
-      else
-        $stderr.puts("Installing SDK : version #{@sdk_version}")
+      if !File.exist?(android_executable) or @force
+        puts("Installing SDK : version #{@sdk_version}")
         sdk_url = File.join(DL_GOOGLE, "android-sdk_r#{@sdk_version}-macosx.zip")
         zipped_sdk = File.join(@tmp_directory, "sdk.zip")
         download(sdk_url, zipped_sdk)
         extracted_sdk = File.join(@tmp_directory, 'sdk')
         system("/usr/bin/unzip -q -a \"#{zipped_sdk}\" -d \"#{extracted_sdk}\"")
+        FileUtils.rm_rf @sdk_directory
         FileUtils.mv(File.join(extracted_sdk, 'android-sdk-macosx'), @sdk_directory)
       end
 
-      system("\"#{android_executable}\" update sdk --all --no-ui --filter #{packages_list.join(',')}")
+      packages_list = sdk_packages.map do |name, dir|
+        name if !dir or @force or !File.exist?(File.join(@sdk_directory, dir))
+      end.compact
+      if packages_list.empty?
+         puts "Installed SDK is up-to-date."
+      else
+         puts "Updating SDK..."
+        system("\"#{android_executable}\" update sdk --all --no-ui --filter #{packages_list.join(',')}")
+      end
     end
 
     def create_directory_structure
-      $stderr.puts("-- Create directory structure...")
       FileUtils.mkdir_p(@tmp_directory)
-      $stderr.puts(@directory)
-      $stderr.puts(@tmp_directory)
     end
 
     def check_java
-      $stderr.puts("-- Checking Java is installed...")
       unless File.exist?('/usr/bin/java')
-        die("[error] Couldn't find Java, please make sure you have java installed, we recommend java 1.6")
+        die("[error] Couldn't find Java, please make sure you have Java installed (we recommend version 1.6).")
       end
     end
 
     def check_env_variables
-      $stderr.puts("-- Checking ENV variables...")
       if ENV['RUBYMOTION_ANDROID_SDK'] != @sdk_directory
         $stderr.puts("[error] RUBYMOTION_ANDROID_SDK is incorrect, should be #{@sdk_directory}")
         $stderr.puts("add `export RUBYMOTION_ANDROID_SDK=#{@sdk_directory}` to your ~/.profile")
