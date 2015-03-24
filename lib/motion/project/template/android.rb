@@ -44,7 +44,7 @@ task :build do
     if File.exist?(library_folder)
       App.config.vendor_project(:jar => library_folder)
     else
-      App.fail "We couldn’t fail #{support_library} in #{extras_folder}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
+      App.fail "We couldn't find #{support_library} in #{extras_folder}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
     end
   end
 
