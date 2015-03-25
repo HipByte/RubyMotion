@@ -464,6 +464,7 @@ EOS
             if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
               unless File.size(res_path) == 0
                 App.info 'Compile', dest_path
+                FileUtils.mkdir_p(File.dirname(dest_path))
                 sh "/usr/bin/plutil -convert binary1 \"#{res_path}\" -o \"#{dest_path}\""
               end
             end
