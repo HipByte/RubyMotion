@@ -91,16 +91,16 @@ task :build do
   support_libraries.uniq.each do |support_library|
     library_config = supported_libraries.fetch(support_library)
     library_path = File.join(extras_path, support_library.split('-'))
-    jar = File.join(library_path, library_config['jar'])
-    if File.exist?(jar)
-      vendor_config = {:jar => jar}
+    jar_path = File.join(library_path, library_config['jar'])
+    if File.exist?(jar_path)
+      vendor_config = {:jar => jar_path}
       if library_config.fetch('res', false)
         vendor_config[:manifest] = File.join(library_path, 'AndroidManifest.xml')
         vendor_config[:resources] = File.join(library_path, 'res')
       end
       App.config.vendor_project(vendor_config)
     else
-      App.fail "We couldn't find `#{support_library}`. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
+      App.fail "We couldn't find `#{support_library}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
     end
   end
 
