@@ -399,8 +399,8 @@ EOS
         else
           App.fail("Invalid Instruments template path or name.")
         end
-        if xcode_version[0] >= '6.0' && xcode_version[0] < '6.2'
-          # workaround for RM-599 and RM-672
+        if xcode_version[0] >= '6.0' && xcode_version[0] < '6.3'
+          # workaround for RM-599, RM-672 and RM-832. Xcode 6.3 beta doesn't need this workaround. complex :(
           template_path = File.expand_path("#{xcode_dir}/../Applications/Instruments.app/Contents/Resources/templates/#{template_path}.tracetemplate")
         end
         optional_data['XrayTemplatePath'] = template_path
