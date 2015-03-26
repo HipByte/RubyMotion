@@ -38,13 +38,69 @@ task :build do
   mkdir_p app_build_dir
 
   # support libraries
+  supported_libraries = {
+    'android-support-v4' => {
+      'jar' => 'android-support-v4.jar'
+    },
+    'android-support-v13' => {
+      'jar' => 'android-support-v13.jar'
+    },
+    'android-support-v17-leanback' => {
+      'jar' => '/libs/android-support-v17-leanback.jar',
+      'res' => true
+    },
+    'android-support-v7-appcompat' => {
+      'jar' => '/libs/android-support-v7-appcompat.jar',
+      'res' => true,
+      'dependencies' => ['android-support-v4']
+    },
+    'android-support-v7-cardview' => {
+      'jar' => '/libs/android-support-v7-cardview.jar',
+      'res' => true
+    },
+    'android-support-v7-gridlayout' => {
+      'jar' => '/libs/android-support-v7-gridlayout.jar',
+      'res' => true
+    },
+    'android-support-v7-mediarouter' => {
+      'jar' => '/libs/android-support-v7-mediarouter.jar',
+      'res' => true
+    },
+    'android-support-v7-palette' => {
+      'jar' => '/libs/android-support-v7-palette.jar'
+    },
+    'android-support-v7-recyclerview' => {
+      'jar' => '/libs/android-support-v7-recyclerview.jar'
+    }
+  }
+
+  support_libraries = []
   extras_path = File.join(App.config.sdk_path, 'extras')
   App.config.support_libraries.each do |support_library|
-    library_path = File.join(extras_path, support_library.split('-'), "\"#{support_library}\".jar")
-    if File.exist?(library_path)
-      App.config.vendor_project(:jar => library_path)
+    if library_config = supported_libraries.fetch(support_library, false)
+      dependencies = library_config.fetch('dependencies', [])
+      dependencies.each do |dependency|
+        support_libraries << dependency
+      end
+      support_libraries << support_library
     else
-      App.fail "We couldn't find #{libray_path}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
+      App.fail "We do not support `#{support_library}`. Supported libraries are : #{supported_libraries.keys.join(',')}"
+    end
+  end
+
+  support_libraries.uniq.each do |support_library|
+    library_config = supported_libraries.fetch(support_library)
+    library_path = File.join(extras_path, support_library.split('-'))
+    jar = File.join(library_path, library_config['jar'])
+    if File.exist?(jar)
+      vendor_config = {:jar => jar}
+      if library_config.fetch('res', false)
+        vendor_config[:manifest] = File.join(library_path, 'AndroidManifest.xml')
+        vendor_config[:resources] = File.join(library_path, 'res')
+      end
+      App.config.vendor_project(vendor_config)
+    else
+      App.fail "We couldn't find #{support_library}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
     end
   end
 
