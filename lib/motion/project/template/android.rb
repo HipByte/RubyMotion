@@ -100,7 +100,7 @@ task :build do
       end
       App.config.vendor_project(vendor_config)
     else
-      App.fail "We couldn't find #{support_library}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
+      App.fail "We couldn't find `#{support_library}`. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
     end
   end
 
