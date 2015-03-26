@@ -31,7 +31,7 @@ module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
       :weak_frameworks, :embedded_frameworks, :external_frameworks, :framework_search_paths,
-      :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class, :embed_dsym, 
+      :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class, :embed_dsym,
       :version
 
     def initialize(project_dir, build_mode)
@@ -230,7 +230,14 @@ EOS
         end
 
         if @framework_search_paths.empty?
-          deps = deps.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+          deps = deps.select { |dep|
+            if File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport'))
+              true
+            else
+              App.warn("Could not find .bridgesupport file for framework \"#{dep}\".")
+              false
+            end
+          }
         end
         deps
       end
@@ -299,7 +306,7 @@ EOS
         if m = `echo '' | xcrun clang -c -xc -g -emit-llvm -S -o /dev/stdout - | grep 'Debug Info Version'`.match(/\d{9}/)
           m[0]
         else
-          # Return dummy 'Debug Info Version' because Xcode 5 or older doesn't return it. 
+          # Return dummy 'Debug Info Version' because Xcode 5 or older doesn't return it.
           "1"
         end
       end
