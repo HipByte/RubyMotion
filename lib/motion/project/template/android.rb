@@ -71,6 +71,13 @@ task :build do
     },
     'android-support-v7-recyclerview' => {
       'jar' => '/libs/android-support-v7-recyclerview.jar'
+    },
+    'android-support-annotations' => {
+      'jar' => '/android-support-annotations.jar'
+    },
+    'google-play-services' => {
+      'path' => '/google/google_play_services/libproject/google-play-services_lib',
+      'jar' => '/libs/google-play-services.jar'
     }
   }
 
@@ -90,7 +97,8 @@ task :build do
 
   support_libraries.uniq.each do |support_library|
     library_config = supported_libraries.fetch(support_library)
-    library_path = File.join(extras_path, support_library.split('-'))
+    library_relative_path = library_config.fetch('path', support_library.split('-'))
+    library_path = File.join(extras_path, library_relative_path)
     jar_path = File.join(library_path, library_config['jar'])
     if File.exist?(jar_path)
       vendor_config = {:jar => jar_path}
