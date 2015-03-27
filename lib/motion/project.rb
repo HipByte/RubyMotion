@@ -75,7 +75,8 @@ task :ctags do
     files = config.bridgesupport_files + config.vendor_projects.map { |p| Dir.glob(File.join(p.path, '*.bridgesupport')) }.flatten + config.files.flatten
     ctags = File.join(config.bindir, 'ctags')
     config = File.join(config.motiondir, 'data', 'bridgesupport-ctags.cfg')
-    sh "#{ctags} --options=\"#{config}\" #{files.map { |x| '"' + x + '"' }.join(' ')}"
+    sh "#{ctags} --fields=+l --options=\"#{config}\" #{files.map { |x| '"' + x + '"' }.join(' ')}"
+    sh "sed -i -e 's/language:bridgesupport/language:Ruby/g' #{tags_file}"
   end
 end
 
