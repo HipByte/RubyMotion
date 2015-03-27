@@ -304,7 +304,7 @@ EOS
       paths.each do |p|
         next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
         next if File.extname(p) == ".momd" && !File.exist?(p.sub(/\.momd$/, ".xcdatamodeld"))
-        next if File.extname(p) == ".momd" && !File.exist?(p.sub(/\.storyboardc$/, ".storyboard"))
+        next if File.extname(p) == ".storyboardc" && !File.exist?(p.sub(/\.storyboardc$/, ".storyboard"))
         App.info 'Delete', relative_path(p)
         rm_rf p
         if File.exist?(p)
