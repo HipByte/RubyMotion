@@ -1,3 +1,36 @@
+= Rubymotion 3.8 =
+
+  * The toolchain has been upgrated to LLVM 3.5.
+  * [Android] Added the `motion android-setup' command which downloads and
+    installs the Android SDK and NDK automatically. Run the
+    `motion android-setup --help' command for more information.
+  * [Android] Added 'app.support_libraries' option in the Rakefile, which is an
+    array containing the names of Android support libraries to be included in
+    your app E.g.:
+      app.support_libraries << 'google-play-services'
+      app.support_libraries << 'android-support-v4'
+  * [Android] Added support for API level 22. Removed support for very old
+    versions of Android that are no longer supported in the SDK.
+  * [Android] Added support to generate Ctags file via the `rake ctags' task.
+  * [Android] Fixed a bug where classes.dex would not be re-generated when a 
+    resource file was changed. Thanks Eito Katagiri for the patch.
+  * [Android] Fixed a bug where running specs would crash.
+  * [iOS] Fix a bug where a build error would happen when building a project
+    for ARM 64-bit using Xcode 6.3 Beta.
+  * [iOS, OSX] Fixed the build system to not recompile `.strings' files on
+    every build.
+  * [iOS, OSX] Fixed a bug where `rake profile' could not launch Instruments.app
+    when it will specify Instruments template with Xcode 6.2.
+  * [iOS] Fixed a bug where `rake background_fetch=true' would not work with
+    with Xcode 6.2.
+  * [iOS, OSX] Fixed the build system to print a warning if a framework included
+    in the Rakefile does not have a corresponding .bridgesupport file (e.g. it
+    has been mispelled).
+  * [iOS, OSX] Fixed the build system to not delete '.storyboardc' files if the
+    corresponding '.storyboard' file does not exist.
+  * [iOS, OSX] Fixed a rare case where gdb would be used instead of LLDB when
+    running in debug mode.
+
 = Rubymotion 3.7 =
 
   * Fixed a bug where the `motion' command would not work as expected if Ruby
