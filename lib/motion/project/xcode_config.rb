@@ -677,6 +677,7 @@ EOS
     end
 
     def ctags_files
+      config = App.config
       ctags_files = bridgesupport_files
       ctags_files += config.vendor_projects.map { |p| Dir.glob(File.join(p.path, '*.bridgesupport')) }.flatten
       ctags_files += config.files.flatten
