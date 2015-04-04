@@ -31,7 +31,7 @@ module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
       :weak_frameworks, :embedded_frameworks, :external_frameworks, :framework_search_paths,
-      :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class,
+      :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class, :embed_dsym,
       :version
 
     def initialize(project_dir, build_mode)
@@ -49,6 +49,7 @@ module Motion; module Project;
       @entitlements = {}
       @delegate_class = 'AppDelegate'
       @spec_mode = false
+      @embed_dsym = (development? ? true : false)
       @vendor_projects = []
       @version = '1.0'
     end
@@ -229,7 +230,14 @@ EOS
         end
 
         if @framework_search_paths.empty?
-          deps = deps.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
+          deps = deps.select { |dep|
+            if File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport'))
+              true
+            else
+              App.warn("Could not find .bridgesupport file for framework \"#{dep}\".")
+              false
+            end
+          }
         end
         deps
       end
@@ -291,6 +299,17 @@ EOS
 
     def ldflags(platform)
       common_flags(platform) + ' -Wl,-no_pie'
+    end
+
+    def xcode_debug_info_version
+      @debug_info_version ||= begin
+        if m = `echo '' | xcrun clang -c -xc -g -emit-llvm -S -o /dev/stdout - | grep 'Debug Info Version'`.match(/\d{9}/)
+          m[0]
+        else
+          # Return dummy 'Debug Info Version' because Xcode 5 or older doesn't return it.
+          "1"
+        end
+      end
     end
 
     # @return [String] The application bundle name, excluding extname.
@@ -387,8 +406,8 @@ EOS
         else
           App.fail("Invalid Instruments template path or name.")
         end
-        if xcode_version[0] >= '6.0' && xcode_version[0] < '6.2'
-          # workaround for RM-599 and RM-672
+        if xcode_version[0] >= '6.0' && !xcode_dir.include?("-Beta.app")
+          # workaround for RM-599, RM-672 and RM-832. Xcode 6.x beta doesn't need this workaround
           template_path = File.expand_path("#{xcode_dir}/../Applications/Instruments.app/Contents/Resources/templates/#{template_path}.tracetemplate")
         end
         optional_data['XrayTemplatePath'] = template_path
@@ -655,6 +674,16 @@ EOS
       end
 
       args
+    end
+
+    def ctags_files
+      ctags_files = bridgesupport_files
+      ctags_files += config.vendor_projects.map { |p| Dir.glob(File.join(p.path, '*.bridgesupport')) }.flatten
+      ctags_files += config.files.flatten
+    end
+
+    def ctags_config_file
+      File.join(motiondir, 'data', 'bridgesupport-ctags.cfg')
     end
   end
 end; end

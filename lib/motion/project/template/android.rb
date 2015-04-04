@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -37,14 +37,82 @@ task :build do
   app_build_dir = App.config.versionized_build_dir
   mkdir_p app_build_dir
 
-  # Generate the Android manifest file.
-  android_manifest_txt = ''
-  android_manifest_txt << <<EOS
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="#{App.config.package}" android:versionCode="#{x=App.config.version_code}" android:versionName="#{App.config.version_name}">
-  <uses-sdk android:minSdkVersion="#{App.config.api_version}" android:targetSdkVersion="#{App.config.target_api_version}"/>
-EOS
-  # Application permissions.
+  # support libraries
+  supported_libraries = {
+    'android-support-v4' => {
+      'jar' => 'android-support-v4.jar'
+    },
+    'android-support-v13' => {
+      'jar' => 'android-support-v13.jar'
+    },
+    'android-support-v17-leanback' => {
+      'jar' => '/libs/android-support-v17-leanback.jar',
+      'res' => true
+    },
+    'android-support-v7-appcompat' => {
+      'jar' => '/libs/android-support-v7-appcompat.jar',
+      'res' => true,
+      'dependencies' => ['android-support-v4']
+    },
+    'android-support-v7-cardview' => {
+      'jar' => '/libs/android-support-v7-cardview.jar',
+      'res' => true
+    },
+    'android-support-v7-gridlayout' => {
+      'jar' => '/libs/android-support-v7-gridlayout.jar',
+      'res' => true
+    },
+    'android-support-v7-mediarouter' => {
+      'jar' => '/libs/android-support-v7-mediarouter.jar',
+      'res' => true
+    },
+    'android-support-v7-palette' => {
+      'jar' => '/libs/android-support-v7-palette.jar'
+    },
+    'android-support-v7-recyclerview' => {
+      'jar' => '/libs/android-support-v7-recyclerview.jar'
+    },
+    'android-support-annotations' => {
+      'jar' => '/android-support-annotations.jar'
+    },
+    'google-play-services' => {
+      'path' => '/google/google_play_services/libproject/google-play-services_lib',
+      'jar' => '/libs/google-play-services.jar'
+    }
+  }
+
+  support_libraries = []
+  extras_path = File.join(App.config.sdk_path, 'extras')
+  App.config.support_libraries.each do |support_library|
+    if library_config = supported_libraries.fetch(support_library, false)
+      dependencies = library_config.fetch('dependencies', [])
+      dependencies.each do |dependency|
+        support_libraries << dependency
+      end
+      support_libraries << support_library
+    else
+      App.fail "We do not support `#{support_library}`. Supported libraries are : #{supported_libraries.keys.join(',')}"
+    end
+  end
+
+  support_libraries.uniq.each do |support_library|
+    library_config = supported_libraries.fetch(support_library)
+    library_relative_path = library_config.fetch('path', support_library.split('-'))
+    library_path = File.join(extras_path, library_relative_path)
+    jar_path = File.join(library_path, library_config['jar'])
+    if File.exist?(jar_path)
+      vendor_config = {:jar => jar_path}
+      if library_config.fetch('res', false)
+        vendor_config[:manifest] = File.join(library_path, 'AndroidManifest.xml')
+        vendor_config[:resources] = File.join(library_path, 'res')
+      end
+      App.config.vendor_project(vendor_config)
+    else
+      App.fail "We couldn't find `#{support_library}. Use #{File.join(App.config.sdk_path, 'tools', 'android')} to install it."
+    end
+  end
+
+  # permissions
   permissions = Array(App.config.permissions)
   if App.config.development?
     # In development mode, we need the INTERNET permission in order to create
@@ -53,51 +121,39 @@ EOS
   end
   permissions.each do |permission|
     permission = "android.permission.#{permission.to_s.upcase}" if permission.is_a?(Symbol)
-    android_manifest_txt << <<EOS
-  <uses-permission android:name="#{permission}"></uses-permission>
-EOS
+    App.config.manifest.add_child('uses-permission', 'android:name' => "#{permission}")
   end
-  # Application features.
-  features = Array(App.config.features)
-  features.each do |feature|
-    android_manifest_txt << <<EOS
-  <uses-feature android:name="#{feature}"></uses-feature>
-EOS
+
+  # features
+  App.config.features.each do |feature|
+    App.config.manifest.child('application').add_child('uses-feature', 'android:name' => "#{feature}")
   end
-  # Custom manifest entries.
-  App.config.manifest_xml_lines(nil).each { |line| android_manifest_txt << "\t" + line + "\n" }
-  android_manifest_txt << <<EOS
-  <application android:label="#{App.config.name}" android:debuggable="#{App.config.development? ? 'true' : 'false'}" #{App.config.icon ? ('android:icon="@drawable/' + App.config.icon + '"') : ''} #{App.config.application_class ? ('android:name="' + App.config.application_class + '"') : ''}>
-EOS
-  App.config.manifest_xml_lines('application').each { |line| android_manifest_txt << "\t\t" + line + "\n" }
-  # Main activity.
-  android_manifest_txt << <<EOS
-    <activity android:name="#{App.config.main_activity}" android:label="#{App.config.name}">
-      <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-      </intent-filter>
-    </activity>
-EOS
-  # Sub-activities.
+
+  # sub activities
   (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
-    android_manifest_txt << <<EOS
-    <activity android:name="#{activity}" android:label="#{activity}" android:parentActivityName="#{App.config.main_activity}">
-      <meta-data android:name="android.support.PARENT_ACTIVITY" android:value="#{App.config.main_activity}"/>
-    </activity>
-EOS
+
+    App.config.manifest.child('application').add_child('activity') do |sub_activity|
+
+      sub_activity['android:name'] = "#{activity}"
+      sub_activity['android:label'] = "#{activity}"
+      sub_activity['android:parentActivityName'] = -> { "#{App.config.main_activity}" }
+
+      sub_activity.add_child('meta-data') do |meta|
+        meta['android:name'] = 'android.support.PARENT_ACTIVITY'
+        meta['android:value'] = -> { "#{App.config.main_activity}" }
+      end
+    end
   end
-  # Services.
-  services = Array(App.config.services)
-  services.each do |service|
-    android_manifest_txt << <<EOS
-    <service android:name="#{service}" android:exported="false"></service>
-EOS
+
+  # services
+  App.config.services.each do |service|
+    App.config.manifest.child('application').add_child('service', 'android:name' => "#{service}", 'android:exported' => 'false')
   end
-  android_manifest_txt << <<EOS
-  </application>
-</manifest>
-EOS
+
+  # generate AndroidManifest.xml
+  android_manifest_txt = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+  android_manifest_txt << App.config.manifest.to_xml
+
   android_manifest = File.join(app_build_dir, 'AndroidManifest.xml')
   if !File.exist?(android_manifest) or File.read(android_manifest) != android_manifest_txt
     App.info 'Create', android_manifest
@@ -124,7 +180,8 @@ EOS
   bs_files = []
   classes_changed = false
   if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
-    extra_packages = '--extra-packages ' + App.config.vendored_projects.map { |x| x[:package] }.compact.join(':')
+    packages_list = App.config.vendored_projects.map { |x| x[:package] }.compact.join(':')
+    extra_packages = packages_list.empty? ? '' : '--extra-packages ' + packages_list
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
 
     r_java = Dir.glob(java_dir + '/**/R.java')
@@ -136,7 +193,7 @@ EOS
     end
 
     r_classes = Dir.glob(classes_dir + '/**/R\$*[a-z]*.class').map { |c| "'#{c}'" }
-    sh "#{App.config.bin_exec('android/gen_bridge_metadata')} #{r_classes.join(' ')} -o \"#{r_bs}\" "
+    sh "RUBYOPT='' #{App.config.bin_exec('android/gen_bridge_metadata')} #{r_classes.join(' ')} -o \"#{r_bs}\" "
 
     classes_changed = true
   end
@@ -144,28 +201,48 @@ EOS
 
   # Compile Ruby files.
   ruby = App.config.bin_exec('ruby')
-  ruby_objs = []
   bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
   bs_files += App.config.vendored_bs_files
   ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
   objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
   kernel_bc = App.config.kernel_path
   ruby_objs_changed = false
-  App.config.files.flatten!
-  ((App.config.spec_mode ? App.config.spec_files : []) + App.config.files).each do |ruby_path|
-    bc_path = File.join(objs_build_dir, File.expand_path(ruby_path) + '.bc')
-    init_func = "MREP_" + `/bin/echo \"#{File.expand_path(bc_path)}\" | /usr/bin/openssl sha1`.strip
-    if !File.exist?(bc_path) \
-        or File.mtime(ruby_path) > File.mtime(bc_path) \
-        or File.mtime(ruby) > File.mtime(bc_path) \
-        or File.mtime(kernel_bc) > File.mtime(bc_path)
+
+  build_file = Proc.new do |files_build_dir, ruby_path|
+    ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.o')
+    init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
+    if !File.exist?(ruby_obj) \
+        or File.mtime(ruby_path) > File.mtime(ruby_obj) \
+        or File.mtime(ruby) > File.mtime(ruby_obj) \
+        or File.mtime(kernel_bc) > File.mtime(ruby_obj)
       App.info 'Compile', ruby_path
-      FileUtils.mkdir_p(File.dirname(bc_path))
-      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{bc_path}\" #{init_func} \"#{ruby_path}\""
+      ruby_bc = ruby_obj + '.bc'
+      FileUtils.mkdir_p(File.dirname(ruby_bc))
+      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{ruby_bc}\" #{init_func} \"#{ruby_path}\""
+      sh "#{App.config.cc} #{App.config.asflags} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
       ruby_objs_changed = true
     end
-    ruby_objs << [bc_path, init_func]
+    [ruby_obj, init_func]
   end
+
+  # Resolve file dependencies.
+  if App.config.detect_dependencies == true
+    App.config.dependencies = Motion::Project::Dependency.new(App.config.files - App.config.exclude_from_detect_dependencies, App.config.dependencies).run
+  end
+
+  parallel = Motion::Project::ParallelBuilder.new(objs_build_dir, build_file)
+  parallel.files = App.config.ordered_build_files
+  parallel.files += App.config.spec_files if App.config.spec_mode
+  parallel.run
+
+  ruby_objs = app_objs = parallel.objects
+  spec_objs = []
+  if App.config.spec_mode
+    app_objs = ruby_objs[0...App.config.ordered_build_files.size]
+    spec_objs = ruby_objs[-(App.config.spec_files.size)..-1]
+  end
+
+  FileUtils.touch(objs_build_dir) if ruby_objs_changed
 
   # Generate payload main file.
   payload_c_txt = <<EOS
@@ -182,6 +259,9 @@ extern "C" {
     void *rb_vm_top_self(void);
     void rb_rb2oc_exc_handler(void);
 EOS
+  App.config.custom_init_funcs.each do |init_func|
+    payload_c_txt << "    void #{init_func}(void);\n"
+  end
   ruby_objs.each do |_, init_func|
     payload_c_txt << <<EOS
     void *#{init_func}(void *rcv, void *sel);
@@ -189,6 +269,7 @@ EOS
   end
   payload_c_txt << <<EOS
 }
+extern bool ruby_vm_debug_logs;
 extern "C"
 jint
 JNI_OnLoad(JavaVM *vm, void *reserved)
@@ -199,9 +280,17 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
 	return -1;
     }
     assert(env != NULL);
+    #{App.config.vm_debug_logs ? 'ruby_vm_debug_logs = true;' : ''}
     rb_vm_init("#{App.config.package_path}", "#{App.config.rubymotion_env_value}", "#{Motion::Version}", env);
     void *top_self = rb_vm_top_self();
 EOS
+  App.config.custom_init_funcs.each do |init_func|
+    payload_c_txt << <<EOS
+    env->PushLocalFrame(32);
+    #{init_func}();
+    env->PopLocalFrame(NULL);
+EOS
+  end
   ruby_objs.each do |ruby_obj, init_func|
     payload_c_txt << <<EOS
     try {
@@ -239,7 +328,7 @@ EOS
     App.info 'Create', libpayload_path
     FileUtils.mkdir_p(File.dirname(libpayload_path))
     sh "#{App.config.cc} #{App.config.cflags} -c \"#{payload_c}\" -o \"#{payload_o}\""
-    sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs}"
+    sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs_pre} #{App.config.libs.join(' ')} #{App.config.ldlibs_post}"
   end
 
   # Install native shared libraries.
@@ -324,7 +413,7 @@ EOS
           else
             # Probably something else (what could it be?).
             add_method = true
-          end 
+          end
         end
         current_class[:methods] << method_line if add_method
       else
@@ -332,7 +421,7 @@ EOS
       end
     end
   end
-  App.config.files.map { |x| File.dirname(x) }.uniq.each do |path|
+  App.config.files.flatten.map { |x| File.dirname(x) }.uniq.each do |path|
     # Load extension files (any .java file inside the same directory of a .rb file).
     Dir.glob(File.join(path, "*.java")).each do |java_ext|
       class_name = File.basename(java_ext).sub(/\.java$/, '')
@@ -378,7 +467,6 @@ EOS
   end
 
   # Compile java files.
-  classes_changed = false
   vendored_jars = App.config.vendored_projects.map { |x| x[:jar] }
   vendored_jars += [File.join(App.config.versioned_datadir, 'rubymotion.jar')]
   classes_dir = File.join(app_build_dir, 'classes')

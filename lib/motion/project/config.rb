@@ -57,7 +57,8 @@ module Motion; module Project
 
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
-      :template, :detect_dependencies, :exclude_from_detect_dependencies
+      :template, :detect_dependencies, :exclude_from_detect_dependencies,
+      :opt_level, :custom_init_funcs
 
     ConfigTemplates = {}
 
@@ -87,6 +88,7 @@ module Motion; module Project
       @dependencies = {}
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
+      @custom_init_funcs = []
     end
 
     def osx_host_version
@@ -302,6 +304,7 @@ EOS
       paths.each do |p|
         next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
         next if File.extname(p) == ".momd" && !File.exist?(p.sub(/\.momd$/, ".xcdatamodeld"))
+        next if File.extname(p) == ".storyboardc" && !File.exist?(p.sub(/\.storyboardc$/, ".storyboard"))
         App.info 'Delete', relative_path(p)
         rm_rf p
         if File.exist?(p)

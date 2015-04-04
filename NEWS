@@ -1,3 +1,204 @@
+= Rubymotion 3.8 =
+
+  * The toolchain has been upgrated to LLVM 3.5.
+  * [Android] Added the `motion android-setup' command which downloads and
+    installs the Android SDK and NDK automatically. Run the
+    `motion android-setup --help' command for more information.
+  * [Android] Added 'app.support_libraries' option in the Rakefile, which is an
+    array containing the names of Android support libraries to be included in
+    your app E.g.:
+      app.support_libraries << 'google-play-services'
+      app.support_libraries << 'android-support-v4'
+  * [Android] Added support for API level 22. Removed support for very old
+    versions of Android that are no longer supported in the SDK.
+  * [Android] Added support to generate Ctags file via the `rake ctags' task.
+  * [Android] Fixed a bug where classes.dex would not be re-generated when a 
+    resource file was changed. Thanks Eito Katagiri for the patch.
+  * [Android] Fixed a bug where running specs would crash.
+  * [iOS] Fix a bug where a build error would happen when building a project
+    for ARM 64-bit using Xcode 6.3 Beta.
+  * [iOS, OSX] Fixed the build system to not recompile `.strings' files on
+    every build.
+  * [iOS, OSX] Fixed a bug where `rake profile' could not launch Instruments.app
+    when it will specify Instruments template with Xcode 6.2.
+  * [iOS] Fixed a bug where `rake background_fetch=true' would not work with
+    with Xcode 6.2.
+  * [iOS, OSX] Fixed the build system to print a warning if a framework included
+    in the Rakefile does not have a corresponding .bridgesupport file (e.g. it
+    has been mispelled).
+  * [iOS, OSX] Fixed the build system to not delete '.storyboardc' files if the
+    corresponding '.storyboard' file does not exist.
+  * [iOS, OSX] Fixed a rare case where gdb would be used instead of LLDB when
+    running in debug mode.
+
+= Rubymotion 3.7 =
+
+  * Fixed a bug where the `motion' command would not work as expected if Ruby
+    was installed with rbenv/RVM.
+  * [iOS] Fix a bug where the build system would not detect the properties of
+    the running simulator if it existed with a different version of iOS.
+  * [iOS] Fixed a bug where a WatchKit app would not launch on the simulator
+    if it was built with x86_64 (64-bit Intel) only.
+  * [iOS, OSX] Improved the symbolication of exception backtraces. Backtraces
+    are now properly symbolicated when running on the device. This is done by
+    parsing the dSYM bundle at runtime. For this to work, in development mode,
+    the dSYM will be embedded within the application bundle. (This is disabled
+    in release mode). You can control this setting with the `app.embed_dsym'
+    variable in the project's Rakefile.
+  * [iOS, OSX] Improved performance when creating empty Hash objects.
+    ~2 times faster.
+  * [iOS, OSX] Improved performance when creating very small Array objects.
+    ~30% faster.
+  * [iOS, OSX] Bridgesupport files for vendor projects are now generated in the
+    common build directory (~/Library/Rubymotion/build). This fixes a problem
+    when vendoring the Reveal framework.
+  * [iOS, OSX] Added a feature to disable capturing view (command key + moving
+    mouse over) in iOS simulator or OS X app. To enable/disable capturing view,
+    run `enable_capture' or `disable_capture' commands in REPL. If you want to
+    disable capturing before the application is launched, you can set the
+    DISABLE_CAPTURE environment variable when you will run the `rake' command.
+    (ex. `$ rake DISABLE_CAPTURE=1').
+  * [Android] The runtime is now using the GNU C++ stdlib for better internal
+    support and also upcoming new features.
+  * [Android] Improved compilation time, compiling multiple files in parallel.
+  * [Android] Support for defining manual file dependencies via
+    'app.files_dependencies'.
+  * [Android] Added Module#module_function.
+  * [Android] Added Symbol#to_sym.
+  * [Android] Added Time#usec.
+  * [Android] Object#send now accepts strings.
+  * [Android] Improved Kernel#rand to accept ranges (of fixnums and floats).
+  * [Android] Fixed a bug where undefined local variables or methods returned
+    false instead of raising an exception.
+  * [Android] Fixed a bug where Java getter/setter shortcuts would sometimes
+    not work.
+  * [Android] Fixed a bug where a crash would happen when running a spec with
+    a lot of test cases.
+  * [Android] Fixed memory leaks when symbolicating an exception backtrace.
+
+= RubyMotion 3.6 =
+
+  * [iOS] Added support for iOS 8.3. Xcode 6.3 beta is required.
+  * [iOS, OSX] Fixed a bug where the build would fail when using Xcode 5.
+  * [iOS] Fixed a bug where WatchKit applications could not be launched with
+    Xcode 6.2 beta 5.
+  * [iOS] Fixed a bug where device log wouldn't be displayed with `rake device'
+    if `CFBundleName' property was changed.
+  * [Android] Improved the build time of projects, by not compiling the
+    internal bitcode of Ruby files that have not changed.
+  * [Android] Added Math module.
+  * [Android] Added Time#{+, -}.
+  * [Android] Added Hash#{default, default=, default_proc, default_proc=}.
+  * [Android] Added String#{[]=, slice!, chop, chop!, chomp, chomp!, sub, sub!,
+    gsub, gsub!, split}.
+  * [Android] Improved Float#to_s, String#[], Array#{[]=, values_at} for CRuby
+    compatibility.
+  * [Android] Improved Hash#{shift, replace} for CRuby compatibility.
+  * [Android] Fixed a build error in a Bundler environment.
+  * [Android] Fixed a bug where Array#[] would crash when returning a large
+    array.
+  * [Android] Fixed a bug where Array#delete would crash when removing a lot of
+    elements.
+  * [Android] Fixed a bug where Array#[start, length]= would crash when
+    providing a large start position.
+  * [Android] Fixed a bug where Array#pop(number) would crash when specifying
+    a large number.
+  * [Android] Fixed a bug where Array#flatten would crash when used on a large
+    array.
+  * [Android] Fixed a bug where String#scan would crash if many elements would
+    be matched.
+  * [Android] Fixed a bug where String#scan returned the wrong value if the
+    Regexp group would be passed as argument.
+  * [Android] Fixed a bug where attempting to retrieve a Java field on an
+    inner Java class would always return null/zero on Android 21 / ART,
+    apparently due to a JNI regression (we added a workaround).
+
+= RubyMotion 3.5 =
+
+  * [iOS, OSX] Fixed a regression introduced by the previous release where the
+    REPL would not work.
+
+= RubyMotion 3.4 =
+
+  * [iOS] Fixed a bug where iOS 8 extensions and their host app could not have
+    different deployment_target values.
+  * [iOS] Fixed a bug where an incorrect architecture would be chosen when
+    debugging on a device. Now defaults to the device architecture.
+  * [iOS, OSX] Fixed a bug where small structure types couldn't be returned
+    from Objective-C methods in 64-bit.
+  * [Android] Added Bundler support to the project template.
+  * [Android] Added the `app.theme' Rakefile variable to set up the theme of
+    the app. The default value is `Theme.Holo'.
+  * [Android] Added Array#{flatten, flatten!, slice, slice!}.
+  * [Android] Added Enumerable#{reverse_each, each_with_object, each_entry,
+    each_slice, each_cons, collect, map, count, find, detect, grep, find_index,
+    flat_map, collect_concat, partition, group_by, first, all?, any?, one?,
+    none?, min, max, minmax, min_by, max_by, minmax_by, member?, include?}.
+  * [Android] Improved Array#[] for CRuby compatibility.
+  * [Android] Disabled internal/debug VM logs since they impact launch time and
+    general performance. If you want to set them back on (for debugging), the
+    `app.vm_debug_logs' variable can be set to `true'.
+  * [Android] Fixed a bug where Fixnum#* would cause a runtime crash if the
+    receiver was zero.
+  * [Android] Fixed a bug where an `ensure' statement would cause the project
+    to fail to build, due to a linking error.
+  * [Android] Fixed a bug in the Java method dispatcher where it would fail
+    to call methods returning arrays of non-object types (ex. the `getBytes'
+    method of java.lang.String).
+  * [Android] Fixed a bug where trying to set/assign a value to a Java object
+    field would cause a NoMethodError.
+  * [Android] Fixed Enumerable#{each_with_index, select} to return an Enumerator
+    when if no block is given.
+  * [Android] Fixed a bug where Enumerable methods would be taken in priority
+    over Hash methods (ex. `select'), due to the fact that the module was
+    included in the wrong class.
+  * [Android] Fixed a bug where the use of the `break' keyword inside a block
+    would cause a compilation crash.
+  * [Android] Fixed a bug in the spec framework where the `main_activity'
+    helper method would only work as expected in the first spec file, and
+    return nil in other spec files.
+
+= RubyMotion 3.3 =
+
+  * [iOS] Fixed a bug where a WatchKit application could be launched on an iOS
+    8.1 simulator, which does not actually support WatchKit and would crash.
+  * [iOS] Fixed a bug where the compiler would no longer emit proper DWARF
+    metadata for ARM64 due to an Xcode / clang change.
+  * [iOS] Print an informative error when no simulator devices are configured.
+  * [iOS, OSX] Fixed a bug where the #== method in a pure Ruby object would
+    not resolve WeakRef operands.
+  * [iOS, OSX] Fixed a bug where small structure cannot be passed into
+    Objective-C funcitons with 64-bit app.
+  * [iOS, OSX] Fixed a bug where the #kind_of? method in an ImmediateRef would
+    not compare against the reference object's class.
+  * [iOS, OSX] Fixed a memory leak in Array#{uniq, uniq!, compact, compact!,
+    select, select!, keep_if}.
+  * [iOS] Fixed a bug where it would trigger a crash when Ruby method which has
+    5 or more arguments will be called from Objective-C code in arm64 device.
+  * [OSX] Updated Edit menu to include items generated by Xcode. Thanks to
+    Hwee-Boon Yar for the patch (pull request #187).
+  * [Android] Introduced app.manifest, which makes it possible to directly 
+    manipulate the contents of the AndroidManifest.xml file from the Rakefile.
+    Read the documentation in the "Providing Custom Values" section of the
+    Android Project Management guide on the Rubymotion website. Thanks to
+    Daniel Brooker for the patch.
+  * [Android] Added String#{[], slice}.
+  * [Android] Fixed a bug where projects with an XML file in the 'resources'
+    directory would not compile correctly.
+  * [Android] Fixed a bug where Object#instance_eval would crash when targeting
+    old versions of Android (below 14).
+  * [Android] Fixed a bug where Ruby methods and blocks where limited by the
+    number of arguments they could accept.
+  * [Android] Fixed a bug where Hash would not include Enumerable.
+  * [Android] Fixed a bug where Ruby Hash methods (ex. #[]) would not be
+    available on Java *Map objects.
+  * [Android] Fixed a bug where Hash objects with a default Proc (ex. created
+    with `Hash.new {}') would not dispatch the Proc when a key isn't found.
+  * [Android] Fixed a bug where Ruby String methods were not available on
+    java.lang.String objects.
+  * [Android] Fixed a bug where passing java.lang.String objects to Ruby
+    String methods expecting String arguments would cause a runtime crash.
+
 = RubyMotion 3.2 =
 
   * [iOS] Fixed a bug where RubyMotion frameworks could not be loaded due to

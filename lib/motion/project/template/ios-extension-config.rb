@@ -44,6 +44,19 @@ module Motion; module Project;
     def local_platform; 'iPhoneSimulator'; end
     def deploy_platform; 'iPhoneOS'; end
 
+    def embed_dsym
+      if ENV['RM_TARGET_EMBED_DSYM']
+        ENV['RM_TARGET_EMBED_DSYM'] == "true" ? true : false
+      else
+        @embed_dsym
+      end
+    end
+
+    def embed_dsym=(boolean)
+      ENV.delete('RM_TARGET_EMBED_DSYM')
+      @embed_dsym = boolean
+    end
+
     # App Extensions are required to include a 64-bit for App Store submission.
     def archs
       @archs ||= begin
@@ -217,8 +230,7 @@ module Motion; module Project;
             'CFBundleIconFiles' => icons,
           }
         },
-        # TODO temp hack to get ints for Instruments, but strings for normal builds.
-        'UIDeviceFamily' => device_family_ints.map { |x| ENV['__USE_DEVICE_INT__'] ? x.to_i : x.to_s },
+        'UIDeviceFamily' => device_family_ints,
         'DTXcode' => begin
           vers = xcode_version[0].gsub(/\./, '')
           if vers.length == 2

@@ -133,9 +133,6 @@ task :simulator do
     App.fail "It is not possible to simulate an SDK version (#{target}) " \
              "lower than the app's deployment target (#{deployment_target})"
   end
-  if target && ENV['device_name']
-    App.fail "It is not possible to specify both `device_name' and `target'"
-  end
   target ||= App.config.sdk_version
 
   # May be overridden on Xcode <= 5 with the `device_family' option (see below)
@@ -230,7 +227,9 @@ END
   App.info 'Simulate', app
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']
-  system "#{env} #{sim} #{debug} #{family_int} \"#{simulate_device}\" #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
+  command = "#{env} #{sim} #{debug} #{family_int} \"#{simulate_device}\" #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
+  puts command if App::VERBOSE
+  system(command)
   App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
   exit($?.exitstatus)
 end
@@ -277,14 +276,7 @@ task :device => :archive do
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
   if ENV['debug']
-    unless remote_arch = ENV['arch']
-      ary = App.config.archs['iPhoneOS']
-      remote_arch = ary.last
-      if ary.size > 1
-        $stderr.puts "*** Application is built for multiple architectures (#{ary.join(', ')}), the debugger will target #{remote_arch}. Pass the `arch' option in order to specify which one to use (ex. rake device debug=1 arch=arm64)."
-      end
-    end
-    env << " RM_REMOTE_ARCH=\"#{remote_arch}\""
+    env << " RM_AVAILABLE_ARCHS='#{App.config.archs['iPhoneOS'].join(':')}'"
   end
 
   deploy = File.join(App.config.bindir, 'ios/deploy')
@@ -337,7 +329,6 @@ end
 namespace :profile do
   desc "Run a build on the simulator through Instruments"
   task :simulator do
-    ENV['__USE_DEVICE_INT__'] = '1'
     Rake::Task['build:simulator'].invoke
 
     target = ENV['target'] || App.config.sdk_version
@@ -371,8 +362,6 @@ namespace :profile do
 
   desc "Run a build on the device through Instruments"
   task :device do
-    ENV['__USE_DEVICE_INT__'] = '1'
-
     # Create a build that allows debugging but doesn't start a debugger on deploy.
     App.config.entitlements['get-task-allow'] = true
     ENV['install_only'] = '1'

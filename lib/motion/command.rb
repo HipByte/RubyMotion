@@ -55,12 +55,13 @@ module Motion
     require 'motion/command/ri'
     require 'motion/command/support'
     require 'motion/command/update'
+    require 'motion/command/android_setup'
 
     self.abstract_command = true
     self.command = 'motion'
     self.plugin_prefix = 'motion'
 
-    self.description = 'RubyMotion lets you develop native iOS and OS X ' \
+    self.description = 'RubyMotion lets you develop native iOS, OS X and Android ' \
                        'applications using the awesome Ruby language.'
 
     # TODO remove in RM 3.

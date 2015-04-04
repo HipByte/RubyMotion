@@ -170,8 +170,7 @@ module Motion; module Project;
       Motion::PropertyList.to_s({
         'MinimumOSVersion' => deployment_target,
         'CFBundleResourceSpecification' => 'ResourceRules.plist',
-        # TODO temp hack to get ints for Instruments, but strings for normal builds.
-        'UIDeviceFamily' => device_family_ints.map { |x| ENV['__USE_DEVICE_INT__'] ? x.to_i : x.to_s },
+        'UIDeviceFamily' => device_family_ints,
         'DTXcode' => begin
           vers = xcode_version[0].gsub(/\./, '')
           if vers.length == 2

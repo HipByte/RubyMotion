@@ -164,7 +164,7 @@ EOS
       #
       def merged_info_plist(platform)
         plist = super
-        plist['UIDeviceFamily'] << '4' # Probably means Apple Watch device?
+        plist['UIDeviceFamily'] << 4 # Probably means Apple Watch device?
         plist['WKWatchKitApp'] = true
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
         plist.delete('UIBackgroundModes')
@@ -187,7 +187,7 @@ EOS
       #         we copy and use as-is.
       #
       def prebuilt_app_executable(platform)
-        File.join(sdk(platform), "/Library/Application Support/SP/SP.app/SP")
+        File.join(sdk(platform), "/Library/Application Support/WatchKit/WK")
       end
 
       # @todo Do we really need this? `man ibtool` seems to indicate it's needed

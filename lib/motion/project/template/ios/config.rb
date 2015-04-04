@@ -467,8 +467,7 @@ module Motion; module Project;
           }
         },
         'UIAppFonts' => fonts,
-        # TODO temp hack to get ints for Instruments, but strings for normal builds.
-        'UIDeviceFamily' => device_family_ints.map { |x| ENV['__USE_DEVICE_INT__'] ? x.to_i : x.to_s },
+        'UIDeviceFamily' => device_family_ints,
         'UISupportedInterfaceOrientations' => interface_orientations_consts,
         'UIStatusBarStyle' => status_bar_style_const,
         'UIBackgroundModes' => background_modes_consts,

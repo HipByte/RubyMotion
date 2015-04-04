@@ -141,7 +141,7 @@ module Motion; module Project;
                 arch
             end
             asm = File.join(files_build_dir, "#{path}.#{arch}.#{arm64 ? 'bc' : 's'}")
-            sh "/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
+            sh "/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --debug-info-version #{config.xcode_debug_info_version} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
 
             # Object 
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
@@ -155,9 +155,10 @@ module Motion; module Project;
           # Assemble fat binary.
           arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
           sh "/usr/bin/lipo -create #{arch_objs_list} -output \"#{obj}\""
+  
+          any_obj_file_built = true
         end
 
-        any_obj_file_built = true
         [obj, init_func]
       end
 
@@ -198,6 +199,9 @@ extern "C" {
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
 EOS
+      config.custom_init_funcs.each do |init_func|
+        init_txt << "void #{init_func}(void);\n"
+      end
       app_objs.each do |_, init_func|
         init_txt << "void #{init_func}(void *, void *);\n"
       end
@@ -230,6 +234,9 @@ EOS
         end
       end
 
+      config.custom_init_funcs.each do |init_func|
+        init_txt << "#{init_func}();\n"
+      end
       app_objs.each do |_, init_func|
         init_txt << "#{init_func}(self, 0);\n"
       end
@@ -421,7 +428,8 @@ EOS
         'Info.plist', 'PkgInfo', 'ResourceRules.plist',
         convert_filesystem_encoding(config.name)
       ]
-      resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld', '.atlas', '.xcassets']
+      resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld',
+                                    '.atlas', '.xcassets', '.strings']
       resources_paths = []
       config.resources_dirs.each do |dir|
         if File.exist?(dir)
@@ -447,8 +455,23 @@ EOS
       end
 
       # Compile all .strings files
-      Dir.glob(File.join(app_resources_dir, '{,**/}*.strings')).each do |strings_file|
-        compile_resource_to_binary_plist(strings_file)
+      config.resources_dirs.each do |dir|
+        if File.exist?(dir)
+          Dir.glob(File.join(dir, '{,**/}*.strings')).each do |strings_path|
+            res_path = strings_path
+            dest_path = File.join(app_resources_dir, path_on_resources_dirs(config.resources_dirs, res_path))
+
+            if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
+              unless File.size(res_path) == 0
+                App.info 'Compile', dest_path
+                FileUtils.mkdir_p(File.dirname(dest_path))
+                sh "/usr/bin/plutil -convert binary1 \"#{res_path}\" -o \"#{dest_path}\""
+              end
+            end
+
+            preserve_resources << path_on_resources_dirs(config.resources_dirs, res_path)
+          end
+        end
       end
 
       # Optional support for #eval (OSX-only).
@@ -473,10 +496,15 @@ EOS
       end
 
       # Generate dSYM.
-      dsym_path = config.app_bundle_dsym(platform)
-      if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
+      if any_obj_file_built
+        dsym_path = config.app_bundle_dsym(platform)
         App.info "Create", dsym_path
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
+
+        # TODO only in debug mode
+        dest_path = File.join(app_resources_dir, File.basename(dsym_path))
+        FileUtils.rm_rf(dest_path)
+        copy_resource(dsym_path, dest_path) if config.embed_dsym
       end
 
       # Strip all symbols. Only in distribution mode.
@@ -502,13 +530,6 @@ EOS
         # So, we do not convert to "Normalization Form D".
         # (Ruby 2.0 or below, Dir.glob returns "Normalization Form D").
         return string
-      end
-    end
-
-    def compile_resource_to_binary_plist(path)
-      unless File.size(path) == 0
-        App.info 'Compile', path
-        sh "/usr/bin/plutil -convert binary1 \"#{path}\""
       end
     end
 

@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -167,7 +167,7 @@ EOS
       headers = source_files.select { |p| File.extname(p) == '.h' }
       bs_files = []
       unless headers.empty?
-        bs_file = bridgesupport_build_path(build_dir)
+        bs_file = bridgesupport_build_path
         if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
           FileUtils.mkdir_p File.dirname(bs_file)
           bs_cflags = (@opts[:bridgesupport_cflags] or cflags)
@@ -209,7 +209,7 @@ EOS
       end
 
       # Generate the bridgesupport file if we need to.
-      bs_file = bridgesupport_build_path(build_dir)
+      bs_file = bridgesupport_build_path
       headers_dir = @opts[:headers_dir]
       if headers_dir
         # Dir.glob does not traverse symlinks with `**`, using this pattern
@@ -222,7 +222,7 @@ EOS
           @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
         end
       end
-      @bs_files = Dir.glob("#{build_dir}/*.bridgesupport").map { |x| File.expand_path(x) }
+      @bs_files << File.expand_path(bs_file)
     end
 
     private
@@ -250,10 +250,10 @@ EOS
     # First check if an explicit metadata file exists and, if so, write
     # the new file to that same location. Otherwise fall back to the
     # platform-specific build dir.
-    def bridgesupport_build_path(build_dir)
+    def bridgesupport_build_path
       bs_file = File.basename(@path) + '.bridgesupport'
       unless File.exist?(bs_file)
-        bs_file = File.join(build_dir, bs_file)
+        bs_file = File.join(Builder.common_build_dir, File.expand_path(@path) + '.bridgesupport')
       end
       bs_file
     end
