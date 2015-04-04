@@ -421,7 +421,7 @@ EOS
       end
     end
   end
-  App.config.files.map { |x| File.dirname(x) }.uniq.each do |path|
+  App.config.files.flatten.map { |x| File.dirname(x) }.uniq.each do |path|
     # Load extension files (any .java file inside the same directory of a .rb file).
     Dir.glob(File.join(path, "*.java")).each do |java_ext|
       class_name = File.basename(java_ext).sub(/\.java$/, '')
