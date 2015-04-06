@@ -34,6 +34,14 @@ module Motion; module Project
       destination = config.app_bundle_executable(platform)
       sh "/usr/bin/ditto -rsrc '#{source}' '#{destination}'"
 
+      entitlements = File.join(config.app_bundle(platform), "Entitlements.plist")
+      File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
+
+      watchapp_dir = config.app_bundle(platform)
+      bundle_provision = File.join(watchapp_dir, "embedded.mobileprovision")
+      App.info 'Create', bundle_provision
+      FileUtils.cp config.provisioning_profile, bundle_provision
+
       # Compile storyboard
       sh "'#{File.join(config.xcode_dir, '/usr/bin/ibtool')}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{config.app_bundle(platform)}' watch_app/Interface.storyboard"
 
