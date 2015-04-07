@@ -180,8 +180,8 @@ EOS
           @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
         end
         bs_files << bs_file
+        @bs_files = bs_files.map { |x| File.expand_path(x) }
       end
-      @bs_files = bs_files.map { |x| File.expand_path(x) }
     end
 
     def build_xcode(platform)
@@ -226,8 +226,8 @@ EOS
           bs_exceptions = (@opts[:bridgesupport_exceptions] or [])
           @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
         end
+        @bs_files << File.expand_path(bs_file)
       end
-      @bs_files << File.expand_path(bs_file)
     end
 
     private
