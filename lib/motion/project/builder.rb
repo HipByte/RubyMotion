@@ -226,6 +226,7 @@ extern "C" {
     void rb_define_global_const(const char *, void *);
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
+    void ruby_init_device_repl(void);
 EOS
       config.custom_init_funcs.each do |init_func|
         init_txt << "void #{init_func}(void);\n"
@@ -253,6 +254,9 @@ RubyMotionInit(int argc, char **argv)
 #endif
 	    void *self = rb_vm_top_self();
 EOS
+      if config.development? and platform == 'iPhoneOS'
+        init_txt << "ruby_init_device_repl();\n"
+      end
       init_txt << config.define_global_env_txt
 
       if !config.targets.empty? and !target_frameworks.empty?
