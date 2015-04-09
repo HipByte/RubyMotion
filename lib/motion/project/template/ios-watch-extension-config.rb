@@ -36,7 +36,8 @@ module Motion; module Project;
       @version = ENV['RM_TARGET_HOST_APP_VERSION']
       @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
       @frameworks = ['WatchKit', 'Foundation', 'CoreGraphics']
-      @deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET']
+      @deployment_target = '8.2' # FIXME: Now, iTunnes require '8.2' as MinimumOSVersion
+      ENV.delete('RM_TARGET_DEPLOYMENT_TARGET')
     end
 
     # @return [String] The name of the Watch extension is always based on that
