@@ -129,6 +129,11 @@ task :build do
     App.config.manifest.child('application').add_child('uses-feature', 'android:name' => "#{feature}")
   end
 
+  # optional_features
+  App.config.optional_features.each do |feature|
+    App.config.manifest.child('application').add_child('uses-feature', 'android:name' => "#{feature}", 'android:required' => 'false')
+  end
+
   # sub activities
   (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
 
