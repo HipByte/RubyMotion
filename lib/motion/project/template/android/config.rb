@@ -95,7 +95,8 @@ module Motion; module Project;
     variable :sdk_path, :ndk_path, :package, :main_activity, :sub_activities,
       :api_version, :target_api_version, :arch, :assets_dirs, :icon,
       :logs_components, :version_code, :version_name, :permissions, :features,
-      :services, :application_class, :manifest, :theme, :support_libraries
+      :optional_features, :services, :application_class, :manifest, :theme,
+      :support_libraries
 
     # Non-public.
     attr_accessor :vm_debug_logs, :libs
@@ -109,6 +110,7 @@ module Motion; module Project;
       @vendored_projects = []
       @permissions = []
       @features = []
+      @optional_features = []
       @services = []
       @manifest_entries = {}
       @release_keystore_path = nil
