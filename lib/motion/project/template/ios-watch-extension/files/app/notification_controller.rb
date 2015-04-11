@@ -24,7 +24,7 @@ class NotificationController < WKUserNotificationInterfaceController
     # Populate your dynamic notification inteface as quickly as possible.
 
     # After populating your dynamic notification interface call the completion block.
-    completionHandler(WKUserNotificationInterfaceTypeCustom)
+    completionHandler.call(WKUserNotificationInterfaceTypeCustom)
   end
 
   def didReceiveRemoteNotification(remoteNotification, withCompletion:completionHandler)
@@ -33,7 +33,7 @@ class NotificationController < WKUserNotificationInterfaceController
     # Populate your dynamic notification inteface as quickly as possible.
 
     # After populating your dynamic notification interface call the completion block.
-    completionHandler(WKUserNotificationInterfaceTypeCustom)
+    completionHandler.call(WKUserNotificationInterfaceTypeCustom)
   end
 
 end
