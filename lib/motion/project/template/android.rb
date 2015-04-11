@@ -33,11 +33,11 @@ require 'motion/project/template/android/config'
 
 desc "Create an application package file (.apk)"
 task :build do
-  # Prepare build dir.
+  # Prepare build directory.
   app_build_dir = App.config.versionized_build_dir
   mkdir_p app_build_dir
 
-  # support libraries
+  # Support libraries.
   supported_libraries = {
     'android-support-v4' => {
       'jar' => 'android-support-v4.jar'
@@ -80,7 +80,6 @@ task :build do
       'jar' => '/libs/google-play-services.jar'
     }
   }
-
   support_libraries = []
   extras_path = File.join(App.config.sdk_path, 'extras')
   App.config.support_libraries.each do |support_library|
@@ -94,7 +93,6 @@ task :build do
       App.fail "We do not support `#{support_library}`. Supported libraries are : #{supported_libraries.keys.join(',')}"
     end
   end
-
   support_libraries.uniq.each do |support_library|
     library_config = supported_libraries.fetch(support_library)
     library_relative_path = library_config.fetch('path', support_library.split('-'))
@@ -112,7 +110,7 @@ task :build do
     end
   end
 
-  # permissions
+  # Permissions.
   permissions = Array(App.config.permissions)
   if App.config.development?
     # In development mode, we need the INTERNET permission in order to create
@@ -124,17 +122,17 @@ task :build do
     App.config.manifest.add_child('uses-permission', 'android:name' => "#{permission}")
   end
 
-  # features
+  # Features.
   App.config.features.each do |feature|
     App.config.manifest.child('application').add_child('uses-feature', 'android:name' => "#{feature}")
   end
 
-  # optional_features
+  # Optional features.
   App.config.optional_features.each do |feature|
     App.config.manifest.child('application').add_child('uses-feature', 'android:name' => "#{feature}", 'android:required' => 'false')
   end
 
-  # sub activities
+  # Sub-activities.
   (App.config.sub_activities.uniq - [App.config.main_activity]).each do |activity|
 
     App.config.manifest.child('application').add_child('activity') do |sub_activity|
@@ -150,12 +148,12 @@ task :build do
     end
   end
 
-  # services
+  # Services.
   App.config.services.each do |service|
     App.config.manifest.child('application').add_child('service', 'android:name' => "#{service}", 'android:exported' => 'false')
   end
 
-  # generate AndroidManifest.xml
+  # Generate AndroidManifest.xml.
   android_manifest_txt = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
   android_manifest_txt << App.config.manifest.to_xml
 
@@ -204,53 +202,61 @@ task :build do
   end
   bs_files << r_bs if File.exist?(r_bs)
 
-  # Compile Ruby files.
-  ruby = App.config.bin_exec('ruby')
-  bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
-  bs_files += App.config.vendored_bs_files
-  ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
-  objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name)
-  kernel_bc = App.config.kernel_path
-  ruby_objs_changed = false
+  objs_build_dirs = []
+  libpayload_subpaths = []
+  libpayload_paths = []
+  gdbserver_subpaths = []
+  native_libs = []
 
-  build_file = Proc.new do |files_build_dir, ruby_path|
-    ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.o')
-    init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
-    if !File.exist?(ruby_obj) \
-        or File.mtime(ruby_path) > File.mtime(ruby_obj) \
-        or File.mtime(ruby) > File.mtime(ruby_obj) \
-        or File.mtime(kernel_bc) > File.mtime(ruby_obj)
-      App.info 'Compile', ruby_path
-      ruby_bc = ruby_obj + '.bc'
-      FileUtils.mkdir_p(File.dirname(ruby_bc))
-      sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{ruby_bc}\" #{init_func} \"#{ruby_path}\""
-      sh "#{App.config.cc} #{App.config.asflags} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
-      ruby_objs_changed = true
+  App.config.archs.each do |arch|
+    # Compile Ruby files.
+    ruby = App.config.bin_exec('ruby')
+    bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
+    bs_files += App.config.vendored_bs_files
+    ruby_bs_flags = bs_files.map { |x| "--uses-bs \"#{x}\"" }.join(' ')
+    objs_build_dir = File.join(app_build_dir, 'obj', 'local', App.config.armeabi_directory_name(arch))
+    objs_build_dirs << objs_build_dir
+    kernel_bc = App.config.kernel_path(arch)
+    ruby_objs_changed = false
+  
+    build_file = Proc.new do |files_build_dir, ruby_path|
+      ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.' + arch + '.o')
+      init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
+      if !File.exist?(ruby_obj) \
+          or File.mtime(ruby_path) > File.mtime(ruby_obj) \
+          or File.mtime(ruby) > File.mtime(ruby_obj) \
+          or File.mtime(kernel_bc) > File.mtime(ruby_obj)
+        App.info 'Compile', ruby_path
+        ruby_bc = ruby_obj + '.bc'
+        FileUtils.mkdir_p(File.dirname(ruby_bc))
+        sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{ruby_bc}\" #{init_func} \"#{ruby_path}\""
+        sh "#{App.config.cc} #{App.config.asflags(arch)} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
+        ruby_objs_changed = true
+      end
+      [ruby_obj, init_func]
     end
-    [ruby_obj, init_func]
-  end
-
-  # Resolve file dependencies.
-  if App.config.detect_dependencies == true
-    App.config.dependencies = Motion::Project::Dependency.new(App.config.files - App.config.exclude_from_detect_dependencies, App.config.dependencies).run
-  end
-
-  parallel = Motion::Project::ParallelBuilder.new(objs_build_dir, build_file)
-  parallel.files = App.config.ordered_build_files
-  parallel.files += App.config.spec_files if App.config.spec_mode
-  parallel.run
-
-  ruby_objs = app_objs = parallel.objects
-  spec_objs = []
-  if App.config.spec_mode
-    app_objs = ruby_objs[0...App.config.ordered_build_files.size]
-    spec_objs = ruby_objs[-(App.config.spec_files.size)..-1]
-  end
-
-  FileUtils.touch(objs_build_dir) if ruby_objs_changed
-
-  # Generate payload main file.
-  payload_c_txt = <<EOS
+  
+    # Resolve file dependencies.
+    if App.config.detect_dependencies == true
+      App.config.dependencies = Motion::Project::Dependency.new(App.config.files - App.config.exclude_from_detect_dependencies, App.config.dependencies).run
+    end
+  
+    parallel = Motion::Project::ParallelBuilder.new(objs_build_dir, build_file)
+    parallel.files = App.config.ordered_build_files
+    parallel.files += App.config.spec_files if App.config.spec_mode
+    parallel.run
+  
+    ruby_objs = app_objs = parallel.objects
+    spec_objs = []
+    if App.config.spec_mode
+      app_objs = ruby_objs[0...App.config.ordered_build_files.size]
+      spec_objs = ruby_objs[-(App.config.spec_files.size)..-1]
+    end
+  
+    FileUtils.touch(objs_build_dir) if ruby_objs_changed
+  
+    # Generate payload main file.
+    payload_c_txt = <<EOS
 // This file has been generated. Do not modify by hands.
 #include <stdio.h>
 #include <stdbool.h>
@@ -264,15 +270,15 @@ extern "C" {
     void *rb_vm_top_self(void);
     void rb_rb2oc_exc_handler(void);
 EOS
-  App.config.custom_init_funcs.each do |init_func|
-    payload_c_txt << "    void #{init_func}(void);\n"
-  end
-  ruby_objs.each do |_, init_func|
-    payload_c_txt << <<EOS
+    App.config.custom_init_funcs.each do |init_func|
+      payload_c_txt << "    void #{init_func}(void);\n"
+    end
+    ruby_objs.each do |_, init_func|
+      payload_c_txt << <<EOS
     void *#{init_func}(void *rcv, void *sel);
 EOS
-  end
-  payload_c_txt << <<EOS
+    end
+    payload_c_txt << <<EOS
 }
 extern bool ruby_vm_debug_logs;
 extern "C"
@@ -289,15 +295,15 @@ JNI_OnLoad(JavaVM *vm, void *reserved)
     rb_vm_init("#{App.config.package_path}", "#{App.config.rubymotion_env_value}", "#{Motion::Version}", env);
     void *top_self = rb_vm_top_self();
 EOS
-  App.config.custom_init_funcs.each do |init_func|
-    payload_c_txt << <<EOS
+    App.config.custom_init_funcs.each do |init_func|
+      payload_c_txt << <<EOS
     env->PushLocalFrame(32);
     #{init_func}();
     env->PopLocalFrame(NULL);
 EOS
-  end
-  ruby_objs.each do |ruby_obj, init_func|
-    payload_c_txt << <<EOS
+    end
+    ruby_objs.each do |ruby_obj, init_func|
+      payload_c_txt << <<EOS
     try {
 	env->PushLocalFrame(32);
 	#{init_func}(top_self, NULL);
@@ -308,44 +314,68 @@ EOS
 	return -1;
     }
 EOS
-  end
-  payload_c_txt << <<EOS
+    end
+    payload_c_txt << <<EOS
     rb_vm_register_native_methods();
     __android_log_write(ANDROID_LOG_DEBUG, "#{App.config.package_path}", "Loaded payload");
     return JNI_VERSION_1_6;
-}
+  }
 EOS
-  payload_c = File.join(app_build_dir, 'jni/payload.cpp')
-  mkdir_p File.dirname(payload_c)
-  if !File.exist?(payload_c) or File.read(payload_c) != payload_c_txt
-    File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
-  end
-
-  # Compile and link payload library.
-  libs_abi_subpath = "lib/#{App.config.armeabi_directory_name}"
-  libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_filename}"
-  libpayload_path = "#{app_build_dir}/#{libpayload_subpath}"
-  payload_o = File.join(File.dirname(payload_c), 'payload.o')
-  if !File.exist?(libpayload_path) \
-      or ruby_objs_changed \
-      or File.mtime(File.join(App.config.versioned_arch_datadir, "librubymotion-static.a")) > File.mtime(libpayload_path) \
-      or File.mtime(payload_c) > File.mtime(payload_o)
-    App.info 'Create', libpayload_path
-    FileUtils.mkdir_p(File.dirname(libpayload_path))
-    sh "#{App.config.cc} #{App.config.cflags} -c \"#{payload_c}\" -o \"#{payload_o}\""
-    sh "#{App.config.cxx} #{App.config.ldflags} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs_pre} #{App.config.libs.join(' ')} #{App.config.ldlibs_post}"
-  end
-
-  # Install native shared libraries.
-  native_libs = []
-  App.config.vendored_projects.map { |x| x[:native] }.compact.flatten.each do |native_lib_src|
-    native_lib_subpath = "#{libs_abi_subpath}/#{File.basename(native_lib_src)}"
-    native_lib_path = "#{app_build_dir}/#{native_lib_subpath}"
-    native_libs << native_lib_subpath
-    if !File.exists?(native_lib_path) \
-      or File.mtime(native_lib_src) > File.mtime(native_lib_path)
-      App.info 'Create', native_lib_path
-      sh "/usr/bin/install -p #{native_lib_src} #{File.dirname(native_lib_path)}"
+    payload_c = File.join(app_build_dir, 'jni/payload-' + arch + '.cpp')
+    if !File.exist?(payload_c) or File.read(payload_c) != payload_c_txt
+      mkdir_p File.dirname(payload_c)
+      File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
+    end
+  
+    # Compile and link payload library.
+    libs_abi_subpath = "lib/#{App.config.armeabi_directory_name(arch)}"
+    libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_filename}"
+    libpayload_subpaths << libpayload_subpath
+    libpayload_path = "#{app_build_dir}/#{libpayload_subpath}"
+    libpayload_paths << libpayload_path
+    payload_o = File.join(File.dirname(payload_c), 'payload.o')
+    if !File.exist?(libpayload_path) \
+        or ruby_objs_changed \
+        or File.mtime(File.join(App.config.versioned_arch_datadir(arch), "librubymotion-static.a")) > File.mtime(libpayload_path) \
+        or File.mtime(payload_c) > File.mtime(payload_o)
+      App.info 'Create', libpayload_path
+      FileUtils.mkdir_p(File.dirname(libpayload_path))
+      sh "#{App.config.cc} #{App.config.cflags(arch)} -c \"#{payload_c}\" -o \"#{payload_o}\""
+      sh "#{App.config.cxx} #{App.config.ldflags(arch)} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs_pre(arch)} #{App.config.libs.join(' ')} #{App.config.ldlibs_post(arch)}"
+    end
+  
+    # Copy the gdb server.
+    gdbserver_subpath = "#{libs_abi_subpath}/gdbserver"
+    gdbserver_subpaths << gdbserver_subpath
+    gdbserver_path = "#{app_build_dir}/#{gdbserver_subpath}"
+    if !File.exist?(gdbserver_path)
+      App.info 'Create', gdbserver_path
+      sh "/usr/bin/install -p #{App.config.ndk_path}/prebuilt/android-#{App.config.common_arch(arch)}/gdbserver/gdbserver #{File.dirname(gdbserver_path)}"
+    end
+  
+    # Install native shared libraries.
+    App.config.vendored_projects.map { |x| x[:native] }.compact.flatten.each do |native_lib_src|
+      native_lib_subpath = "#{libs_abi_subpath}/#{File.basename(native_lib_src)}"
+      native_lib_path = "#{app_build_dir}/#{native_lib_subpath}"
+      native_libs << native_lib_subpath
+      if !File.exists?(native_lib_path) \
+        or File.mtime(native_lib_src) > File.mtime(native_lib_path)
+        App.info 'Create', native_lib_path
+        sh "/usr/bin/install -p #{native_lib_src} #{File.dirname(native_lib_path)}"
+      end
+    end
+  
+    # Create the gdb config file.
+    gdbconfig_path = "#{app_build_dir}/#{libs_abi_subpath}/gdb.setup"
+    if !File.exist?(gdbconfig_path)
+      App.info 'Create', gdbconfig_path
+      File.open(gdbconfig_path, 'w') do |io|
+        io.puts <<EOS
+set solib-search-path #{libs_abi_subpath}:obj/local/#{App.config.armeabi_directory_name(arch)}
+source "#{App.config.ndk_path}/prebuilt/common/gdb/common.setup"
+directory "#{App.config.ndk_path}/platforms/android-#{App.config.api_version_ndk}/arch-arm/usr/include" jni "#{App.config.ndk_path}/sources/cxx-stl/system"
+EOS
+      end
     end
   end
 
@@ -355,30 +385,9 @@ EOS
   # Create a build/jni/Android.mk file (important for ndk-gdb).
   File.open("#{app_build_dir}/jni/Android.mk", 'w') { |io| }
 
-  # Copy the gdb server.
-  gdbserver_subpath = "#{libs_abi_subpath}/gdbserver"
-  gdbserver_path = "#{app_build_dir}/#{gdbserver_subpath}"
-  if !File.exist?(gdbserver_path)
-    App.info 'Create', gdbserver_path
-    sh "/usr/bin/install -p #{App.config.ndk_path}/prebuilt/android-arm/gdbserver/gdbserver #{File.dirname(gdbserver_path)}"
-  end
-
-  # Create the gdb config file.
-  gdbconfig_path = "#{app_build_dir}/#{libs_abi_subpath}/gdb.setup"
-  if !File.exist?(gdbconfig_path)
-    App.info 'Create', gdbconfig_path
-    File.open(gdbconfig_path, 'w') do |io|
-      io.puts <<EOS
-set solib-search-path #{libs_abi_subpath}:obj/local/#{App.config.armeabi_directory_name}
-source "#{App.config.ndk_path}/prebuilt/common/gdb/common.setup"
-directory "#{App.config.ndk_path}/platforms/android-#{App.config.api_version_ndk}/arch-arm/usr/include" jni "#{App.config.ndk_path}/sources/cxx-stl/system"
-EOS
-    end
-  end
-
   # Create java files based on the classes map files.
   java_classes = {}
-  Dir.glob(objs_build_dir + '/**/*.map') do |map|
+  Dir.glob(objs_build_dirs[0] + '/**/*.map') do |map|
     txt = File.read(map)
     current_class = nil
     txt.each_line do |line|
@@ -527,15 +536,15 @@ EOS
   archive = App.config.apk_path
   if !File.exist?(archive) \
       or File.mtime(dex_classes) > File.mtime(archive) \
-      or File.mtime(libpayload_path) > File.mtime(archive) \
       or File.mtime(android_manifest) > File.mtime(archive) \
+      or libpayload_paths.any { |x| File.mtime(x) > File.mtime(archive) } \
       or assets_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
       or resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
       or native_libs.any? { |x| File.mtime("#{app_build_dir}/#{x}") > File.mtime(archive) }
     App.info 'Create', archive
     sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
     Dir.chdir(app_build_dir) do
-      [File.basename(dex_classes), libpayload_subpath, *native_libs, gdbserver_subpath].each do |file|
+      [File.basename(dex_classes), *libpayload_subpaths, *native_libs, *gdbserver_subpaths].each do |file|
         line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"#{File.basename(archive)}\" \"#{file}\""
         line << " > /dev/null" unless Rake.application.options.trace
         sh line
@@ -656,9 +665,28 @@ def run_apk(mode)
         end
       end
       # Enable port forwarding for the REPL socket.
-      sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:33333 tcp:33333"
+      local_tcp = case mode
+        when :emulator
+          '33332'
+        when :device 
+          '33333'
+        else
+          raise
+      end
+      sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:#{local_tcp} tcp:33333"
+      # Determine architecture of device.
+      arch = `\"#{adb_path}\" #{adb_mode_flag(mode)} shell getprop ro.product.cpu.abi`.strip
+      target_triple = case arch
+        when 'x86'
+          'i686-none-linux-androideabi'
+        when /^armeabi/
+          arch = 'armv5te'
+          'armv5e-none-linux-androideabi'
+        else
+          App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
+      end
       # Launch the REPL.
-      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path}\" 0.0.0.0 33333"
+      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp}"
     end
   end
 end
