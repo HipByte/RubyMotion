@@ -503,6 +503,9 @@ module Bacon
   end
 
   def self.current_context
+    if ENV['files'] && @contexts.nil?
+      raise "Current context not set, perhaps there is an error in the file names you provided? (#{ENV['files'].join(',')}"
+    end
     @contexts[current_context_index]
   end
 
