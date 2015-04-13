@@ -134,14 +134,13 @@ module Motion; module Project;
             raise "Can't locate kernel file" unless File.exist?(kernel)
 
             # Assembly.
-            arm64 = false
             compiler_exec_arch = case arch
               when /^arm/
-                (arm64 = (arch == 'arm64')) ? 'x86_64' : 'i386'
+                arch == 'arm64' ? 'x86_64' : 'i386'
               else
                 arch
             end
-            asm = File.join(files_build_dir, "#{path}.#{arch}.#{arm64 ? 'bc' : 's'}")
+            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
             @compiler[job] ||= {}
             @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --debug-info-version #{config.xcode_debug_info_version} --emit-llvm-fast \"\"", "r+")
             @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
@@ -149,8 +148,7 @@ module Motion; module Project;
 
             # Object
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            arch_obj_flags = arm64 ? "-miphoneos-version-min=#{config.deployment_target}" : ''
-            sh "#{cc} -fexceptions -c -arch #{arch} #{arch_obj_flags} \"#{asm}\" -o \"#{arch_obj}\""
+            sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
 
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
