@@ -1,3 +1,33 @@
+= Rubymotion 3.9 =
+
+  * [Android] Projects now support multiple architectures. The `app.arch'
+    variable is replaced by `app.archs' which takes an array of architectures.
+    By default, we still build for arm 32-bit only.
+  * [Android] Added x86 (Intel 32-bit) support. This is mainly used to run
+    apps in faster emulators (such as Genymotion). To build for x86, simply
+    edit your project's Rakefile to add the architecture (app.archs << 'x86').
+  * [Android] Added the `app.optional_features' to let users specify optional
+    features in the manifest file.
+  * [Android] Make sure all Ruby file paths are flattened into single Array.
+    Thanks to Darin Wilson for the patch (pull request #189).
+  * [iOS, OSX] The Ruby runtimes have been rebuilt with Xcode 6.3 final.
+  * [iOS] Fixed ARM64 issues introduced since Xcode 6.3 final.
+  * [iOS] Fixed a bug where the REPL would crash when using an old simulator.
+  * [iOS] Fixed a bug where the value of `app.version' and `app.short_version'
+    between the container and watch apps were not synchronized when submitting
+    to iTunes Connect. Thanks to digitalfx for the patch (pull request #205).
+  * [iOS] Fixed a bug where watch apps could not be submitted to iTunes Connect.
+  * [iOS] Fixed a bug where satch apps would not follow the deployment target
+    of the host app.
+  * [iOS] Fixed a bug where `rake watch' would not launch the watch app when
+    using Xcode 6.3 stable.
+  * [iOS] Fixed a bug where dSYM files were embeded even if the app was built
+    with release mode if app has extensions.
+  * [OSX] Fixed a bug where app would crash when running tests if the UIDevice
+    class is defined.
+  * [iOS, OSX] Fixed a bug where small structures with only float members could
+    not be passed/returned in a 64-bit environment.
+
 = Rubymotion 3.8 =
 
   * The toolchain has been upgrated to LLVM 3.5.
