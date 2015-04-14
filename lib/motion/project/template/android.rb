@@ -537,7 +537,7 @@ EOS
   if !File.exist?(archive) \
       or File.mtime(dex_classes) > File.mtime(archive) \
       or File.mtime(android_manifest) > File.mtime(archive) \
-      or libpayload_paths.any { |x| File.mtime(x) > File.mtime(archive) } \
+      or libpayload_paths.any? { |x| File.mtime(x) > File.mtime(archive) } \
       or assets_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
       or resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
       or native_libs.any? { |x| File.mtime("#{app_build_dir}/#{x}") > File.mtime(archive) }
