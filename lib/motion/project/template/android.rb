@@ -373,7 +373,7 @@ EOS
         io.puts <<EOS
 set solib-search-path #{libs_abi_subpath}:obj/local/#{App.config.armeabi_directory_name(arch)}
 source "#{App.config.ndk_path}/prebuilt/common/gdb/common.setup"
-directory "#{App.config.ndk_path}/platforms/android-#{App.config.api_version_ndk}/arch-arm/usr/include" jni "#{App.config.ndk_path}/sources/cxx-stl/system"
+directory "#{App.config.ndk_path}/platforms/android-#{App.config.api_version_ndk}/arch-#{App.config.common_arch(arch)}/usr/include" jni "#{App.config.ndk_path}/sources/cxx-stl/system"
 EOS
       end
     end
@@ -383,7 +383,9 @@ EOS
   Dir.chdir(app_build_dir) { ln_s 'lib', 'libs' unless File.exist?('libs') }
 
   # Create a build/jni/Android.mk file (important for ndk-gdb).
-  File.open("#{app_build_dir}/jni/Android.mk", 'w') { |io| }
+  File.open("#{app_build_dir}/jni/Android.mk", 'w') do |io|
+    io.puts "APP_ABI := " + App.config.archs.map { |x| App.config.armeabi_directory_name(x) }.join(' ')
+  end
 
   # Create java files based on the classes map files.
   java_classes = {}
