@@ -1,4 +1,36 @@
-= Rubymotion 3.9 =
+= RubyMotion 3.10 =
+
+  * [Android] Fixed typo in android.rb template which breaks incremental builds.
+    Thanks to Darin Wilson for the patch (pull request #210).
+  * [Android] Fixed `rake {emulator,device} debug=1' for multi-arch projects.
+  * [Android] Added Module#const_get.
+  * [Android] Fixed a bug where calling a Java method that returned a large
+    non-Object Java array would crash the runtime by creating a JVM stack
+    overflow.
+  * [Android] Fixed a bug when calling the super version of a Java method,
+    where it would fail if the current stack trace included a super Java call
+    of the same method name but of a different class.
+  * [Android] Fixed a bug where #initialize methods would not be honored when
+    defined in superclasses.
+  * [Android] Fixed a bug where an assertion would happen when trying to
+    resolve a Java class at runtime.
+  * [Android] Fixed a bug where a crash would happen when changing the value
+    of a local variable that previously contained a reference to a constant
+    literal (ex. symbol).
+  * [iOS] Added support for iOS 8.4 (beta).
+  * [iOS] Fixed a wrong in Watch app templete which notification handler should
+    invoke `call' method for Proc handler object. Thanks to Dave Shapiro for
+    the patch (pull request #207).
+  * [iOS] Fixed a bug which it would be trigger a crash when large structures
+    (like CMTime) will be passed into Objective-C methods/funtions on ARM64.
+  * [iOS] Fixed a bug which it would be trigger a crash when it will call
+    NSDecimalNumber#decimalValue method on ARM64.
+  * [iOS] Fixed a bug which UIInterfaceOrientation would cause link error when
+    specify iOS 8.2 or below as deployment target.
+  * [iOS, OSX] Fixed a bug where small structures with only float members could
+    not be passed/returned in a 64-bit environment.
+
+= RubyMotion 3.9 =
 
   * [Android] Projects now support multiple architectures. The `app.arch'
     variable is replaced by `app.archs' which takes an array of architectures.
@@ -28,7 +60,7 @@
   * [iOS, OSX] Fixed a bug where small structures with only float members could
     not be passed/returned in a 64-bit environment.
 
-= Rubymotion 3.8 =
+= RubyMotion 3.8 =
 
   * The toolchain has been upgrated to LLVM 3.5.
   * [Android] Added the `motion android-setup' command which downloads and
@@ -61,7 +93,7 @@
   * [iOS, OSX] Fixed a rare case where gdb would be used instead of LLDB when
     running in debug mode.
 
-= Rubymotion 3.7 =
+= RubyMotion 3.7 =
 
   * Fixed a bug where the `motion' command would not work as expected if Ruby
     was installed with rbenv/RVM.
