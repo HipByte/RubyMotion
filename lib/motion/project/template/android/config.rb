@@ -416,9 +416,6 @@ module Motion; module Project;
       App.fail "Expected `:manifest' key/value pair when `:resources' is given" if res and !manifest
       App.fail "Expected `:resources' key/value pair when `:manifest' is given" if manifest and !res
       App.fail "Unused arguments: `#{opt}'" unless opt.empty?
-      native.each do |native_lib|
-        App.fail "Expected '#{native_lib}' to target #{arch}, arm shared libraries are currently supported" unless native_lib =~ /\/#{arch}|armeabi\//
-      end
 
       package = nil
       if manifest
