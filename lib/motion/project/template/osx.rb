@@ -32,6 +32,8 @@ require 'motion/project'
 require 'motion/project/template/osx/config'
 require 'motion/project/template/osx/builder'
 
+Motion::Project::Config.need_full_version!
+
 desc "Build the project, then run it"
 task :default => :run
 
