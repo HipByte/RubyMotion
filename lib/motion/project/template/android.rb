@@ -721,7 +721,10 @@ desc "Build the app then run it in the emulator"
 task :emulator => ['build', 'emulator:install', 'emulator:start']
 
 desc "Build the app then run it in the device"
-task :device => ['build', 'device:install', 'device:start']
+task :device do
+  Motion::Project::Config.need_full_version!
+  ['build', 'device:install', 'device:start'].each { |x| Rake::Task[x].invoke }
+end
 
 desc "Same as 'rake emulator'"
 task :default => :emulator

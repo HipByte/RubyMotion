@@ -277,8 +277,12 @@ module Motion; module Project
       end
     end
 
-    def motiondir
+    def self.motiondir
       @motiondir ||= File.expand_path(File.join(File.dirname(__FILE__), '../../..'))
+    end
+
+    def motiondir
+      @motiondir ||= self.class.motiondir
     end
 
     def bindir
@@ -335,6 +339,14 @@ EOS
       else
         development? ? 'development' : 'release'
       end
+    end
+
+    def self.evaluation?
+      @evaluation ||= !File.exist?(File.join(motiondir, 'license.key'))
+    end
+
+    def self.need_full_version!
+      App.fail "This functionality is not supported in the evaluation version." if evaluation?
     end
   end
 end; end

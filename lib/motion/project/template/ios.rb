@@ -70,6 +70,7 @@ namespace :build do
 
   desc "Build the device version"
   task :device do
+    Motion::Project::Config.need_full_version!
     pre_build_actions('iPhoneOS')
     App.build('iPhoneOS')
     App.codesign('iPhoneOS')

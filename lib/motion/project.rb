@@ -36,10 +36,16 @@ if Motion::Project::App.template == nil
   require 'motion/project/template/ios'
 end
 
-unless ENV['RM_TARGET_BUILD']
-  # Check for updates.
-  motion_bin_path = File.join(File.dirname(__FILE__), '../../bin/motion')
-  system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
+if Motion::Project::Config.evaluation?
+  puts '=' * 80
+  puts "This is an evaluation copy of RubyMotion. To purchase a full version, go to\nhttp://rubymotion.com/buy"
+  puts '=' * 80
+else
+  unless ENV['RM_TARGET_BUILD']
+    # Check for updates.
+    motion_bin_path = File.join(File.dirname(__FILE__), '../../bin/motion')
+    system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
+  end
 end
 
 desc "Clear local build objects"
