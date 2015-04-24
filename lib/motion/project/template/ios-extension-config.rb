@@ -223,7 +223,6 @@ module Motion; module Project;
     def merged_info_plist(platform)
       super.merge({
         'MinimumOSVersion' => deployment_target,
-        'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
         'CFBundleIcons' => {
           'CFBundlePrimaryIcon' => {
