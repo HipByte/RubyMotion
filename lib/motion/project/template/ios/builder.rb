@@ -37,9 +37,14 @@ module Motion; module Project
         sh "/bin/rm -rf #{tmp}"
         sh "/bin/mkdir -p #{tmp}/Payload"
         sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
+        sh "/bin/chmod -R 755 #{tmp}/Payload"
+        if watchapp?(config)
+          source = File.join(config.sdk('iPhoneOS'), "/Library/Application Support/WatchKit/WK")
+          sh "/usr/bin/ditto -rsrc '#{source}' #{tmp}/WatchKitSupport/WK"
+        end
         Dir.chdir(tmp) do
-          sh "/bin/chmod -R 755 Payload"
-          sh "/usr/bin/zip -q -r archive.zip Payload"
+          dirs = Dir.glob("*").join(' ')
+          sh "/usr/bin/zip -q -r archive.zip #{dirs}"
         end
         sh "/bin/cp #{tmp}/archive.zip \"#{archive}\""
       end
@@ -123,6 +128,10 @@ PLIST
         File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
         sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
       end
+    end
+
+    def watchapp?(config)
+      Dir.glob("#{config.app_bundle('iPhoneOS')}/**/_WatchKitStub/").size > 0
     end
   end
 end; end

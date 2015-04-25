@@ -33,7 +33,11 @@ module Motion; module Project;
     def initialize(*)
       super
       @name = nil
+      @version = ENV['RM_TARGET_HOST_APP_VERSION']
+      @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
       @frameworks = ['WatchKit', 'Foundation', 'CoreGraphics']
+      @deployment_target = '8.2' # FIXME: Now, iTunnes require '8.2' as MinimumOSVersion
+      ENV.delete('RM_TARGET_DEPLOYMENT_TARGET')
     end
 
     # @return [String] The name of the Watch extension is always based on that
@@ -134,7 +138,9 @@ EOS
         @delegate_class = "SPApplicationDelegate"
         @extension_config = extension_config
 
-        @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' Watch App'
+        @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit App'
+        @version = ENV['RM_TARGET_HOST_APP_VERSION']
+        @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
       end
 
       def sdk_version
@@ -155,7 +161,7 @@ EOS
       #         the bundle identifier of the host application.
       #
       def identifier
-        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchapp'
+        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitapp'
       end
 
       # @todo There are more differences with Xcode's Info.plist.

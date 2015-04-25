@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -45,6 +45,14 @@ module Motion; module Project
 
       # Create bundle/ResourceRules.plist.
       resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
+
+      # Codesign bundled .app (Only for watchkit extensions)
+      watchapp_dir = Dir["#{extension_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
+      if watchapp_dir && Dir.exists?(watchapp_dir)
+        entitlements = File.join(watchapp_dir, "Entitlements.plist")
+        codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
+        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements \"#{entitlements}\" \"#{watchapp_dir}\""
+      end
 
       # Codesign executable
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
