@@ -175,6 +175,7 @@ EOS
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
         plist.delete('UIBackgroundModes')
         plist.delete('UIStatusBarStyle')
+        plist.delete('CFBundleResourceSpecification')
         plist
       end
 
