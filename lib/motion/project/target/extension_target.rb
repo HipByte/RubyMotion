@@ -51,7 +51,7 @@ module Motion; module Project
       if watchapp_dir && Dir.exists?(watchapp_dir)
         entitlements = File.join(watchapp_dir, "Entitlements.plist")
         codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
-        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements \"#{entitlements}\" \"#{watchapp_dir}\""
+        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --entitlements \"#{entitlements}\" \"#{watchapp_dir}\""
       end
 
       # Codesign executable
