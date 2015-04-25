@@ -170,7 +170,7 @@ EOS
       #
       def merged_info_plist(platform)
         plist = super
-        plist['UIDeviceFamily'] << 4 # Probably means Apple Watch device?
+        plist['UIDeviceFamily'] = [4] # Probably means Apple Watch device?
         plist['WKWatchKitApp'] = true
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
         plist.delete('UIBackgroundModes')
