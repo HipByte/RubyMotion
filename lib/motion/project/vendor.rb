@@ -89,6 +89,11 @@ module Motion; module Project;
           end
         end
       end
+      Dir.chdir(@path) do
+        if File.exist?(bridgesupport_build_path)
+          FileUtils.rm bridgesupport_build_path
+        end
+      end
     end
 
     def build_static(platform)
@@ -175,8 +180,8 @@ EOS
           @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
         end
         bs_files << bs_file
+        @bs_files = bs_files.map { |x| File.expand_path(x) }
       end
-      @bs_files = bs_files.map { |x| File.expand_path(x) }
     end
 
     def build_xcode(platform)
@@ -221,8 +226,8 @@ EOS
           bs_exceptions = (@opts[:bridgesupport_exceptions] or [])
           @config.gen_bridge_metadata(platform, headers, bs_file, bs_cflags, bs_exceptions)
         end
+        @bs_files << File.expand_path(bs_file)
       end
-      @bs_files << File.expand_path(bs_file)
     end
 
     private
@@ -251,9 +256,9 @@ EOS
     # the new file to that same location. Otherwise fall back to the
     # platform-specific build dir.
     def bridgesupport_build_path
-      bs_file = File.basename(@path) + '.bridgesupport'
+      bs_file = File.basename(Dir.pwd) + '.bridgesupport'
       unless File.exist?(bs_file)
-        bs_file = File.join(Builder.common_build_dir, File.expand_path(@path) + '.bridgesupport')
+        bs_file = File.join(Builder.common_build_dir, File.expand_path(Dir.pwd), bs_file)
       end
       bs_file
     end

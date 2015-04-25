@@ -176,6 +176,12 @@ module Motion; module Project
       @build_dir
     end
 
+    def build_mode=(mode)
+      @build_mode = mode
+      @embed_dsym = (development? ? true : false)
+      mode
+    end
+
     def build_mode_name
       @build_mode.to_s.capitalize
     end

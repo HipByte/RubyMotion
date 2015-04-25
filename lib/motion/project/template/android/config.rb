@@ -93,9 +93,10 @@ module Motion; module Project;
     register :android
 
     variable :sdk_path, :ndk_path, :package, :main_activity, :sub_activities,
-      :api_version, :target_api_version, :arch, :assets_dirs, :icon,
+      :api_version, :target_api_version, :archs, :assets_dirs, :icon,
       :logs_components, :version_code, :version_name, :permissions, :features,
-      :services, :application_class, :manifest, :theme, :support_libraries
+      :optional_features, :services, :application_class, :manifest, :theme,
+      :support_libraries
 
     # Non-public.
     attr_accessor :vm_debug_logs, :libs
@@ -104,11 +105,12 @@ module Motion; module Project;
       super
       @main_activity = 'MainActivity'
       @sub_activities = []
-      @arch = 'armv5te'
+      @archs = ['armv5te']
       @assets_dirs = [File.join(project_dir, 'assets')]
       @vendored_projects = []
       @permissions = []
       @features = []
+      @optional_features = []
       @services = []
       @manifest_entries = {}
       @release_keystore_path = nil
@@ -271,16 +273,42 @@ module Motion; module Project;
       File.join(ndk_toolchain_bin_dir, 'clang++')
     end
 
-    def asflags
-      archflags = case arch
-        when 'armv5te'
-          "-march=armv5te"
-        when 'armv7'
-          "-march=armv7a -mfpu=vfpv3-d16"
+    def common_arch(arch)
+      case arch
+        when /^arm/
+          'arm'
+        when 'x86'
+          arch
         else
           raise "Invalid arch `#{arch}'"
       end
-      "-no-canonical-prefixes -target #{arch}-none-linux-androideabi #{archflags} -mthumb -msoft-float -marm -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\""
+    end
+
+    def toolchain_flags(arch)
+      case common_arch(arch)
+        when 'arm'
+          "-target #{arch}-none-linux-androideabi -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\""
+        when 'x86'
+          "-target i686-none-linux-android -gcc-toolchain \"#{ndk_path}/toolchains/x86-4.8/prebuilt/darwin-x86_64\""
+      end
+    end
+
+    def asflags(arch)
+      archflags = ''
+      case arch
+        when /^arm/
+          archflags << "-target #{arch}-none-linux-androideabi -marm -mthumb  "
+          if arch == 'armv5te'
+            archflags << "-march=armv5te "
+          elsif arch == 'armv7'
+            archflags << "-march=armv7a -mfpu=vfpv3-d16 "
+          end
+        when 'x86'
+          # Nothing.
+        else
+          raise "Invalid arch `#{arch}'"
+      end
+      "-no-canonical-prefixes -msoft-float #{toolchain_flags(arch)} #{archflags}"
     end
 
     def api_version_ndk
@@ -299,16 +327,16 @@ module Motion; module Project;
         end
     end
 
-    def cflags
+    def cflags(arch)
       archflags = case arch
         when 'armv5te'
           "-mtune=xscale"
       end
-      "#{asflags} #{archflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-arm/usr/include\" -Wformat -Werror=format-security"
+      "#{asflags(arch)} #{archflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-#{common_arch(arch)}/usr/include\" -Wformat -Werror=format-security"
     end
 
-    def cxxflags
-      "#{cflags} -I\"#{ndk_path}/sources/cxx-stl/stlport/stlport\""
+    def cxxflags(arch)
+      "#{cflags(arch)} -I\"#{ndk_path}/sources/cxx-stl/stlport/stlport\""
     end
 
     def payload_library_filename
@@ -319,33 +347,35 @@ module Motion; module Project;
       'payload'
     end
 
-    def ldflags
-      "-Wl,-soname,#{payload_library_filename} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-arm\" -lgcc  -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\" -no-canonical-prefixes -target #{arch}-none-linux-androideabi  -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -O0 -g3"
+    def ldflags(arch)
+      "#{toolchain_flags(arch)} -Wl,-soname,#{payload_library_filename} -shared --sysroot=\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-#{common_arch(arch)}\" -lgcc -no-canonical-prefixes -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -O0 -g3"
     end
 
     def versioned_datadir
       "#{motiondir}/data/android/#{api_version}"
     end
 
-    def versioned_arch_datadir
+    def versioned_arch_datadir(arch)
       "#{versioned_datadir}/#{arch}"
     end
 
-    def ldlibs_pre
+    def ldlibs_pre(arch)
       # The order of the libraries matters here.
-      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-arm/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir}\" -lrubymotion-static"
+      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-#{common_arch(arch)}/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir(arch)}\" -lrubymotion-static"
     end
 
-    def ldlibs_post
-      "-L#{ndk_path}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi -lgnustl_static"
+    def ldlibs_post(arch)
+      "-L#{ndk_path}/sources/cxx-stl/gnu-libstdc++/4.9/libs/#{armeabi_directory_name(arch)} -lgnustl_static"
     end
 
-    def armeabi_directory_name
+    def armeabi_directory_name(arch)
       case arch
         when 'armv5te'
           'armeabi'
         when 'armv7'
           'armeabi-v7a'
+        when 'x86'
+          arch
         else
           raise "Invalid arch `#{arch}'"
       end
@@ -355,8 +385,8 @@ module Motion; module Project;
       File.join(motiondir, 'bin', name)
     end
 
-    def kernel_path
-      File.join(versioned_arch_datadir, "kernel-#{arch}.bc")
+    def kernel_path(arch)
+      File.join(versioned_arch_datadir(arch), "kernel-#{arch}.bc")
     end
 
     def clean_project
