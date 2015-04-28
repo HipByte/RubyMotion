@@ -141,6 +141,7 @@ EOS
         @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit App'
         @version = ENV['RM_TARGET_HOST_APP_VERSION']
         @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
+        @interface_orientations = [:portrait, :portrait_upside_down]
       end
 
       def sdk_version
@@ -170,11 +171,13 @@ EOS
       #
       def merged_info_plist(platform)
         plist = super
+        plist['CFBundleDisplayName'] = ENV['RM_TARGET_HOST_APP_NAME']
         plist['UIDeviceFamily'] = [4] # Probably means Apple Watch device?
         plist['WKWatchKitApp'] = true
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
         plist.delete('UIBackgroundModes')
         plist.delete('UIStatusBarStyle')
+        plist.delete('UIAppFonts')
         plist.delete('CFBundleResourceSpecification')
         plist
       end
