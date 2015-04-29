@@ -37,9 +37,18 @@ if Motion::Project::App.template == nil
 end
 
 if Motion::Project::Config.evaluation?
+  require 'date'
+  days = 30 - (Date.today - File.mtime(__FILE__).to_date).to_i
+  expired = days <= 0
   puts '=' * 80
-  puts "This is an evaluation copy of RubyMotion. To purchase a full version, go to\nhttp://rubymotion.com/buy"
+  if expired
+    puts "This evaluation copy of RubyMotion is expired."
+  else
+    puts "This is an evaluation copy of RubyMotion that will expire in #{days} day#{days > 1 ? 's' : ''}."
+  end
+  puts "To purchase a full version, go to http://rubymotion.com/buy"
   puts '=' * 80
+  exit 1 if expired
 else
   unless ENV['RM_TARGET_BUILD']
     # Check for updates.
