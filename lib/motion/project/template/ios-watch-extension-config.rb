@@ -63,6 +63,7 @@ module Motion; module Project;
     #
     def merged_info_plist(platform)
       super.merge({
+        'UIRequiredDeviceCapabilities' => ['watch-companion'],
         'RemoteInterfacePrincipalClass' => 'InterfaceController',
         'NSExtension' => {
           'NSExtensionPointIdentifier' => 'com.apple.watchkit',
