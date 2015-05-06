@@ -566,6 +566,8 @@ EOS
     sh "\"#{App.config.zipalign_path}\" -f 4 \"#{archive}\" \"#{archive}-aligned\""
     sh "/bin/mv \"#{archive}-aligned\" \"#{archive}\""
   end
+
+  $bs_files = bs_files
 end
 
 desc "Create an application package file (.apk) for release (Google Play)"
@@ -688,7 +690,7 @@ def run_apk(mode)
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
       # Launch the REPL.
-      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp}"
+      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{$bs_files.join(' ')}"
     end
   end
 end
