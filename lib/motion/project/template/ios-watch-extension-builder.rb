@@ -45,7 +45,12 @@ module Motion; module Project
       FileUtils.cp config.provisioning_profile, bundle_provision
 
       # Compile storyboard
-      sh "'#{File.join(config.xcode_dir, '/usr/bin/ibtool')}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{config.app_bundle(platform)}' watch_app/Interface.storyboard"
+      ibtool = File.join(config.xcode_dir, '/usr/bin/ibtool')
+      Dir.glob("watch_app/**/Interface.storyboard").each do |storyboard|
+        compilation_directory = File.join(config.app_bundle(platform), File.dirname(storyboard.sub('watch_app/', '')))
+        FileUtils.mkdir_p(compilation_directory)
+        sh "'#{ibtool}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{compilation_directory}' #{storyboard}"
+      end
 
       # Compile asset bundles
       compile_asset_bundles(config, platform)
