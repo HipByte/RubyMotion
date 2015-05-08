@@ -47,14 +47,14 @@ module Motion; module Project
       # Compile storyboard
       ibtool = File.join(config.xcode_dir, '/usr/bin/ibtool')
       Dir.glob("watch_app/**/Interface.storyboard").each do |storyboard|
-        compilation_directory = File.join(config.app_bundle(platform), File.dirname(destination_directory(storyboard)))
+        compilation_directory = File.join(config.app_bundle(platform), File.dirname(sanitize_destination_path(storyboard)))
         FileUtils.mkdir_p(compilation_directory)
         sh "'#{ibtool}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{compilation_directory}' #{storyboard}"
       end
 
       # Copy localization files
       Dir.glob('watch_app/**/*.strings').each do |res_path|
-        dest_path = File.join(config.app_bundle(platform), destination_directory(res_path))
+        dest_path = File.join(config.app_bundle(platform), sanitize_destination_path(res_path))
         copy_resource(res_path, dest_path)
       end
 
@@ -72,7 +72,7 @@ module Motion; module Project
     alias_method "build_extension", "build"
     alias_method "build", "build_watch_extension"
 
-    def destination_directory(path)
+    def sanitize_destination_path(path)
       path.sub('watch_app/', '')
     end
   end
