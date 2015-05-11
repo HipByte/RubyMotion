@@ -355,11 +355,12 @@ EOS
   
     # Install native shared libraries.
     App.config.vendored_projects.map { |x| x[:native] }.compact.flatten.each do |native_lib_src|
+      next unless native_lib_src.include?(App.config.armeabi_directory_name(arch))
       native_lib_subpath = "#{libs_abi_subpath}/#{File.basename(native_lib_src)}"
       native_lib_path = "#{app_build_dir}/#{native_lib_subpath}"
       native_libs << native_lib_subpath
       if !File.exists?(native_lib_path) \
-        or File.mtime(native_lib_src) > File.mtime(native_lib_path)
+          or File.mtime(native_lib_src) > File.mtime(native_lib_path)
         App.info 'Create', native_lib_path
         sh "/usr/bin/install -p #{native_lib_src} #{File.dirname(native_lib_path)}"
       end
