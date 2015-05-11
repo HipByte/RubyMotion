@@ -1,0 +1,6 @@
+[submodule "vendor/XCPretty"]
+	path = vendor/XCPretty
+	url = https://github.com/alloy/XCPretty.git
+[submodule "vendor/CLAide"]
+	path = vendor/CLAide
+	url = https://github.com/CocoaPods/CLAide.git

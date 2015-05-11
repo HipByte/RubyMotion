@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module CLI
     # This class parses a command name out of the +yard+ CLI command and calls

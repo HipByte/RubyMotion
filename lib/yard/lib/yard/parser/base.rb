@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Parser
     # Represents the abstract base parser class that parses source code in

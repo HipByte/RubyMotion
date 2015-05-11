@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD::CodeObjects
   # An ExtraFileObject represents an extra documentation file (README or other
   # file). It is not strictly a CodeObject (does not inherit from `Base`) although

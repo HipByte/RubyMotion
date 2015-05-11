@@ -1,15 +1,17 @@
+# encoding: utf-8
+
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -21,9 +23,13 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'pathname'
+require 'motion/project/app'
+require 'motion/util/version'
+
 module Motion; module Project
   class Config
-    include Rake::DSL if Rake.const_defined?(:DSL)
+    include Rake::DSL if defined?(Rake) && Rake.const_defined?(:DSL)
 
     VARS = []
 
@@ -47,47 +53,47 @@ module Motion; module Project
       end
     end
 
-    variable :files, :xcode_dir, :sdk_version, :deployment_target, :frameworks,
-      :weak_frameworks, :framework_search_paths, :libs, :delegate_class, :name, :build_dir,
-      :resources_dir, :specs_dir, :identifier, :codesign_certificate,
-      :provisioning_profile, :device_family, :interface_orientations, :version,
-      :short_version, :icons, :prerendered_icon, :background_modes, :seed_id,
-      :entitlements, :fonts, :status_bar_style, :motiondir, :detect_dependencies
+    variable :name, :files, :build_dir, :specs_dir, :resources_dirs, :motiondir
 
     # Internal only.
-    attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies
+    attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
+      :template, :detect_dependencies, :exclude_from_detect_dependencies,
+      :opt_level, :custom_init_funcs
+
+    ConfigTemplates = {}
+
+    def self.register(template)
+      ConfigTemplates[template] = self
+    end
+
+    def self.make(template, project_dir, build_mode)
+      klass = ConfigTemplates[template]
+      unless klass
+        $stderr.puts "Config template `#{template}' not registered"
+        exit 1
+      end
+      config = klass.new(project_dir, build_mode)
+      config.template = template
+      config
+    end
 
     def initialize(project_dir, build_mode)
       @project_dir = project_dir
       @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
-      @info_plist = {}
-      @dependencies = {}
-      @detect_dependencies = true
-      @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
-      @weak_frameworks = []
-      @framework_search_paths = []
-      @libs = []
-      @delegate_class = 'AppDelegate'
+      @build_mode = build_mode
       @name = 'Untitled'
-      @resources_dir = File.join(project_dir, 'resources')
+      @resources_dirs = [File.join(project_dir, 'resources')]
       @build_dir = File.join(project_dir, 'build')
       @specs_dir = File.join(project_dir, 'spec')
-      @device_family = :iphone
-      @bundle_signature = '????'
-      @interface_orientations = [:portrait, :landscape_left, :landscape_right]
-      @version = '1.0'
-      @short_version = '1'
-      @status_bar_style = :default
-      @background_modes = []
-      @icons = []
-      @prerendered_icon = false
-      @vendor_projects = []
-      @entitlements = {}
-      @spec_mode = false
-      @build_mode = build_mode
+      @dependencies = {}
+      @detect_dependencies = true
+      @exclude_from_detect_dependencies = []
+      @custom_init_funcs = []
     end
 
-    OSX_VERSION = `/usr/bin/sw_vers -productVersion`.strip.sub(/\.\d+$/, '').to_f
+    def osx_host_version
+      @osx_host_version ||= Util::Version.new(`/usr/bin/sw_vers -productVersion`.strip)
+    end
 
     def variables
       map = {}
@@ -115,87 +121,40 @@ module Motion; module Project
       self
     end
 
-    def xcode_dir
-      @xcode_dir ||= begin
-        xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
+    def unescape_path(path)
+      path.gsub('\\', '')
+    end
 
-        # First, honor /usr/bin/xcode-select
-	xcodeselect = '/usr/bin/xcode-select'
-        if File.exist?(xcodeselect)
-          path = `#{xcodeselect} -print-path`.strip
-          if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
-            @xcode_error_printed ||= false
-            $stderr.puts(<<EOS) unless @xcode_error_printed
-===============================================================================
-It appears that you have a version of Xcode installed in /Applications that has
-not been set as the default version. It is possible that RubyMotion may be
-using old versions of certain tools which could eventually cause issues.
-
-To fix this problem, you can type the following command in the terminal:
-    $ sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
-===============================================================================
-EOS
-            @xcode_error_printed = true
-          end
-          return path if File.exist?(path)
-        end
-
-        # Since xcode-select is borked, we assume the user installed Xcode
-        # as an app (new in Xcode 4.3).
-        return xcode_dot_app_path if File.exist?(xcode_dot_app_path)
-
-        App.fail "Can't locate any version of Xcode on the system."
-      end
+    def escape_path(path)
+      path.gsub(' ', '\\ ')
     end
 
     def locate_binary(name)
       [File.join(xcode_dir, 'usr/bin'), '/usr/bin'].each do |dir|
         path = File.join(dir, name)
-        return path if File.exist?(path)
+        return escape_path(path) if File.exist?(path)
       end
       App.fail "Can't locate binary `#{name}' on the system."
     end
 
-    def xcode_version
-      @xcode_version ||= begin
-        txt = `#{locate_binary('xcodebuild')} -version`
-        vers = txt.scan(/Xcode\s(.+)/)[0][0]
-        build = txt.scan(/Build version\s(.+)/)[0][0]
-        [vers, build]
-      end
-    end
-
     def validate
-      # Xcode version
-      App.fail "Xcode 4.x or greater is required" if xcode_version[0] < '4.0'
-
-      # sdk_version
-      ['iPhoneSimulator', 'iPhoneOS'].each do |platform|
-        sdk_path = File.join(platforms_dir, platform + '.platform',
-            "Developer/SDKs/#{platform}#{sdk_version}.sdk")
-        unless File.exist?(sdk_path)
-          App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'" 
-        end
-      end
-
-      # deployment_target
-      if deployment_target > sdk_version
-        App.fail "Deployment target `#{deployment_target}' must be equal or lesser than SDK version `#{sdk_version}'"
-      end
-      unless File.exist?(datadir)
-        App.fail "iOS deployment target #{deployment_target} is not supported by this version of RubyMotion"
-      end
-
-      # icons
-      if !(icons.is_a?(Array) and icons.all? { |x| x.is_a?(String) })
-        App.fail "app.icons should be an array of strings."
-      end
+      # Do nothing, for now.
     end
 
     def supported_versions
-      @supported_versions ||= Dir.glob(File.join(motiondir, 'data/*')).select{|path| File.directory?(path)}.map do |path|
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', template.to_s, '[1-9]*')).select{|path| File.directory?(path)}.map do |path|
         File.basename path
       end
+    end
+
+    def resources_dir
+      warn("`app.resources_dir' is deprecated; use `app.resources_dirs'");
+      @resources_dirs.first
+    end
+
+    def resources_dir=(dir)
+      warn("`app.resources_dir' is deprecated; use `app.resources_dirs'");
+      @resources_dirs = [dir]
     end
 
     def build_dir
@@ -215,6 +174,12 @@ EOS
         end
       end
       @build_dir
+    end
+
+    def build_mode=(mode)
+      @build_mode = mode
+      @embed_dsym = (development? ? true : false)
+      mode
     end
 
     def build_mode_name
@@ -245,10 +210,6 @@ EOS
       end
     end
 
-    def versionized_build_dir(platform)
-      File.join(build_dir, platform + '-' + deployment_target + '-' + build_mode_name)
-    end
-
     attr_reader :project_dir
 
     def project_file
@@ -257,9 +218,9 @@ EOS
 
     def files_dependencies(deps_hash)
       res_path = lambda do |x|
-        path = /^\./.match(x) ? x : File.join('.', x)
+        path = /^\.{0,2}\//.match(x) ? x : File.join('.', x)
         unless @files.flatten.include?(path)
-          App.fail "Can't resolve dependency `#{x}'"
+          App.fail "Can't resolve dependency `#{path}'"
         end
         path
       end
@@ -269,25 +230,17 @@ EOS
       end
     end
 
-    attr_reader :vendor_projects
-
-    def vendor_project(path, type, opts={})
-      @vendor_projects << Motion::Project::Vendor.new(path, type, self, opts)
-    end
-
-    def unvendor_project(path)
-      @vendor_projects.delete_if { |x| x.path == path }
-    end
-
     def file_dependencies(file)
-      deps = @dependencies[file]
-      if deps
-        deps = deps.map { |x| file_dependencies(x) }
-      else
-        deps = [] 
+      # memorize the calculated file dependencies in order to reduce the time
+      # detecting file dependencies.
+      # http://hipbyte.myjetbrains.com/youtrack/issue/RM-466
+      @known_dependencies ||= {}
+      @known_dependencies[file] ||= begin
+        deps = @dependencies[file] || []
+        deps = deps.map { |x| file_dependencies(x) }.flatten.uniq
+        deps << file
+        deps
       end
-      deps << file
-      deps 
     end
 
     def ordered_build_files
@@ -296,73 +249,31 @@ EOS
       end
     end
 
-    def frameworks_dependencies
-      @frameworks_dependencies ||= begin
-        # Compute the list of frameworks, including dependencies, that the project uses.
-        deps = []
-        slf = File.join(sdk('iPhoneSimulator'), 'System', 'Library', 'Frameworks')
-        frameworks.each do |framework|
-          framework_path = File.join(slf, framework + '.framework', framework)
-          if File.exist?(framework_path)
-            `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
-              # Only care about public, non-umbrella frameworks (for now).
-              if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(.+)$/) and md[1] == md[2]
-                deps << md[1]
-              end
-            end
-          end
-          deps << framework
+    def spec_core_files
+      @spec_core_files ||= begin
+        # Core library + core helpers.
+        Dir.chdir(File.join(File.dirname(__FILE__), '..')) do
+          (['spec.rb'] +
+          Dir.glob(File.join('spec', 'helpers', '*.rb')) +
+          Dir.glob(File.join('project', 'template', App.template.to_s, 'spec-helpers', '*.rb'))).
+            map { |x| File.expand_path(x) }
         end
-        deps.uniq!
-        if @framework_search_paths.empty?
-          deps = deps.select { |dep| File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport')) }
-        end
-        deps
-      end
-    end
-
-    def frameworks_stubs_objects(platform)
-      stubs = []
-      (frameworks_dependencies + weak_frameworks).uniq.each do |framework|
-        stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
-        stubs << stubs_obj if File.exist?(stubs_obj)
-      end
-      stubs
-    end
-
-    def bridgesupport_files
-      @bridgesupport_files ||= begin
-        bs_files = []
-        deps = ['RubyMotion'] + (frameworks_dependencies + weak_frameworks).uniq
-        deps << 'UIAutomation' if spec_mode
-        deps.each do |framework|
-          supported_versions.each do |ver|
-            next if ver < deployment_target || sdk_version < ver
-            bs_path = File.join(datadir(ver), 'BridgeSupport', framework + '.bridgesupport')
-            if File.exist?(bs_path)
-              bs_files << bs_path
-            end
-          end
-        end
-        bs_files
       end
     end
 
     def spec_files
       @spec_files ||= begin
-        # Core library + core helpers.
-        core = Dir.chdir(File.join(File.dirname(__FILE__), '..')) { (['spec.rb'] + Dir.glob(File.join('spec', 'helpers', '*.rb'))).map { |x| File.expand_path(x) } }
         # Project helpers.
-        helpers = Dir.glob(File.join(specs_dir, 'helpers', '*.rb'))
+        helpers = Dir.glob(File.join(specs_dir, 'helpers', '**', '*.rb'))
         # Project specs.
         specs = Dir.glob(File.join(specs_dir, '**', '*.rb')) - helpers
         if files_filter = ENV['files']
           # Filter specs we want to run. A filter can be either the basename of a spec file or its path.
           files_filter = files_filter.split(',')
           files_filter.map! { |x| File.exist?(x) ? File.expand_path(x) : x }
-          specs.delete_if { |x| !files_filter.include?(File.expand_path(x)) and !files_filter.include?(File.basename(x, '.rb')) }
+          specs.delete_if { |x| [File.expand_path(x), File.basename(x, '.rb'), File.basename(x, '_spec.rb')].none? { |p| files_filter.include?(p) } }
         end
-        core + helpers + specs
+        spec_core_files + helpers + specs
       end
     end
 
@@ -375,11 +286,11 @@ EOS
     end
 
     def datadir(target=deployment_target)
-      File.join(motiondir, 'data', target)
+      File.join(motiondir, 'data', template.to_s, target)
     end
 
-    def platforms_dir
-      File.join(xcode_dir, 'Platforms')
+    def strip_args
+      ''
     end
 
     def platform_dir(platform)
@@ -575,7 +486,7 @@ EOS
         'CFBundleDevelopmentRegion' => 'en',
         'CFBundleName' => @name,
         'CFBundleDisplayName' => @name,
-        'CFBundleExecutable' => @name, 
+        'CFBundleExecutable' => @name,
         'CFBundleIdentifier' => identifier,
         'CFBundleInfoDictionaryVersion' => '6.0',
         'CFBundlePackageType' => 'APPL',
@@ -628,7 +539,7 @@ EOS
           App.warn "Found #{certs.size} iPhone Developer certificates in the keychain. Set the `codesign_certificate' project setting. Will use the first certificate: `#{certs[0]}'"
         end
         certs[0][1..-2] # trim trailing `"` characters
-      end 
+      end
     end
 
     def device_id
@@ -694,41 +605,49 @@ EOS
           App.fail "Can't find an application seed ID in the provisioning profile `#{provisioning_profile}'"
         elsif seed_ids.size > 1
           App.warn "Found #{seed_ids.size} seed IDs in the provisioning profile. Set the `seed_id' project setting. Will use the last one: `#{seed_ids.last}'"
+
+    def print_crash_message
+      $stderr.puts ''
+      $stderr.puts '=' * 80
+      $stderr.puts <<EOS
+The application terminated. A crash report file may have been generated by the
+system, use `rake crashlog' to open it. Use `rake debug=1' to restart the app
+in the debugger.
+EOS
+      $stderr.puts '=' * 80
+    end
+
+    def clean_project
+      paths = [self.build_dir]
+      paths.concat(Dir.glob(self.resources_dirs.flatten.map{ |x| x + '/**/*.{nib,storyboardc,momd}' }))
+      paths.each do |p|
+        next if File.extname(p) == ".nib" && !File.exist?(p.sub(/\.nib$/, ".xib"))
+        next if File.extname(p) == ".momd" && !File.exist?(p.sub(/\.momd$/, ".xcdatamodeld"))
+        next if File.extname(p) == ".storyboardc" && !File.exist?(p.sub(/\.storyboardc$/, ".storyboard"))
+        App.info 'Delete', relative_path(p)
+        rm_rf p
+        if File.exist?(p)
+          # It can happen that because of file permissions a dir/file is not
+          # actually removed, which can lead to confusing issues.
+          App.fail "Failed to remove `#{relative_path(p)}'. Please remove this path manually."
         end
-        seed_ids.last
       end
     end
 
-    def entitlements_data
-      dict = entitlements
-      if distribution_mode
-        dict['application-identifier'] ||= seed_id + '.' + identifier
+    def relative_path(path)
+      if ENV['RM_TARGET_HOST_APP_PATH']
+        Pathname.new(File.expand_path(path)).relative_path_from(Pathname.new(ENV['RM_TARGET_HOST_APP_PATH'])).to_s
       else
-        # Required for gdb.
-        dict['get-task-allow'] = true if dict['get-task-allow'].nil?
-      end
-      Motion::PropertyList.to_s(dict)
-    end
-
-    def fonts
-      @fonts ||= begin
-        if File.exist?(resources_dir)
-          Dir.chdir(resources_dir) do
-            Dir.glob('*.{otf,ttf}')
-          end
-        else
-          []
-        end
+        path
       end
     end
 
-    def gen_bridge_metadata(headers, bs_file)
-      sdk_path = self.sdk('iPhoneSimulator')
-      includes = headers.map { |header| "-I'#{File.dirname(header)}'" }.uniq
-      a = sdk_version.scan(/(\d+)\.(\d+)/)[0]
-      sdk_version_headers = ((a[0].to_i * 10000) + (a[1].to_i * 100)).to_s
-      extra_flags = OSX_VERSION >= 10.7 ? '--no-64-bit' : ''
-      sh "RUBYOPT='' /usr/bin/gen_bridge_metadata --format complete #{extra_flags} --cflags \"-isysroot #{sdk_path} -miphoneos-version-min=#{sdk_version} -D__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__=#{sdk_version_headers} -I. #{includes.join(' ')}\" #{headers.map { |x| "\"#{x}\"" }.join(' ')} -o \"#{bs_file}\""
+    def rubymotion_env_value
+      if spec_mode
+        'test'
+      else
+        development? ? 'development' : 'release'
+      end
     end
   end
 end; end

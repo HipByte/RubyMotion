@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 begin require 'ripper'; rescue LoadError; end
 
 module YARD

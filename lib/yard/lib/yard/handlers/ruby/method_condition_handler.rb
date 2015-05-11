@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles a conditional inside a method
 class YARD::Handlers::Ruby::MethodConditionHandler < YARD::Handlers::Ruby::Base
   handles :if_mod, :unless_mod

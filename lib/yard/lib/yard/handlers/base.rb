@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Handlers
     # Raised during processing phase when a handler needs to perform

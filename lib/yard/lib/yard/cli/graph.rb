@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module CLI
     # Options to pass to the {Graph} CLI.

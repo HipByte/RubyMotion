@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Tags
     # Keeps track of all the registered meta-data tags and directives.

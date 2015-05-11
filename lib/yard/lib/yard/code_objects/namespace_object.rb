@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD::CodeObjects
   # A "namespace" is any object that can store other objects within itself.
   # The two main Ruby objects that can act as namespaces are modules

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
 # 
@@ -46,6 +48,7 @@ EOS
           when Hash
             str << indent_line("<dict>", indent)
             plist.each do |key, val|
+              key = key.to_s if key.is_a?(Symbol)
               raise "Hash key must be a string" unless key.is_a?(String)
               str << indent_line("<key>#{key}</key>", indent + 1)
               cat_element(val, str, indent + 1)
@@ -66,7 +69,7 @@ EOS
           when Time
             str << indent_line("<date>#{plist.utc.iso8601}</date>", indent)
           when Integer
-            str << indent_line("<real>#{plist}</real>", indent)
+            str << indent_line("<integer>#{plist}</integer>", indent)
           else
             raise "Invalid plist object of type `#{plist.class}' (must be either a Hash, Array, String, or boolean true/false value)"
         end

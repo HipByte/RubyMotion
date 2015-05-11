@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Gem
   class << self
     undef source_index if method_defined?(:source_index)

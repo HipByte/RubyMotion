@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles +attr_*+ statements in modules/classes
 class YARD::Handlers::Ruby::AttributeHandler < YARD::Handlers::Ruby::Base
   handles method_call(:attr)

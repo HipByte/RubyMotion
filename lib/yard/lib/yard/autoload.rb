@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # @private
 def __p(path) File.join(YARD::ROOT, 'yard', *path.split('/')); end
 

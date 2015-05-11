@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Parser::Ruby::Legacy
     class StatementList < Array

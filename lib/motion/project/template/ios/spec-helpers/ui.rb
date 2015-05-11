@@ -1,6 +1,8 @@
+# encoding: utf-8
+
 # macbacon-ui extensions.
 #
-# Copyright (C) 2012 Eloy Durán eloy.de.enige@gmail.com
+# Copyright (C) 2012 Eloy Duran eloy.de.enige@gmail.com
 #
 # Bacon is freely distributable under the terms of an MIT-style license.
 # See COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -167,8 +169,11 @@ module Bacon
     # TODO
     # * :navigation => true
     # * :tab => true
-    def tests(controller_class, options = {})
-      @controller_class, @options = controller_class, options
+    def tests(controller_class, options = {}, &block)
+      if block
+        puts "   \e[1mWARNING!\e[0m Passing a block to the `tests` method is deprecated and will be removed in an upcoming release. Instead, simply define a `before` filter above your call to `tests`. For more information see: http://www.rubymotion.com/developer-center/articles/testing/#_configuring_your_context"
+      end
+      @controller_class, @options, @after_created_block = controller_class, options, block
       extend Bacon::Functional::API
       extend Bacon::Functional::ContextExt
     end
@@ -213,10 +218,19 @@ module Bacon
       attr_accessor :controller
 
       def controller
-        @controller ||= if @options[:id]
-          storyboard.instantiateViewControllerWithIdentifier(@options[:id])
-        else
-          @controller_class.alloc.init
+        @controller ||= begin
+          c = nil
+          if @options[:id]
+            c = storyboard.instantiateViewControllerWithIdentifier(@options[:id])
+          else
+            c = @controller_class.alloc.init
+          end
+          if @after_created_block
+            @after_created_block.call(c)
+          else
+            send(@options[:after_created], c) if @options[:after_created]
+          end
+          c
         end
       end
 
@@ -238,7 +252,7 @@ module Bacon
     module API
       include RunLoopHelpers
 
-      attr_accessor :window
+      attr_writer :window
 
       # Gets overriden by ContextExt#window when the spec context is configured
       # to run against a specific controller.
@@ -276,12 +290,12 @@ module Bacon
 
       def view(label)
         return label if label.is_a?(UIView)
-        window.viewByName(label) ||
+        UIApplication.sharedApplication.keyWindow.viewByName(label) ||
           raise(Bacon::Error.new(:error, "Unable to find a view with label `#{label}'"))
       end
 
       def views(view_class)
-        views = window.viewsByClass(view_class)
+        views = UIApplication.sharedApplication.keyWindow.viewsByClass(view_class)
         if views.empty?
           raise(Bacon::Error.new(:error, "Unable to find any view of class `#{view_class.name}'"))
         end
@@ -323,11 +337,12 @@ module Bacon
         touches  = options[:touches] || 1
         location = _coerce_location_to_point(view, options[:at], false) || view.superview.convertPoint(view.center, toView:nil)
 
-        _event_generator.sendTaps(taps,
-                         location:location,
-              withNumberOfTouches:touches,
-                           inRect:window.frame)
-        proper_wait(taps * 0.4)
+        EventDispatcher.dispatch(taps * 0.4) do
+          _event_generator.sendTaps(taps,
+                           location:location,
+                withNumberOfTouches:touches,
+                             inRect:window.frame)
+        end
 
         view
       end
@@ -337,7 +352,9 @@ module Bacon
         from, to = _extract_start_and_end_points(view, options)
         duration = options[:duration] || Functional.default_duration
 
-        _event_generator.sendFlickWithStartPoint(from, endPoint:to, duration:duration)
+        EventDispatcher.dispatch(duration) do
+          _event_generator.sendFlickWithStartPoint(from, endPoint:to, duration:duration)
+        end
         proper_wait(duration)
 
         view
@@ -376,20 +393,24 @@ module Bacon
         view     = view(label_or_view)
         duration = options[:duration] || Functional.default_duration
         touches  = options[:touches]  || 1
+        if touches > 1
+          raise 'Dragging with more than 1 touch is currently unavailable. Please file a support ticket in case you were using this.'
+        end
 
         unless points = options[:points]
           from, to = _extract_start_and_end_points(view, options)
           points   = linear_interpolate(from, to, options[:number_of_points])
         end
 
-        pointer  = Pointer.new(CGPoint.type, points.size)
-        points.each.with_index do |point, i|
-          pointer[i] = point
+        pause = duration.to_f / points.size
+        _event_generator.touchDown(points.first)
+        proper_wait(pause)
+        points[1..-1].each do |point|
+          _event_generator._moveLastTouchPoint(point)
+          proper_wait(pause)
         end
-
-        EventDispatcher.dispatch(duration) do
-          _event_generator.sendMultifingerDragWithPointArray(pointer, numPoints:points.size, duration:duration, numFingers:touches)
-        end
+        _event_generator.liftUp(points.last)
+        proper_wait(pause)
 
         view
       end
@@ -439,7 +460,7 @@ module Bacon
         end
       end
 
-      LOCATION_TO_POINT_INSET = 5
+      LOCATION_TO_POINT_INSET = 8
 
       def _location_to_point(view, location, raise_if_invalid = true)
         frame = view.frame
@@ -502,12 +523,6 @@ module Bacon
         from = _extract_point(view, options, :from)
         to   = _extract_point(view, options, :to)
         [from, to]
-      end
-
-      def _view(accessibilityLabel, error_message = nil)
-        return accessibilityLabel if accessibilityLabel.is_a?(UIView)
-        window.viewByName(accessibilityLabel) ||
-          raise(Bacon::Error.new(:error, error_message || "Unable to find a view with label `#{accessibilityLabel}'"))
       end
 
       # This class wraps a block that will be executed on a GCD queue, but will

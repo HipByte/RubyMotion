@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::PrivateConstantHandler)
 class YARD::Handlers::Ruby::Legacy::PrivateConstantHandler < YARD::Handlers::Ruby::Legacy::Base
   handles /\Aprivate_constant(\s|\(|$)/

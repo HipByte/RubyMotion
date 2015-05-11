@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Sets visibility of a constant (class, module, const)
 class YARD::Handlers::Ruby::PrivateConstantHandler < YARD::Handlers::Ruby::Base
   handles method_call(:private_constant)

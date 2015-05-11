@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles a method definition
 class YARD::Handlers::Ruby::MethodHandler < YARD::Handlers::Ruby::Base
   handles :def, :defs

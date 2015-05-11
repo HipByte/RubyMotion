@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
 # 
@@ -22,5 +24,5 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Motion
-  Version = "1.31"
+  Version = "3.10"
 end

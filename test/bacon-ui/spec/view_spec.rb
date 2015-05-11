@@ -99,7 +99,7 @@ describe "UIView extensions" do
   end
 end
 
-describe "Bacon::Functional::API, concerning device events" do
+describe "Bacon::Functional::API, concerning view helpers shortcuts" do
   tests SimpleViewController
 
   it "finds a view by its accessibility label" do
@@ -118,6 +118,27 @@ describe "Bacon::Functional::API, concerning device events" do
       raise 'Oh noes!'
     end
     view(view).should == view
+  end
+
+  it "finds a view on the current key window" do
+    begin
+      alert = UIAlertView.alloc.initWithTitle(nil,
+                                      message:'Overlapping all views',
+                                     delegate:nil,
+                            cancelButtonTitle:'OK',
+                            otherButtonTitles:nil)
+      alert.show
+      proper_wait(1)
+
+      alertWindow = UIApplication.sharedApplication.keyWindow
+      alertWindow.should.not == @window
+
+      view('OK').window.should == alertWindow
+      views(UIView).first.window.should == alertWindow
+
+    ensure
+      alert.dismissWithClickedButtonIndex(0, animated:false)
+    end
   end
 
   it "raises if no view by label could be found after the `timeout` passes" do

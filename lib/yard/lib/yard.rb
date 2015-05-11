@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require File.expand_path('../yard/version.rb', __FILE__)
 
 module YARD

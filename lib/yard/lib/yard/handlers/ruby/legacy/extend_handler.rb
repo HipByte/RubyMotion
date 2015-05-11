@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # (see Ruby::ExtendHandler)
 class YARD::Handlers::Ruby::Legacy::ExtendHandler < YARD::Handlers::Ruby::Legacy::MixinHandler
   handles /\Aextend(\s|\()/

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module YARD
   module Tags
     # Represents a metadata tag value (+@tag+). Tags can have any combination of

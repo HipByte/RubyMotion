@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 class YARD::Handlers::C::ModuleHandler < YARD::Handlers::C::Base
   MATCH1 = /([\w\.]+)\s* = \s*rb_define_module\s*\(\s*"([\w:]+)"\s*\)/mx
   MATCH2 = /([\w\.]+)\s* = \s*rb_define_module_under\s*\(\s*(\w+),\s*"(\w+)"\s*\)/mx

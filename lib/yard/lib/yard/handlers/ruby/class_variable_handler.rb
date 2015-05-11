@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles a class variable (@@variable)
 class YARD::Handlers::Ruby::ClassVariableHandler < YARD::Handlers::Ruby::Base
   handles :assign

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Handles 'yield' calls
 class YARD::Handlers::Ruby::YieldHandler < YARD::Handlers::Ruby::Base
   handles :yield, :yield0

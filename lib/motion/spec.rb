@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Bacon -- small RSpec clone.
 #
 # "Truth will sooner come out from error than from confusion." ---Francis Bacon
@@ -52,7 +54,7 @@ module Bacon
         puts "##teamcity[testFailed timestamp = '#{java_time}' message = '#{escape_message(error)}' name = '#{escape_message(@@description)}']\n\n"
       end
       duration = ((Time.now - @@started) * 1000).to_i
-      puts "##teamcity[testFinished timestamp = '#{java_time}' duration = '#{duration}' name = '#{escape_message(@@description)}']\n\n"     
+      puts "##teamcity[testFinished timestamp = '#{java_time}' duration = '#{duration}' name = '#{escape_message(@@description)}']\n\n"
     end
 
     def handle_summary
@@ -91,7 +93,7 @@ module Bacon
       end
 
       copy_of_text
-    end   
+    end
 
     def convert_time_to_java_simple_date(time)
       gmt_offset = time.gmt_offset
@@ -152,6 +154,41 @@ module Bacon
       puts ErrorLog  if Backtraces
       puts "%d tests, %d assertions, %d failures, %d errors" %
         Counter.values_at(:specifications, :requirements, :failed, :errors)
+    end
+  end
+
+  module ColorizedOutput
+    GREEN = "\033[0;32m"
+    RED   = "\033[0;31m"
+    RESET = "\033[00m"
+
+    def handle_specification_begin(name); end
+    def handle_specification_end        ; end
+
+    def handle_requirement_begin(description) end
+    def handle_requirement_end(error)
+      if error.empty?
+        print "#{GREEN}.#{RESET}"
+      else
+        print "#{RED}#{error[0..0]}#{RESET}"
+      end
+    end
+
+    def handle_summary
+      puts ""
+      puts "", ErrorLog  if Backtraces && ! ErrorLog.empty?
+
+      duration = "%0.2f" % (Time.now - @timer)
+      puts "", "Finished in #{duration} seconds."
+
+      color = GREEN
+      if Counter[:errors] > 0 || Counter[:failed] > 0
+        color = RED
+      end
+
+      puts "#{color}%d tests, %d assertions, %d failures, %d errors#{RESET}" %
+        Counter.values_at(:specifications, :requirements, :failed, :errors)
+      puts ""
     end
   end
 
@@ -237,9 +274,9 @@ module Bacon
     'test_unit' => TestUnitOutput,
     'tap' => TapOutput,
     'knock' => KnockOutput,
-    'rubymine' => RubyMineOutput
+    'rubymine' => RubyMineOutput,
+    'colorized' => ColorizedOutput,
   }
-  extend(Outputs[ENV['output']] || SpecDoxOutput)
 
   class Error < RuntimeError
     attr_accessor :count_as
@@ -298,7 +335,12 @@ module Bacon
       # If an exception occurred, we definitely don't need to schedule any more blocks
       unless @exception_occurred
         @postponed_blocks_count += 1
-        performSelector("run_postponed_block:", withObject:block, afterDelay:seconds)
+        unless Platform.android?
+          performSelector("run_postponed_block:", withObject:block, afterDelay:seconds)
+        else
+          sleep seconds
+          run_postponed_block(block)
+        end
       end
     end
 
@@ -310,7 +352,12 @@ module Bacon
         else
           @postponed_blocks_count += 1
           @postponed_block = block
-          performSelector("postponed_block_timeout_exceeded", withObject:nil, afterDelay:timeout)
+          unless Platform.android?
+            performSelector("postponed_block_timeout_exceeded", withObject:nil, afterDelay:timeout)
+          else
+            sleep timeout
+            postponed_block_timeout_exceeded
+          end
         end
       end
     end
@@ -325,7 +372,12 @@ module Bacon
           @postponed_block = block
           @observed_object_and_key_path = [object_to_observe, key_path]
           object_to_observe.addObserver(self, forKeyPath:key_path, options:0, context:nil)
-          performSelector("postponed_change_block_timeout_exceeded", withObject:nil, afterDelay:timeout)
+          unless Platform.android?
+            performSelector("postponed_change_block_timeout_exceeded", withObject:nil, afterDelay:timeout)
+          else
+            sleep timeout
+            postponed_change_block_timeout_exceeded
+          end
         end
       end
     end
@@ -355,8 +407,10 @@ module Bacon
     end
 
     def resume
-      NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:'postponed_block_timeout_exceeded', object:nil)
-      NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:'postponed_change_block_timeout_exceeded', object:nil)
+      unless Platform.android?
+        NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:'postponed_block_timeout_exceeded', object:nil)
+        NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:'postponed_change_block_timeout_exceeded', object:nil)
+      end
       remove_observer!
       block, @postponed_block = @postponed_block, nil
       run_postponed_block(block)
@@ -387,8 +441,10 @@ module Bacon
     end
 
     def cancel_scheduled_requests!
-      NSObject.cancelPreviousPerformRequestsWithTarget(@context)
-      NSObject.cancelPreviousPerformRequestsWithTarget(self)
+      unless Platform.android?
+        NSObject.cancelPreviousPerformRequestsWithTarget(@context)
+        NSObject.cancelPreviousPerformRequestsWithTarget(self)
+      end
     end
 
     def exit_spec
@@ -404,21 +460,37 @@ module Bacon
       rescue Object => e
         @exception_occurred = true
 
-        ErrorLog << "#{e.class}: #{e.message}\n"
-        lines = $DEBUG ? e.backtrace : e.backtrace.find_all { |line| line !~ /bin\/macbacon|\/mac_bacon\.rb:\d+/ }
-        lines.each_with_index { |line, i|
-          ErrorLog << "\t#{line}#{i==0 ? ": #{@context.name} - #{@description}" : ""}\n"
-        }
-        ErrorLog << "\n"
+        if e.is_a?(Exception)
+          ErrorLog << "#{e.class}: #{e.message}\n"
+          lines = $DEBUG ? e.backtrace : e.backtrace.find_all { |line| line !~ /bin\/macbacon|\/mac_bacon\.rb:\d+/ }
+          lines.each_with_index { |line, i|
+            ErrorLog << "\t#{line}#{i==0 ? ": #{@context.name} - #{@description}" : ""}\n"
+          }
+          ErrorLog << "\n"
+        else
+          if defined?(NSException)
+            # Pure NSException.
+            ErrorLog << "#{e.name}: #{e.reason}\n"
+          else
+            # Pure Java exception.
+            ErrorLog << "#{e.class.toString} : #{e.getMessage}"
+          end
+        end
 
         @error = if e.kind_of? Error
           Counter[e.count_as] += 1
-          e.count_as.to_s.upcase
+          "#{e.count_as.to_s.upcase} - #{e}"
         else
           Counter[:errors] += 1
-          "ERROR: #{e.class}"
+          "ERROR: #{e.class} - #{e}"
         end
       end
+    end
+  end
+
+  class Platform
+    def self.android?
+      defined?(NSObject) ? false : true
     end
   end
 
@@ -434,11 +506,25 @@ module Bacon
     @contexts[current_context_index]
   end
 
-  def self.run
+  def self.run(arg=nil)
+    unless respond_to?(:handle_specification_begin)
+      extend(Outputs[ENV['output']] || SpecDoxOutput)
+    end
+
     @timer ||= Time.now
     Counter[:context_depth] += 1
     handle_specification_begin(current_context.name)
-    current_context.performSelector("run", withObject:nil, afterDelay:0)
+    unless Platform.android?
+      current_context.performSelector("run", withObject:nil, afterDelay:0)
+    else
+      @main_activity ||= arg
+      current_context.run
+    end
+  end
+
+  # Android-only.
+  def self.main_activity
+    @main_activity
   end
 
   def self.context_did_finish(context)
@@ -450,13 +536,17 @@ module Bacon
     else
       # DONE
       handle_summary
-      exit(Counter.values_at(:failed, :errors).inject(:+))
+      unless Platform.android?
+        exit(Counter.values_at(:failed, :errors).inject(:+))
+      else
+        # In Android there is no need to exit as we terminate the activity right after Bacon.
+      end
     end
   end
 
   class Context
     attr_reader :name, :block
-    
+
     def initialize(name, before = nil, after = nil, &block)
       @name = name
       @before, @after = (before ? before.dup : []), (after ? after.dup : [])
@@ -472,9 +562,17 @@ module Bacon
     def run
       # TODO
       #return  unless name =~ RestrictContext
-      if spec = current_specification
-        spec.performSelector("run", withObject:nil, afterDelay:0)
+
+      unless Platform.android?
+        if spec = current_specification
+          spec.performSelector("run", withObject:nil, afterDelay:0)
+        else
+          Bacon.context_did_finish(self)
+        end
       else
+        @specifications.each do |spec|
+          spec.run
+        end
         Bacon.context_did_finish(self)
       end
     end
@@ -484,11 +582,13 @@ module Bacon
     end
 
     def specification_did_finish(spec)
-      if (@current_specification_index + 1) < @specifications.size
-        @current_specification_index += 1
-        run
-      else
-        Bacon.context_did_finish(self)
+      unless Platform.android?
+        if (@current_specification_index + 1) < @specifications.size
+          @current_specification_index += 1
+          run
+        else
+          Bacon.context_did_finish(self)
+        end
       end
     end
 
@@ -505,7 +605,7 @@ module Bacon
       Counter[:specifications] += 1
       @specifications << Specification.new(self, description, block, @before, @after)
     end
-    
+
     def should(*args, &block)
       if Counter[:depth]==0
         it('should '+args.first,&block)
@@ -545,6 +645,11 @@ module Bacon
     def raise?(*args, &block); block.raise?(*args); end
     def throw?(*args, &block); block.throw?(*args); end
     def change?(*args, &block); block.change?(*args); end
+
+    alias_method :context, :describe
+
+    # Android-only.
+    def main_activity; Bacon.main_activity; end
   end
 end
 
@@ -602,6 +707,8 @@ module Kernel
   private
   def describe(*args, &block) Bacon::Context.new(args.join(' '), &block)  end
   def shared(name, &block)    Bacon::Shared[name] = block                 end
+
+  alias_method :context, :describe
 end
 
 class Should
@@ -675,3 +782,14 @@ end
 
 # Do not log all exceptions when running the specs.
 Exception.log_exceptions = false
+
+if defined?(UIDevice) && UIDevice.respond_to?("currentDevice") && !UIDevice.currentDevice.model.match(/simulator/i)
+  module Kernel
+    def puts(*args)
+      NSLog(args.join("\n"))
+    end
+    def print(*args)
+      puts *args # TODO
+    end
+  end
+end

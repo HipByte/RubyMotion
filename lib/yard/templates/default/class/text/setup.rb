@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 include T('default/module/text')
 
 def init
