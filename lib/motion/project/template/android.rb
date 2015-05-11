@@ -208,7 +208,7 @@ task :build do
   gdbserver_subpaths = []
   native_libs = []
 
-  App.config.archs.each do |arch|
+  App.config.archs.uniq.each do |arch|
     # Compile Ruby files.
     ruby = App.config.bin_exec('ruby')
     bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
