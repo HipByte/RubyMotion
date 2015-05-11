@@ -42,19 +42,6 @@ unless ENV['RM_TARGET_BUILD']
   system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
 end
 
-desc "Deploy on the device"
-task :device => :archive do
-  App.info 'Deploy', App.config.archive
-  device_id = (ENV['id'] or App.config.device_id)
-  unless App.config.provisions_all_devices? || App.config.provisioned_devices.include?(device_id)
-    App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
-  end
-  env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
-  deploy = File.join(App.config.bindir, 'deploy')
-  flags = Rake.application.options.trace ? '-d' : ''
-  sh "#{env} #{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
-end
-
 desc "Clear local build objects"
 task :clean do
   App.config.clean_project

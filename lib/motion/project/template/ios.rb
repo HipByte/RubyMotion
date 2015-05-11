@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -271,7 +271,7 @@ desc "Deploy on the device"
 task :device => :archive do
   App.info 'Deploy', App.config.archive
   device_id = (ENV['id'] or App.config.device_id)
-  unless App.config.provisioned_devices.include?(device_id)
+  unless App.config.provisions_all_devices? || App.config.provisioned_devices.include?(device_id)
     App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
