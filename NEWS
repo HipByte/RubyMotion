@@ -1,3 +1,41 @@
+= RubyMotion 3.11 =
+
+  * [iOS] Fixed a bug which UIInterfaceOrientation would cause link error when
+  * [iOS, OSX] Improved floating precision for 64-bit environment. 
+    specify iOS 8.2 or below as deployment target.
+  * [iOS] Fixed a regression where the exception could not be handled on i386
+    iOS simulator.
+  * [iOS] Fixed a bug where watch apps could be rejected with iTunes Connect.
+    Thanks to digitalfx for the patch (pull request #213 and #214).
+  * [iOS] Fixed a bug where watch apps could not installed to iPad devices.
+    Thanks to digitalfx for the patch (pull request #215).
+  * [iOS] Fixed a bug where watch apps were not able to localize.
+  * [iOS, OSX] Fixed a bug where some GLKit structures could not be created.
+  * [iOS] Fixed a bug where some GLKit structures could not be created.
+  * [iOS] Added support for enterprise certificate profiles. Thanks James 
+    Daniels for the patch. (pull request #64)
+  * [iOS, OSX] Fixed a crash when generating ctags.
+  * [iOS, OSX] Fixed a bug where it could not pass a pointer of structure into
+    into Ruby Block from Objective-C. 
+  * [OSX] Fixed a bug where GLKit inline functions could not be used on OS X.
+  * [Android] Added Kernel#{block_given?,iterator?}.
+  * [Android] Added Integer#upto.
+  * [Android] Ruby arrays are now converted to the correct primitive Java array
+    type when passed as an argument to a Java method in Android 5.0.
+  * [Android] Fixed a bug where refering to the current exception in a rescue
+    block would trigger a crash at runtime.
+  * [Android] Fixed a bug in the REPL where Java package paths could not be
+    properly evaluated.
+  * [Android] Fixed a bug where Java classes could not be re-opened.
+  * [Android] Fixed a bug where classes defined inside modules would not be
+    exposed to Java. Caveat: the module must be provided when declaring the
+    class (ex. `class MyModule::MyActivity < Android::App::Activity').
+  * [Android] Fixed a bug where the compiler would emit Java method definitions
+    for methods defined in classes not present in the current class' super
+    class chain.
+  * [Android] Fixed a bug where app.vendor_project with `:native' pointing to
+    an array of paths for different architecture libraries would not work.
+
 = RubyMotion 3.10 =
 
   * [Android] Fixed typo in android.rb template which breaks incremental builds.
