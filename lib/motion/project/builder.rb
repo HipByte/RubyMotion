@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,6 +26,7 @@
 require 'thread'
 require 'motion/project/paralel_builder'
 require 'motion/project/dependency'
+require 'motion/project/experimental_dependency'
 
 module Motion; module Project;
   class Builder
@@ -56,10 +57,10 @@ module Motion; module Project;
       sdk = config.sdk(platform)
       cc = config.locate_compiler(platform, 'clang')
       cxx = config.locate_compiler(platform, 'clang++')
-    
+
       build_dir = File.join(config.versionized_build_dir(platform))
       App.info 'Build', build_dir
- 
+
       # Prepare the list of BridgeSupport files needed.
       bs_files = config.bridgesupport_files
 
@@ -119,7 +120,7 @@ module Motion; module Project;
         should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
- 
+
         # Generate or retrieve init function.
         init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} \"#{obj}\"`.scan(/T\s+_(MREP_.*)/)[0][0]
 
@@ -131,7 +132,7 @@ module Motion; module Project;
             # Locate arch kernel.
             kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
             raise "Can't locate kernel file" unless File.exist?(kernel)
-   
+
             # Assembly.
             arm64 = false
             compiler_exec_arch = case arch
@@ -143,7 +144,7 @@ module Motion; module Project;
             asm = File.join(files_build_dir, "#{path}.#{arch}.#{arm64 ? 'bc' : 's'}")
             sh "/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --debug-info-version #{config.xcode_debug_info_version} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
 
-            # Object 
+            # Object
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
             arch_obj_flags = arm64 ? "-miphoneos-version-min=#{config.deployment_target}" : ''
             sh "#{cc} -fexceptions -c -arch #{arch} #{arch_obj_flags} \"#{asm}\" -o \"#{arch_obj}\""
@@ -151,11 +152,11 @@ module Motion; module Project;
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
           end
-   
+
           # Assemble fat binary.
           arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
           sh "/usr/bin/lipo -create #{arch_objs_list} -output \"#{obj}\""
-  
+
           any_obj_file_built = true
         end
 
@@ -164,7 +165,8 @@ module Motion; module Project;
 
       # Resolve file dependencies.
       if config.detect_dependencies == true
-        config.dependencies = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
+        klass = ENV['experimental_dependency'] == 1 ? ExperimentalDependency : Dependency
+        config.dependencies = klass.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
       end
 
       parallel = ParallelBuilder.new(objs_build_dir, build_file)
@@ -273,7 +275,7 @@ EOS
 
       # Generate main file.
       main_txt = config.main_cpp_file_txt(spec_objs)
- 
+
       # Compile main file.
       main = File.join(objs_build_dir, 'main.mm')
       main_o = File.join(objs_build_dir, 'main.o')
@@ -406,7 +408,7 @@ EOS
           if !File.exist?(dest_path) or File.mtime(src_path) > File.mtime(dest_path)
             App.info 'Copy', src_path
             FileUtils.cp_r(src_path, dest_path)
-          end 
+          end
         end
       end
 
