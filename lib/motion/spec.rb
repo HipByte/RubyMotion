@@ -512,13 +512,21 @@ module Bacon
     end
 
     @timer ||= Time.now
-    Counter[:context_depth] += 1
-    handle_specification_begin(current_context.name)
     unless Platform.android?
+      Counter[:context_depth] += 1
+      handle_specification_begin(current_context.name)
       current_context.performSelector("run", withObject:nil, afterDelay:0)
     else
       @main_activity ||= arg
-      current_context.run
+
+      @contexts.each do |context|
+        Counter[:context_depth] += 1
+        handle_specification_begin(context.name)
+        context.run
+        handle_specification_end
+        Counter[:context_depth] -= 1
+      end
+      handle_summary
     end
   end
 
@@ -528,18 +536,20 @@ module Bacon
   end
 
   def self.context_did_finish(context)
-    handle_specification_end
-    Counter[:context_depth] -= 1
-    if (@current_context_index + 1) < @contexts.size
-      @current_context_index += 1
-      run
-    else
-      # DONE
-      handle_summary
-      unless Platform.android?
-        exit(Counter.values_at(:failed, :errors).inject(:+))
+    unless Platform.android?
+      handle_specification_end
+      Counter[:context_depth] -= 1
+      if (@current_context_index + 1) < @contexts.size
+        @current_context_index += 1
+        run
       else
-        # In Android there is no need to exit as we terminate the activity right after Bacon.
+        # DONE
+        handle_summary
+        unless Platform.android?
+          exit(Counter.values_at(:failed, :errors).inject(:+))
+        else
+          # In Android there is no need to exit as we terminate the activity right after Bacon.
+        end
       end
     end
   end
@@ -616,9 +626,12 @@ module Bacon
 
     def describe(*args, &block)
       context = Bacon::Context.new(args.join(' '), @before, @after, &block)
-      (parent_context = self).methods(false).each {|e|
-        class<<context; self end.send(:define_method, e) {|*args| parent_context.send(e, *args)}
-      }
+      # FIXME: fix RM-879 and RM-806
+      unless Platform.android?
+        (parent_context = self).methods(false).each {|e|
+          class<<context; self end.send(:define_method, e) {|*args| parent_context.send(e, *args)}
+        }
+      end
       context
     end
 
