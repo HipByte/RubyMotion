@@ -342,7 +342,7 @@ EOS
     end
 
     def self.evaluation?
-      @evaluation ||= !File.exist?(File.join(motiondir, 'license.key'))
+      @evaluation ||= !File.exist?('/Library/RubyMotion/license.key')
     end
 
     def self.need_full_version!
