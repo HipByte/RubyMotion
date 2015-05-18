@@ -165,7 +165,7 @@ module Motion; module Project;
 
       # Resolve file dependencies.
       if config.detect_dependencies == true
-        klass = ENV['experimental_dependency'] == 1 ? ExperimentalDependency : Dependency
+        klass = ENV['experimental_dependency'] ? ExperimentalDependency : Dependency
         config.dependencies = klass.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
       end
 
