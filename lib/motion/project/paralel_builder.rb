@@ -43,8 +43,8 @@ module Motion; module Project;
         th = Thread.new do
           sleep
           objs = []
-          while path = queue.shift
-            objs << builder.call(objs_build_dir, path)
+          while arg = queue.shift
+            objs << builder.call(objs_build_dir, arg[0], arg[1])
           end
           queue.concat(objs)
         end
@@ -55,7 +55,7 @@ module Motion; module Project;
     def run
       builder_i = 0
       @files.each do |path|
-        @builders[builder_i][0] << path
+        @builders[builder_i][0] << [path, builder_i]
         builder_i += 1
         builder_i = 0 if builder_i == @builders_count
       end

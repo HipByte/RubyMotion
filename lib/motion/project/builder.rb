@@ -110,7 +110,8 @@ module Motion; module Project;
       is_default_archs = (archs == config.default_archs[platform])
       rubyc_bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
 
-      build_file = Proc.new do |files_build_dir, path|
+      @compiler = []
+      build_file = Proc.new do |files_build_dir, path, job|
         rpath = path
         path = File.expand_path(path)
         if is_default_archs && !project_files.include?(path)
@@ -142,7 +143,10 @@ module Motion; module Project;
                 arch
             end
             asm = File.join(files_build_dir, "#{path}.#{arch}.#{arm64 ? 'bc' : 's'}")
-            sh "/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --debug-info-version #{config.xcode_debug_info_version} --emit-llvm \"#{asm}\" #{init_func} \"#{path}\""
+            @compiler[job] ||= {}
+            @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --debug-info-version #{config.xcode_debug_info_version} --emit-llvm-fast \"\"", "r+")
+            @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
+            @compiler[job][arch].gets # wait to finish compilation
 
             # Object
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
@@ -173,6 +177,14 @@ module Motion; module Project;
       parallel.files = config.ordered_build_files
       parallel.files += config.spec_files if config.spec_mode
       parallel.run
+
+      # terminate compiler process
+      @compiler.each do |item|
+        next unless item
+        item.each do |k, v|
+          v.puts "quit"
+        end
+      end
 
       objs = app_objs = parallel.objects
       spec_objs = []
