@@ -121,6 +121,7 @@ module Motion; module Project;
               end
               files.each { |f| FileUtils.touch(f) }
               source_files.concat(files)
+              source_files.uniq!
               next
             else
               # Not a valid source file, skip.
