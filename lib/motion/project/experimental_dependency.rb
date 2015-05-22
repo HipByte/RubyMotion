@@ -112,6 +112,8 @@ module Motion; module Project;
         # We do not want to modify the original array
         parents = parents.dup
 
+        return unless sexp.is_a?(Array)
+
         case sexp[0]
         # Ignore code inside method definitions
         # def foo; end
