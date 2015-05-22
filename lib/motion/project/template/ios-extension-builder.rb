@@ -101,7 +101,6 @@ PLIST
       archs = config.archs[platform]
 
       ruby = File.join(config.bindir, 'ruby')
-      llc = File.join(config.bindir, 'llc')
       @nfd = File.join(config.bindir, 'nfd')
 
       if config.spec_mode and (config.spec_files - config.spec_core_files).empty?

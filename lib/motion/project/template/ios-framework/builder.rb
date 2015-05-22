@@ -51,7 +51,6 @@ module Motion; module Project
       archs = config.archs[platform]
 
       ruby = File.join(config.bindir, 'ruby')
-      llc = File.join(config.bindir, 'llc')
       @nfd = File.join(config.bindir, 'nfd')
 
       config.resources_dirs.flatten!
