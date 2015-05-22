@@ -114,15 +114,6 @@ module Motion; module Project;
             when '.cpp', '.cxx', '.mm'
               cplusplus = true
               @config.locate_compiler(platform, 'clang++', 'g++')
-            when '.h'
-              # If header modified, recompile the associated source file
-              files = source_files.keep_if do |file|
-                File.basename(srcfile, '.*') == File.basename(file, '.*')
-              end
-              files.each { |f| FileUtils.touch(f) }
-              source_files.concat(files)
-              source_files.uniq!
-              next
             else
               # Not a valid source file, skip.
               next
