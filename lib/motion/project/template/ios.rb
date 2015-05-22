@@ -278,6 +278,9 @@ task :device => :archive do
     env << " RM_AVAILABLE_ARCHS='#{App.config.archs['iPhoneOS'].join(':')}'"
   end
 
+  pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
+  at_exit { Process.kill(:TERM, pid) }
+
   deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   Signal.trap(:INT) { } if ENV['debug']
