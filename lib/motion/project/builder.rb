@@ -109,6 +109,17 @@ module Motion; module Project;
       is_default_archs = (archs == config.default_archs[platform])
       rubyc_bs_flags = bs_files.map { |x| "--uses-bs \"" + x + "\" " }.join(' ')
 
+      tmp_build_dir = File.join(build_dir, 'tmp')
+      FileUtils.mkdir_p(tmp_build_dir)
+
+      init_func_file_path = File.join(tmp_build_dir, "init_func")
+      saved_init_funcs = if File.exist?(init_func_file_path)
+                         Marshal.load(File.read(init_func_file_path))
+                       else
+                         {}
+                       end
+      new_init_funcs_hash = {}
+
       build_file = Proc.new do |files_build_dir, path|
         rpath = path
         path = File.expand_path(path)
@@ -121,7 +132,11 @@ module Motion; module Project;
             or File.mtime(ruby) > File.mtime(obj))
  
         # Generate or retrieve init function.
-        init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} \"#{obj}\"`.scan(/T\s+_(MREP_.*)/)[0][0]
+        new_init_funcs_hash[obj] = init_func = if should_rebuild
+                                            "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}"
+                                          else
+                                            saved_init_funcs[obj] || `#{config.locate_binary('nm')} \"#{obj}\"`.scan(/T\s+_(MREP_.*)/)[0][0]
+                                          end
 
         if should_rebuild
           App.info 'Compile', rpath
@@ -180,6 +195,7 @@ module Motion; module Project;
       end
 
       FileUtils.touch(objs_build_dir) if any_obj_file_built
+      File.write(init_func_file_path, Marshal.dump(new_init_funcs_hash))
 
       # Generate init file.
       init_txt = <<EOS
