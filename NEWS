@@ -1,8 +1,25 @@
+= RubyMotion 3.12 =
+  
+  * [Android] Added support for Android M (experimental). To target it, set
+    `app.api_version' to `MNC'.
+  * [Android] Improved Object#raise to accept an exception class or instance.
+  * [Android, iOS, OSX] Introduced a new experimental file dependency resolver.
+    If you have any file dependency manually specified in the Rakefile, the new
+    resolver should make those unnecessary. To try it, set the environmental
+    variable "experimental_dependency" (e.g. 'rake experimental_dependency=1').
+    The new resolver will become the default in a future release.
+  * [iOS] Fixed "duplicate symbol" error when it would build app for iOS device
+    using Xcode 6.2.
+  * [iOS] Fixed a bug where the latest version of the Facebook iOS SDK would
+    not compile correctly.
+  * [iOS, OSX] Improved compilation time for projects that have many source
+    files. 2~ times faster.
+
 = RubyMotion 3.11 =
 
   * [iOS] Fixed a bug which UIInterfaceOrientation would cause link error when
-  * [iOS, OSX] Improved floating precision for 64-bit environment. 
     specify iOS 8.2 or below as deployment target.
+  * [iOS, OSX] Improved floating precision for 64-bit environment. 
   * [iOS] Fixed a regression where the exception could not be handled on i386
     iOS simulator.
   * [iOS] Fixed a bug where watch apps could be rejected with iTunes Connect.
