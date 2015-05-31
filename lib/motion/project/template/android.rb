@@ -583,7 +583,7 @@ def adb_mode_flag(mode)
     when :emulator
       '-e'
     when :device
-      '-d'
+      "-s #{device_id}"
     else
       raise
   end
