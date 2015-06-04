@@ -219,7 +219,8 @@ task :build do
     kernel_bc = App.config.kernel_path(arch)
     ruby_objs_changed = false
   
-    build_file = Proc.new do |files_build_dir, ruby_path|
+    @compiler = []
+    build_file = Proc.new do |files_build_dir, ruby_path, job|
       ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.' + arch + '.o')
       init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
       if !File.exist?(ruby_obj) \
@@ -229,7 +230,10 @@ task :build do
         App.info 'Compile', ruby_path
         ruby_bc = ruby_obj + '.bc'
         FileUtils.mkdir_p(File.dirname(ruby_bc))
-        sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{ruby_bc}\" #{init_func} \"#{ruby_path}\""
+        @compiler[job] ||= {}
+        @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm-fast \"\"", "r+")
+        @compiler[job][arch].puts "#{ruby_bc}\n#{init_func}\n#{ruby_path}"
+        @compiler[job][arch].gets # wait to finish compilation
         sh "#{App.config.cc} #{App.config.asflags(arch)} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
         ruby_objs_changed = true
       end
