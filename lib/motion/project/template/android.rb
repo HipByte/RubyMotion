@@ -250,6 +250,14 @@ task :build do
     parallel.files += App.config.spec_files if App.config.spec_mode
     parallel.run
   
+    # terminate compiler process
+    @compiler.each do |item|
+      next unless item
+      item.each do |k, v|
+        v.puts "quit"
+      end
+    end
+
     ruby_objs = app_objs = parallel.objects
     spec_objs = []
     if App.config.spec_mode
