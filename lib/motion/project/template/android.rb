@@ -489,6 +489,7 @@ EOS
   classes_dir = File.join(app_build_dir, 'classes')
   mkdir_p classes_dir
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
+  java_paths = []
   Dir.glob(File.join(app_build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
     paths[paths.index('java')] = 'classes'
@@ -505,11 +506,17 @@ EOS
     end
 
     if !File.exist?(java_class_path) or File.mtime(java_path) > File.mtime(java_class_path)
-      App.info 'Create', java_class_path if Rake.application.options.trace
-      sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
-      classes_changed = true
+      java_paths << java_path
     end
   end
+  compile_java_file = Proc.new do |classes_dir, java_path|
+    App.info 'Create', java_class_path if Rake.application.options.trace
+    sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
+    classes_changed = true
+  end
+  parallel = Motion::Project::ParallelBuilder.new(classes_dir, compile_java_file)
+  parallel.files = java_paths
+  parallel.run
 
   # Generate the dex file.
   dex_classes = File.join(app_build_dir, 'classes.dex')
