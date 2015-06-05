@@ -722,8 +722,13 @@ namespace 'emulator' do
   end
 
   desc "Start the app's main intent in the emulator"
-  task :start => ['build', 'emulator:install'] do
+  task :start => ['emulator:build', 'emulator:install'] do
     run_apk(:emulator)
+  end
+
+  task :build do
+    App.config.archs << 'x86' unless App.config.archs.include?('x86')
+    Rake::Task["build"].invoke
   end
 end
 
@@ -740,7 +745,7 @@ namespace 'device' do
 end
 
 desc "Build the app then run it in the emulator"
-task :emulator => ['build', 'emulator:install', 'emulator:start']
+task :emulator => ['emulator:build', 'emulator:install', 'emulator:start']
 
 desc "Build the app then run it in the device"
 task :device do
