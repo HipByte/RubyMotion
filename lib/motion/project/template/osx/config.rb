@@ -33,7 +33,7 @@ module Motion; module Project;
     variable :icon, :copyright, :category,
         :embedded_frameworks, :external_frameworks,
         :codesign_for_development, :codesign_for_release,
-        :eval_support
+        :eval_support, :provisioning_profile
 
     def initialize(project_dir, build_mode)
       super
@@ -44,6 +44,7 @@ module Motion; module Project;
       @codesign_for_development = false
       @codesign_for_release = true
       @eval_support = false
+      @provisioning_profile = nil
     end
 
     def platforms; ['MacOSX']; end

@@ -487,6 +487,8 @@ EOS
         end
       end
 
+      embed_provisioning_profile(config, bundle_path)
+
       # Optional support for #eval (OSX-only).
       if config.respond_to?(:eval_support) and config.eval_support
         repl_dylib_path = File.join(datadir, '..', 'librubymotion-repl.dylib')
@@ -552,6 +554,10 @@ EOS
         App.info 'Copy', res_path
         FileUtils.cp_r(res_path, dest_path)
       end
+    end
+
+    def embed_provisioning_profile(config, bundle)
+
     end
 
     def profile(config, platform, config_plist)
