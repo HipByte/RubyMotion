@@ -110,7 +110,8 @@ PLIST
       FileUtils.cp config.provisioning_profile, bundle_provision
 
       # Codesign.
-      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
+      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
+
       app_frameworks = File.join(config.app_bundle(platform), 'Frameworks')
       config.embedded_frameworks.each do |framework|
         framework_path = File.join(app_frameworks, File.basename(framework))
