@@ -273,11 +273,10 @@ module Motion; module Project;
           "iPad"
       end
 
-      ver = xcode_version[0].match(/(\d+)/)
-      case ver[0].to_i
-      when 6
+      ver = xcode_version[0].match(/(\d+)/)[0].to_i
+      if ver >= 6
         (device_name.nil?) ? device + device_retina_xcode6_string(family, target, retina) : device_name
-      when 5
+      elsif ver == 5
         device + device_retina_xcode5_string(family, target, retina)
       else
         device + device_retina_xcode4_string(family, target, retina)
