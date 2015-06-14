@@ -301,17 +301,6 @@ EOS
       common_flags(platform) + ' -Wl,-no_pie'
     end
 
-    def xcode_debug_info_version
-      @debug_info_version ||= begin
-        if m = `echo '' | xcrun clang -c -xc -g -emit-llvm -S -o /dev/stdout - | grep 'Debug Info Version'`.match(/\d{9}/)
-          m[0]
-        else
-          # Return dummy 'Debug Info Version' because Xcode 5 or older doesn't return it.
-          "1"
-        end
-      end
-    end
-
     # @return [String] The application bundle name, excluding extname.
     #
     def bundle_name
