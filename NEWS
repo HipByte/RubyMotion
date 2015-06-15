@@ -1,3 +1,23 @@
+= RubyMotion 3.13 =
+
+  * [iOS, OSX] Added support for iOS 9 and OS X 10.11 (experimental). To
+    target these, you will need Xcode 7 (beta). NOTE: If you can't launch your
+    app on a device running iOS 9, manually trust your certificate by going to
+    Settings > General > Profiles and selecting your certificate. Also, arm64
+    is not supported with Xcode 7 at this point, so you will have to remove it
+    from app.archs['iPhoneOS'] when doing device builds.
+  * [iOS, OSX] Fixed a bug where certain C structures could not be passed to a 
+    Ruby block from Objective-C code.
+  * [iOS, OSX] Fixed a bug where broken value would be received when a
+    Objective-C method returns a small structure on i386 architecture.
+  * [iOS] Updated Watchkit templates. If your watch app crashes on launch, try
+    replacing the "initWithContext" methods with "awakeWithContext".
+  * [Android] Improved compilation time by introduced parallel compiling for
+    Java files and faster compiling (like iOS/OS X).
+  * [Android] Fixed a bug where Time#- would not return value with millisecond
+    precision.
+  * [Android] Added Time#to_f.
+
 = RubyMotion 3.12 =
   
   * [Android] Added support for Android M (experimental). To target it, set
