@@ -282,8 +282,6 @@ task :device => :archive do
     archs = App.config.archs['iPhoneOS']
     if !ENV['install_only'] && archs.include?('armv7') && archs.size == 1
       # Now, REPL supports armv7 only
-      pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
-      at_exit { Process.kill(:TERM, pid) }
       env << " RM_ENABLE_REPL=true"
       repl_mode = true
     end
@@ -301,6 +299,8 @@ task :device => :archive do
 
   if repl_mode
     # Launch the REPL.
+    pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
+    at_exit { Process.kill(:TERM, pid) }
     kernel = File.join(App.config.datadir, "iPhoneOS", "kernel-armv7.bc")
     sh "\"#{File.join(App.config.bindir, 'repl')}\" \"#{kernel}\" armv7-none-linux-androideabi 0.0.0.0 33333" # To run REPL, now, it need android triple.
   end
