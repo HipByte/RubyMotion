@@ -40,7 +40,7 @@ module Motion; module Project;
       @icon = ''
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @category = 'utilities'
-      @frameworks = ['AppKit', 'Foundation', 'CoreGraphics', 'CoreServices']
+      @frameworks = ['AppKit', 'Foundation', 'CoreGraphics', 'CoreServices', 'Security']
       @codesign_for_development = false
       @codesign_for_release = true
       @eval_support = false
