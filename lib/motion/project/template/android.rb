@@ -208,7 +208,7 @@ task :build do
   gdbserver_subpaths = []
   native_libs = []
 
-  App.config.archs.each do |arch|
+  App.config.archs.uniq.each do |arch|
     # Compile Ruby files.
     ruby = App.config.bin_exec('ruby')
     bs_files += Dir.glob(File.join(App.config.versioned_datadir, 'BridgeSupport/*.bridgesupport'))
@@ -219,7 +219,8 @@ task :build do
     kernel_bc = App.config.kernel_path(arch)
     ruby_objs_changed = false
   
-    build_file = Proc.new do |files_build_dir, ruby_path|
+    @compiler = []
+    build_file = Proc.new do |files_build_dir, ruby_path, job|
       ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.' + arch + '.o')
       init_func = "MREP_" + `/bin/echo \"#{File.expand_path(ruby_obj)}\" | /usr/bin/openssl sha1`.strip
       if !File.exist?(ruby_obj) \
@@ -229,7 +230,10 @@ task :build do
         App.info 'Compile', ruby_path
         ruby_bc = ruby_obj + '.bc'
         FileUtils.mkdir_p(File.dirname(ruby_bc))
-        sh "VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm \"#{ruby_bc}\" #{init_func} \"#{ruby_path}\""
+        @compiler[job] ||= {}
+        @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -i386 \"#{ruby}\" #{ruby_bs_flags} --emit-llvm-fast \"\"", "r+")
+        @compiler[job][arch].puts "#{ruby_bc}\n#{init_func}\n#{ruby_path}"
+        @compiler[job][arch].gets # wait to finish compilation
         sh "#{App.config.cc} #{App.config.asflags(arch)} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
         ruby_objs_changed = true
       end
@@ -246,6 +250,14 @@ task :build do
     parallel.files += App.config.spec_files if App.config.spec_mode
     parallel.run
   
+    # terminate compiler process
+    @compiler.each do |item|
+      next unless item
+      item.each do |k, v|
+        v.puts "quit"
+      end
+    end
+
     ruby_objs = app_objs = parallel.objects
     spec_objs = []
     if App.config.spec_mode
@@ -355,11 +367,12 @@ EOS
   
     # Install native shared libraries.
     App.config.vendored_projects.map { |x| x[:native] }.compact.flatten.each do |native_lib_src|
+      next unless native_lib_src.include?(App.config.armeabi_directory_name(arch))
       native_lib_subpath = "#{libs_abi_subpath}/#{File.basename(native_lib_src)}"
       native_lib_path = "#{app_build_dir}/#{native_lib_subpath}"
       native_libs << native_lib_subpath
       if !File.exists?(native_lib_path) \
-        or File.mtime(native_lib_src) > File.mtime(native_lib_path)
+          or File.mtime(native_lib_src) > File.mtime(native_lib_path)
         App.info 'Create', native_lib_path
         sh "/usr/bin/install -p #{native_lib_src} #{File.dirname(native_lib_path)}"
       end
@@ -389,7 +402,7 @@ EOS
 
   # Create java files based on the classes map files.
   java_classes = {}
-  Dir.glob(objs_build_dirs[0] + '/**/*.map') do |map|
+  Dir.glob(objs_build_dirs[0] + '/**/*.map', File::FNM_DOTMATCH) do |map|
     txt = File.read(map)
     current_class = nil
     txt.each_line do |line|
@@ -488,6 +501,7 @@ EOS
   classes_dir = File.join(app_build_dir, 'classes')
   mkdir_p classes_dir
   class_path = [classes_dir, "#{App.config.sdk_path}/tools/support/annotations.jar", *vendored_jars].map { |x| "\"#{x}\"" }.join(':')
+  java_paths = []
   Dir.glob(File.join(app_build_dir, 'java', '**', '*.java')).each do |java_path|
     paths = java_path.split('/')
     paths[paths.index('java')] = 'classes'
@@ -504,11 +518,17 @@ EOS
     end
 
     if !File.exist?(java_class_path) or File.mtime(java_path) > File.mtime(java_class_path)
-      App.info 'Create', java_class_path if Rake.application.options.trace
-      sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
-      classes_changed = true
+      java_paths << java_path
     end
   end
+  compile_java_file = Proc.new do |classes_dir, java_path|
+    App.info 'Create', java_class_path if Rake.application.options.trace
+    sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
+    classes_changed = true
+  end
+  parallel = Motion::Project::ParallelBuilder.new(classes_dir, compile_java_file)
+  parallel.files = java_paths
+  parallel.run
 
   # Generate the dex file.
   dex_classes = File.join(app_build_dir, 'classes.dex')
@@ -566,6 +586,8 @@ EOS
     sh "\"#{App.config.zipalign_path}\" -f 4 \"#{archive}\" \"#{archive}-aligned\""
     sh "/bin/mv \"#{archive}-aligned\" \"#{archive}\""
   end
+
+  $bs_files = bs_files
 end
 
 desc "Create an application package file (.apk) for release (Google Play)"
@@ -580,7 +602,7 @@ def adb_mode_flag(mode)
     when :emulator
       '-e'
     when :device
-      '-d'
+      "-s #{device_id}"
     else
       raise
   end
@@ -688,7 +710,7 @@ def run_apk(mode)
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
       # Launch the REPL.
-      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp}"
+      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{$bs_files.join(' ')}"
     end
   end
 end
@@ -700,8 +722,13 @@ namespace 'emulator' do
   end
 
   desc "Start the app's main intent in the emulator"
-  task :start => ['build', 'emulator:install'] do
+  task :start => ['emulator:build', 'emulator:install'] do
     run_apk(:emulator)
+  end
+
+  task :build do
+    App.config.archs << 'x86' unless App.config.archs.include?('x86')
+    Rake::Task["build"].invoke
   end
 end
 
@@ -718,10 +745,13 @@ namespace 'device' do
 end
 
 desc "Build the app then run it in the emulator"
-task :emulator => ['build', 'emulator:install', 'emulator:start']
+task :emulator => ['emulator:build', 'emulator:install', 'emulator:start']
 
 desc "Build the app then run it in the device"
-task :device => ['build', 'device:install', 'device:start']
+task :device do
+  Motion::Project::Config.need_full_version!
+  ['build', 'device:install', 'device:start'].each { |x| Rake::Task[x].invoke }
+end
 
 desc "Same as 'rake emulator'"
 task :default => :emulator

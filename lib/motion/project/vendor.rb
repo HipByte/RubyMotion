@@ -172,6 +172,13 @@ EOS
       headers = source_files.select { |p| File.extname(p) == '.h' }
       bs_files = []
       unless headers.empty?
+
+        # Fix for RM-851
+        if macro_header = headers.detect { |h| h.include?("FBSDKMacros") }
+          headers.delete(macro_header)
+          headers.unshift(macro_header)
+        end
+
         bs_file = bridgesupport_build_path
         if !File.exist?(bs_file) or headers.any? { |h| File.mtime(h) > File.mtime(bs_file) }
           FileUtils.mkdir_p File.dirname(bs_file)
@@ -220,6 +227,13 @@ EOS
         # Dir.glob does not traverse symlinks with `**`, using this pattern
         # will at least traverse symlinks one level down.
         headers = Dir.glob(File.join(project_dir, headers_dir, '**{,/*/**}/*.h'))
+
+        # Fix for RM-851
+        if macro_header = headers.detect { |h| h.include?("FBSDKMacros") }
+          headers.delete(macro_header)
+          headers.unshift(macro_header)
+        end
+
         if !File.exist?(bs_file) or headers.any? { |x| File.mtime(x) > File.mtime(bs_file) }
           FileUtils.mkdir_p File.dirname(bs_file)
           bs_cflags = (@opts[:bridgesupport_cflags] or @opts[:cflags] or '')

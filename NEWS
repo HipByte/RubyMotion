@@ -1,3 +1,78 @@
+= RubyMotion 3.13 =
+
+  * [iOS, OSX] Added support for iOS 9 and OS X 10.11 (experimental). To
+    target these, you will need Xcode 7 (beta). NOTE: If you can't launch your
+    app on a device running iOS 9, manually trust your certificate by going to
+    Settings > General > Profiles and selecting your certificate. Also, arm64
+    is not supported with Xcode 7 at this point, so you will have to remove it
+    from app.archs['iPhoneOS'] when doing device builds.
+  * [iOS, OSX] Fixed a bug where certain C structures could not be passed to a 
+    Ruby block from Objective-C code.
+  * [iOS, OSX] Fixed a bug where broken value would be received when a
+    Objective-C method returns a small structure on i386 architecture.
+  * [iOS] Updated Watchkit templates. If your watch app crashes on launch, try
+    replacing the "initWithContext" methods with "awakeWithContext".
+  * [Android] Improved compilation time by introduced parallel compiling for
+    Java files and faster compiling (like iOS/OS X).
+  * [Android] Fixed a bug where Time#- would not return value with millisecond
+    precision.
+  * [Android] Added Time#to_f.
+
+= RubyMotion 3.12 =
+  
+  * [Android] Added support for Android M (experimental). To target it, set
+    `app.api_version' to `MNC'.
+  * [Android] Improved Object#raise to accept an exception class or instance.
+  * [Android, iOS, OSX] Introduced a new experimental file dependency resolver.
+    If you have any file dependency manually specified in the Rakefile, the new
+    resolver should make those unnecessary. To try it, set the environmental
+    variable "experimental_dependency" (e.g. 'rake experimental_dependency=1').
+    The new resolver will become the default in a future release.
+  * [iOS] Fixed "duplicate symbol" error when it would build app for iOS device
+    using Xcode 6.2.
+  * [iOS] Fixed a bug where the latest version of the Facebook iOS SDK would
+    not compile correctly.
+  * [iOS, OSX] Improved compilation time for projects that have many source
+    files. 2~ times faster.
+
+= RubyMotion 3.11 =
+
+  * [iOS] Fixed a bug which UIInterfaceOrientation would cause link error when
+    specify iOS 8.2 or below as deployment target.
+  * [iOS, OSX] Improved floating precision for 64-bit environment. 
+  * [iOS] Fixed a regression where the exception could not be handled on i386
+    iOS simulator.
+  * [iOS] Fixed a bug where watch apps could be rejected with iTunes Connect.
+    Thanks to digitalfx for the patch (pull request #213 and #214).
+  * [iOS] Fixed a bug where watch apps could not installed to iPad devices.
+    Thanks to digitalfx for the patch (pull request #215).
+  * [iOS] Fixed a bug where watch apps were not able to localize.
+  * [iOS, OSX] Fixed a bug where some GLKit structures could not be created.
+  * [iOS] Fixed a bug where some GLKit structures could not be created.
+  * [iOS] Added support for enterprise certificate profiles. Thanks James 
+    Daniels for the patch. (pull request #64)
+  * [iOS, OSX] Fixed a crash when generating ctags.
+  * [iOS, OSX] Fixed a bug where it could not pass a pointer of structure into
+    into Ruby Block from Objective-C. 
+  * [OSX] Fixed a bug where GLKit inline functions could not be used on OS X.
+  * [Android] Added Kernel#{block_given?,iterator?}.
+  * [Android] Added Integer#upto.
+  * [Android] Ruby arrays are now converted to the correct primitive Java array
+    type when passed as an argument to a Java method in Android 5.0.
+  * [Android] Fixed a bug where refering to the current exception in a rescue
+    block would trigger a crash at runtime.
+  * [Android] Fixed a bug in the REPL where Java package paths could not be
+    properly evaluated.
+  * [Android] Fixed a bug where Java classes could not be re-opened.
+  * [Android] Fixed a bug where classes defined inside modules would not be
+    exposed to Java. Caveat: the module must be provided when declaring the
+    class (ex. `class MyModule::MyActivity < Android::App::Activity').
+  * [Android] Fixed a bug where the compiler would emit Java method definitions
+    for methods defined in classes not present in the current class' super
+    class chain.
+  * [Android] Fixed a bug where app.vendor_project with `:native' pointing to
+    an array of paths for different architecture libraries would not work.
+
 = RubyMotion 3.10 =
 
   * [Android] Fixed typo in android.rb template which breaks incremental builds.

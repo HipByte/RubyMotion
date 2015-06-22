@@ -177,6 +177,24 @@ module Motion; module Project;
     end
     private :read_provisioned_profile_array
 
+    def read_provisioned_profile_boolean(key)
+      text = File.read(provisioning_profile)
+      text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
+      case text.scan(/<key>\s*#{key}\s*<\/key>\s*<(true|false)\/>/m)[0]
+      when ['true']
+        true
+      when ['false']
+        false
+      else
+        nil
+      end
+    end
+    private :read_provisioned_profile_boolean
+
+    def provisions_all_devices?
+      @provisions_all_devices ||= !!read_provisioned_profile_boolean('ProvisionsAllDevices')
+    end
+
     def provisioned_devices
       @provisioned_devices ||= read_provisioned_profile_array('ProvisionedDevices')
     end
@@ -255,11 +273,10 @@ module Motion; module Project;
           "iPad"
       end
 
-      ver = xcode_version[0].match(/(\d+)/)
-      case ver[0].to_i
-      when 6
+      ver = xcode_version[0].match(/(\d+)/)[0].to_i
+      if ver >= 6
         (device_name.nil?) ? device + device_retina_xcode6_string(family, target, retina) : device_name
-      when 5
+      elsif ver == 5
         device + device_retina_xcode5_string(family, target, retina)
       else
         device + device_retina_xcode4_string(family, target, retina)
