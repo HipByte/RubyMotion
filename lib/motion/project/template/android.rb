@@ -353,7 +353,7 @@ EOS
       App.info 'Create', libpayload_path
       FileUtils.mkdir_p(File.dirname(libpayload_path))
       sh "#{App.config.cc} #{App.config.cflags(arch)} -c \"#{payload_c}\" -o \"#{payload_o}\""
-      sh "#{App.config.cxx} #{App.config.ldflags(arch)} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs_pre(arch)} #{App.config.libs.join(' ')} #{App.config.ldlibs_post(arch)}"
+      sh "#{App.config.cxx} #{App.config.ldflags(arch)} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs_pre(arch)} #{App.config.libs[App.config.armeabi_directory_name(arch)].join(' ')} #{App.config.ldlibs_post(arch)}"
     end
   
     # Copy the gdb server.

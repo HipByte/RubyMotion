@@ -120,7 +120,7 @@ module Motion; module Project;
       @application_class = nil
       @theme = "@android:style/Theme.Holo"
       @vm_debug_logs = false
-      @libs = []
+      @libs = Hash.new([])
 
       if Motion::Project::Config.evaluation?
         @archs = ['x86']
