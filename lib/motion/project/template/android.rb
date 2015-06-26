@@ -467,6 +467,10 @@ EOS
   java_classes.each do |name, klass|
     klass_super = klass[:super]
     klass_super = 'java.lang.Object' if klass_super == '$blank$'
+    if !klass_super.include?('.') and !java_classes.has_key?(klass_super)
+      # Super class does not exist, skipping...
+      next
+    end
     java_file_txt = ''
     java_file_txt << <<EOS
 // This file has been generated automatically. Do not edit.
