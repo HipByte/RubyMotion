@@ -101,6 +101,16 @@ module Motion; module Project;
         end
       end
 
+      # filter cross platform files
+      if config.cross_platform_mode
+        excluded_platforms = (Config::SUPPORTED_TEMPLATES - [config.template]).map(&:to_s)
+        config.files.each do |file|
+          if excluded_platforms.any? { |excluded| file.include?(excluded) }
+            config.files.delete(file)
+          end
+        end
+      end
+
       # Build object files.
       objs_build_dir = File.join(build_dir, 'objs')
       FileUtils.mkdir_p(objs_build_dir)
