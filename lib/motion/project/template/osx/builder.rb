@@ -62,7 +62,7 @@ module Motion; module Project
       framework_versions = 'Frameworks/*.framework/Versions/*'
       Dir.glob(File.join(app_bundle, framework_versions)) do |version|
         unless version == File.basename('Current')
-          codesign_bundle(config, version)
+          codesign_bundle(config, version, true)
         end
       end
 
@@ -86,6 +86,12 @@ module Motion; module Project
     #        be to the specific version directory inside the `Versions`
     #        directory of the bundle.
     #
+    # @param [Boolean] deep
+    #        Indicates whether to include the `--deep` flag for codesign.
+    #        Any extra code in frameworks (such as an XPC service) must
+    #        also be signed.  `--deep` ensures it's signed with the same
+    #        identity as the bundle
+    #
     # @yield If a block is given, this will be yielded to allow the generation
     #        of an entitlements file, only when needed.
     #
@@ -99,6 +105,7 @@ module Motion; module Project
         App.info 'Codesign', bundle
         entitlements_path = yield if block_given?
         command = "/usr/bin/codesign --force --sign '#{config.codesign_certificate}' "
+        command << "--deep " if deep
         command << "--entitlements '#{entitlements_path}' " if entitlements_path
         command << "'#{bundle}'"
         sh(command)
