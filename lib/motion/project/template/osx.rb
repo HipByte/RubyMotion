@@ -32,7 +32,9 @@ require 'motion/project'
 require 'motion/project/template/osx/config'
 require 'motion/project/template/osx/builder'
 
-Motion::Project::Config.need_full_version!
+if Motion::Project::Config.starter?
+  App.fail 'You are using RubyMotion Starter. OS X development is not supported in this release. If you would like to write Mac apps you can purchase a paid subscription.'
+end
 
 desc "Build the project, then run it"
 task :default => :run

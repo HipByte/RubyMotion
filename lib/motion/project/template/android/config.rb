@@ -121,13 +121,6 @@ module Motion; module Project;
       @theme = "@android:style/Theme.Holo"
       @vm_debug_logs = false
       @libs = Hash.new([])
-
-      if Motion::Project::Config.evaluation?
-        @archs = ['x86']
-        @api_version = '22'
-        @target_api_version = '22'
-      end
-
       @manifest = AndroidManifest.new
       construct_manifest
 

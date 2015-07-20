@@ -341,12 +341,8 @@ EOS
       end
     end
 
-    def self.evaluation?
-      @evaluation ||= !File.exist?('/Library/RubyMotion/license.key')
-    end
-
-    def self.need_full_version!
-      App.fail "This functionality is not supported in the evaluation version." if evaluation?
+    def self.starter?
+      @is_starter ||= !File.exist?('/Library/RubyMotion/license.key')
     end
   end
 end; end
