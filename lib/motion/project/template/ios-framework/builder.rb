@@ -431,6 +431,7 @@ EOS
       if !File.exist?(dest_path) or File.mtime(res_path) > File.mtime(dest_path)
         FileUtils.mkdir_p(File.dirname(dest_path))
         App.info 'Copy', relative_path(res_path)
+        FileUtils.rm_rf(dest_path)
         FileUtils.cp_r(res_path, dest_path)
       end
     end
