@@ -61,7 +61,7 @@ module Motion; module Project;
     def archs
       @archs ||= begin
         archs = super
-        archs['iPhoneSimulator'].delete('x86_64')
+        archs['iPhoneSimulator'].delete('x86_64') if archs['iPhoneSimulator']
         archs
       end
     end
@@ -154,13 +154,16 @@ module Motion; module Project;
     end
 
     def cflag_version_min(platform)
-      flag = " -miphoneos-version-min=#{deployment_target}"
-      if platform == "iPhoneSimulator"
-        ver = xcode_version[0].match(/(\d+)/)
-        if ver[0].to_i >= 5
-          flag = " -mios-simulator-version-min=#{deployment_target}"
-        end
-      end
+      flag = case platform
+             when "iPhoneOS"
+               " -miphoneos-version-min=#{deployment_target}"
+             when "iPhoneSimulator"
+               " -mios-simulator-version-min=#{deployment_target}"
+             when "WatchOS"
+               " -mwatchos-version-min=#{deployment_target}"
+             when "WatchSimulator"
+               " -mwatchos-simulator-version-min=#{deployment_target}"
+             end
       flag
     end
 
@@ -169,9 +172,7 @@ module Motion; module Project;
     end
 
     def ldflags(platform)
-      ldflags = super
-      ldflags << " -fobjc-arc" if deployment_target < '5.0'
-      ldflags
+      super + " -fobjc-arc"
     end
 
     def bridgesupport_flags
@@ -189,6 +190,7 @@ module Motion; module Project;
       case family
         when :iphone then 1
         when :ipad then 2
+        when :watch then 4
         else
           App.fail "Unknown device_family value: `#{family}'"
       end
@@ -222,9 +224,8 @@ module Motion; module Project;
     end
 
     def merged_info_plist(platform)
-      super.merge({
+      plist = super.merge({
         'MinimumOSVersion' => deployment_target,
-        'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'CFBundleSupportedPlatforms' => [deploy_platform],
         'CFBundleIcons' => {
           'CFBundlePrimaryIcon' => {
@@ -249,6 +250,8 @@ module Motion; module Project;
         'DTPlatformBuild' => sdk_build_version(platform),
         'CFBundlePackageType' => 'XPC!'
       })
+      plist.delete('UISupportedInterfaceOrientations')
+      plist
     end
 
     def manifest_plist_data

@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,8 +33,10 @@ module Motion; module Project
       source = config.prebuilt_app_executable(platform)
       destination = config.app_bundle_executable(platform)
       sh "/usr/bin/ditto -rsrc '#{source}' '#{destination}'"
-      sh "/usr/bin/ditto -rsrc '#{source}' '#{File.join(config.app_bundle(platform), '_WatchKitStub/WK')}'"
 
+      if !config.watchV2?
+        sh "/usr/bin/ditto -rsrc '#{source}' '#{File.join(config.app_bundle(platform), '_WatchKitStub/WK')}'"
+      end
 
       entitlements = File.join(config.app_bundle(platform), "Entitlements.plist")
       File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
@@ -47,9 +49,14 @@ module Motion; module Project
       # Compile storyboard
       ibtool = File.join(config.xcode_dir, '/usr/bin/ibtool')
       Dir.glob("watch_app/**/Interface.storyboard").each do |storyboard|
-        compilation_directory = File.join(config.app_bundle(platform), File.dirname(sanitize_destination_path(storyboard)))
-        FileUtils.mkdir_p(compilation_directory)
-        sh "'#{ibtool}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{compilation_directory}' #{storyboard}"
+	if Util::Version.new(config.xcode_version[0]) >= Util::Version.new('7.0')
+	  sh "'#{ibtool}' --errors --warnings --notices --target-device watch --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '/tmp' #{storyboard}"
+	  sh "'#{ibtool}' --errors --warnings --notices --target-device watch --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --link '#{File.join(config.app_bundle(platform), 'Base.lproj')}' '/tmp/Interface.storyboardc'"
+	else
+	  compilation_directory = File.join(config.app_bundle(platform), File.dirname(sanitize_destination_path(storyboard)))
+	  FileUtils.mkdir_p(compilation_directory)
+	  sh "'#{ibtool}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{compilation_directory}' #{storyboard}"
+	end
       end
 
       # Copy localization files
@@ -66,6 +73,9 @@ module Motion; module Project
     end
 
     def build_watch_extension(config, platform, opts)
+      unless ENV['RM_TARGET_BUILD']
+        App.fail "Extension targets must be built from an application project"
+      end
       build_extension(config, platform, opts)
       build_watch_app(config.watch_app_config, platform, opts)
     end

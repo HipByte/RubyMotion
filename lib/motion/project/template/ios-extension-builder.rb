@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,41 +34,6 @@ module Motion; module Project
 
       extension_dir = config.app_bundle(platform)
 
-      # Create bundle/ResourceRules.plist.
-      resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
-      unless File.exist?(resource_rules_plist)
-        App.info 'Create', resource_rules_plist
-        File.open(resource_rules_plist, 'w') do |io|
-          io.write(<<-PLIST)
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-        <key>rules</key>
-        <dict>
-                <key>.*</key>
-                <true/>
-                <key>Info.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>10</real>
-                </dict>
-                <key>ResourceRules.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>100</real>
-                </dict>
-        </dict>
-</dict>
-</plist>
-PLIST
-        end
-      end
-
       # Copy the provisioning profile
       bundle_provision = File.join(extension_dir, "embedded.mobileprovision")
       App.info 'Create', bundle_provision
@@ -81,14 +46,16 @@ PLIST
       end
 
       @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
-      config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
-      if ENV['RM_TARGET_DEPLOYMENT_TARGET'] && \
-         Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET']) > Util::Version.new(App.config.deployment_target)
-        App.config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET']
-      end
-      if ENV['RM_TARGET_ARCHS']
-        eval(ENV['RM_TARGET_ARCHS']).each do |platform, archs|
-          config.archs[platform] = archs.uniq
+      if !config.watchV2?
+        config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
+        if ENV['RM_TARGET_DEPLOYMENT_TARGET'] && \
+          Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET']) > Util::Version.new(App.config.deployment_target)
+          App.config.deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET']
+        end
+        if ENV['RM_TARGET_ARCHS']
+          eval(ENV['RM_TARGET_ARCHS']).each do |platform, archs|
+            config.archs[platform] = archs.uniq
+          end
         end
       end
 
@@ -114,10 +81,10 @@ PLIST
       sdk = config.sdk(platform)
       cc = config.locate_compiler(platform, 'clang')
       cxx = config.locate_compiler(platform, 'clang++')
-    
+
       build_dir = File.join(config.versionized_build_dir(platform))
       App.info 'Build', relative_path(build_dir)
- 
+
       # Prepare the list of BridgeSupport files needed.
       bs_files = config.bridgesupport_files
 
@@ -161,7 +128,7 @@ PLIST
         should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
- 
+
         # Generate or retrieve init function.
         init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} \"#{obj}\"`.scan(/T\s+_(MREP_.*)/)[0][0]
 
@@ -173,7 +140,7 @@ PLIST
             # Locate arch kernel.
             kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
             raise "Can't locate kernel file" unless File.exist?(kernel)
-   
+
             # Assembly.
             compiler_exec_arch = case arch
               when /^arm/
@@ -181,20 +148,33 @@ PLIST
               else
                 arch
             end
-            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
+            asm_extension = platform == 'WatchOS' ? 'bc' : 's'
+            asm = File.join(files_build_dir, "#{path}.#{arch}.#{asm_extension}")
             @compiler[job] ||= {}
             @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm-fast \"\"", "r+")
             @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
             @compiler[job][arch].gets # wait to finish compilation
 
-            # Object 
+            # Object
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+            if platform == 'WatchOS'
+              @dummy_object_file ||= begin
+                src_path = '/tmp/__dummy_object_file__.c'
+                obj_path = '/tmp/__dummy_object_file__.o'
+                File.open(src_path, 'w') { |io| io.puts "static int foo(void) { return 42; }" }
+                sh "#{cc} -c #{src_path} -o #{obj_path} -arch armv7k -fembed-bitcode"
+                obj_path
+              end
+              # FIXME: -fembed-bitcode-marker has to be -fembed-bitcode
+              sh "#{cxx} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\" -fembed-bitcode-marker -mwatchos-version-min=#{config.deployment_target}"
+            else
+              sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+            end
 
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
           end
-   
+
           # Assemble fat binary.
           arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
           sh "/usr/bin/lipo -create #{arch_objs_list} -output \"#{obj}\""
@@ -307,7 +287,7 @@ EOS
 
       # Generate main file.
       main_txt = config.main_cpp_file_txt(spec_objs)
- 
+
       # Compile main file.
       main = File.join(objs_build_dir, 'main.mm')
       main_o = File.join(objs_build_dir, 'main.o')
@@ -351,13 +331,13 @@ EOS
         linker_option = begin
           m = config.deployment_target.match(/(\d+)/)
           if m[0].to_i < 7
-            "-stdlib=libstdc++"
+            "-stdlib=libc++"
           end
         end || ""
         kernel = File.join(datadir, platform, "kernel.o")
         # Use the `-no_implicit_dylibs` linker option to hide the fact that it
         # links against `libextension.dylib` which contains `NSExtensionMain`.
-        sh "#{cxx} -o \"#{main_exec}\" \"#{kernel}\" #{objs_list} #{config.sdk(platform)}/System/Library/PrivateFrameworks/PlugInKit.framework/PlugInKit -fobjc-link-runtime -fapplication-extension -Xlinker -no_implicit_dylibs #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        sh "#{cxx} -o \"#{main_exec}\" \"#{kernel}\" #{objs_list}  -fobjc-link-runtime -fapplication-extension -Xlinker -no_implicit_dylibs #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
       end
 

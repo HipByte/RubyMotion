@@ -35,8 +35,17 @@ module Motion; module Project;
       @name = nil
       @version = ENV['RM_TARGET_HOST_APP_VERSION']
       @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
-      @frameworks = ['WatchKit', 'Foundation', 'CoreGraphics']
-      @deployment_target = '8.2' # FIXME: Now, iTunnes require '8.2' as MinimumOSVersion
+      @frameworks = ['WatchKit', 'Foundation']
+
+      if !watchV2?
+        # FIXME: iTunnes requires '8.2' as MinimumOSVersion for WatchKit V1 apps
+        host_deloyment_version = Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET'])
+        if host_deloyment_version > Util::Version.new('8.2')
+          @deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET']
+        else
+          @deployment_target = '8.2'
+        end
+      end
       ENV.delete('RM_TARGET_DEPLOYMENT_TARGET')
     end
 
@@ -52,18 +61,67 @@ module Motion; module Project;
                'automatically be named after the host application.'
     end
 
+    # TODO datadir should not depend on the template name
+    def datadir(target=deployment_target)
+      watchV2? ? File.join(motiondir, 'data', 'watchos', target) : super
+    end
+
+    # TODO datadir should not depend on the template name
+    def supported_versions
+      if watchV2?
+        @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'watchos', '*')).select{|path| File.directory?(path)}.map do |path|
+          File.basename path
+        end
+      else
+        super
+      end
+    end
+
+    def platforms
+      watchV2? ? %W{WatchSimulator WatchOS} : %W{iPhoneSimulator iPhoneOS}
+    end
+
+    def local_platform
+      watchV2? ? 'WatchSimulator' : 'iPhoneSimulator'
+    end
+
+    def deploy_platform
+      watchV2? ? 'WatchOS' : 'iPhoneOS'
+    end
+
+    def watchV2?
+      ENV['WATCHV2'] == "1"
+    end
+
     # @return [String] The bundle identifier of the watch extension based on the
     #         bundle identifier of the host application.
     #
     def identifier
-      ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitextension'
+      if watchV2?
+        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitapp.watchkitextension'
+      else
+        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitextension'
+      end
     end
 
     # @see {XcodeConfig#merged_info_plist}
     #
     def merged_info_plist(platform)
-      super.merge({
-        'UIRequiredDeviceCapabilities' => ['watch-companion'],
+      plist = super
+      plist.delete('UIAppFonts')
+      plist.delete('CFBundleIcons')
+      plist.delete('CFBundleIconFiles')
+      plist.delete('LSApplicationCategoryType')
+      plist.delete('UISupportedInterfaceOrientations')
+      if watchV2?
+        plist['WKExtensionDelegateClassName'] = 'ExtensionDelegate'
+        plist['MinimumOSVersion'] = '2.0'
+        plist['UIDeviceFamily'] = [4]
+        plist['CFBundleSupportedPlatforms'] = ['WatchOS']
+      else
+        plist['UIRequiredDeviceCapabilities'] = ['watch-companion']
+      end
+      plist.merge({
         'RemoteInterfacePrincipalClass' => 'InterfaceController',
         'NSExtension' => {
           'NSExtensionPointIdentifier' => 'com.apple.watchkit',
@@ -121,6 +179,31 @@ EOS
 EOS
     end
 
+    def app_bundle(platform)
+      if watchV2?
+        File.join(watch_app_config.app_bundle(platform), 'PlugIns', bundle_name + '.appex')
+      else
+        super
+      end
+    end
+
+    def cflags(platform, cplusplus)
+      cflags = super
+      if platform == 'WatchOS'
+        cflags += ' -fembed-bitcode'
+      end
+      cflags
+    end
+
+    def ldflags(platform)
+      ldflags = super
+      if platform == 'WatchOS'
+        ldflags += ' -fembed-bitcode -Xlinker -bitcode_hide_symbols'
+        ldflags.gsub!(' -Wl,-no_pie', '')
+      end
+      ldflags
+    end
+
     # This config class is mostly used to re-use existing filename/path APIs as
     # they are in any other iOS application and to build an Info.plist.
     #
@@ -128,6 +211,8 @@ EOS
     # existing `SP.app` application template inside the SDK.
     #
     class WatchAppConfig < IOSConfig
+      attr_accessor :extension_config
+
       def initialize(project_dir, build_mode, extension_config)
         super(project_dir, build_mode)
         @name = nil
@@ -139,9 +224,13 @@ EOS
         @delegate_class = "SPApplicationDelegate"
         @extension_config = extension_config
 
-        @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit App'
+        @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit App' if ENV['RM_TARGET_HOST_APP_NAME']
         @version = ENV['RM_TARGET_HOST_APP_VERSION']
         @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
+      end
+
+      def watchV2?
+        @extension_config.watchV2?
       end
 
       def sdk_version
@@ -152,10 +241,14 @@ EOS
         @extension_config.deployment_target
       end
 
+      def deploy_platform
+        watchV2? ? 'WatchOS' : 'iPhoneOS'
+      end
+
       # Ensure that we also compile assets with `actool` for the watch.
       #
       def device_family
-        [:iphone, :watch]
+        :watch
       end
 
       # @return [String] The bundle identifier of the watch application based on
@@ -165,6 +258,12 @@ EOS
         ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitapp'
       end
 
+      def entitlements_data
+        dict = entitlements
+        dict['application-identifier'] ||= seed_id + '.' + identifier
+        Motion::PropertyList.to_s(dict)
+      end
+
       # @todo There are more differences with Xcode's Info.plist.
       #
       # @see {XcodeConfig#merged_info_plist}
@@ -172,9 +271,20 @@ EOS
       def merged_info_plist(platform)
         plist = super
         plist['CFBundleDisplayName'] = ENV['RM_TARGET_HOST_APP_NAME']
-        plist['UIDeviceFamily'] << 4 # Probably means Apple Watch device?
         plist['WKWatchKitApp'] = true
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
+        if watchV2?
+          plist['UIDeviceFamily'] = [4]
+          plist['MinimumOSVersion'] = deployment_target
+          plist['CFBundleSupportedPlatforms'] = ['WatchOS']
+        else
+          plist['UIDeviceFamily'] << 4
+        end
+        plist['UISupportedInterfaceOrientations'] = ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationPortraitUpsideDown']
+        plist.delete('UIAppFonts')
+        plist.delete('CFBundleIcons')
+        plist.delete('CFBundleIconFiles')
+        plist.delete('LSApplicationCategoryType')
         plist.delete('UIBackgroundModes')
         plist.delete('UIStatusBarStyle')
         plist.delete('CFBundleResourceSpecification')
@@ -189,7 +299,11 @@ EOS
       #         build directory.
       #
       def app_bundle(platform)
-        File.join(@extension_config.app_bundle(platform), bundle_filename)
+        if watchV2?
+          File.join(versionized_build_dir(platform), bundle_name + '.app')
+        else
+          File.join(@extension_config.app_bundle(platform), bundle_filename)
+        end
       end
 
       # @return [String] The path to the SockPuppet application executable that

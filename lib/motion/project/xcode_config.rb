@@ -634,6 +634,9 @@ EOS
         @targets << Motion::Project::FrameworkTarget.new(path, type, self, opts)
       when :extension
         @targets << Motion::Project::ExtensionTarget.new(path, type, self, opts)
+      when :watchapp
+        opts = { env: { "WATCHV2" => "1" } }.merge(opts)
+        @targets << Motion::Project::WatchTarget.new(path, type, self, opts)
       else
         App.fail("Unsupported target type '#{type}'")
       end

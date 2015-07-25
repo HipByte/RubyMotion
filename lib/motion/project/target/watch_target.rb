@@ -26,28 +26,28 @@
 require 'motion/project/target'
 
 module Motion; module Project
-  class ExtensionTarget < Target
+  class WatchTarget < Target
     def copy_products(platform)
-      src_path = src_extension_path
+      src_path = src_watchapp_path
       dest_path = destination_dir
-      FileUtils.mkdir_p(File.join(@config.app_bundle(platform), 'PlugIns'))
+      FileUtils.mkdir_p(File.join(@config.app_bundle(platform), 'Watch'))
 
-      extension_path = destination_bundle_path
+      watchapp_path = destination_bundle_path
 
-      if !File.exist?(extension_path) or File.mtime(src_path) > File.mtime(extension_path)
+      if !File.exist?(watchapp_path) or File.mtime(src_path) > File.mtime(watchapp_path)
         App.info 'Copy', src_path
         FileUtils.cp_r(src_path, dest_path)
       end
     end
 
     def codesign(platform)
-      extension_dir = destination_bundle_path
+      extension_dir = Dir["#{destination_bundle_path}/PlugIns/*.appex"].sort_by{ |f| File.mtime(f) }.last
 
       # Create bundle/ResourceRules.plist.
       resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
 
       # Codesign bundled .app (Only for watchkit extensions)
-      watchapp_dir = Dir["#{extension_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
+      watchapp_dir = Dir["#{destination_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
       if watchapp_dir && Dir.exists?(watchapp_dir)
         entitlements = File.join(watchapp_dir, "Entitlements.plist")
         codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
@@ -64,32 +64,32 @@ module Motion; module Project
       end
     end
 
-    def src_extension_path
-      @src_extension_path ||= begin
-        path = File.join(build_dir, '*.appex')
+    def src_watchapp_path
+      @src_watchapp_path ||= begin
+        path = File.join(build_dir, '*.app')
         Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end
 
     # @return [String] The directory inside the application bundle where the
-    #                  extension should be located in the final product.
+    #                  watch app should be located in the final product.
     #
     def destination_dir
-      File.join(@config.app_bundle(@platform), 'PlugIns')
+      File.join(@config.app_bundle(@platform), 'Watch')
     end
 
-    # @return [String, nil] The path to the extension bundle inside the
+    # @return [String, nil] The path to the watch app bundle inside the
     #         application bundle or `nil` if it has not been built yet.
     #
     def destination_bundle_path
-      File.join(destination_dir, extension_name)
+      File.join(destination_dir, watchapp_name)
     end
 
-    # @return [String, nil] The name of the extension or `nil` if it has not
+    # @return [String, nil] The name of the watch app or `nil` if it has not
     #         been built yet.
     #
-    def extension_name
-      File.basename(src_extension_path)
+    def watchapp_name
+      File.basename(src_watchapp_path)
     end
   end
 end;end
