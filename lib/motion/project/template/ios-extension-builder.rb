@@ -187,9 +187,17 @@ PLIST
             @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
             @compiler[job][arch].gets # wait to finish compilation
 
+            deployment_target = case platform
+              when "iPhoneSimulator"
+                "-mios-simulator-version-min"
+              when "iPhoneOS"
+                "-miphoneos-version-min"
+              when "MacOSX"
+                "-mmacosx-version-min"
+            end + "=#{config.deployment_target}"
             # Object 
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            sh "#{cc} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+            sh "#{cc} #{deployment_target} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
 
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
