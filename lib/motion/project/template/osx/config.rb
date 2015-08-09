@@ -102,7 +102,11 @@ module Motion; module Project;
     end
 
     def common_flags(platform)
-      super + " -mmacosx-version-min=#{deployment_target}"
+      super + cflag_version_min(platform)
+    end
+
+    def cflag_version_min(platform)
+      " -mmacosx-version-min=#{deployment_target}"
     end
 
     def bridgesupport_flags
