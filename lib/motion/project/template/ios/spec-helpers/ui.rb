@@ -67,7 +67,7 @@ module UIApplicationExt
     end
 
     # TODO this code breaks most gestures
-    if @highlightTouches
+    if @highlightTouches && event.respond_to?(:allTouches) && event.allTouches
       event.allTouches.each do |touch|
         case touch.phase
         when UITouchPhaseBegan
@@ -336,6 +336,7 @@ module Bacon
         taps     = options[:times]   || 1
         touches  = options[:touches] || 1
         location = _coerce_location_to_point(view, options[:at], false) || view.superview.convertPoint(view.center, toView:nil)
+        location = UIAElement._convertPointToCurrentInterfaceOrientation(location)
 
         EventDispatcher.dispatch(taps * 0.4) do
           _event_generator.sendTaps(taps,
@@ -350,6 +351,8 @@ module Bacon
       def flick(label_or_view, options)
         view     = view(label_or_view)
         from, to = _extract_start_and_end_points(view, options)
+        from = UIAElement._convertPointToCurrentInterfaceOrientation(from)
+        to = UIAElement._convertPointToCurrentInterfaceOrientation(to)
         duration = options[:duration] || Functional.default_duration
 
         EventDispatcher.dispatch(duration) do
@@ -366,6 +369,8 @@ module Bacon
 
         options[:from] ||= :left unless options[:to]
         from, to = _extract_start_and_end_points(view, options)
+        from = UIAElement._convertPointToCurrentInterfaceOrientation(from)
+        to = UIAElement._convertPointToCurrentInterfaceOrientation(to)
 
         EventDispatcher.dispatch(duration) do
           _event_generator.sendPinchOpenWithStartPoint(from, endPoint:to, duration:duration)
@@ -380,6 +385,8 @@ module Bacon
 
         options[:from] ||= :right unless options[:to]
         from, to = _extract_start_and_end_points(view, options)
+        from = UIAElement._convertPointToCurrentInterfaceOrientation(from)
+        to = UIAElement._convertPointToCurrentInterfaceOrientation(to)
 
         EventDispatcher.dispatch(duration) do
           _event_generator.sendPinchCloseWithStartPoint(from, endPoint:to, duration:duration)
@@ -406,6 +413,7 @@ module Bacon
         _event_generator.touchDown(points.first)
         proper_wait(pause)
         points[1..-1].each do |point|
+          point = UIAElement._convertPointToCurrentInterfaceOrientation(point)
           _event_generator._moveLastTouchPoint(point)
           proper_wait(pause)
         end
