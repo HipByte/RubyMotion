@@ -46,6 +46,15 @@ module Motion; module Project
       Paths << pre_templates if File.exist?(pre_templates)
     end
 
+    # Templates from RubyMotion gems.
+    if defined?(Gem) and defined?(Gem::Specification) and Gem::Specification.respond_to?(:each)
+      Gem::Specification.each do |spec|
+        if spec.respond_to?(:metadata) and path = spec.metadata['rubymotion_template_dir']
+          Paths << File.join(spec.gem_dir, path)
+        end
+      end
+    end
+
     # TODO Caching these and making it based on the Paths constant makes it
     #      less simple to register plugin templates, because you cannot add
     #      them to the Paths constant and ensure this method will return those
