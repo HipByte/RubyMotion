@@ -364,7 +364,7 @@ module Motion; module Project;
     end
 
     def ldlibs_post(arch)
-      "-L#{ndk_path}/sources/cxx-stl/gnu-libstdc++/4.9/libs/#{armeabi_directory_name(arch)} -lgnustl_static"
+      "-L#{ndk_path}/sources/cxx-stl/gnu-libstdc++/4.9/libs/#{armeabi_directory_name(arch)} -lgnustl_static -latomic"
     end
 
     def armeabi_directory_name(arch)
