@@ -1,3 +1,17 @@
+= RubyMotion 3.14 =
+
+  * [iOS] Improved iOS 9 ARM64 support.
+  * [iOS] Fixed a problem where apps could not compile/link for iOS 9.
+  * [iOS] Fixed a problem where `rake debug=1' could not launch the debugger
+    with Xcode 7. 
+  * [iOS, OSX] Fixed a bug where it would cause `Permission denied' error if
+    resource files have read-only permission only when they will be copied into
+    app bundle. 
+  * [Android] Added support for `def' expressions in the REPL.
+  * [Android] Fixed build when `--trace' is passed to Rake.
+  * [Android] Fixed a bug where passing blocks to methods in a loop could
+    overflow the Android VM with too many global references.
+
 = RubyMotion 3.13 =
 
   * [iOS, OSX] Added support for iOS 9 and OS X 10.11 (experimental). To
