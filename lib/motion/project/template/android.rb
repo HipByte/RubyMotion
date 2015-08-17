@@ -526,6 +526,7 @@ EOS
     end
   end
   compile_java_file = Proc.new do |classes_dir, java_path|
+    App.info 'Create', java_path if Rake.application.options.trace
     sh "/usr/bin/javac -d \"#{classes_dir}\" -classpath #{class_path} -sourcepath \"#{java_dir}\" -target 1.5 -bootclasspath \"#{android_jar}\" -encoding UTF-8 -g -source 1.5 \"#{java_path}\""
     classes_changed = true
   end
@@ -620,13 +621,15 @@ def install_apk(mode)
 
   if mode == :device
     App.fail "Could not find a USB-connected device" if device_id.empty?
+  else
+    App.fail "Could not find emulator" if device_id.empty?
+  end
 
-    device_version = device_api_version(device_id)
-    app_api_version = App.config.api_version
-    app_api_version = app_api_version == 'L' ? 20 : app_api_version.to_i
-    if device_version < app_api_version
-      App.fail "Cannot install an app built for API version #{App.config.api_version} on a device running API version #{device_version}"
-    end
+  device_version = device_api_version(device_id)
+  app_api_version = App.config.api_version
+  app_api_version = app_api_version == 'L' ? 20 : app_api_version.to_i
+  if device_version < app_api_version
+    App.fail "Cannot install an app built for API version #{App.config.api_version} on a device running API version #{device_version}"
   end
 
   line = "\"#{adb_path}\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
@@ -695,7 +698,7 @@ def run_apk(mode)
       local_tcp = case mode
         when :emulator
           '33332'
-        when :device 
+        when :device
           '33333'
         else
           raise
