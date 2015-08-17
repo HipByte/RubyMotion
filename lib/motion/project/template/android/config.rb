@@ -255,7 +255,7 @@ module Motion; module Project;
 
     def ndk_toolchain_bin_dir
       @ndk_toolchain_bin_dir ||= begin
-        paths = ['3.3', '3.4', '3.5'].map do |x|
+        paths = ['3.5', '3.4', '3.3'].map do |x|
           File.join(ndk_path, "toolchains/llvm-#{x}/prebuilt/darwin-x86_64/bin")
         end
         path = paths.find { |x| File.exist?(x) }
