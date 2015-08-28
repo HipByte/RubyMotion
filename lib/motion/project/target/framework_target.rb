@@ -75,7 +75,7 @@ PLIST
         end
       end
 
-      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.platform_dir(platform), 'Developer/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
+      codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
 
       framework_path = File.join(@config.app_bundle(platform), 'Frameworks', framework_name)
       if File.mtime(@config.project_file) > File.mtime(framework_path) \
