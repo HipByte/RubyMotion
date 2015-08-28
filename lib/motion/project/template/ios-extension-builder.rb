@@ -46,7 +46,7 @@ module Motion; module Project
       end
 
       @host_app_dir = ENV['RM_TARGET_HOST_APP_PATH']
-      if !config.watchV2?
+      if !ENV['WATCHV2']
         config.sdk_version = ENV['RM_TARGET_SDK_VERSION'] if ENV['RM_TARGET_SDK_VERSION']
         if ENV['RM_TARGET_DEPLOYMENT_TARGET'] && \
           Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET']) > Util::Version.new(App.config.deployment_target)
