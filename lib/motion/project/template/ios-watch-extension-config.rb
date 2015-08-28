@@ -147,7 +147,6 @@ module Motion; module Project;
 extern "C" {
     void rb_define_global_const(const char *, void *);
     void rb_rb2oc_exc_handler(void);
-    void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
 EOS
       main_txt << <<EOS
@@ -172,7 +171,7 @@ EOS
     void *WatchKit = dlopen("/System/Library/Frameworks/WatchKit.framework/WatchKit", 0x2);
     int (*real_main)(void) = (int (*)(void))dlsym(WatchKit, "main");
     retval = real_main();
-    rb_exit(retval);
+    exit(retval);
     [pool release];
     return retval;
 }
@@ -275,10 +274,11 @@ EOS
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
         if watchV2?
           plist['UIDeviceFamily'] = [4]
-          plist['MinimumOSVersion'] = deployment_target
+          plist['MinimumOSVersion'] = '2.0'
           plist['CFBundleSupportedPlatforms'] = ['WatchOS']
         else
           plist['UIDeviceFamily'] << 4
+          plist['MinimumOSVersion'] = '8.2'
         end
         plist['UISupportedInterfaceOrientations'] = ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationPortraitUpsideDown']
         plist.delete('UIAppFonts')

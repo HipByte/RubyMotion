@@ -46,14 +46,6 @@ module Motion; module Project
       # Create bundle/ResourceRules.plist.
       resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
 
-      # Codesign bundled .app (Only for watchkit extensions)
-      watchapp_dir = Dir["#{destination_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
-      if watchapp_dir && Dir.exists?(watchapp_dir)
-        entitlements = File.join(watchapp_dir, "Entitlements.plist")
-        codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
-        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --entitlements \"#{entitlements}\" \"#{watchapp_dir}\""
-      end
-
       # Codesign executable
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
       if File.mtime(@config.project_file) > File.mtime(extension_dir) \
@@ -61,6 +53,14 @@ module Motion; module Project
         App.info 'Codesign', extension_dir
         entitlements = File.join(extension_dir, "Entitlements.plist")
         sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --entitlements \"#{entitlements}\" \"#{extension_dir}\""
+      end
+
+      # Codesign bundled .app
+      watchapp_dir = Dir["#{destination_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
+      if watchapp_dir && Dir.exists?(watchapp_dir)
+        entitlements = File.join(watchapp_dir, "Entitlements.plist")
+        codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
+        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --entitlements \"#{entitlements}\" \"#{watchapp_dir}\""
       end
     end
 
