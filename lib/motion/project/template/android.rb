@@ -218,7 +218,7 @@ task :build do
     objs_build_dirs << objs_build_dir
     kernel_bc = App.config.kernel_path(arch)
     ruby_objs_changed = false
-  
+
     @compiler = []
     build_file = Proc.new do |files_build_dir, ruby_path, job|
       ruby_obj = File.join(objs_build_dir, File.expand_path(ruby_path) + '.' + arch + '.o')
@@ -239,17 +239,17 @@ task :build do
       end
       [ruby_obj, init_func]
     end
-  
+
     # Resolve file dependencies.
     if App.config.detect_dependencies == true
       App.config.dependencies = Motion::Project::Dependency.new(App.config.files - App.config.exclude_from_detect_dependencies, App.config.dependencies).run
     end
-  
+
     parallel = Motion::Project::ParallelBuilder.new(objs_build_dir, build_file)
     parallel.files = App.config.ordered_build_files
     parallel.files += App.config.spec_files if App.config.spec_mode
     parallel.run
-  
+
     # terminate compiler process
     @compiler.each do |item|
       next unless item
@@ -264,9 +264,9 @@ task :build do
       app_objs = ruby_objs[0...App.config.ordered_build_files.size]
       spec_objs = ruby_objs[-(App.config.spec_files.size)..-1]
     end
-  
+
     FileUtils.touch(objs_build_dir) if ruby_objs_changed
-  
+
     # Generate payload main file.
     payload_c_txt = <<EOS
 // This file has been generated. Do not modify by hands.
@@ -338,7 +338,7 @@ EOS
       mkdir_p File.dirname(payload_c)
       File.open(payload_c, 'w') { |io| io.write(payload_c_txt) }
     end
-  
+
     # Compile and link payload library.
     libs_abi_subpath = "lib/#{App.config.armeabi_directory_name(arch)}"
     libpayload_subpath = "#{libs_abi_subpath}/#{App.config.payload_library_filename}"
@@ -355,7 +355,7 @@ EOS
       sh "#{App.config.cc} #{App.config.cflags(arch)} -c \"#{payload_c}\" -o \"#{payload_o}\""
       sh "#{App.config.cxx} #{App.config.ldflags(arch)} \"#{payload_o}\" #{ruby_objs.map { |o, _| "\"" + o + "\"" }.join(' ')} -o \"#{libpayload_path}\" #{App.config.ldlibs_pre(arch)} #{App.config.libs[App.config.armeabi_directory_name(arch)].join(' ')} #{App.config.ldlibs_post(arch)}"
     end
-  
+
     # Copy the gdb server.
     gdbserver_subpath = "#{libs_abi_subpath}/gdbserver"
     gdbserver_subpaths << gdbserver_subpath
@@ -364,7 +364,7 @@ EOS
       App.info 'Create', gdbserver_path
       sh "/usr/bin/install -p #{App.config.ndk_path}/prebuilt/android-#{App.config.common_arch(arch)}/gdbserver/gdbserver #{File.dirname(gdbserver_path)}"
     end
-  
+
     # Install native shared libraries.
     App.config.vendored_projects.map { |x| x[:native] }.compact.flatten.each do |native_lib_src|
       next unless native_lib_src.include?(App.config.armeabi_directory_name(arch))
@@ -377,7 +377,7 @@ EOS
         sh "/usr/bin/install -p #{native_lib_src} #{File.dirname(native_lib_path)}"
       end
     end
-  
+
     # Create the gdb config file.
     gdbconfig_path = "#{app_build_dir}/#{libs_abi_subpath}/gdb.setup"
     if !File.exist?(gdbconfig_path)
@@ -477,7 +477,7 @@ EOS
 package #{App.config.package};
 import com.rubymotion.*;
 EOS
-    java_file_txt << "public class #{name} extends #{klass_super}"
+    java_file_txt << "public class #{name} extends #{klass_super.gsub('$', '.')}"
     if klass[:interfaces].size > 0
       java_file_txt << " implements #{klass[:interfaces].join(', ')}"
     end
