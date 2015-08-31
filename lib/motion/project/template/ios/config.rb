@@ -152,7 +152,7 @@ EOS
         end
 
         # Deployment target must not change.
-        if self.deployment_target != '8.4' or self.info_plist['MinimumOSVersion'] != '8.4'
+        if self.deployment_target != '8.4' or (self.info_plist['MinimumOSVersion'] and self.info_plist['MinimumOSVersion'] != '8.4')
           App.fail "You are using RubyMotion Starter. Only iOS 8.4 is supported in this release. If you would like to target older or newer (in beta) versions of iOS you can purchase a paid subscription."
         end
       end
