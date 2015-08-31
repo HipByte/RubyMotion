@@ -130,6 +130,10 @@ module Motion; module Project;
       if path = ENV['RUBYMOTION_ANDROID_NDK']
         @ndk_path = File.expand_path(path)
       end
+
+      if Motion::Project::Config.starter?
+        self.assets_dirs << File.join(File.dirname(__FILE__), 'launch_image')
+      end
     end
 
     def construct_manifest

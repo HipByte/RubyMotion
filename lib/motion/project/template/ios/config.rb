@@ -44,6 +44,11 @@ module Motion; module Project;
       @icons = []
       @prerendered_icon = false
       @manifest_assets = []
+
+      if Motion::Project::Config.starter?
+        self.resources_dirs << File.join(File.dirname(__FILE__), 'launch_image')
+        self.info_plist['UILaunchStoryboardName'] = 'launch_screen'
+      end
     end
 
     def platforms; ['iPhoneSimulator', 'iPhoneOS']; end
@@ -122,6 +127,34 @@ module Motion; module Project;
       # manifest_assets
       if !(manifest_assets.is_a?(Array) and manifest_assets.all? { |x| x.is_a?(Hash) and x.keys.include?(:kind) and x.keys.include?(:url) })
         App.fail "app.manifest_assets should be an array of hashes with values for the :kind and :url keys"
+      end
+
+      if Motion::Project::Config.starter?
+        # RubyMotion Starter must have the launch screen.
+        launch_screen_err_msg = "You are using RubyMotion Starter. You are not allowed to remove or edit the RubyMotion splash screen from your app, but you can purchase a paid subscription to do so."
+        if info_plist['UILaunchStoryboardName'] != 'launch_screen'
+          App.fail launch_screen_err_msg 
+        end
+
+        # Files must be intact.
+        Dir.chdir(File.join(File.dirname(__FILE__), 'launch_image')) do
+          IO.popen('shasum -c - >& /dev/null', 'w') do |io|
+            io.puts <<EOS
+cd6443640ccf5ec8532aec8356148e28ce49343b  ./launch_screen.png
+0e890dd3684e5cb893c5128f5e95f9c33e535d32  ./launch_screen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib
+9f6b7c82c0e97c4e979211b7d69ec84094714f15  ./launch_screen.storyboardc/Info.plist
+3888d250465ac017d7b21fcb51477fcddc6a1b6c  ./launch_screen.storyboardc/UIViewController-01J-lp-oVM.nib
+EOS
+          end
+          unless $?.success?
+            App.fail launch_screen_err_msg
+          end
+        end
+
+        # Deployment target must not change.
+        if self.deployment_target != '8.4' or self.info_plist['MinimumOSVersion'] != '8.4'
+          App.fail "You are using RubyMotion Starter. Only iOS 8.4 is supported in this release. If you would like to target older or newer (in beta) versions of iOS you can purchase a paid subscription."
+        end
       end
 
       super
