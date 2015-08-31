@@ -342,7 +342,8 @@ EOS
     end
 
     def self.starter?
-      @is_starter ||= !File.exist?('/Library/RubyMotion/license.key')
+      # Starter does not have OS X support.
+      @is_starter ||= !File.exist?('/Library/RubyMotion/data/osx')
     end
   end
 end; end
