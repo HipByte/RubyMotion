@@ -168,6 +168,17 @@ module Motion; module Project;
       @deployment_target ||= osx_host_version.segments.first(2).join('.')
     end
 
+    def sdk(platform)
+      # FIXME
+      # Now, Xcode 7 beta doesn't have binaries of each frameworks, and we need them
+      # to solve framework dependencies.
+      if osx_host_version >= Util::Version.new('10.11')
+        path = '/'
+      else
+        super(platform)
+      end
+    end
+
     def supported_sdk_versions(versions)
       versions.reverse.find { |vers|
         Util::Version.new(deployment_target) <= Util::Version.new(vers) && File.exist?(datadir(vers))
