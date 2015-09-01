@@ -140,7 +140,7 @@ module Motion; module Project;
         Dir.chdir(File.join(File.dirname(__FILE__), 'launch_image')) do
           IO.popen('shasum -c - >& /dev/null', 'w') do |io|
             io.puts <<EOS
-cd6443640ccf5ec8532aec8356148e28ce49343b  ./launch_screen.png
+6d0daeb80a5048120fd088e1a139d4d9e12906ec  ./launch_screen.png
 0e890dd3684e5cb893c5128f5e95f9c33e535d32  ./launch_screen.storyboardc/01J-lp-oVM-view-Ze5-6b-2t3.nib
 9f6b7c82c0e97c4e979211b7d69ec84094714f15  ./launch_screen.storyboardc/Info.plist
 3888d250465ac017d7b21fcb51477fcddc6a1b6c  ./launch_screen.storyboardc/UIViewController-01J-lp-oVM.nib
