@@ -323,7 +323,7 @@ module Motion; module Project;
             '5'
           when '10', '11'
             '9'
-          when '22', 'MNC'
+          when '22', '23', 'MNC'
             '21'
           else
             api_version
