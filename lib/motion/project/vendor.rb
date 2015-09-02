@@ -136,6 +136,12 @@ EOS
 #  import <UIKit/UIKit.h>
 #endif
 EOS
+              when /^Watch/
+                header =<<EOS
+#ifjef __OBJC__
+#  import <UIKit/UIKit.h>
+#endif
+EOS
               else
                 App.fail "Unknown platform : #{platform}"
             end
@@ -332,6 +338,8 @@ EOS
         xcconfig << "MACOSX_DEPLOYMENT_TARGET=#{@config.deployment_target} "
       when /^iPhone/
         xcconfig << "IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+      when /^Watch/
+        xcconfig << "WATCHOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
       else
         App.fail "Unknown platform : #{platform}"
       end
