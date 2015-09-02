@@ -651,6 +651,7 @@ EOS
     #
     def strip_args
       args = super
+      args << " -x"
 
       frameworks = targets.select { |t| t.type == :framework }
       required_symbols = frameworks.map(&:required_symbols).flatten.uniq.sort
