@@ -343,7 +343,7 @@ EOS
 
     def self.starter?
       # Starter does not have OS X support.
-      @is_starter ||= !File.exist?('/Library/RubyMotion/data/osx')
+      @is_starter ||= !File.exist?(File.join(File.dirname(__FILE__), '../../../data/osx'))
     end
   end
 end; end
