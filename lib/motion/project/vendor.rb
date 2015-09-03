@@ -138,7 +138,7 @@ EOS
 EOS
               when /^Watch/
                 header =<<EOS
-#ifjef __OBJC__
+#ifdef __OBJC__
 #  import <UIKit/UIKit.h>
 #endif
 EOS
