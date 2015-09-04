@@ -1,3 +1,28 @@
+= RubyMotion 4.0 =
+
+  * Support for watchOS 2.0 (beta). Apple Watch apps can now use native APIs.
+    To create a new watchOS app run `motion create my_watch_app
+    --template=ios-watch-app'.
+  * Fixed a bug where `motion' command would cause an error with Ruby 1.8 which
+    is bundled in OS X 10.8.
+  * Improved `motion create' to automatically load templates from RubyMotion
+    gems. For this to happen, the gem has to provide a value for the
+    `rubymotion_template_dir' spec metadata key, which should be the name of
+    the directory (relative to the gem) where the templates are located.
+  * [iOS] Fixed a problem where codesigning would fail on a shared framework
+    when using  `rake device' with Xcode 7.
+  * [iOS] Fixed a problem where a crash would happen when using a framework
+    added in iOS 9.
+  * [OSX] Fixed a problem where framework depencencies would not be properly
+    built when compiling an app for OS X 10.11.
+  * [iOS, OSX] Improved iOS 9 and OS X 10.11 support for APIs with a updated
+    version of the BridgeSupport files generator.
+  * [iOS, OSX] Fixed a bug which `begin/rescue' syntax would trigger a crash
+    in distributed app.
+  * [Android] Fixes an issue when subclassing a nested Java class.
+  * [Android] Fixed a regression which would trigger a crash when calling
+    certain methods with a block.
+
 = RubyMotion 3.14 =
 
   * [iOS] Improved iOS 9 ARM64 support.
