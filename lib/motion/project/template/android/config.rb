@@ -427,7 +427,7 @@ module Motion; module Project;
       @vendored_bs_files ||= begin
         vendored_projects.map do |proj|
           jar_file = proj[:jar]
-          bs_file = File.join(File.dirname(jar_file), File.basename(jar_file) + '.bridgesupport')
+          bs_file = File.join(versionized_build_dir, File.basename(jar_file) + '.bridgesupport')
           if create and (!File.exist?(bs_file) or File.mtime(jar_file) > File.mtime(bs_file))
             App.info 'Create', bs_file
             sh "#{bin_exec('android/gen_bridge_metadata')} -o \"#{bs_file}\" \"#{jar_file}\""
