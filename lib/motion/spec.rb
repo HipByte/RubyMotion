@@ -796,7 +796,8 @@ end
 # Do not log all exceptions when running the specs.
 Exception.log_exceptions = false
 
-if defined?(UIDevice) && UIDevice.respond_to?("currentDevice") && !UIDevice.currentDevice.model.match(/simulator/i)
+# FIXME : Need better detection for iPhone Simulator
+if defined?(UIDevice) && UIDevice.respond_to?("currentDevice") && UIDevice.currentDevice.name != "iPhone Simulator"
   module Kernel
     def puts(*args)
       NSLog(args.join("\n"))
