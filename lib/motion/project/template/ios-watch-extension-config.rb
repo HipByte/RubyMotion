@@ -277,13 +277,11 @@ EOS
           plist['MinimumOSVersion'] = '2.0'
           plist['CFBundleSupportedPlatforms'] = ['WatchOS']
         else
-          plist['UIDeviceFamily'] << 4
+          plist['UIDeviceFamily'] = [4]
           plist['MinimumOSVersion'] = '8.2'
         end
         plist['UISupportedInterfaceOrientations'] = ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationPortraitUpsideDown']
         plist.delete('UIAppFonts')
-        plist.delete('CFBundleIcons')
-        plist.delete('CFBundleIconFiles')
         plist.delete('LSApplicationCategoryType')
         plist.delete('UIBackgroundModes')
         plist.delete('UIStatusBarStyle')
