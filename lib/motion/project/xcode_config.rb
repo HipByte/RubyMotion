@@ -438,7 +438,11 @@ EOS
     end
 
     def profiler_config_device_identifier(device_name, target)
-      re = /#{device_name} \(#{target} Simulator\) \[(.+)\]/
+      re = /#{device_name} \(#{target}\) \[(.+)\]/
+      if xcode_version[0] < '7.0'
+        re = /#{device_name} \(#{target} Simulator\) \[(.+)\]/
+      end
+
       `#{locate_binary('instruments')} -s 2>&1`.strip.split("\n").each { |line|
         if m = re.match(line)
           return m[1]
