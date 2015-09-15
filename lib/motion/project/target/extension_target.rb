@@ -43,9 +43,6 @@ module Motion; module Project
     def codesign(platform)
       extension_dir = destination_bundle_path
 
-      # Create bundle/ResourceRules.plist.
-      resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
-
       # Codesign bundled .app (Only for watchkit extensions)
       watchapp_dir = Dir["#{extension_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
       if watchapp_dir && Dir.exists?(watchapp_dir)

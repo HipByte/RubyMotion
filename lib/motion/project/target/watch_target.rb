@@ -43,9 +43,6 @@ module Motion; module Project
     def codesign(platform)
       extension_dir = Dir["#{destination_bundle_path}/PlugIns/*.appex"].sort_by{ |f| File.mtime(f) }.last
 
-      # Create bundle/ResourceRules.plist.
-      resource_rules_plist = File.join(extension_dir, 'ResourceRules.plist')
-
       # Codesign executable
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
       if File.mtime(@config.project_file) > File.mtime(extension_dir) \

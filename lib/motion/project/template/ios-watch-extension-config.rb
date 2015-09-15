@@ -287,7 +287,6 @@ EOS
         plist.delete('LSApplicationCategoryType')
         plist.delete('UIBackgroundModes')
         plist.delete('UIStatusBarStyle')
-        plist.delete('CFBundleResourceSpecification')
         plist
       end
 

@@ -170,7 +170,6 @@ module Motion; module Project;
     def info_plist_data(platform)
       Motion::PropertyList.to_s({
         'MinimumOSVersion' => deployment_target,
-        'CFBundleResourceSpecification' => 'ResourceRules.plist',
         'UIDeviceFamily' => device_family_ints,
         'DTXcode' => begin
           vers = xcode_version[0].gsub(/\./, '')

@@ -40,48 +40,13 @@ module Motion; module Project
     end
 
     def codesign(platform)
-      # Create bundle/ResourceRules.plist.
-      resource_rules_plist = File.join(@config.app_bundle(platform), 'Frameworks', framework_name, 'ResourceRules.plist')
-      unless File.exist?(resource_rules_plist)
-        App.info 'Create', resource_rules_plist
-        File.open(resource_rules_plist, 'w') do |io|
-          io.write(<<-PLIST)
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-        <key>rules</key>
-        <dict>
-                <key>.*</key>
-                <true/>
-                <key>Info.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>10</real>
-                </dict>
-                <key>ResourceRules.plist</key>
-                <dict>
-                        <key>omit</key>
-                        <true/>
-                        <key>weight</key>
-                        <real>100</real>
-                </dict>
-        </dict>
-</dict>
-</plist>
-PLIST
-        end
-      end
-
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
 
       framework_path = File.join(@config.app_bundle(platform), 'Frameworks', framework_name)
       if File.mtime(@config.project_file) > File.mtime(framework_path) \
           or !system("#{codesign_cmd} --verify \"#{framework_path}\" >& /dev/null")
         App.info 'Codesign', framework_path
-        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" \"#{framework_path}\""
+        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" \"#{framework_path}\""
       end
     end
 
