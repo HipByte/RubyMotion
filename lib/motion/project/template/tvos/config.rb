@@ -27,7 +27,7 @@ require 'motion/project/template/ios/config'
 
 module Motion; module Project;
   class TVOSConfig < IOSConfig
-    register :'tvos-app'
+    register :'tvos'
 
     def initialize(*)
       super
