@@ -29,7 +29,7 @@ module Motion; module Project
   class Builder
     def archive(config)
       # Create .ipa archive.
-      app_bundle = config.app_bundle('iPhoneOS')
+      app_bundle = config.app_bundle('AppleTVOS')
       archive = config.archive
       if !File.exist?(archive) or File.mtime(app_bundle) > File.mtime(archive)
         App.info 'Create', archive
@@ -38,10 +38,6 @@ module Motion; module Project
         sh "/bin/mkdir -p #{tmp}/Payload"
         sh "/bin/cp -r \"#{app_bundle}\" #{tmp}/Payload"
         sh "/bin/chmod -R 755 #{tmp}/Payload"
-        if watchapp?(config)
-          source = File.join(config.sdk('iPhoneOS'), "/Library/Application Support/WatchKit/WK")
-          sh "/usr/bin/ditto -rsrc '#{source}' #{tmp}/WatchKitSupport/WK"
-        end
         Dir.chdir(tmp) do
           dirs = Dir.glob("*").join(' ')
           sh "/usr/bin/zip -q -r archive.zip #{dirs}"
@@ -50,7 +46,7 @@ module Motion; module Project
       end
 
       # Create manifest file (if needed).
-      manifest_plist = File.join(config.versionized_build_dir('iPhoneOS'), 'manifest.plist')
+      manifest_plist = File.join(config.versionized_build_dir('AppleTVOS'), 'manifest.plist')
       manifest_plist_data = config.manifest_plist_data
       if manifest_plist_data and (!File.exist?(manifest_plist) or File.mtime(config.project_file) > File.mtime(manifest_plist))
         App.info 'Create', manifest_plist
@@ -129,10 +125,6 @@ PLIST
         File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
         sh "#{codesign_cmd} -f -s \"#{config.codesign_certificate}\" --resource-rules=\"#{resource_rules_plist}\" --entitlements #{entitlements} \"#{bundle_path}\""
       end
-    end
-
-    def watchapp?(config)
-      Dir.glob("#{config.app_bundle('iPhoneOS')}/**/_WatchKitStub/").size > 0
     end
   end
 end; end

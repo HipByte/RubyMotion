@@ -59,7 +59,7 @@ module Motion; module Project;
       @archs ||= begin
         # No longer build for armv7s by default.
         archs = super
-        archs['iPhoneOS'].delete('armv7s')
+        archs['iPhoneOS'].delete('armv7s') if archs['iPhoneOS']
         archs
       end
     end

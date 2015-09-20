@@ -140,7 +140,8 @@ module Motion; module Project;
               else
                 arch
             end
-            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
+            asm_extension = platform == 'AppleTVOS' ? 'bc' : 's'
+            asm = File.join(files_build_dir, "#{path}.#{arch}.#{asm_extension}")
             @compiler[job] ||= {}
             @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm-fast \"\"", "r+")
             @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
@@ -148,7 +149,19 @@ module Motion; module Project;
 
             # Object
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+
+            if platform == 'AppleTVOS'
+              @dummy_object_file ||= begin
+                src_path = '/tmp/__dummy_object_file__.c'
+                obj_path = '/tmp/__dummy_object_file__.o'
+                File.open(src_path, 'w') { |io| io.puts "static int foo(void) { return 42; }" }
+                sh "#{cc} -c #{src_path} -o #{obj_path} -arch armv7k -fembed-bitcode"
+                obj_path
+              end
+              sh "#{cxx} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+            else
+              sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+            end
 
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
