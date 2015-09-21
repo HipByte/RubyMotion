@@ -99,7 +99,7 @@ module Motion; module Project
     #
     # @return [void]
     #
-    def codesign_bundle(config, bundle)
+    def codesign_bundle(config, bundle, deep = false)
       if File.mtime(config.project_file) > File.mtime(bundle) \
           or !system("/usr/bin/codesign --verify '#{bundle}' >& /dev/null")
         App.info 'Codesign', bundle
