@@ -142,7 +142,11 @@ module Motion; module Project
             @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
             @compiler[job][arch].gets # wait to finish compilation
 
-            # Object 
+            if !File.exists?(asm)
+              App.fail "File '#{rpath}' failed to compile"
+            end
+
+            # Object
             arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
             sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
 
