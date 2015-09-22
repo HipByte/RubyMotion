@@ -1,3 +1,35 @@
+= RubyMotion 4.1 =
+
+  * [tvOS] Added initial support for Apple TV (simulator only). To create a new
+    tvOS app, run 'motion create mytvapp --template=tvos'. (Xcode 7.1 is
+    required).
+  * [iOS, OSX] Improved iOS 9 and OS X 10.11 support by fixing some wrong data 
+    types in BridgeSupport.
+  * [iOS, OSX] Fixed a problem which would cause duplicated symbols error when 
+    using Flurry sdk.
+  * [iOS, OSX] Improved performance when converting Ruby Array to NSArray
+    object. ~20% faster.
+  * [iOS, OSX] Improved performance in Array#{flatten, uniq, &}.
+  * [iOS] Fixed a problem where it cannot pass Array object as WeakRef into
+    NSArray.arrayWithArray argument with iOS 9.
+  * [iOS] Fixed a problem where it couldnt launch Instruments.app with Xcode 7
+    with `rake profile'.
+  * [iOS] Fixed a problem which it couldnt upload app which was built with
+    Xcode 7 to iTunes store.
+  * [Android] Fixed a bug where String object could not be used as argument for 
+    Object#{instance_variable_get, instance_variable_set,
+    instance_variable_defined?} and Module#{attr, attr_accessor, attr_reader,
+    attr_writer}.
+  * [Android] Fixed a regression where assigning values to dynamic (block)
+    variables could lead to a runtime Java VM crash.
+  * [Android] Fixed a bug which String#gsub will trigger a crash when regular
+    expression would not be matched.
+  * [Android] Fixed a bug which Array#[start, length]= would trigger a crash
+    when it will erase many elements in receiver object.
+  * [Android] Added Module#const_set.
+  * [Android] Added Symbol#{id2name, intern, empty?, match, <=>, casecmp,
+    upcase, downcase, swapcase, capitalize, []}.
+
 = RubyMotion 4.0 =
 
   * Support for watchOS 2.0 (beta). Apple Watch apps can now use native APIs.
