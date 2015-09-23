@@ -1,3 +1,11 @@
+= RubyMotion 4.2 =
+
+  * [iOS] Fixed a regression which cannot use UIInterfaceOrientationIsLandscape
+    in iOS 8.2 or below.
+  * [OSX] Make code signing to all embedded frameworks. Thanks to digitalMoksha
+    for the patch (pull request #232).
+  * [Android] Added support for API 23 final (and removed MNC version).
+
 = RubyMotion 4.1 =
 
   * [tvOS] Added initial support for Apple TV (simulator only). To create a new
