@@ -254,7 +254,7 @@ EOS
       #         the bundle identifier of the host application.
       #
       def identifier
-        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchapp'
+        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitapp'
       end
 
       def entitlements_data
