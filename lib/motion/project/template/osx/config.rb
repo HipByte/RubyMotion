@@ -52,6 +52,10 @@ module Motion; module Project;
     def device_family; 'mac'; end
 
     def validate
+      if sdk_version == '10.11' && osx_host_version < '10.11'
+        App.fail "Using the OSX 10.11 SDK requires running OSX 10.11, but you are running OSX #{osx_host_version}"
+      end
+
       super
     end
 
