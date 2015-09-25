@@ -108,7 +108,7 @@ EOS
 
     def validate
       # Xcode version
-      App.fail "Xcode 4.x or greater is required" if xcode_version[0] < '4.0'
+      App.fail "Xcode 6.x or greater is required" if Util::Version.new(xcode_version[0]) < Util::Version.new('6.0')
 
       # sdk_version
       platforms.each do |platform|
