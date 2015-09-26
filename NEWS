@@ -1,3 +1,22 @@
+= RubyMotion 4.3 =
+
+  * Dropped support for OSX 10.8 as development environment.  Please use OSX
+    10.9 or higher.
+  * [iOS, OSX] Solved an issue where certain constants in the enums
+    NSLayoutPriority* and UILayoutPriority* could not be used.
+  * [iOS, OSX] Solved a bug introduced in version 4.1 where an array would not
+    correctly return its contents when called from Objective-C in some cases.
+    This manifested in UIView#addConstraints not adding certain constraints.
+  * [iOS, OSX] Fixed a problem which it would raise an exception in generating
+    BridgeSupport file for 3rd-party library. 
+    The exception is "Received exception: addFile: Couldn't lookup file: ...".
+  * [iOS] Fixed a bug where watchkit apps would have an incorrect identifier.
+  * [OSX] Using the OSX 10.11 SDK requires running on OSX 10.11. An error will
+    be printed if you try to use it in OSX 10.10 or lower.
+  * [Android] Fixed a crash that would happen when trying to access a local
+    variable that was created from the value of another local variable whose
+    value changed after.
+
 = RubyMotion 4.2 =
 
   * [iOS] Fixed a regression which cannot use UIInterfaceOrientationIsLandscape
