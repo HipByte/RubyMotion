@@ -244,7 +244,12 @@ module Motion; module Project;
 
     def frameworks_stubs_objects(platform)
       stubs = []
-      (frameworks_dependencies + weak_frameworks).uniq.each do |framework|
+      deps = frameworks_dependencies + weak_frameworks
+      # Look in the 'bridgesupport_files' method for explanation
+      if deps.include?('ApplicationServices') && deployment_target == '10.7' && sdk_version != '10.7'
+        deps << 'CoreGraphics'
+      end
+      deps.uniq.each do |framework|
         stubs_obj = File.join(datadir(sdk_version), platform, "#{framework}_stubs.o")
         stubs << stubs_obj if File.exist?(stubs_obj)
       end
@@ -255,6 +260,13 @@ module Motion; module Project;
       @bridgesupport_files ||= begin
         bs_files = []
         deps = ['RubyMotion'] + (frameworks_dependencies + weak_frameworks).uniq
+        # In 10.7 CoreGraphics is a subframework of ApplicationServices. In 10.8 and up
+        # it is a system framework too. Since in 10.8 and up we ignore the subframework
+        # version of CoreGraphics and do not generate stubs or BS files for it, we have
+        # to add them manually if we use the ApplicationServices framework and target 10.7
+        if deps.include?('ApplicationServices') && deployment_target == '10.7' && sdk_version != '10.7'
+          deps << 'CoreGraphics'
+        end
         deps << 'UIAutomation' if spec_mode
         deps.each do |framework|
           bs_path = File.join(datadir(sdk_version), 'BridgeSupport', framework + '.bridgesupport')
