@@ -133,7 +133,7 @@ module Motion; module Project;
         # RubyMotion Starter must have the launch screen.
         launch_screen_err_msg = "You are using RubyMotion Starter. You are not allowed to remove or edit the RubyMotion splash screen from your app, but you can purchase a paid subscription to do so."
         if info_plist['UILaunchStoryboardName'] != 'launch_screen'
-          App.fail launch_screen_err_msg 
+          App.fail launch_screen_err_msg
         end
 
         # Files must be intact.
@@ -567,7 +567,13 @@ EOS
     def sdk_build_version(platform)
       @sdk_build_version ||= begin
         sdk_path = sdk(platform)
-        `#{locate_binary('xcodebuild')} -version -sdk '#{sdk_path}' ProductBuildVersion`.strip
+        plist_path = "#{sdk_path}/System/Library/CoreServices/SystemVersion.plist"
+        sdk_build_version = `/usr/libexec/PlistBuddy -c 'Print :ProductBuildVersion' "#{plist_path}" 2>&1`.strip
+        if !$?.success?
+          `#{locate_binary('xcodebuild')} -version -sdk '#{sdk_path}' ProductBuildVersion`.strip
+        else
+          sdk_build_version
+        end
       end
     end
 
