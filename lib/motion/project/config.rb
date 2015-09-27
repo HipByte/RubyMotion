@@ -293,7 +293,7 @@ module Motion; module Project
       File.join(motiondir, 'bin')
     end
 
-    def datadir(target=deployment_target)
+    def datadir(target=sdk_version)
       File.join(motiondir, 'data', template.to_s, target)
     end
 
