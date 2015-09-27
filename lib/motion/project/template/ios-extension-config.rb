@@ -273,13 +273,6 @@ module Motion; module Project;
       versions.reverse.find { |vers| File.exist?(datadir(vers)) }
     end
 
-    def sdk_build_version(platform)
-      @sdk_build_version ||= begin
-        sdk_path = sdk(platform)
-        `#{locate_binary('xcodebuild')} -version -sdk '#{sdk_path}' ProductBuildVersion`.strip
-      end
-    end
-
     # TODO datadir should not depend on the template name
     def datadir(target=deployment_target)
       File.join(motiondir, 'data', 'ios', target)

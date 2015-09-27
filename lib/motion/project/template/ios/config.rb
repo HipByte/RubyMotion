@@ -564,19 +564,6 @@ EOS
       versions.reverse.find { |vers| File.exist?(datadir(vers)) }
     end
 
-    def sdk_build_version(platform)
-      @sdk_build_version ||= begin
-        sdk_path = sdk(platform)
-        plist_path = "#{sdk_path}/System/Library/CoreServices/SystemVersion.plist"
-        sdk_build_version = `/usr/libexec/PlistBuddy -c 'Print :ProductBuildVersion' "#{plist_path}" 2>&1`.strip
-        if !$?.success?
-          `#{locate_binary('xcodebuild')} -version -sdk '#{sdk_path}' ProductBuildVersion`.strip
-        else
-          sdk_build_version
-        end
-      end
-    end
-
     def main_cpp_file_txt(spec_objs)
       main_txt = <<EOS
 #import <UIKit/UIKit.h>
