@@ -245,7 +245,7 @@ module Motion; module Project;
     def frameworks_stubs_objects(platform)
       stubs = []
       (frameworks_dependencies + weak_frameworks).uniq.each do |framework|
-        stubs_obj = File.join(datadir, platform, "#{framework}_stubs.o")
+        stubs_obj = File.join(datadir(sdk_version), platform, "#{framework}_stubs.o")
         stubs << stubs_obj if File.exist?(stubs_obj)
       end
       stubs
