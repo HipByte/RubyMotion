@@ -257,12 +257,9 @@ module Motion; module Project;
         deps = ['RubyMotion'] + (frameworks_dependencies + weak_frameworks).uniq
         deps << 'UIAutomation' if spec_mode
         deps.each do |framework|
-          supported_versions.each do |ver|
-            next if Util::Version.new(ver) < Util::Version.new(deployment_target) || Util::Version.new(sdk_version) < Util::Version.new(ver)
-            bs_path = File.join(datadir(ver), 'BridgeSupport', framework + '.bridgesupport')
-            if File.exist?(bs_path)
-              bs_files << bs_path
-            end
+          bs_path = File.join(datadir(sdk_version), 'BridgeSupport', framework + '.bridgesupport')
+          if File.exist?(bs_path)
+            bs_files << bs_path
           end
         end
         bs_files
