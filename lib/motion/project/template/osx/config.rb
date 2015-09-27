@@ -40,7 +40,9 @@ module Motion; module Project;
       @icon = ''
       @copyright = "Copyright © #{Time.now.year} #{`whoami`.strip}. All rights reserved."
       @category = 'utilities'
-      @frameworks = ['AppKit', 'Foundation', 'CoreGraphics', 'CoreServices', 'Security']
+      @frameworks = ['AppKit', 'Foundation', 'CoreServices', 'Security']
+      # In 10.7, CoreGraphics is a subframework of ApplicationServices
+      @frameworks << 'CoreGraphics' if deployment_target != "10.7"
       @codesign_for_development = false
       @codesign_for_release = true
       @eval_support = false
