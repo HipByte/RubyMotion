@@ -64,34 +64,10 @@ module Motion; module Project;
         if ENV['RM_TARGET_XCODE_DIR']
           ENV['RM_TARGET_XCODE_DIR']
         else
-          xcode_dot_app_path = '/Applications/Xcode.app/Contents/Developer'
-
-          # First, honor /usr/bin/xcode-select
           xcodeselect = '/usr/bin/xcode-select'
-          if File.exist?(xcodeselect)
-            path = `#{xcodeselect} -print-path`.strip
-            if path.match(/^\/Developer\//) and File.exist?(xcode_dot_app_path)
-              @xcode_error_printed ||= false
-              $stderr.puts(<<EOS) unless @xcode_error_printed
-===============================================================================
-It appears that you have a version of Xcode installed in /Applications that has
-not been set as the default version. It is possible that RubyMotion may be
-using old versions of certain tools which could eventually cause issues.
-
-To fix this problem, you can type the following command in the terminal:
-    $ sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
-===============================================================================
-EOS
-              @xcode_error_printed = true
-            end
-            return unescape_path(path) if File.exist?(path)
-          end
-
-          # Since xcode-select is borked, we assume the user installed Xcode
-          # as an app (new in Xcode 4.3).
-          return unescape_path(xcode_dot_app_path) if File.exist?(xcode_dot_app_path)
-
-          App.fail "Can't locate any version of Xcode on the system."
+          xcode_dir = unescape_path(`#{xcodeselect} -print-path`.strip)
+          App.fail "Can't locate any version of Xcode on the system." unless File.exist?(xcode_dir)
+          xcode_dir
         end
       end
     end
