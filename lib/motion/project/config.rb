@@ -95,6 +95,10 @@ module Motion; module Project
       @osx_host_version ||= Util::Version.new(`/usr/bin/sw_vers -productVersion`.strip)
     end
 
+    def osx_host_build_version
+      @osx_host_build_version ||= `sw_vers -buildVersion`.strip
+    end
+
     def variables
       map = {}
       VARS.each do |sym|

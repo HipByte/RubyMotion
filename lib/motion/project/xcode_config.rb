@@ -343,7 +343,7 @@ module Motion; module Project;
 
     def generic_info_plist
       {
-        'BuildMachineOSBuild' => `sw_vers -buildVersion`.strip,
+        'BuildMachineOSBuild' => osx_host_build_version,
         'CFBundleDevelopmentRegion' => 'en',
         'CFBundleName' => name,
         'CFBundleDisplayName' => name,
