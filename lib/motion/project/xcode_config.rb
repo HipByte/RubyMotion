@@ -54,8 +54,12 @@ module Motion; module Project;
       @version = '1.0'
     end
 
-    def xcode_dir
+    def xcode_dir=(xcode_dir)
       @xcode_version = nil
+      @xcode_dir = xcode_dir
+    end
+
+    def xcode_dir
       @xcode_dir ||= begin
         if ENV['RM_TARGET_XCODE_DIR']
           ENV['RM_TARGET_XCODE_DIR']
@@ -80,17 +84,16 @@ To fix this problem, you can type the following command in the terminal:
 EOS
               @xcode_error_printed = true
             end
-            return path if File.exist?(path)
+            return unescape_path(path) if File.exist?(path)
           end
 
           # Since xcode-select is borked, we assume the user installed Xcode
           # as an app (new in Xcode 4.3).
-          return xcode_dot_app_path if File.exist?(xcode_dot_app_path)
+          return unescape_path(xcode_dot_app_path) if File.exist?(xcode_dot_app_path)
 
           App.fail "Can't locate any version of Xcode on the system."
         end
       end
-      unescape_path(@xcode_dir)
     end
 
     def xcode_version
