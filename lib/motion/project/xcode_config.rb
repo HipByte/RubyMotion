@@ -98,9 +98,16 @@ EOS
 
     def xcode_version
       @xcode_version ||= begin
-        txt = `#{locate_binary('xcodebuild')} -version`
-        vers = txt.scan(/Xcode\s(.+)/)[0][0]
-        build = txt.scan(/(BuildVersion:|Build version)\s(.+)/)[0][1]
+        failed = false
+        vers = `/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "#{xcode_dir}/../Info.plist"`.strip
+        failed = true if !$?.success?
+        build = `/usr/libexec/PlistBuddy -c "Print :ProductBuildVersion" "#{xcode_dir}/../version.plist"`.strip
+        failed = true if !$?.success?
+        if failed
+          txt = `#{locate_binary('xcodebuild')} -version`
+          vers = txt.scan(/Xcode\s(.+)/)[0][0]
+          build = txt.scan(/(BuildVersion:|Build version)\s(.+)/)[0][1]
+        end
         [vers, build]
       end
     end
