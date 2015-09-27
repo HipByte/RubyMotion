@@ -41,6 +41,9 @@ task :build => ['build:simulator', 'build:device']
 
 namespace :build do
   def pre_build_actions(platform)
+    unless ENV['RM_TARGET_BUILD']
+      App.fail "Watch app targets must be built from an application project"
+    end
 
     # TODO: Ensure Info.plist gets regenerated on each build so it has ints for
     # Instruments and strings for normal builds.
