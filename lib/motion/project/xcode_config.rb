@@ -259,7 +259,7 @@ module Motion; module Project;
     def bridgesupport_files
       @bridgesupport_files ||= begin
         bs_files = []
-        deps = ['RubyMotion'] + (frameworks_dependencies + weak_frameworks).uniq
+        deps = ['RubyMotion'] + (frameworks + weak_frameworks).uniq
         # In 10.7 CoreGraphics is a subframework of ApplicationServices. In 10.8 and up
         # it is a system framework too. Since in 10.8 and up we ignore the subframework
         # version of CoreGraphics and do not generate stubs or BS files for it, we have
