@@ -1,3 +1,27 @@
+= RubyMotion 4.4 =
+
+  * [iOS, OSX] Improved the startup time of the compiler by 70% when using a
+    deployment target much older than the SDK version, by only loading
+    BridgeSupport files for that SDK version.
+  * [iOS] Fixed a problem where watchOS 1.0 apps could not be installed on an
+    Apple Watch device.
+  * [iOS] Fixed a bug where line numbers were not properly symbolicated in
+    exceptions raised in an iOS 9 app.
+  * [iOS] Silenced a warning when starting the simulator with Xcode 7.
+  * [Android] Added Proc.new.
+  * [Android] Added Numeric#{pred,succ,next}.
+  * [Android] Added Module#define_method.
+  * [Android] Added Time#strftime.
+  * [Android] Set the last expression evaluated in the REPL as the `_'
+    local variable.
+  * [Android] Fixed a bug where sending `==' to nil could cause a VM crash.
+  * [Android] Fixed a bug in `String#to_i' when `-1' would be returned instead
+    of large numbers (Bignum).
+  * [Android] Fixed a bug where certain builtin selectors (ex. `#===' or `#~=')
+    would crash the REPL.
+  * [Android] Fixed a bug where calling a block that has variadic arguments
+    (ex. `lambda { |*a| ... }') could cause a runtime crash.
+
 = RubyMotion 4.3 =
 
   * Dropped support for OSX 10.8 as development environment.  Please use OSX
