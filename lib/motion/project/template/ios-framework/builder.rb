@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -60,10 +60,10 @@ module Motion; module Project
       sdk = config.sdk(platform)
       cc = config.locate_compiler(platform, 'clang')
       cxx = config.locate_compiler(platform, 'clang++')
-    
+
       build_dir = File.join(config.versionized_build_dir(platform))
       App.info 'Build', relative_path(build_dir)
- 
+
       # Prepare the list of BridgeSupport files needed.
       bs_files = config.bridgesupport_files
 
@@ -116,7 +116,7 @@ module Motion; module Project
         should_rebuild = (!File.exist?(obj) \
             or File.mtime(path) > File.mtime(obj) \
             or File.mtime(ruby) > File.mtime(obj))
- 
+
         # Generate or retrieve init function.
         init_func = should_rebuild ? "MREP_#{`/usr/bin/uuidgen`.strip.gsub('-', '')}" : `#{config.locate_binary('nm')} \"#{obj}\"`.scan(/T\s+_(MREP_.*)/)[0][0]
 
@@ -128,7 +128,7 @@ module Motion; module Project
             # Locate arch kernel.
             kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
             raise "Can't locate kernel file" unless File.exist?(kernel)
-   
+
             # Assembly.
             compiler_exec_arch = case arch
               when /^arm/
@@ -153,7 +153,7 @@ module Motion; module Project
             [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
           end
-   
+
           # Assemble fat binary.
           arch_objs_list = arch_objs.map { |x| "\"#{x}\"" }.join(' ')
           sh "/usr/bin/lipo -create #{arch_objs_list} -output \"#{obj}\""
@@ -419,6 +419,7 @@ EOS
       # Generate dSYM.
       dsym_path = config.app_bundle_dsym(platform)
       if !File.exist?(dsym_path) or File.mtime(main_exec) > File.mtime(dsym_path)
+        FileUtils.rm_rf(dsym_path)
         App.info "Create", relative_path(dsym_path)
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
       end

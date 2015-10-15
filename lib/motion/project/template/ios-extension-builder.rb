@@ -509,6 +509,7 @@ EOS
       # Generate dSYM.
       if any_obj_file_built
         dsym_path = config.app_bundle_dsym(platform)
+        FileUtils.rm_rf(dsym_path)
         App.info "Create", relative_path(dsym_path)
         sh "/usr/bin/dsymutil \"#{main_exec}\" -o \"#{dsym_path}\""
 
