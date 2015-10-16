@@ -31,6 +31,8 @@ module Motion; module Project
   class Config
     include Rake::DSL if defined?(Rake) && Rake.const_defined?(:DSL)
 
+    SUPPORTED_TEMPLATES = [:ios, :android, :osx]
+
     VARS = []
 
     def self.variable(*syms)
@@ -58,7 +60,7 @@ module Motion; module Project
     # Internal only.
     attr_accessor :build_mode, :spec_mode, :distribution_mode, :dependencies,
       :template, :detect_dependencies, :exclude_from_detect_dependencies,
-      :opt_level, :custom_init_funcs
+      :opt_level, :custom_init_funcs, :cross_platform_mode
 
     ConfigTemplates = {}
 
@@ -89,6 +91,7 @@ module Motion; module Project
       @detect_dependencies = true
       @exclude_from_detect_dependencies = []
       @custom_init_funcs = []
+      @cross_platform_mode = false
     end
 
     def osx_host_version
