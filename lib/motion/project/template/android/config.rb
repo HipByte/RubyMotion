@@ -286,7 +286,7 @@ module Motion; module Project;
     def common_arch(arch)
       case arch
         when /^arm/
-          'arm'
+          arch.start_with?('arm64') ? 'arm64' : 'arm'
         when 'x86'
           arch
         else
@@ -298,6 +298,8 @@ module Motion; module Project;
       case common_arch(arch)
         when 'arm'
           "-target #{arch}-none-linux-androideabi -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\""
+        when 'arm64'
+          "-target aarch64-none-linux-android -gcc-toolchain \"#{ndk_path}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64\""
         when 'x86'
           "-target i686-none-linux-android -gcc-toolchain \"#{ndk_path}/toolchains/x86-4.8/prebuilt/darwin-x86_64\""
       end
@@ -384,7 +386,7 @@ module Motion; module Project;
           'armeabi'
         when 'armv7'
           'armeabi-v7a'
-        when 'x86'
+        when 'arm64-v8a', 'x86'
           arch
         else
           raise "Invalid arch `#{arch}'"
