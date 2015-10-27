@@ -163,13 +163,11 @@ $deployed_app_path = nil
 
 desc "Deploy on the device"
 task :device => :archive do
-  App.fail "Device deploy for Apple TV is not available yet."
-
   App.info 'Deploy', App.config.archive
   device_id = (ENV['id'] or App.config.device_id)
-  # unless App.config.provisions_all_devices? || App.config.provisioned_devices.include?(device_id)
-  #   App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
-  # end
+  unless App.config.provisions_all_devices? || App.config.provisioned_devices.include?(device_id)
+    App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
+  end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
   if ENV['debug']
     env << " RM_AVAILABLE_ARCHS='#{App.config.archs['AppleTVOS'].join(':')}'"
@@ -178,7 +176,7 @@ task :device => :archive do
   deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   Signal.trap(:INT) { } if ENV['debug']
-  cmd = "#{env} #{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
+  cmd = "#{env} #{deploy} #{flags} -tvos \"#{device_id}\" \"#{App.config.archive}\""
   if ENV['install_only']
     $deployed_app_path = `#{cmd}`.strip
   else
