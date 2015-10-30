@@ -82,8 +82,26 @@ module Motion; module Project;
     #
     def merged_info_plist(platform)
       plist = super
+      plist.delete('CFBundleIcons')
+      plist.delete('CFBundleIconFiles')
+      plist.delete('UISupportedInterfaceOrientations')
+
       plist['UIDeviceFamily'] = [3]
       plist['UIRequiredDeviceCapabilities'] = ['arm64']
+      plist['CFBundleIcons'] = {
+        'CFBundlePrimaryIcon' => "App Icon - Small"
+      }
+      plist['TVTopShelfImage'] = {
+        'TVTopShelfPrimaryImage' => "Top Shelf Image"
+      }
+      plist['UILaunchImages'] = [
+        {
+          'UILaunchImageMinimumOSVersion' => "9.0",
+          'UILaunchImageName' => "LaunchImage",
+          'UILaunchImageOrientation' => "Landscape",
+          'UILaunchImageSize' => "{1920, 1080}"
+        }
+      ]
       plist
     end
 
