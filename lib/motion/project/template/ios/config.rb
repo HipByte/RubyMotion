@@ -206,7 +206,7 @@ EOS
     def read_provisioned_profile_array(key)
       text = File.read(provisioning_profile)
       text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
-      text.scan(/<key>\s*#{key}\s*<\/key>\s*<array>(.*?)\s*<\/array>/m)[0][0].scan(/<string>(.*?)<\/string>/).map { |str| str[0].strip.downcase }
+      text.scan(/<key>\s*#{key}\s*<\/key>\s*<array>(.*?)\s*<\/array>/m)[0][0].scan(/<string>(.*?)<\/string>/).map { |str| str[0].strip }
     end
     private :read_provisioned_profile_array
 
