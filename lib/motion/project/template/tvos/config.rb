@@ -31,6 +31,7 @@ module Motion; module Project;
 
     def initialize(*)
       super
+      @device_family = :tv
       # @frameworks = ['WatchKit', 'Foundation']
     end
 

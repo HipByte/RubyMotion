@@ -190,6 +190,7 @@ module Motion; module Project;
       case family
         when :iphone then 1
         when :ipad then 2
+        when :tv then 3
         when :watch then 4
         else
           App.fail "Unknown device_family value: `#{family}'"

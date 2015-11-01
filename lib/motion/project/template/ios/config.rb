@@ -294,6 +294,7 @@ EOS
       case family
         when :iphone then 1
         when :ipad then 2
+        when :tv then 3
         else
           App.fail "Unknown device_family value: `#{family}'"
       end
