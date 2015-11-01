@@ -617,6 +617,9 @@ EOS
           partial_info_plist = config.asset_bundle_partial_info_plist_path(platform)
           app_icon_and_launch_image_options << " --output-partial-info-plist '#{partial_info_plist}'"
         end
+        if platform.start_with?("AppleTV")
+          app_icon_and_launch_image_options << " --app-icon 'App Icon & Top Shelf Image'"
+        end
 
         App.info 'Compile', assets_bundles.join(", ")
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
