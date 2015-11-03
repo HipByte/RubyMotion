@@ -1,3 +1,31 @@
+= RubyMotion 4.5 =
+
+  * [tvOS] Added device deployment support. Apple TV apps can now be deployed
+    on your Apple TV and also be submitted to the App Store.
+  * [iOS] Added support for iOS 9.2 (beta). Latest Xcode is needed. RubyMotion
+    Starter now targets iOS 9.1 (stable).
+  * [iOS] Fixed a bug where `XXXCreateXXX()' or `XXXCopyXXX()' APIs might
+    cause a crash with double free.
+  * [watchOS] Fixed a bug where device builds were not working.
+  * [iOS, OSX] Fixed a bug where the `foo?' shortcut could not be used for
+    `isFoo' if it accepted an argument.
+  * [iOS, OSX] Fixed an error when generating dSYM files when the executable
+    name contained a '%' character.
+  * [iOS, OSX] Fixed an error when generating .bridgesupport compiler files
+    when the process would abort when trying to increase the number of shell
+    files that can be opened.
+  * [Android] Added support for arm64-v8a / aarch64 (experimental).
+  * [Android] Added Array#zip.
+  * [Android] Added String#{ljust,rjust,center}.
+  * [Android] Added Fixnum methods to java.lang.{Short,Long} objects.
+  * [Android] Added Float methods to java.lang.Float objects.
+  * [Android] Fixed Array.new to behave like CRuby.
+  * [Android] Fixed a bug where the runtime would sometimes crash if a Java
+    exception was raised.
+  * [Android] Fixed a bug when the runtime would call the wrong Java method if
+    it had multiple implementations and if the one that should have been called
+    was accepting a Java string object.
+
 = RubyMotion 4.4 =
 
   * [iOS, OSX] Improved the startup time of the compiler by 70% when using a
@@ -85,7 +113,8 @@
 
   * Support for watchOS 2.0 (beta). Apple Watch apps can now use native APIs.
     To create a new watchOS app run `motion create my_watch_app
-    --template=ios-watch-app'.
+    --template=ios-watch-app'. Then configure your iOS application by adding:
+    `app.target 'path/to/MyWatchOS2App', :watchapp`
   * Fixed a bug where `motion' command would cause an error with Ruby 1.8 which
     is bundled in OS X 10.8.
   * Improved `motion create' to automatically load templates from RubyMotion
