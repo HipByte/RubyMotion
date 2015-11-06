@@ -713,6 +713,8 @@ def run_apk(mode)
         when /^armeabi/
           arch = 'armv5te'
           'armv5e-none-linux-androideabi'
+        when 'arm64-v8a'
+          'aarch64-none-linux-android'
         else
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
