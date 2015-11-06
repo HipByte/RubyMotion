@@ -715,8 +715,13 @@ def run_apk(mode)
           arch = 'armv5te'
           'armv5e-none-linux-androideabi'
         when 'arm64-v8a'
-          'aarch64-none-linux-android'
-          repl_arch = 'x86_64'
+          if App.config.archs.include?(arch)
+            'aarch64-none-linux-android'
+            repl_arch = 'x86_64'
+          else
+            arch = 'armv5te'
+            'armv5e-none-linux-androideabi'
+          end
         else
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
