@@ -707,6 +707,7 @@ def run_apk(mode)
       sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:#{local_tcp} tcp:33333"
       # Determine architecture of device.
       arch = `\"#{adb_path}\" #{adb_mode_flag(mode)} shell getprop ro.product.cpu.abi`.strip
+      repl_arch = 'i386'
       target_triple = case arch
         when 'x86'
           'i686-none-linux-androideabi'
@@ -715,11 +716,12 @@ def run_apk(mode)
           'armv5e-none-linux-androideabi'
         when 'arm64-v8a'
           'aarch64-none-linux-android'
+          repl_arch = 'x86_64'
         else
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
       # Launch the REPL.
-      sh "\"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{$bs_files.join(' ')}"
+      sh "arch -#{repl_arch} \"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{$bs_files.join(' ')}"
     end
   end
 end
