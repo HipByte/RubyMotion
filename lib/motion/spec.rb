@@ -797,7 +797,7 @@ end
 Exception.log_exceptions = false
 
 # FIXME : Need better detection for iPhone Simulator
-if defined?(UIDevice) && UIDevice.respond_to?("currentDevice") && !UIDevice.currentDevice.name =~ /(iPhone|iPad) Simulator/
+if defined?(UIDevice) && UIDevice.respond_to?("currentDevice") && !(UIDevice.currentDevice.name =~ /(iPhone|iPad) Simulator/)
   module Kernel
     def puts(*args)
       NSLog(args.join("\n"))
