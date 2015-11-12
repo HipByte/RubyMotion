@@ -130,7 +130,7 @@ module Motion; module Project;
 #  import <Cocoa/Cocoa.h>
 #endif
 EOS
-              when /^iPhone/
+              when /^iPhone/, /^AppleTV/
                 header =<<EOS
 #ifdef __OBJC__
 #  import <UIKit/UIKit.h>
@@ -338,6 +338,8 @@ EOS
         xcconfig << "MACOSX_DEPLOYMENT_TARGET=#{@config.deployment_target} "
       when /^iPhone/
         xcconfig << "IPHONEOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
+      when /^AppleTV/
+        xcconfig << "TVOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
       when /^Watch/
         xcconfig << "WATCHOS_DEPLOYMENT_TARGET=#{@config.deployment_target} "
       else
