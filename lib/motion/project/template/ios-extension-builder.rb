@@ -169,8 +169,7 @@ module Motion; module Project
                 sh "#{cc} -c #{src_path} -o #{obj_path} -arch armv7k -fembed-bitcode"
                 obj_path
               end
-              # FIXME: -fembed-bitcode-marker has to be -fembed-bitcode
-              sh "#{cxx} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\" -fembed-bitcode-marker -mwatchos-version-min=#{config.deployment_target}"
+              sh "#{cxx} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\" -fembed-bitcode -mwatchos-version-min=#{config.deployment_target}"
             else
               sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
             end
