@@ -476,6 +476,7 @@ EOS
     java_file_txt << <<EOS
 // This file has been generated automatically. Do not edit.
 package #{App.config.package};
+import #{App.config.package}.*;
 import com.rubymotion.*;
 EOS
     java_file_txt << "public class #{name} extends #{klass_super.gsub('$', '.')}"
