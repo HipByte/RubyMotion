@@ -324,19 +324,18 @@ module Motion; module Project;
     end
 
     def api_version_ndk
-      @api_version_ndk ||=
-        # NDK does not provide headers for versions of Android with no native
-        # API changes (ex. 10 and 11 are the same as 9).
-        case api_version
-          when '6', '7'
-            '5'
-          when '10', '11'
-            '9'
-          when '22', '23'
-            '21'
-          else
-            api_version
-        end
+      # NDK does not provide headers for versions of Android with no native
+      # API changes (ex. 10 and 11 are the same as 9).
+      case api_version
+        when '6', '7'
+          '5'
+        when '10', '11'
+          '9'
+        when '22', '23'
+          '21'
+        else
+          api_version
+      end
     end
 
     def cflags(arch)
@@ -373,7 +372,8 @@ module Motion; module Project;
 
     def ldlibs_pre(arch)
       # The order of the libraries matters here.
-      "-L\"#{ndk_path}/platforms/android-#{api_version}/arch-#{common_arch(arch)}/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir(arch)}\" -lrubymotion-static"
+p api_version,api_version_ndk
+      "-L\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-#{common_arch(arch)}/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir(arch)}\" -lrubymotion-static"
     end
 
     def ldlibs_post(arch)
