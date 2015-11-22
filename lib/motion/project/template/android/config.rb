@@ -372,7 +372,6 @@ module Motion; module Project;
 
     def ldlibs_pre(arch)
       # The order of the libraries matters here.
-p api_version,api_version_ndk
       "-L\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-#{common_arch(arch)}/usr/lib\" -lstdc++ -lc -lm -llog -L\"#{versioned_arch_datadir(arch)}\" -lrubymotion-static"
     end
 
