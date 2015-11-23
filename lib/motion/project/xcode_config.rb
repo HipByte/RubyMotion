@@ -487,7 +487,7 @@ module Motion; module Project;
         elsif certs.size > 1
           App.warn "Found #{certs.size} #{platform_prefixes.join('/')} " \
                    "#{type} certificates in the keychain. Set the " \
-                   "`codesign_certificate' project setting to explicitely " \
+                   "`codesign_certificate' project setting to explicitly " \
                    "use one of (defaults to the first): #{certs.join(', ')}"
         end
         certs.first
