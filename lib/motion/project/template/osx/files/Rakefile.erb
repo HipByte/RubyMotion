@@ -10,5 +10,6 @@ end
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
+  app.info_plist['NSMainNibFile'] = 'MainMenu'
   app.name = '<%= name %>'
 end
