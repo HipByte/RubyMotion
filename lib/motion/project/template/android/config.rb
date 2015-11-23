@@ -270,7 +270,7 @@ module Motion; module Project;
           File.join(ndk_path, "toolchains/llvm-#{x}/prebuilt/darwin-x86_64/bin")
         end
         path = paths.find { |x| File.exist?(x) }
-        App.fail "Can't locate a proper NDK toolchain (paths tried: #{paths.join(' ')})" unless path
+        App.fail "Can't locate a proper NDK toolchain (paths tried: #{paths.join(' ')}). Please install NDK toolchain using `motion android-setup' command." unless path
         path
       end
     end
