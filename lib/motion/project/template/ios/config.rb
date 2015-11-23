@@ -538,7 +538,7 @@ EOS
         'DTPlatformVersion' => sdk_version,
         'DTPlatformBuild' => sdk_build_version(platform),
       }) {|key, oldval, newval| oldval }
-      # If the user has not explicitely specified launch images, try to find
+      # If the user has not explicitly specified launch images, try to find
       # them ourselves.
       if !plist.has_key?('UILaunchImages') && launch_images = self.launch_images
         plist['UILaunchImages'] = launch_images

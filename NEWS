@@ -699,7 +699,7 @@
 = RubyMotion 2.34 =
 
   * All iOS and OS X versions of the runtime have been recompiled with Xcode 6.
-  * [iOS] Add support for iPhone 6/6+ launch images. Unless explicitely
+  * [iOS] Add support for iPhone 6/6+ launch images. Unless explicitly
     specified, the Info.plist `UILaunchImages' key is populated from all PNG
     files in the resource directories that start with Default. For iPhone 6/6+
     use the `-667h' and `-736h' filename modifiers.
