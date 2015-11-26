@@ -544,10 +544,10 @@ EOS
     end
 
     def path_on_resources_dirs(dirs, path)
-      dir = dirs.each do |dir|
-        break dir if path =~ /^#{dir}/
+      dir = File.dirname(path)
+      if dirs.include?(dir)
+        path = path.sub(/^#{dir}\/*/, '')
       end
-      path = path.sub(/^#{dir}\/*/, '') if dir
       path
     end
 
