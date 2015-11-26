@@ -130,13 +130,7 @@ module Motion; module Project;
 #  import <Cocoa/Cocoa.h>
 #endif
 EOS
-              when /^iPhone/, /^AppleTV/
-                header =<<EOS
-#ifdef __OBJC__
-#  import <UIKit/UIKit.h>
-#endif
-EOS
-              when /^Watch/
+              when /^iPhone/, /^AppleTV/, /^Watch/
                 header =<<EOS
 #ifdef __OBJC__
 #  import <UIKit/UIKit.h>
