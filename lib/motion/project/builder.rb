@@ -545,6 +545,7 @@ EOS
 
     def path_on_resources_dirs(dirs, path)
       dir = dirs.each do |dir|
+        dir << '/' unless dir.end_with?('/')
         break dir if path =~ /^#{dir}/
       end
       path = path.sub(/^#{dir}\/*/, '') if dir
