@@ -162,7 +162,7 @@ module Motion; module Project;
     end
 
     def strip_args
-      ''
+      ' -x'
     end
 
     # Defaults to the MAJOR and MINOR version of the host machine. For example,
