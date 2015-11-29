@@ -216,7 +216,7 @@ EOS
       end
 
       @libs = Dir.glob("#{build_dir}/*.a").map { |x| File.expand_path(x) }
-      if @libs.empty?
+      if @libs.empty? && !@opts[:allow_empty_products]
         App.fail "Building vendor project `#{@path}' failed to create at least one `.a' library."
       end
 
