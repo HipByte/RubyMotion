@@ -226,15 +226,6 @@ module Motion; module Project;
         return nil if versions.empty?
         numbers = versions.map { |x| x.to_i }
         vers = numbers.max
-        if vers == 20
-          if numbers.size > 1
-            # Don't return 20 (L) by default, as it's not yet stable.
-            numbers.delete(vers)
-            vers = numbers.max
-          else
-            vers = 'L'
-          end
-        end
         vers.to_s
       end
     end
