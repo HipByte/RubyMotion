@@ -118,7 +118,6 @@ module Motion; module Project;
       @version_code = '1'
       @version_name = '1.0'
       @application_class = nil
-      @theme = "@android:style/Theme.Material.Light"
       @vm_debug_logs = false
       @libs = Hash.new([])
       @manifest = AndroidManifest.new
@@ -164,6 +163,16 @@ module Motion; module Project;
             filter.add_child('action', 'android:name' => 'android.intent.action.MAIN' )
             filter.add_child('category', 'android:name' => 'android.intent.category.LAUNCHER' )
           end
+        end
+      end
+    end
+
+    def theme
+      @theme ||= begin
+        if Motion::Util::Version.new(target_api_version) >= Motion::Util::Version.new(21)
+          "@android:style/Theme.Material.Light"
+        else
+          "@android:style/Theme.Holo"
         end
       end
     end
