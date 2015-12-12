@@ -1,3 +1,48 @@
+= RubyMotion 4.6 =
+
+  * The toolchain has been upgraded to LLVM 3.6 for all platforms.
+  * Introduced safe navigation operator `&.' as experimental.
+  * Fixed a bug where operator assignment (like `obj[idx] ||= expr') returns
+    wrong result.
+  * [iOS, OSX, tvOS, watchOS] Optimized recursive calling. 3 times faster.
+  * [Android] Optimized the app executable size when a project has too many
+    Ruby source files, by removing unnecessary internal code.
+  * [Android] Updated Android NDK to android-ndk-r10e version. Please update 
+    the Android NDK toolchain by using `motion android-setup' command.
+  * [Android] Fixed a bug in `motion android-setup' which couldn't update the
+    NDK if `~/.rubymotion-android/ndk' existed.
+  * [Android] Fixed a regression when creating non-Java and Enumerator objects.
+  * [Android] Added the StandardError exception class.
+  * [Android] Added Exception#message.
+  * [Android] Fixed a bug where calling from Ruby code Ruby methods overriding
+    Java methods would use the Java implementation of said method instead of
+    the Ruby one.
+  * [Android] Fixed a bug where certain Exception subclasses could not be
+    properly instantiated and raised.
+  * [Android] Fixed a bug in Object#send where the current block would not be
+    propagated to the target method.
+  * [Android] Fixed a bug where redefining a Ruby method in a class would not
+    overwrite previous implementations of said method.
+  * [Android] Fixed a bug where Java classes inheriting from templates
+    (generics) would not be available in Ruby.
+  * [Android] Apps now use the Material Design theme by default if targeting
+    API 21 or newer.
+  * [watchOS] Added support to embed bitcode.
+  * [tvOS] Fixed a crash when an exception would be raised from the REPL.
+  * [iOS, OSX, tvOS, watchOS] Fixed a bug where BigDecimal#to_s would return
+    an unexpected string.
+  * [iOS, OSX, tvOS, watchOS] Added `:' and `::' modifier in Time#strftime().
+  * [iOS, OSX] Fixed a bug where it could not copy resource files properly from 
+    the resources directory if it contained `resources' as the directory name,
+    like `resources-XXX'. Thanks to Hwee-Boon Yar for the patch (pull request
+    #233).
+  * [iOS] Fixed a bug where `rake spec:device' would not show the spec logs.
+  * [OSX] Fixed a bug that caused apps built in release mode to be unable to
+    rescue exceptions.
+  * [tvOS] Fixed a bug where 3rd-party libraries could not be built.
+  * [tvOS] Fixed a bug where some UIKit constants (ex.
+    `UILayoutPriorityDefaultHigh') could not be used from Ruby.
+
 = RubyMotion 4.5 =
 
   * [tvOS] Added device deployment support. Apple TV apps can now be deployed
