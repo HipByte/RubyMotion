@@ -634,9 +634,19 @@ def install_apk(mode)
     App.fail "Cannot install an app built for API version #{App.config.api_version} on a device running API version #{device_version}"
   end
 
-  line = "\"#{adb_path}\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\""
-  line << " > /dev/null" unless Rake.application.options.trace
-  sh line
+  # Because adb always returns exit code 0 even if the command failed, we need
+  # to check for the presence of the string "Failure" to detect if the
+  # installation was successful
+  line = "\"#{adb_path}\" #{adb_mode_flag(mode)} install -r \"#{App.config.apk_path}\" 2>&1"
+  IO.popen(line) do |io|
+    output = io.read
+    if output.include?('Failure')
+      puts output
+      App.fail "Could not install application on the device"
+    elsif Rake.application.options.trace
+      puts output
+    end
+  end
 end
 
 def device_api_version(device_id)
@@ -734,7 +744,7 @@ end
 
 namespace 'emulator' do
   desc "Install the app in the emulator"
-  task :install do
+  task :install => :'emulator:build' do
     install_apk(:emulator)
   end
 
