@@ -33,10 +33,7 @@ module Motion; module Project
       source = config.prebuilt_app_executable(platform)
       destination = config.app_bundle_executable(platform)
       sh "/usr/bin/ditto -rsrc '#{source}' '#{destination}'"
-
-      if !config.watchV2?
-        sh "/usr/bin/ditto -rsrc '#{source}' '#{File.join(config.app_bundle(platform), '_WatchKitStub/WK')}'"
-      end
+      sh "/usr/bin/ditto -rsrc '#{source}' '#{File.join(config.app_bundle(platform), '_WatchKitStub/WK')}'"
 
       entitlements = File.join(config.app_bundle(platform), "Entitlements.plist")
       File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
