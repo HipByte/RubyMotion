@@ -52,6 +52,9 @@ module Motion; class Command
       need_root
       File.open(LicensePath, 'w') { |io| io.write @license_key }
       puts "Product activated. Thanks for purchasing RubyMotion :-)"
+
+      update_check_file = File.join(ENV['TMPDIR'] || '/tmp', '.motion-update-check')
+      File.unlink(update_check_file) if File.exist?(update_check_file)
     end
   end
 end; end
