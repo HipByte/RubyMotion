@@ -306,6 +306,7 @@ main(int argc, char **argv)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     int retval = 0;
 EOS
+    main_txt << "    setenv(\"VM_OPT_LEVEL\", \"#{App.config.opt_level}\", true);\n"
     if ENV['ARR_CYCLES_DISABLE']
       main_txt << <<EOS
     setenv("ARR_CYCLES_DISABLE", "1", true);
