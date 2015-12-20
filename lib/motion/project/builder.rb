@@ -159,10 +159,10 @@ module Motion; module Project;
                 src_path = '/tmp/__dummy_object_file__.c'
                 obj_path = '/tmp/__dummy_object_file__.o'
                 File.open(src_path, 'w') { |io| io.puts "static int foo(void) { return 42; }" }
-                sh "#{cc} -c #{src_path} -o #{obj_path} -arch armv7k -fembed-bitcode"
+                sh "#{cc} -c #{src_path} -o #{obj_path} -arch #{arch} -fembed-bitcode"
                 obj_path
               end
-              sh "#{cxx} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
+              sh "#{cxx} #{config.cflag_version_min(platform)} -fembed-bitcode -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
             else
               sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
             end
@@ -307,7 +307,7 @@ EOS
       main_o = File.join(objs_build_dir, 'main.o')
       if !(File.exist?(main) and File.exist?(main_o) and File.read(main) == main_txt)
         File.open(main, 'w') { |io| io.write(main_txt) }
-        sh "#{cxx} \"#{main}\" #{config.cflags(platform, true)} -c -o \"#{main_o}\""
+        sh "#{cxx} \"#{main}\" #{config.cflags(platform, true)} -fembed-bitcode -c -o \"#{main_o}\""
       end
 
       # Prepare bundle.

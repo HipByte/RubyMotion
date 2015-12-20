@@ -285,7 +285,7 @@ EOS
       init_o = File.join(objs_build_dir, 'init.o')
       if !(File.exist?(init) and File.exist?(init_o) and File.read(init) == init_txt)
         File.open(init, 'w') { |io| io.write(init_txt) }
-        sh "#{cxx} \"#{init}\" #{config.cflags(platform, true)} -c -o \"#{init_o}\""
+        sh "#{cxx} \"#{init}\" #{config.cflags(platform, true)} -fembed-bitcode -c -o \"#{init_o}\""
       end
 
       # Generate main file.
@@ -296,7 +296,7 @@ EOS
       main_o = File.join(objs_build_dir, 'main.o')
       if !(File.exist?(main) and File.exist?(main_o) and File.read(main) == main_txt)
         File.open(main, 'w') { |io| io.write(main_txt) }
-        sh "#{cxx} \"#{main}\" #{config.cflags(platform, true)} -c -o \"#{main_o}\""
+        sh "#{cxx} \"#{main}\" #{config.cflags(platform, true)} -fembed-bitcode -c -o \"#{main_o}\""
       end
 
       librubymotion = File.join(datadir, platform, 'librubymotion-static.a')

@@ -106,23 +106,23 @@ module Motion; module Project;
       plist
     end
 
-    # def cflags(platform, cplusplus)
-    #   cflags = super
-    #   if platform == 'WatchOS'
-    #     cflags += ' -fembed-bitcode'
-    #   end
-    #   cflags
-    # end
+    def cflags(platform, cplusplus)
+      cflags = super
+      if platform == 'AppleTVOS'
+        cflags += ' -fembed-bitcode'
+      end
+      cflags
+    end
 
-    # def ldflags(platform)
-    #   ldflags = super
-    #   if platform == 'WatchOS'
-    #     ldflags += ' -fembed-bitcode -Xlinker -bitcode_hide_symbols'
-    #     ldflags.gsub!(' -Wl,-no_pie', '')
-    #   end
-    #   ldflags
-    # end
-    #
+     def ldflags(platform)
+       ldflags = super
+       if platform == 'AppleTVOS'
+         ldflags += ' -fembed-bitcode -Xlinker -bitcode_hide_symbols'
+         ldflags.gsub!(' -Wl,-no_pie', '')
+       end
+       ldflags
+     end
+
     def cflag_version_min(platform)
       flag = " -mtvos-version-min=#{deployment_target}"
       if platform == "AppleTVSimulator"
