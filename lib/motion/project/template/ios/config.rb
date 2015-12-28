@@ -152,8 +152,8 @@ EOS
         end
 
         # Deployment target must not change.
-        if self.deployment_target != '9.1' or (self.info_plist['MinimumOSVersion'] and self.info_plist['MinimumOSVersion'] != '9.1')
-          App.fail "You are using RubyMotion Starter. Only iOS 9.1 is supported in this release. If you would like to target older or newer (in beta) versions of iOS you can purchase a paid subscription."
+        if self.deployment_target != '9.2' or (self.info_plist['MinimumOSVersion'] and self.info_plist['MinimumOSVersion'] != '9.2')
+          App.fail "You are using RubyMotion Starter. Only iOS 9.2 is supported in this release. If you would like to target older or newer (in beta) versions of iOS you can purchase a paid subscription."
         end
       end
 
