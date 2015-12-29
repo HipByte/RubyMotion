@@ -1,3 +1,36 @@
+= RubyMotion 4.7 =
+
+  * Fixed a regression in where RubyMotion compiler causes a crash with
+    `rake archive:distribution' if app has the unreachable local variables.
+  * Fixed a bug in safe navigation operator which could not work as expected
+    with block call.
+  * [Android] Added Hash.[] (ex. `Hash[1,2,3,4]').
+  * [Android] Fixed a bug where pure Java exceptions would not be catched in a
+    "begin;rescue" block.
+  * [watchOS] Fixed a bug where it could not deploy app into device.
+  * [watchOS] Improve watchOS simulator launcher to be able to check exception
+    message easily.
+  * [tvOS] Fixed a bug where it will cause a crash if it would call the method
+    which handle the CFType value.
+  * [tvOS] Fixed an issue where distribution builds would not contain correct
+    embedded bitcode.
+  * [iOS, tvOS] Fixed a problem where it would fail launching application with
+    "Simulator session started with error" message.
+  * [iOS, OSX, tvOS, watchOS] Fixed a regression in where Dispatch.once did not
+    work correctly with `rake archive:distribution'.
+  * [iOS, OSX, tvOS, watchOS] Improved performance where creating Objective-C
+    selectors internally. Ex, Object#{send, respond_to?} is now ~20% faster.
+  * [iOS, OSX, tvOS, watchOS] Added to support Range object as argument in
+    Kernel#rand and Random#rand for CRuby compatibility.
+  * [iOS, OSX, tvOS, watchOS] Improved performance in where creating Time
+    object by Time.{now, new}. ~30% faster.
+  * [iOS, OSX, tvOS, watchOS] Improved performance in where generating Symbol
+    object. Ex, String#to_sym is now ~10% faster.
+  * [iOS, OSX, tvOS, watchOS] Improved performance in #length and #size method
+    in Array/Hash/String. ~70% faster.
+  * [iOS, OSX, tvOS, watchOS] Improved creating Range literal performance.
+    ~40% faster.
+
 = RubyMotion 4.6 =
 
   * The toolchain has been upgraded to LLVM 3.6 for all platforms.
