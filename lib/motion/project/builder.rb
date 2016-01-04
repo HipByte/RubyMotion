@@ -293,9 +293,8 @@ EOS
         # Create a static archive with all object files + the runtime.
         lib = File.join(config.versionized_build_dir(platform), config.name + '.a')
         App.info 'Create', lib
-        kernel = File.join(datadir, platform, "kernel.o")
         objs_list = objs.map { |path, _| path }.unshift(init_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
-        sh "/usr/bin/libtool -static \"#{librubymotion}\" \"#{kernel}\" #{objs_list} -o \"#{lib}\""
+        sh "/usr/bin/libtool -static \"#{librubymotion}\" #{objs_list} -o \"#{lib}\""
         return lib
       end
 
