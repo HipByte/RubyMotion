@@ -302,7 +302,7 @@ task :device => :archive do
     pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
     at_exit { Process.kill(:TERM, pid) }
     kernel = File.join(App.config.datadir, "iPhoneOS", "kernel-armv7.bc")
-    sh "\"#{File.join(App.config.bindir, 'repl')}\" \"#{kernel}\" armv7-none-linux-androideabi 0.0.0.0 33333" # To run REPL, now, it need android triple.
+    sh "arch -i386 \"#{File.join(App.config.bindir, 'repl')}\" \"#{kernel}\" armv7-none-linux-androideabi 0.0.0.0 33333" # To run REPL, now, it need android triple.
   end
 end
 
