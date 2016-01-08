@@ -45,6 +45,9 @@ module Motion; module Project;
         else
           @deployment_target = '8.2'
         end
+      else
+        # watchV2
+        @deployment_target = '2.0'
       end
       ENV.delete('RM_TARGET_DEPLOYMENT_TARGET')
     end
