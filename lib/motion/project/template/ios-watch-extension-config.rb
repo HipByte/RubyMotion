@@ -116,7 +116,7 @@ module Motion; module Project;
       plist.delete('UISupportedInterfaceOrientations')
       if watchV2?
         plist['WKExtensionDelegateClassName'] = 'ExtensionDelegate'
-        plist['MinimumOSVersion'] = '2.0'
+        plist['MinimumOSVersion'] = deployment_target
         plist['UIDeviceFamily'] = [4]
         plist['CFBundleSupportedPlatforms'] = ['WatchOS']
       else
@@ -279,7 +279,7 @@ EOS
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
         if watchV2?
           plist['UIDeviceFamily'] = [4]
-          plist['MinimumOSVersion'] = '2.0'
+          plist['MinimumOSVersion'] = deployment_target
           plist['CFBundleSupportedPlatforms'] = ['WatchOS']
         else
           plist['UIDeviceFamily'] = [4]
