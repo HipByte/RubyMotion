@@ -277,6 +277,7 @@ EOS
           end
         end
       end
+      system "killall ibtoold"
 
       preserve_resources = []
 
