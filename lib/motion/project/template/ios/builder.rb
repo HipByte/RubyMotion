@@ -41,6 +41,9 @@ module Motion; module Project
         if watchapp?(config)
           source = File.join(config.sdk('iPhoneOS'), "/Library/Application Support/WatchKit/WK")
           sh "/usr/bin/ditto -rsrc '#{source}' #{tmp}/WatchKitSupport/WK"
+        elsif watchappV2?(config)
+          source = File.join(config.platform_dir('WatchOS'), "/Developer/SDKs/WatchOS.sdk/Library/Application Support/WatchKit/WK")
+          sh "/usr/bin/ditto -rsrc '#{source}' #{tmp}/WatchKitSupport2/WK"
         end
         Dir.chdir(tmp) do
           dirs = Dir.glob("*").join(' ')
@@ -97,7 +100,10 @@ module Motion; module Project
     end
 
     def watchapp?(config)
-      Dir.glob("#{config.app_bundle('iPhoneOS')}/**/_WatchKitStub/").size > 0
+      Dir.glob("#{config.app_bundle('iPhoneOS')}/PlugIns/**/_WatchKitStub/").size > 0
+    end
+    def watchappV2?(config)
+      Dir.glob("#{config.app_bundle('iPhoneOS')}/Watch/**/_WatchKitStub/").size > 0
     end
   end
 end; end
