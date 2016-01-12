@@ -37,7 +37,9 @@ module Motion; module Project;
       @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
       @frameworks = ['WatchKit', 'Foundation']
 
-      if !watchV2? && ENV['RM_TARGET_DEPLOYMENT_TARGET']
+      if watchV2?
+        @deployment_target = '2.0'
+      elsif ENV['RM_TARGET_DEPLOYMENT_TARGET']
         # FIXME: iTunnes requires '8.2' as MinimumOSVersion for WatchKit V1 apps
         host_deployment_version = Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET'])
         if host_deployment_version > Util::Version.new('8.2')
@@ -45,9 +47,6 @@ module Motion; module Project;
         else
           @deployment_target = '8.2'
         end
-      else
-        # watchV2
-        @deployment_target = '2.0'
       end
       ENV.delete('RM_TARGET_DEPLOYMENT_TARGET')
     end
