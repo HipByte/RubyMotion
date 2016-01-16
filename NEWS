@@ -1,3 +1,20 @@
+= RubyMotion 4.8 =
+
+  * [iOS, tvOS, watchOS] Added support for iOS 9.3, watchOS 2.2 and tvOS 9.2
+    (beta). Latest Xcode is needed.
+  * [iOS, OSX, tvOS, watchOS] Fixed an issue where certain vector types like
+    'vector_float3' used in frameworks like SpriteKit, SceneKit and GameplayKit
+    could not be used.
+  * [iOS] Fixed a problem where ibtool would cause an error if extension and
+    container app have storyboard files.
+  * [watchOS] Fixed a bug where it would trigger a crash when it calls a method
+    which takes with a block (like Array#each{|item| .... }).
+  * [watchOS] Fixed a problem where it would fail to upload the app to iTunes
+    Store.
+  * [watchOS] Fixed a bug where it would return a broken value when the method
+    or function returns a small structure (like NSRange or CGRect).
+  * [android] Fixed a bug where armv5te binary would cause a crash for device.
+
 = RubyMotion 4.7 =
 
   * Fixed a regression in where RubyMotion compiler causes a crash with
