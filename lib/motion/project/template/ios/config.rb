@@ -601,7 +601,9 @@ EOS
     dlopen("/Developer/Library/PrivateFrameworks/UIAutomation.framework/UIAutomation", RTLD_LOCAL);
     void (*AXSApplicationAccessibilitySetEnabled)(int);
     *(void **)(&AXSApplicationAccessibilitySetEnabled) = dlsym(RTLD_DEFAULT, "_AXSApplicationAccessibilitySetEnabled");
-    (*AXSApplicationAccessibilitySetEnabled)(1);
+    if (AXSApplicationAccessibilitySetEnabled != NULL) {
+      (*AXSApplicationAccessibilitySetEnabled)(1);
+    }
 
     SpecLauncher *launcher = [[self alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
