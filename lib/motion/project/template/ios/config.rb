@@ -598,24 +598,10 @@ EOS
     [UIApplication sharedApplication];
 
     // Enable simulator accessibility.
-    // Thanks http://www.stewgleadow.com/blog/2011/10/14/enabling-accessibility-for-ios-applications/
-    NSString *simulatorRoot = [[[NSProcessInfo processInfo] environment] objectForKey:@"IPHONE_SIMULATOR_ROOT"];
-    if (simulatorRoot != nil) {
-        void *appSupportLibrary = dlopen([[simulatorRoot stringByAppendingPathComponent:@"/System/Library/PrivateFrameworks/AppSupport.framework/AppSupport"] fileSystemRepresentation], RTLD_LAZY);
-        CFStringRef (*copySharedResourcesPreferencesDomainForDomain)(CFStringRef domain) = (CFStringRef (*)(CFStringRef)) dlsym(appSupportLibrary, "CPCopySharedResourcesPreferencesDomainForDomain");
-
-        if (copySharedResourcesPreferencesDomainForDomain != NULL) {
-            CFStringRef accessibilityDomain = copySharedResourcesPreferencesDomainForDomain(CFSTR("com.apple.Accessibility"));
-
-            if (accessibilityDomain != NULL) {
-                CFPreferencesSetValue(CFSTR("ApplicationAccessibilityEnabled"), kCFBooleanTrue, accessibilityDomain, kCFPreferencesAnyUser, kCFPreferencesAnyHost);
-                CFRelease(accessibilityDomain);
-            }
-        }
-    }
-
-    // Load the UIAutomation framework.
     dlopen("/Developer/Library/PrivateFrameworks/UIAutomation.framework/UIAutomation", RTLD_LOCAL);
+    void (*AXSApplicationAccessibilitySetEnabled)(int);
+    *(void **)(&AXSApplicationAccessibilitySetEnabled) = dlsym(RTLD_DEFAULT, "_AXSApplicationAccessibilitySetEnabled");
+    (*AXSApplicationAccessibilitySetEnabled)(1);
 
     SpecLauncher *launcher = [[self alloc] init];
     [[NSNotificationCenter defaultCenter] addObserver:launcher selector:@selector(appLaunched:) name:UIApplicationDidBecomeActiveNotification object:nil];
