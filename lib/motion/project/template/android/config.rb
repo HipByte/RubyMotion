@@ -299,7 +299,7 @@ module Motion; module Project;
         when 'arm'
           "-target #{arch}-none-linux-androideabi -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\""
         when 'arm64'
-          "-target aarch64-none-linux-android -gcc-toolchain \"#{ndk_path}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64\""
+          "-target arm64-v8a-linux-androideabi-none -gcc-toolchain \"#{ndk_path}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64\""
         when 'x86'
           "-target i686-none-linux-android -gcc-toolchain \"#{ndk_path}/toolchains/x86-4.8/prebuilt/darwin-x86_64\""
       end

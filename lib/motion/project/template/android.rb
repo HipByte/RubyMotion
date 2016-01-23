@@ -727,7 +727,7 @@ def run_apk(mode)
           'armv5e-none-linux-androideabi'
         when 'arm64-v8a'
           if App.config.archs.include?(arch)
-            'aarch64-none-linux-android'
+            'arm64-v8a-linux-androideabi-none'
             repl_arch = 'x86_64'
           else
             arch = 'armv5te'
