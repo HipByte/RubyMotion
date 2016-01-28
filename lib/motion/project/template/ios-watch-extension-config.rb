@@ -35,7 +35,8 @@ module Motion; module Project;
       @name = nil
       @version = ENV['RM_TARGET_HOST_APP_VERSION']
       @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
-      @frameworks = ['WatchKit', 'Foundation']
+      @frameworks = ['WatchKit', 'UIKit', 'Foundation', 'CoreGraphics',
+                     'CoreFoundation']
 
       if watchV2?
         @deployment_target = '2.0'

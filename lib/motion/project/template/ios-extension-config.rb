@@ -34,7 +34,8 @@ module Motion; module Project;
 
     def initialize(project_dir, build_mode)
       super
-      @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
+      @frameworks = ['UIKit', 'Foundation', 'CoreGraphics', 'CoreFoundation',
+                     'CFNetwork', 'CoreAudio']
       @device_family = :iphone
       @icons = []
       @manifest_assets = []

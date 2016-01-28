@@ -36,7 +36,8 @@ module Motion; module Project;
 
     def initialize(project_dir, build_mode)
       super
-      @frameworks = ['UIKit', 'Foundation', 'CoreGraphics']
+      @frameworks = ['UIKit', 'Foundation', 'CoreGraphics', 'CoreFoundation',
+                     'CFNetwork', 'CoreAudio']
       @device_family = :iphone
       @interface_orientations = [:portrait, :landscape_left, :landscape_right]
       @background_modes = []
