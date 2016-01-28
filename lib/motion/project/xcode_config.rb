@@ -200,51 +200,9 @@ module Motion; module Project;
       escape_path(path)
     end
 
-    def frameworks_dependencies
-      @frameworks_dependencies ||= begin
-        # Compute the list of frameworks, including dependencies, that the project uses.
-        deps = frameworks.dup.uniq
-        slf = File.join(sdk(local_platform), 'System', 'Library', 'Frameworks')
-
-        find_dependencies = lambda { |framework_path|
-          if File.exist?(framework_path)
-            `#{locate_binary('otool')} -L \"#{framework_path}\"`.scan(/\t([^\s]+)\s\(/).each do |dep|
-              # Only care about public, non-umbrella frameworks (for now).
-              if md = dep[0].match(/^\/System\/Library\/Frameworks\/(.+)\.framework\/(Versions\/.\/)?(.+)$/) and md[1] == md[3]
-                if File.exist?(File.join(datadir, 'BridgeSupport', md[1] + '.bridgesupport'))
-                  deps << md[1]
-                  deps.uniq!
-                end
-              end
-            end
-          end
-        }
-        deps.each do |framework|
-          framework_path = File.join(slf, framework + '.framework', framework)
-          find_dependencies.call(framework_path)
-        end
-        embedded_frameworks.each do |framework|
-          framework_path = File.expand_path(File.join(framework, File.basename(framework, ".framework")))
-          find_dependencies.call(framework_path)
-        end
-
-        if @framework_search_paths.empty?
-          deps = deps.select { |dep|
-            if File.exist?(File.join(datadir, 'BridgeSupport', dep + '.bridgesupport'))
-              true
-            else
-              App.warn("Could not find .bridgesupport file for framework \"#{dep}\".")
-              false
-            end
-          }
-        end
-        deps
-      end
-    end
-
     def frameworks_stubs_objects(platform)
       stubs = []
-      deps = frameworks_dependencies + weak_frameworks
+      deps = frameworks + weak_frameworks
       # Look in the 'bridgesupport_files' method for explanation
       if deps.include?('ApplicationServices') && deployment_target == '10.7' && sdk_version != '10.7'
         deps << 'CoreGraphics'

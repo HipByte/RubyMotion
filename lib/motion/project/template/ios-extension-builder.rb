@@ -322,7 +322,7 @@ EOS
         App.info 'Link', relative_path(main_exec)
         objs_list = objs.map { |path, _| path }.unshift(init_o, main_o, *config.frameworks_stubs_objects(platform)).map { |x| "\"#{x}\"" }.join(' ')
         framework_search_paths = config.framework_search_paths.uniq.map { |x| "-F '#{File.expand_path(x)}'" }.join(' ')
-        frameworks = config.frameworks_dependencies.map { |x| "-framework #{x}" }.join(' ')
+        frameworks = config.frameworks.map { |x| "-framework #{x}" }.join(' ')
         weak_frameworks = config.weak_frameworks.map { |x| "-weak_framework #{x}" }.join(' ')
         vendor_libs = config.vendor_projects.inject([]) do |libs, vendor_project|
           libs << vendor_project.libs.map { |x|
