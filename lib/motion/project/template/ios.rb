@@ -295,10 +295,6 @@ task :device => :archive do
   end
 
   if repl_mode
-    # Launch the REPL.
-    pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
-    at_exit { Process.kill(:TERM, pid) }
-
     kernel_path = nil
     target_triple = nil
 
