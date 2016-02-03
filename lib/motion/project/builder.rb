@@ -254,7 +254,7 @@ RubyMotionInit(int argc, char **argv)
 #endif
 	    void *self = rb_vm_top_self();
 EOS
-      if config.development? and platform == 'iPhoneOS'
+      if config.development? and platform.include?('iPhone')
         init_txt << "ruby_init_device_repl();\n"
       end
       init_txt << config.define_global_env_txt

@@ -291,7 +291,7 @@ task :device => :archive do
   if ENV['install_only']
     $deployed_app_path = `#{cmd}`.strip
   else
-    remote_arch = sh(cmd)
+    remote_arch = `#{cmd}`.strip
   end
 
   if repl_mode
@@ -299,13 +299,19 @@ task :device => :archive do
     pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
     at_exit { Process.kill(:TERM, pid) }
 
+    kernel_path = nil
+    target_triple = nil
+
     if remote_arch.include?('arm64') && App.config.archs['iPhoneOS'].include?('arm64')
-      kernel = File.join(App.config.datadir, "iPhoneOS", "kernel-arm64.bc")
-      sh "arch -x86_64 \"#{File.join(App.config.bindir, 'repl')}\" \"#{kernel}\" arm64-apple-ios5.0.0 0.0.0.0 33333" # To run REPL, now, it need android triple.
+      kernel_path = "kernel-arm64.bc"
+      target_triple = "arm64-apple-ios5.0.0"
     else
-      kernel = File.join(App.config.datadir, "iPhoneOS", "kernel-armv7.bc")
-      sh "arch -i386 \"#{File.join(App.config.bindir, 'repl')}\" \"#{kernel}\" armv7-apple-ios5.0.0 0.0.0.0 33333" # To run REPL, now, it need android triple.
+      kernel_path = "kernel-armv7.bc"
+      target_triple = "armv7-apple-ios5.0.0"
     end
+
+    kernel = File.join(App.config.datadir, "iPhoneOS", kernel_path)
+    sh "#{File.join(App.config.bindir, 'repl')} \"#{kernel}\" #{target_triple} 0.0.0.0 33333" # To run REPL, now, it need android triple.
   end
 end
 
