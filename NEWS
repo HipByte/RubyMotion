@@ -1,3 +1,43 @@
+= RubyMotion 4.9 =
+
+  * [Android] Added Comparable module.
+  * [Android] Added Array#{-, &, |, <=>, to_ary, uniq, uniq!, cycle} methods.
+  * [Android] Added Kernel#{enum_for, to_enum} methods.
+  * [Android] Added Enumerator#{with_index, with_object, each_with_index,
+    each_with_object} methods.
+  * [Android] Added Enumerable#{cycle, reject, take, drop} methods.
+  * [Android] Added Module#{include?, class_variable_get, class_variable_set,
+    class_variable_defined?, module_eval, class_eval} methods.
+  * [Android] Added Object#define_singleton_method method.
+  * [Android] Fixed a bug where overriding a pure Ruby method would cause a
+    crash.
+  * [Android] Fixed a bug where a compile error would happen when trying to use
+    the back-reference syntax of a regular expression.
+  * [Android] Fixed a bug where an app couldn't launch on an arm64 device
+    (ie. Nexus 9).
+  * [Android] Fixed a bug where evaluating expression on REPL would trigger a
+    crash on an arm64 device.
+  * [Android] Fixed a bug in Time#strftime where local time wasn't used.
+  * [Android] Fixed a memory leak in Enumerator objects.
+  * [Android] Fixed a crash if `nil' would be passed into methods as index
+    arguments.
+  * [Android] Fixed a crash if `nil' would be passed into Java methods as
+    char/byte/short/long/float/double/array type argument.
+  * [Android] Fixed a bug where constants defined in modules that were mixed
+    in couldn't be looked up.
+  * [Android] Fixed Module#module_function to honor arguments.
+  * [iOS] Fixed an issue where iOS Simulator cannot be launched with Xcode 7.3
+    beta.
+  * [iOS] Fixed an issue where some UI tests using the `tap' method could fail
+    after a cold start-up of the iOS simulator.
+  * [iOS] Fixed a bug where MIDIClientCreate() would trigger a crash on 32-bit.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug where exceptions raised from a Ruby
+    file main scope would not be properly symbolicated.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug where it wouldn't catch Objective-C
+    exception which BigDecimal will raise.
+  * [iOS, OSX, watchOS, tvOS] Fixed a memory leak in Object#instance_eval.
+  * [iOS, OSX, watchOS, tvOS] Fixed a memory leak in Enumerable#zip.
+
 = RubyMotion 4.8 =
 
   * [iOS, tvOS, watchOS] Added support for iOS 9.3, watchOS 2.2 and tvOS 9.2
