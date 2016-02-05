@@ -132,7 +132,7 @@ module Motion; module Project;
 
       if Motion::Project::Config.starter?
         self.assets_dirs << File.join(File.dirname(__FILE__), 'launch_image')
-        self.api_version = '22'
+        self.api_version = '23'
       end
     end
 
@@ -195,8 +195,8 @@ module Motion; module Project;
       end
 
       if Motion::Project::Config.starter?
-        if self.api_version != '22'
-          App.fail "You are using RubyMotion Starter. Only Android API 22 is supported in this release. If you would like to target older or newer (in beta) versions of Android you can purchase a paid subscription."
+        if self.api_version != '23'
+          App.fail "You are using RubyMotion Starter. Only Android API 23 is supported in this release. If you would like to target older or newer (in beta) versions of Android you can purchase a paid subscription."
         end
       end
 
