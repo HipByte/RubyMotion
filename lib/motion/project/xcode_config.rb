@@ -272,6 +272,9 @@ module Motion; module Project;
           bs_path = File.join(datadir(sdk_version), 'BridgeSupport', framework + '.bridgesupport')
           if File.exist?(bs_path)
             bs_files << bs_path
+          elsif frameworks.include?(framework)
+            self.frameworks.delete(framework)
+            App.warn("Could not find .bridgesupport file for framework \"#{framework}\".")
           end
         end
         bs_files
