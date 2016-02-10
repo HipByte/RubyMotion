@@ -129,14 +129,14 @@ module Motion; module Project
             kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
             raise "Can't locate kernel file" unless File.exist?(kernel)
 
-            # Assembly.
+            # Object.
             compiler_exec_arch = case arch
               when /^arm/
                 arch == 'arm64' ? 'x86_64' : 'i386'
               else
                 arch
             end
-            asm = File.join(files_build_dir, "#{path}.#{arch}.s")
+            asm = File.join(files_build_dir, "#{path}.#{arch}.o")
             @compiler[job] ||= {}
             @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm-fast \"\"", "r+")
             @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
@@ -147,10 +147,7 @@ module Motion; module Project
             end
 
             # Object
-            arch_obj = File.join(files_build_dir, "#{path}.#{arch}.o")
-            sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
-
-            [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
+            arch_obj = asm
             arch_objs << arch_obj
           end
 
