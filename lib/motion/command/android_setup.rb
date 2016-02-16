@@ -28,7 +28,7 @@ module Motion; class Command
     DefaultDirectory = File.join(File.expand_path("~"), '.rubymotion-android')
     DefaultSDKVersion = '24.1.2'
     DefaultNDKVersion = 'r10e'
-    DefaultAPIVersion = '22'
+    DefaultAPIVersion = '23'
 
     DL_GOOGLE = "https://dl.google.com/android"
 
