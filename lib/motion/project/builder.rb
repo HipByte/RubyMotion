@@ -350,7 +350,19 @@ EOS
         objs_file = Tempfile.new('linker-objs-list')
         objs_list.each { |obj| objs_file.puts(obj) }
         objs_file.close # flush
-        sh "#{cxx} -o \"#{main_exec}\" -filelist \"#{objs_file.path}\" #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+
+        # Some entitlements are needed for the simulator (e.g. HealthKit) but
+        # instead of signing the app we include them as a section in the
+        # executable like Xcode does.
+        entitlements = ''
+        if config.entitlements.any? && platform.include?('Simulator')
+          build_dir = config.versionized_build_dir(platform)
+          entitlements = File.join(build_dir, "Entitlements.plist")
+          File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
+          entitlements = "-Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker \"#{entitlements}\""
+        end
+
+        sh "#{cxx} -o \"#{main_exec}\" #{entitlements} -filelist \"#{objs_file.path}\" #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
 
         # Change the install name of embedded frameworks.
