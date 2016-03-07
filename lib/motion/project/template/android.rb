@@ -412,8 +412,11 @@ EOS
         if current_class
           # Class is already exported, make sure the super classes match.
           if current_class[:super] != md[2]
-            $stderr.puts "Class `#{md[1]}' already defined with a different super class (`#{current_class[:super]}')"
-            exit 1
+            if current_class[:super] != '$blank$'
+              App.fail "Class `#{md[1]}' already defined with a different super class (`#{current_class[:super]}')"
+            else
+              current_class[:super] = md[2]
+            end
           end
         else
           # Export a new class.
