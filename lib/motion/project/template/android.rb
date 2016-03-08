@@ -185,7 +185,7 @@ task :build do
   if !r_java_mtime or all_resources.any? { |x| Dir.glob(x + '/**/*').any? { |y| File.mtime(y) > r_java_mtime } }
     packages_list = App.config.vendored_projects.map { |x| x[:package] }.compact.join(':')
     extra_packages = packages_list.empty? ? '' : '--extra-packages ' + packages_list
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay"
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -m -J \"#{java_dir}\" #{extra_packages} --auto-add-overlay --max-res-version #{App.config.target_api_version}"
 
     r_java = Dir.glob(java_dir + '/**/R.java')
     classes_dir = File.join(app_build_dir, 'classes')
