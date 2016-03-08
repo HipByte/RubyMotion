@@ -573,7 +573,7 @@ EOS
       or resources_dirs.any? { |x| File.mtime(x) > File.mtime(archive) } \
       or native_libs.any? { |x| File.mtime("#{app_build_dir}/#{x}") > File.mtime(archive) }
     App.info 'Create', archive
-    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay"
+    sh "\"#{App.config.build_tools_dir}/aapt\" package -f -M \"#{android_manifest}\" #{aapt_assets_flags} #{aapt_resources_flags} -I \"#{android_jar}\" -F \"#{archive}\" --auto-add-overlay  --max-res-version #{App.config.target_api_version}"
     Dir.chdir(app_build_dir) do
       [File.basename(dex_classes), *libpayload_subpaths, *native_libs, *gdbserver_subpaths].each do |file|
         line = "\"#{App.config.build_tools_dir}/aapt\" add -f \"#{File.basename(archive)}\" \"#{file}\""
