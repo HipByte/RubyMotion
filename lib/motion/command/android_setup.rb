@@ -49,7 +49,7 @@ module Motion; class Command
     self.description = 'Setup the Android environment (SDK and NDK).'
 
     def initialize(argv)
-      @directory = argv.option('directory') || DefaultDirectory
+      @directory = File.expand_path(argv.option('directory') || DefaultDirectory)
       @sdk_version = argv.option('sdk_version') || DefaultSDKVersion
       @ndk_version = argv.option('ndk_version') || DefaultNDKVersion
       @api_version = argv.option('api_version') || DefaultAPIVersion
