@@ -1,3 +1,52 @@
+= RubyMotion 4.10 =
+
+  * [Android] RubyMotion Starter now targets API 23.
+  * [Android] Added ScriptError, SyntaxError and StopIteration.
+  * [Android] Added Fixnum#{**, div, fdiv, truncate, coerce, magnitude} methods.
+  * [Android] Added Float#{**, coerce, div, fdiv, quo, nan?, infinite?, finite?}
+    methods.
+  * [Android] Added Float::{ROUNDS, RADIX, MANT_DIG, DIG, MIN_EXP, MAX_EXP,
+    MIN_10_EXP, MAX_10_EXP, MIN, MAX, EPSILON, INFINITY, NAN} constants.
+  * [Android] Added Bignum#** method.
+  * [Android] Added Regexp.{new, compile, quote, escape, last_match} methods.
+  * [Android] Added Regexp::{IGNORECASE, EXTENDED, MULTILINE} constants.
+  * [Android] Added MatchData#{eql?, ==} methods.
+  * [Android] Added Range#{first, last, cover?} methods.
+  * [Android] Added Enumerable#{take_while, drop_while} methods.
+  * [Android] Added Object#{object_id, __id__} methods.
+  * [Android] Added Kernel.#loop method.
+  * [Android] Fixed an issue in `motion android-setup' which it wouldn't accept
+    relative directory path in `--directory' option.
+  * [Android] Fixed an issue where Module#{const_set, class_variable_get,
+    class_variable_set, class_variable_defined?, instance_variable_get,
+    instance_variable_set, instance_variable_defined?, attr, attr_reader,
+    attr_writer, attr_accessor} would accept invalid names.
+  * [Android] Fixed various issues in String#{index, rindex, split, []=, chomp,
+    to_i, rjust, each_line, scan, sub, gsub, +} to conform to the Ruby
+    specifications.
+  * [Android] Fixed various issues in Array#{[]=, flatten} to conform to the
+    Ruby specifications.
+  * [Android] Fixed various issues in Hash#{[], []=, merge, store, has_value?,
+    replace} to conform to the Ruby specifications.
+  * [Android] Fixed various issues in Regexp#{match, =~} to conform to the Ruby
+    specifications.
+  * [Android] Fixed various issues in MatchData#{[], regexp, length} to conform
+    to the Ruby specifications.
+  * [Android] Fixed a bug when dispatching a polymorphic method given an
+    Array argument, when the version that expects a Java array would be called
+    instead of the version that expects a java.util.List.
+  * [Android] Fixed a bug when re-opening a class that was previously defined
+    where the build system would generate an incorrect Java class.
+  * [Android] Fixed an issue that could cause compilation error when invoking
+    `aapt' and using newer versions of support packages with an older Android 
+    api version.
+  * [iOS, OSX, tvOS] Fixed issue where the REPL would not auto insert the
+    suggested autocompletion result.
+  * [iOS] Added better support for Xcode 7.3 beta in order to get rid of
+    warning messaged when compiling apps for the device.
+  * Fixed a bug where objects would not be converted with #to_ary when yield.
+  * Fixed various issues in Proc#call to conform to the Ruby specifications.
+
 = RubyMotion 4.9 =
 
   * [Android] Added Comparable module.
