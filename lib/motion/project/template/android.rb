@@ -228,14 +228,14 @@ task :build do
           or File.mtime(ruby) > File.mtime(ruby_obj) \
           or File.mtime(kernel_bc) > File.mtime(ruby_obj)
         App.info 'Compile', ruby_path
-        ruby_bc = ruby_obj + '.bc'
-        FileUtils.mkdir_p(File.dirname(ruby_bc))
+        asm = ruby_obj + '.s'
+        FileUtils.mkdir_p(File.dirname(asm))
         @compiler[job] ||= {}
         ruby_arch = arch.start_with?('arm64') ? 'x86_64' : 'i386'
         @compiler[job][arch] ||= IO.popen("/usr/bin/env VM_PLATFORM=android VM_KERNEL_PATH=\"#{kernel_bc}\" arch -#{ruby_arch} \"#{ruby}\" #{ruby_bs_flags} --emit-llvm-fast \"\"", "r+")
-        @compiler[job][arch].puts "#{ruby_bc}\n#{init_func}\n#{ruby_path}"
+        @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{ruby_path}"
         @compiler[job][arch].gets # wait to finish compilation
-        sh "#{App.config.cc} #{App.config.asflags(arch)} -c \"#{ruby_bc}\" -o \"#{ruby_obj}\""
+        sh "#{App.config.cc} #{App.config.asflags(arch)} -c \"#{asm}\" -o \"#{ruby_obj}\""
         ruby_objs_changed = true
       end
       [ruby_obj, init_func]
