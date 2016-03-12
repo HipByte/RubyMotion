@@ -133,14 +133,14 @@ module Motion; module Project;
             kernel = File.join(datadir, platform, "kernel-#{arch}.bc")
             raise "Can't locate kernel file" unless File.exist?(kernel)
 
-            # Object.
+            # Assembly.
             compiler_exec_arch = case arch
               when /^arm/
                 arch == 'arm64' ? 'x86_64' : 'i386'
               else
                 arch
             end
-            asm_extension = platform == 'AppleTVOS' ? 'bc' : 'o'
+            asm_extension = platform == 'AppleTVOS' ? 'bc' : 's'
             asm = File.join(files_build_dir, "#{path}.#{arch}.#{asm_extension}")
             @compiler[job] ||= {}
             @compiler[job][arch] ||= IO.popen("/usr/bin/env RM_DATADIR_PATH=\"#{config.datadir(config.sdk_version)}\" VM_PLATFORM=\"#{platform}\" VM_KERNEL_PATH=\"#{kernel}\" VM_OPT_LEVEL=\"#{config.opt_level}\" /usr/bin/arch -arch #{compiler_exec_arch} #{ruby} #{rubyc_bs_flags} --emit-llvm-fast \"\"", "r+")
@@ -163,9 +163,11 @@ module Motion; module Project;
                 obj_path
               end
               sh "#{cxx} #{config.cflag_version_min(platform)} -fembed-bitcode -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
-              [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
+            else
+              sh "#{cc} #{config.cflag_version_min(platform)} -fexceptions -c -arch #{arch} \"#{asm}\" -o \"#{arch_obj}\""
             end
 
+            [asm].each { |x| File.unlink(x) } unless ENV['keep_temps']
             arch_objs << arch_obj
           end
 
