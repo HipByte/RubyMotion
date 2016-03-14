@@ -320,7 +320,7 @@ module Motion; module Project;
         else
           raise "Invalid arch `#{arch}'"
       end
-      "-no-canonical-prefixes -msoft-float #{toolchain_flags(arch)} #{archflags}"
+      "-no-canonical-prefixes #{toolchain_flags(arch)} #{archflags}"
     end
 
     def api_version_ndk
