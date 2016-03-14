@@ -292,6 +292,7 @@ EOS
     void *#{init_func}(void *rcv, void *sel);
 EOS
     end
+    payload_c_txt  << "int rm_repl_port = #{App.config.local_repl_port};\n"
     payload_c_txt << <<EOS
 }
 extern bool ruby_vm_debug_logs;
@@ -701,6 +702,10 @@ def run_apk(mode)
       end
       Process.kill('KILL', adb_logs_pid)
     else
+      # Enable port forwarding for the REPL socket.
+      local_tcp = TCPServer.new('localhost', 0).addr[1]
+      remote_tcp = App.config.local_repl_port
+
       # Show logs in a child process.
       at_exit do
         # Kill the logcat process.
@@ -709,17 +714,10 @@ def run_apk(mode)
         if `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
           sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
         end
+        # Disable the forwarding
+        sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward --remove tcp:#{local_tcp}"
       end
-      # Enable port forwarding for the REPL socket.
-      local_tcp = case mode
-        when :emulator
-          '33332'
-        when :device
-          '33333'
-        else
-          raise
-      end
-      sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:#{local_tcp} tcp:33333"
+      sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:#{local_tcp} tcp:#{remote_tcp}"
       # Determine architecture of device.
       arch = `\"#{adb_path}\" #{adb_mode_flag(mode)} shell getprop ro.product.cpu.abi`.strip
       repl_arch = 'i386'
@@ -744,7 +742,7 @@ def run_apk(mode)
       repl_launcher = Motion::Project::REPLLauncher.new({
         "kernel-path" => App.config.kernel_path(arch),
         "target-triple" => target_triple,
-        "device-port" => local_tcp,
+        "local-port" => local_tcp,
         "device-hostname" => "0.0.0.0",
         "platform" => "android",
         "verbose" => App::VERBOSE,

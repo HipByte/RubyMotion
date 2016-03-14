@@ -643,5 +643,18 @@ module Motion; module Project;
     def ctags_config_file
       File.join(motiondir, 'data', 'bridgesupport-ctags.cfg')
     end
+
+    def local_repl_port(platform)
+      @local_repl_port ||= begin
+        ports_file = File.join(versionized_build_dir(platform), 'repl_ports.txt')
+        if File.exist?(ports_file)
+          File.read(ports_file)
+        else
+          local_repl_port = TCPServer.new('localhost', 0).addr[1]
+          File.open(ports_file, 'w') { |io| io.write(local_repl_port.to_s) }
+          local_repl_port
+        end
+      end
+    end
   end
 end; end

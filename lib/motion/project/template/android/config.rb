@@ -23,6 +23,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require 'socket'
+
 module Motion; module Project;
 
   class AndroidManifest < Hash
@@ -509,6 +511,19 @@ module Motion; module Project;
     def version(code, name)
       @version_code = code
       @version_name = name
+    end
+
+    def local_repl_port
+      @local_repl_port ||= begin
+        ports_file = File.join(versionized_build_dir, 'repl_ports.txt')
+        if File.exist?(ports_file)
+          File.read(ports_file)
+        else
+          local_repl_port = TCPServer.new('localhost', 0).addr[1]
+          File.open(ports_file, 'w') { |io| io.write(local_repl_port.to_s) }
+          local_repl_port
+        end
+      end
     end
   end
 end; end

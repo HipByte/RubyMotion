@@ -86,7 +86,7 @@ task :run do
     "spec-mode" => App.config.spec_mode,
     "kernel-path" => kernel,
     "target-triple" => target_triple,
-    "device-port" => "33334",
+    "local-port" => App.config.local_repl_port('MacOSX'),
     "device-hostname" => "0.0.0.0",
     "platform" => "MacOSX",
     "sdk-version" => App.config.sdk_version,

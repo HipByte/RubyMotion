@@ -29,8 +29,8 @@ module Motion; module Project;
 class REPLLauncher
   VALID_VARS = %W{verbose arguments debug-mode spec-mode start-suspended
     background-fetch kernel-path xcode-path target-triple device-hostname
-    device-port uses-bs display-type platform device-name device-family
-    app-bundle-path sdk-version bs_files}
+    local-port remote-port uses-bs display-type platform device-name
+    device-family app-bundle-path sdk-version bs_files}
 
   def initialize(opts)
     opts.each do |key, value|
