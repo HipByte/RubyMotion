@@ -26,6 +26,7 @@
 require 'motion/project/config'
 require 'motion/util/code_sign'
 require 'motion/project/target'
+require 'socket'
 
 module Motion; module Project;
   class XcodeConfig < Config
