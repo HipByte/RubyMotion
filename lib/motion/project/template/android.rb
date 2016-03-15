@@ -632,7 +632,7 @@ def install_apk(mode)
 
   device_version = device_api_version(device_id)
   app_api_version = App.config.api_version
-  app_api_version = app_api_version == 'L' ? 20 : app_api_version.to_i
+  app_api_version = app_api_version.to_i
   if device_version < app_api_version
     App.fail "Cannot install an app built for API version #{App.config.api_version} on a device running API version #{device_version}"
   end
