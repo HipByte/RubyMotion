@@ -26,7 +26,7 @@
 module Motion; class Command
   class AndroidSetup < Command
     DefaultDirectory = File.join(File.expand_path("~"), '.rubymotion-android')
-    DefaultSDKVersion = '24.1.2'
+    DefaultSDKVersion = '24.4.1'
     DefaultNDKVersion = 'r10e'
     DefaultAPIVersion = '23'
 
@@ -37,10 +37,10 @@ module Motion; class Command
     def sdk_packages
       [
         ["platform-tools", 'platform-tools'],
-        ["build-tools-22.0.1", 'build-tools/22.0.1'],
-        ["android-#{@api_version}", 'platforms/android-22'],
-        ["addon-google_apis-google-#{@api_version}", 'add-ons/addon-google_apis-google-22'],
-        ["sys-img-armeabi-v7a-addon-google_apis-google-#{@api_version}", 'system-images/android-22/google_apis/armeabi-v7a'],
+        ["build-tools-23.0.1", 'build-tools/23.0.1'],
+        ["android-#{@api_version}", "platforms/android-#{@api_version}"],
+        ["addon-google_apis-google-#{@api_version}", "add-ons/addon-google_apis-google-#{@api_version}"],
+        ["sys-img-armeabi-v7a-addon-google_apis-google-#{@api_version}", "system-images/android-#{@api_version}/google_apis/armeabi-v7a"],
         ["extra-android-support", 'extras/android/support']
       ]
     end
