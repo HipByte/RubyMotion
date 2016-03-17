@@ -99,6 +99,9 @@ module Motion; class Command
           download(ndk_url, zipped_ndk)
           extracted_ndk = @tmp_directory
           system("/usr/bin/unzip -q -a \"#{zipped_ndk}\" -d \"#{extracted_ndk}\"")
+          File.open(File.join(extracted_ndk, "android-ndk-#{@ndk_version}", 'RELEASE.TXT'), 'w') { |io|
+            io.puts "#{@ndk_version} (64-bit)"
+          }
         else
           ndk_url = File.join(DL_GOOGLE, 'ndk', "android-ndk-#{@ndk_version}-darwin-x86_64.bin")
           ndk_bin = File.join(@tmp_directory, 'ndk.bin')
@@ -115,6 +118,8 @@ module Motion; class Command
 
     def current_ndk_version
       File.read(File.join(@ndk_directory, 'RELEASE.TXT')).strip.split(' ')[0]
+    rescue
+      nil
     end
 
     def setup_sdk
