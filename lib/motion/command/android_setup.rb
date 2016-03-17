@@ -27,7 +27,7 @@ module Motion; class Command
   class AndroidSetup < Command
     DefaultDirectory = File.join(File.expand_path("~"), '.rubymotion-android')
     DefaultSDKVersion = '24.4.1'
-    DefaultNDKVersion = 'r10e'
+    DefaultNDKVersion = 'r11'
     DefaultAPIVersion = '23'
 
     DL_GOOGLE = "https://dl.google.com/android"
@@ -93,11 +93,19 @@ module Motion; class Command
     def setup_ndk
       if !File.exist?(@ndk_directory) || @ndk_version != current_ndk_version || @force
         puts("Installing NDK : version #{@ndk_version}")
-        ndk_url = File.join(DL_GOOGLE, 'ndk', "android-ndk-#{@ndk_version}-darwin-x86_64.bin")
-        ndk_bin = File.join(@tmp_directory, 'ndk.bin')
-        download(ndk_url, ndk_bin)
-        system('/bin/chmod', '+x', ndk_bin)
-        Dir.chdir(@tmp_directory) { system(ndk_bin) }
+        if @ndk_version >= 'r11'
+          ndk_url = File.join(DL_GOOGLE, 'repository', "android-ndk-#{@ndk_version}-darwin-x86_64.zip")
+          zipped_ndk = File.join(@tmp_directory, 'ndk.zip')
+          download(ndk_url, zipped_ndk)
+          extracted_ndk = @tmp_directory
+          system("/usr/bin/unzip -q -a \"#{zipped_ndk}\" -d \"#{extracted_ndk}\"")
+        else
+          ndk_url = File.join(DL_GOOGLE, 'ndk', "android-ndk-#{@ndk_version}-darwin-x86_64.bin")
+          ndk_bin = File.join(@tmp_directory, 'ndk.bin')
+          download(ndk_url, ndk_bin)
+          system('/bin/chmod', '+x', ndk_bin)
+          Dir.chdir(@tmp_directory) { system(ndk_bin) }
+        end
         FileUtils.rm_rf(@ndk_directory)
         FileUtils.mv(File.join(@tmp_directory, "android-ndk-#{@ndk_version}"), @ndk_directory)
       else
