@@ -266,10 +266,7 @@ module Motion; module Project;
 
     def ndk_toolchain_bin_dir
       @ndk_toolchain_bin_dir ||= begin
-        paths = ['3.6'].map do |x|
-          File.join(ndk_path, "toolchains/llvm-#{x}/prebuilt/darwin-x86_64/bin")
-        end
-        path = paths.find { |x| File.exist?(x) }
+        path = File.join(ndk_path, "toolchains/llvm/prebuilt/darwin-x86_64/bin")
         App.fail "Can't locate a proper NDK toolchain (paths tried: #{paths.join(' ')}). Please install NDK toolchain using `motion android-setup' command." unless path
         path
       end
@@ -297,11 +294,11 @@ module Motion; module Project;
     def toolchain_flags(arch)
       case common_arch(arch)
         when 'arm'
-          "-target #{arch}-none-linux-androideabi -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.8/prebuilt/darwin-x86_64\""
+          "-target #{arch}-none-linux-androideabi -gcc-toolchain \"#{ndk_path}/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64\""
         when 'arm64'
           "-target arm64-v8a-linux-androideabi-none -gcc-toolchain \"#{ndk_path}/toolchains/aarch64-linux-android-4.9/prebuilt/darwin-x86_64\""
         when 'x86'
-          "-target i686-none-linux-android -gcc-toolchain \"#{ndk_path}/toolchains/x86-4.8/prebuilt/darwin-x86_64\""
+          "-target i686-none-linux-android -gcc-toolchain \"#{ndk_path}/toolchains/x86-4.9/prebuilt/darwin-x86_64\""
       end
     end
 
@@ -331,8 +328,10 @@ module Motion; module Project;
           '5'
         when '10', '11'
           '9'
-        when '22', '23', 'N'
+        when '22'
           '21'
+        when 'N'
+          '24'
         else
           api_version
       end
