@@ -740,7 +740,7 @@ def run_apk(mode)
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
       # Launch the REPL.
-      sh "arch -#{repl_arch} \"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{$bs_files.join(' ')}"
+      sh "arch -#{repl_arch} \"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{($bs_files or []).join(' ')}"
     end
   end
 end
@@ -752,7 +752,11 @@ namespace 'emulator' do
   end
 
   desc "Start the app's main intent in the emulator"
-  task :start => ['emulator:build', 'emulator:install'] do
+  task :start do
+    unless ENV["skip_build"]
+      Rake::Task["emulator:build"].invoke
+      Rake::Task["emulator:install"].invoke
+    end
     run_apk(:emulator)
   end
 
