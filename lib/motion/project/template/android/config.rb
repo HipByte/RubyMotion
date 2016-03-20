@@ -306,7 +306,6 @@ module Motion; module Project;
       archflags = ''
       case arch
         when /^arm/
-          archflags << "-marm "
           if arch == 'armv5te'
             archflags << "-march=armv5te "
           elsif arch == 'armv7'
