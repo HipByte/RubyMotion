@@ -41,7 +41,7 @@ module Motion; module Project
     end
 
     def codesign(platform)
-      extension_dir = Dir["#{destination_bundle_path}/PlugIns/*.appex"].sort_by{ |f| File.mtime(f) }.last
+      extension_dir = File.expand_path(Dir["#{destination_bundle_path}/PlugIns/*.appex"].sort_by{ |f| File.mtime(f) }.last)
 
       # Codesign executable
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
@@ -53,7 +53,7 @@ module Motion; module Project
       end
 
       # Codesign bundled .app
-      watchapp_dir = Dir["#{destination_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
+      watchapp_dir = File.expand_path(Dir["#{destination_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last)
       if watchapp_dir && Dir.exists?(watchapp_dir)
         entitlements = File.join(watchapp_dir, "Entitlements.plist")
         codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
