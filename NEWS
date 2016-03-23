@@ -1,3 +1,16 @@
+= RubyMotion 4.11 =
+
+  * The toolchain has been upgraded to LLVM 3.7 for all platforms.
+  * [Android] Updated Android NDK to android-ndk-r11 version. Please update 
+    the Android NDK toolchain by using `motion android-setup' command.
+  * [Android] Fixed a bug where Java interfaces that extend an interface
+    (ex. `android.text.TextWatcher') would not be available in Ruby.
+  * [iOS] RubyMotion Starter now targets iOS 9.3.
+  * [iOS, watchOS] Fixed an issue where codesigning causes error with
+    "cannot read entitlement data" with WatchOS app, Extensions and Frameworks 
+    after updated rake to 11.0.1+.
+    Thanks to Taylor for the patch (pull request #241).
+
 = RubyMotion 4.10 =
 
   * [Android] RubyMotion Starter now targets API 23.
