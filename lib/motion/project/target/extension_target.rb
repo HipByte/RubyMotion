@@ -41,7 +41,7 @@ module Motion; module Project
     end
 
     def codesign(platform)
-      extension_dir = destination_bundle_path
+      extension_dir = File.expand_path(destination_bundle_path)
 
       # Codesign bundled .app (Only for watchkit extensions)
       watchapp_dir = Dir["#{extension_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
