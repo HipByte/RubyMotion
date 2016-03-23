@@ -42,7 +42,7 @@ module Motion; module Project
     def codesign(platform)
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
 
-      framework_path = File.join(@config.app_bundle(platform), 'Frameworks', framework_name)
+      framework_path = File.expand_path(File.join(@config.app_bundle(platform), 'Frameworks', framework_name))
       if File.mtime(@config.project_file) > File.mtime(framework_path) \
           or !system("#{codesign_cmd} --verify \"#{framework_path}\" >& /dev/null")
         App.info 'Codesign', framework_path
