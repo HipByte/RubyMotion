@@ -341,7 +341,7 @@ module Motion; module Project;
         when 'armv5te'
           "-mtune=xscale"
       end
-      "#{asflags(arch)} #{archflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-#{common_arch(arch)}/usr/include\" -Wformat -Werror=format-security"
+      "#{asflags(arch)} #{archflags} -MMD -MP -fpic -ffunction-sections -funwind-tables -fexceptions -fstack-protector -fno-rtti -fno-strict-aliasing -O0 -g3 -fno-omit-frame-pointer -DANDROID -I\"#{ndk_path}/platforms/android-#{api_version_ndk}/arch-#{common_arch(arch)}/usr/include\" -Wformat -Werror=format-security -Wno-unknown-attributes"
     end
 
     def cxxflags(arch)
