@@ -439,7 +439,7 @@ module Motion; module Project;
             App.info 'Create', bs_file
             filter_args =
               if ary = proj[:filter]
-                ary.map { |x| '-f "#{x}"' }.join(' ')
+                ary.map { |x| "-f \"#{x}\"" }.join(' ')
               else
                 ''
               end
