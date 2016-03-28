@@ -415,6 +415,7 @@ module Motion; module Project;
       App.fail "Expected `:jar' key/value pair in `#{opt}'" unless jar
       res = opt.delete(:resources)
       manifest = opt.delete(:manifest)
+      filter = opt.delete(:filter)
       native = opt.delete(:native) || []
       App.fail "Expected `:manifest' key/value pair when `:resources' is given" if res and !manifest
       App.fail "Expected `:resources' key/value pair when `:manifest' is given" if manifest and !res
@@ -426,7 +427,7 @@ module Motion; module Project;
         App.fail "Given manifest `#{manifest}' does not have a `package' attribute in the top-level element" if $?.to_i != 0
         package = line.match(/package=\"(.+)\"$/)[1]
       end
-      @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest, :package => package, :native => native }
+      @vendored_projects << { :jar => jar, :resources => res, :manifest => manifest, :package => package, :native => native, :filter => filter }
     end
 
     def vendored_bs_files(create=true)
@@ -436,7 +437,13 @@ module Motion; module Project;
           bs_file = File.join(versionized_build_dir, File.basename(jar_file) + '.bridgesupport')
           if create and (!File.exist?(bs_file) or File.mtime(jar_file) > File.mtime(bs_file))
             App.info 'Create', bs_file
-            sh "#{bin_exec('android/gen_bridge_metadata')} -o \"#{bs_file}\" \"#{jar_file}\""
+            filter_args =
+              if ary = proj[:filter]
+                ary.map { |x| '-f "#{x}"' }.join(' ')
+              else
+                ''
+              end
+            sh "#{bin_exec('android/gen_bridge_metadata')} -o \"#{bs_file}\" #{filter_args} \"#{jar_file}\""
           end
           bs_file
         end
