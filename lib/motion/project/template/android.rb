@@ -738,6 +738,9 @@ def run_apk(mode)
         else
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
+
+      ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app'))
+
       # Launch the REPL.
       repl_launcher = Motion::Project::REPLLauncher.new({
         "kernel-path" => App.config.kernel_path(arch),

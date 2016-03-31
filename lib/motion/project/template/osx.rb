@@ -79,6 +79,8 @@ task :run do
   target_triple = "x86_64-apple-osx10.7.0"
   kernel = File.join(App.config.datadir, "MacOSX", "kernel-x86_64.bc")
 
+  ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app/'))
+
   repl_launcher = Motion::Project::REPLLauncher.new({
     "app-bundle-path" => exec,
     "arguments" => ENV['args'],

@@ -217,6 +217,8 @@ END
   end
   app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
 
+  ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app'))
+
   repl_launcher = Motion::Project::REPLLauncher.new({
     "arguments" => ENV['args'],
     "debug-mode" => !!ENV['debug'],
@@ -318,6 +320,8 @@ task :device => :archive do
     end
 
     kernel = File.join(App.config.datadir, "iPhoneOS", kernel_path)
+
+    ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app'))
 
     repl_launcher = Motion::Project::REPLLauncher.new({
       "arguments" => ENV['args'],
