@@ -237,9 +237,7 @@ EOS
       app_objs.each do |_, init_func|
         init_txt << "void #{init_func}(void *, void *);\n"
       end
-      if config.development?
-        init_txt << "int rm_repl_port = #{config.local_repl_port(platform)};\n"
-      end
+      init_txt << "int rm_repl_port = #{config.local_repl_port(platform)};\n"
       init_txt << <<EOS
 }
 
