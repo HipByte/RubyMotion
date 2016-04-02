@@ -308,10 +308,8 @@ task :device => :archive do
 
     if remote_arch.include?('arm64') && App.config.archs['iPhoneOS'].include?('arm64')
       kernel_path = "kernel-arm64.bc"
-      target_triple = "arm64-apple-ios7.0.0"
     else
       kernel_path = "kernel-armv7.bc"
-      target_triple = "armv7-apple-ios5.0.0"
     end
 
     kernel = File.join(App.config.datadir, "iPhoneOS", kernel_path)
@@ -323,7 +321,6 @@ task :device => :archive do
       "debug-mode" => !!ENV['debug'],
       "spec-mode" => App.config.spec_mode,
       "kernel-path" => kernel,
-      "target-triple" => target_triple,
       "local-port" => TCPServer.new('localhost', 0).addr[1],
       "remote-port" => App.config.local_repl_port('iPhoneOS'),
       "device-hostname" => "0.0.0.0",
