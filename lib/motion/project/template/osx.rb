@@ -76,8 +76,11 @@ task :run do
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']
 
-  target_triple = "x86_64-apple-osx10.7.0"
-  kernel = File.join(App.config.datadir, "MacOSX", "kernel-x86_64.bc")
+  if App.config.archs["MacOSX"].include?("x86_64")
+    kernel = File.join(App.config.datadir, "MacOSX", "kernel-x86_64.bc")
+  else
+    kernel = File.join(App.config.datadir, "MacOSX", "kernel-i386.bc")
+  end
 
   ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app/'))
 
@@ -87,7 +90,6 @@ task :run do
     "debug-mode" => !!ENV['debug'],
     "spec-mode" => App.config.spec_mode,
     "kernel-path" => kernel,
-    "target-triple" => target_triple,
     "local-port" => App.config.local_repl_port('MacOSX'),
     "device-hostname" => "0.0.0.0",
     "platform" => "MacOSX",
