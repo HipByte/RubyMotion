@@ -206,14 +206,10 @@ END
     end
   end
 
-  target_triple = ''
-  kernel_path = ''
   if App.config.archs['iPhoneSimulator'].include?('x86_64')
     kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
-    target_triple = "x86_64-apple-ios7.0.0"
   else
     kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
-    target_triple = "i386-apple-ios5.0.0"
   end
   app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
 
@@ -229,7 +225,6 @@ END
     "device-name" => ENV["device_name"],
     "background-fetch" => !!ENV['background_fetch'],
     "kernel-path" => kernel_path,
-    "target-triple" => target_triple,
     "local-port" => App.config.local_repl_port('iPhoneSimulator'),
     "device-hostname" => "0.0.0.0",
     "sdk-version" => target,
