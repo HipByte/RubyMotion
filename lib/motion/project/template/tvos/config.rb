@@ -68,20 +68,7 @@ module Motion; module Project;
       'AppleTVOS'
     end
     def provisioning_profile(name = /tvOS\s?Team Provisioning Profile/)
-      @provisioning_profile ||= begin
-        paths = Dir.glob(File.expand_path("~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision")).select do |path|
-          text = File.read(path)
-          text.force_encoding('binary') if RUBY_VERSION >= '1.9.0'
-          text.scan(/<key>\s*Name\s*<\/key>\s*<string>\s*([^<]+)\s*<\/string>/)[0][0].match(name)
-        end
-        if paths.size == 0
-          App.fail "Can't find a provisioning profile named `#{name}'"
-        elsif paths.size > 1
-          App.warn "Found #{paths.size} provisioning profiles named `#{name}'. Set the `provisioning_profile' project setting. Will use the first one: `#{paths[0]}'"
-        end
-        paths[0]
-      end
-      File.expand_path(@provisioning_profile)
+      super(name)
     end
 
     # @return [String] The bundle identifier of the watch extension based on the
