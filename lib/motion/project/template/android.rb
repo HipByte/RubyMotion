@@ -721,19 +721,17 @@ def run_apk(mode)
       # Determine architecture of device.
       arch = `\"#{adb_path}\" #{adb_mode_flag(mode)} shell getprop ro.product.cpu.abi`.strip
       repl_arch = 'i386'
-      target_triple = case arch
+      case arch
         when 'x86'
-          'i686-none-linux-androideabi'
         when /^armeabi/
           arch = 'armv5te'
-          'armv5e-none-linux-androideabi'
         when 'arm64-v8a'
           if App.config.archs.include?(arch)
             repl_arch = 'x86_64'
-            'arm64-v8a-linux-androideabi-none'
+          elsif App.config.archs.include?('armv7')
+            arch = 'armv7'
           else
             arch = 'armv5te'
-            'armv5e-none-linux-androideabi'
           end
         else
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
@@ -744,7 +742,6 @@ def run_apk(mode)
       # Launch the REPL.
       repl_launcher = Motion::Project::REPLLauncher.new({
         "kernel-path" => App.config.kernel_path(arch),
-        "target-triple" => target_triple,
         "local-port" => local_tcp,
         "device-hostname" => "0.0.0.0",
         "platform" => "android",
