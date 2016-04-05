@@ -325,6 +325,8 @@ task :device => :archive do
       "remote-port" => App.config.local_repl_port('iPhoneOS'),
       "device-hostname" => "0.0.0.0",
       "platform" => "iPhoneOS",
+      "device-id" => device_id,
+      "app-bundle-path" => App.config.app_bundle('iPhoneOS'),
       "verbose" => App::VERBOSE
     })
 
