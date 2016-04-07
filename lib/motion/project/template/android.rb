@@ -703,7 +703,19 @@ def run_apk(mode)
       Process.kill('KILL', adb_logs_pid)
     else
       # Enable port forwarding for the REPL socket.
-      local_tcp = TCPServer.new('localhost', 0).addr[1]
+      local_tcp = begin
+        # Generate a random TCP port.
+        socket = TCPServer.new('localhost', 0)
+        port = socket.addr[1]
+        socket.close
+        begin
+          TCPSocket.new('localhost', port)
+        rescue Errno::ECONNREFUSED
+          port
+        else
+          '33333'
+        end
+      end
       remote_tcp = App.config.local_repl_port
 
       # Show logs in a child process.
