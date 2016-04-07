@@ -761,7 +761,7 @@ def run_apk(mode)
         "bs_files" => $bs_files
       })
 
-      repl_launcher.launch
+      sh repl_launcher.launch_cmd
     end
   end
 end

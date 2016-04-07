@@ -66,9 +66,13 @@ class REPLLauncher
     args
   end
 
-  def launch
+  def launch_cmd
     repl = File.join(App.config.bindir, 'repl')
-    command = "#{repl} #{arguments}"
+    "#{repl} #{arguments}"
+  end
+
+  def launch
+    command = launch_cmd
     puts command if App::VERBOSE
     system(command)
   end
