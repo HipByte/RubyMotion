@@ -222,6 +222,8 @@ module Bacon
           c = nil
           if @options[:id]
             c = storyboard.instantiateViewControllerWithIdentifier(@options[:id])
+          elsif @options[:nib_name]
+            c = @controller_class.alloc.initWithNibName(@options[:nib_name], bundle:nil)
           else
             c = @controller_class.alloc.init
           end
