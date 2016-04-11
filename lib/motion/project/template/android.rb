@@ -726,8 +726,10 @@ def run_apk(mode)
         if `\"#{adb_path}\" -d shell ps`.include?(App.config.package)
           sh "\"#{adb_path}\" #{adb_mode_flag(mode)} shell am force-stop #{App.config.package}"
         end
-        # Disable the forwarding
+        # Disable the forwarding.
         sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward --remove tcp:#{local_tcp}"
+        # Set the terminal echo back.
+        system("/bin/stty echo")
       end
       sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:#{local_tcp} tcp:#{remote_tcp}"
       # Determine architecture of device.
