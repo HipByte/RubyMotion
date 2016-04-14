@@ -42,6 +42,11 @@ Edit +motionme+ and point the $motion_libdir variable at your local git repo.
   
 Now using +motionme+ instead of +motion+ will use the forked RubyMotion
 
+== Report a bug
+
+We stopped GitHub issue tracker because we have our main issue tracker in http://hipbyte.myjetbrains.com/youtrack/issues.
+If you would find a bug, please report it using "motion support" command. Then we will filed issue in our issue tracker properly.
+
 == Contributions
 
 Please use the GitHub pull-request mechanism to submit contributions.
