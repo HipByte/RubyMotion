@@ -218,7 +218,7 @@ task :device => :archive do
       "device-hostname" => "0.0.0.0",
       "platform" => "iPhoneOS",
       "device-id" => device_id,
-      "app-bundle-path" => App.config.app_bundle('AppleTVDevice'),
+      "app-bundle-path" => App.config.app_bundle('AppleTVOS'),
       "verbose" => App::VERBOSE
     })
 
