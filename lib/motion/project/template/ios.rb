@@ -215,6 +215,7 @@ END
 
   ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app'))
 
+  retina = ENV['retina']
   device_name = ENV["device_name"]
   device_name = App.config.device_family_string(device_name, family_int, target, retina)
   repl_launcher = Motion::Project::REPLLauncher.new({
