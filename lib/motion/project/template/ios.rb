@@ -215,6 +215,8 @@ END
 
   ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app'))
 
+  device_name = ENV["device_name"]
+  device_name = App.config.device_family_string(device_name, family_int, target, retina)
   repl_launcher = Motion::Project::REPLLauncher.new({
     "arguments" => ENV['args'],
     "debug-mode" => !!ENV['debug'],
@@ -222,7 +224,7 @@ END
     "start-suspended" => !!ENV['no_continue'],
     "app-bundle-path" => app_bundle,
     "xcode-path" => App.config.xcode_dir,
-    "device-name" => ENV["device_name"],
+    "device-name" => device_name,
     "background-fetch" => !!ENV['background_fetch'],
     "kernel-path" => kernel_path,
     "local-port" => App.config.local_repl_port('iPhoneSimulator'),
