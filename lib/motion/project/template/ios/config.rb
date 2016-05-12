@@ -364,7 +364,7 @@ EOS
       when '4'
         ' 5s'
       else
-        (family == 1) ? ' 6' : ' Air'
+        (family == 1) ? ' 6s' : ' Air 2'
       end
     end
 
