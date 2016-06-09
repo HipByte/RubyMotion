@@ -539,7 +539,7 @@ EOS
       end
 
       # Generate dSYM.
-      if any_obj_file_built
+      if main_exec_created
         dsym_path = config.app_bundle_dsym(platform)
         FileUtils.rm_rf(dsym_path)
         App.info "Create", dsym_path
