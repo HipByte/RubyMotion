@@ -101,12 +101,11 @@ module Motion; module Project;
       :support_libraries
 
     # Non-public.
-    attr_accessor :vm_debug_logs, :libs, :opt_level
+    attr_accessor :vm_debug_logs, :libs
 
     def initialize(project_dir, build_mode)
       super
       @main_activity = 'MainActivity'
-      @build_mode = build_mode
       @sub_activities = []
       @archs = ['armv7']
       @assets_dirs = [File.join(project_dir, 'assets')]
@@ -218,14 +217,6 @@ module Motion; module Project;
         else
           ary.last
         end
-      end
-    end
-
-    def opt_level
-      @opt_level ||= case @build_mode
-        when :development; 0
-        when :release; 3
-        else; 0
       end
     end
 
