@@ -46,7 +46,7 @@ module Motion; module Project
       if File.mtime(@config.project_file) > File.mtime(framework_path) \
           or !system("#{codesign_cmd} --verify \"#{framework_path}\" >& /dev/null")
         App.info 'Codesign', framework_path
-        sh "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" \"#{framework_path}\""
+        system "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" \"#{framework_path}\""
       end
     end
 
