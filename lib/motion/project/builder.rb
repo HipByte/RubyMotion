@@ -369,7 +369,7 @@ EOS
           entitlements = "-Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker \"#{entitlements}\""
         end
 
-        sh "#{cxx} -o \"#{main_exec}\" #{entitlements} -filelist \"#{objs_file.path}\" #{config.ldflags(platform)} -L#{File.join(datadir, platform)} -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        sh "#{cxx} -o \"#{main_exec}\" #{entitlements} -filelist \"#{objs_file.path}\" #{config.ldflags(platform)} -L\"#{File.join(datadir, platform)}\" -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
 
         # Change the install name of embedded frameworks.
