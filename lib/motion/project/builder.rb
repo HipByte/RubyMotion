@@ -569,7 +569,7 @@ EOS
 
     def convert_filesystem_encoding(string)
       if RUBY_VERSION < "2.1.0"
-        return eval `#{@nfd} "#{string}"`
+        return eval `\"#{@nfd}\" "#{string}"`
       else
         # Dir.glob on Ruby 2.1 returns file path as "Normalization Form C".
         # So, we do not convert to "Normalization Form D".

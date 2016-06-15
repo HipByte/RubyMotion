@@ -68,7 +68,7 @@ class REPLLauncher
 
   def launch_cmd
     repl = File.join(App.config.bindir, 'repl')
-    "#{repl} #{arguments}"
+    "\"#{repl}\" #{arguments}"
   end
 
   def launch
