@@ -94,6 +94,7 @@ task :run do
     "device-hostname" => "0.0.0.0",
     "platform" => "MacOSX",
     "sdk-version" => App.config.sdk_version,
+    "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
     "verbose" => App::VERBOSE
   })
 
