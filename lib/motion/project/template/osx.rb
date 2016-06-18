@@ -82,8 +82,6 @@ task :run do
     kernel = File.join(App.config.datadir, "MacOSX", "kernel-i386.bc")
   end
 
-  ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app/'))
-
   repl_launcher = Motion::Project::REPLLauncher.new({
     "app-bundle-path" => exec,
     "arguments" => ENV['args'],
@@ -95,6 +93,7 @@ task :run do
     "platform" => "MacOSX",
     "sdk-version" => App.config.sdk_version,
     "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
+    "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
     "verbose" => App::VERBOSE
   })
 

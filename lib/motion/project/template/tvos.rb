@@ -133,6 +133,7 @@ END
     "device-family" => "3",
     "platform" => "AppleTVSimulator",
     "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
+    "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
     "verbose" => App::VERBOSE
   })
 
@@ -221,6 +222,7 @@ task :device => :archive do
       "device-id" => device_id,
       "app-bundle-path" => App.config.app_bundle('AppleTVOS'),
       "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
+      "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
       "verbose" => App::VERBOSE
     })
 

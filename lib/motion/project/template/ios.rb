@@ -134,6 +134,7 @@ namespace :watch do
       "device-family" => App.config.device_family_ints[0],
       "platform" => "WatchOSSimulator",
       "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
+      "reloading-path" => File.expand_path(File.join(watch_extension.path, 'app')),
       "verbose" => App::VERBOSE
     })
 
@@ -214,8 +215,6 @@ END
   end
   app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
 
-  ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app'))
-
   retina = ENV['retina']
   device_name = ENV["device_name"]
   device_name = App.config.device_family_string(device_name, family_int, target, retina)
@@ -235,6 +234,7 @@ END
     "device-family" => family_int,
     "platform" => "iPhoneSimulator",
     "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
+    "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
     "verbose" => App::VERBOSE
   })
 
@@ -319,8 +319,6 @@ task :device => :archive do
 
     kernel = File.join(App.config.datadir, "iPhoneOS", kernel_path)
 
-    ENV['RELOADING_PATH'] = File.expand_path(File.join(App.config.project_dir, 'app'))
-
     repl_launcher = Motion::Project::REPLLauncher.new({
       "arguments" => ENV['args'],
       "debug-mode" => !!ENV['debug'],
@@ -333,6 +331,7 @@ task :device => :archive do
       "device-id" => device_id,
       "app-bundle-path" => App.config.app_bundle('iPhoneOS'),
       "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
+      "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
       "verbose" => App::VERBOSE
     })
 
