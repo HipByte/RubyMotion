@@ -60,7 +60,8 @@ module Motion; module Project;
       @file_paths.each do |path|
         parser = Constant.new(File.read(path))
         parser.defined.each do |const|
-          consts_defined[const] = path
+          consts_defined[const] ||= []
+          consts_defined[const] << path
         end
         parser.referred.each do |const|
           consts_referred[const] ||= []
@@ -81,13 +82,15 @@ module Motion; module Project;
         nesting << klass
 
         nesting.each do |nesting_ref_path|
-          if def_path = consts_defined[nesting_ref_path]
-            ref_paths.each do |ref_path|
-              next if def_path == ref_path
-              next if cyclic?(dependency, def_path, ref_path)
-              dependency[ref_path] ||= []
-              dependency[ref_path] << def_path
-              dependency[ref_path].uniq!
+          if consts_defined[nesting_ref_path]
+            consts_defined[nesting_ref_path].each do |def_path|
+              ref_paths.each do |ref_path|
+                next if def_path == ref_path
+                next if cyclic?(dependency, def_path, ref_path)
+                dependency[ref_path] ||= []
+                dependency[ref_path] << def_path
+                dependency[ref_path].uniq!
+              end
             end
             break
           end
