@@ -291,7 +291,7 @@ task :device => :archive do
   if ENV['install_only']
     $deployed_app_path = `#{cmd}`.strip
   else
-    remote_arch = `#{cmd}`.strip
+    remote_arch = sh(cmd)
   end
 
   if repl_mode
