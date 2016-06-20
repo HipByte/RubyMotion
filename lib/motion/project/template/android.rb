@@ -740,7 +740,7 @@ def run_apk(mode)
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
       # Launch the REPL.
-      sh "arch -#{repl_arch} \"#{App.config.bin_exec('android/repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{($bs_files or []).join(' ')}"
+      sh "\"#{App.config.bin_exec('repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{$bs_files.join(' ')}"
     end
   end
 end
