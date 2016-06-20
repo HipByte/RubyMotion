@@ -274,12 +274,20 @@ task :device => :archive do
     App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
+
+  repl_mode = false
   if ENV['debug']
     env << " RM_AVAILABLE_ARCHS='#{App.config.archs['iPhoneOS'].join(':')}'"
+  else
+    archs = App.config.archs['iPhoneOS']
+    if !ENV['install_only'] && archs.include?('armv7') && archs.size == 1
+      # Now, REPL supports armv7 only
+      pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
+      at_exit { Process.kill(:TERM, pid) }
+      env << " RM_ENABLE_REPL=true"
+      repl_mode = true
+    end
   end
-
-  pid = spawn(File.join(App.config.bindir, 'ios/tunnel'))
-  at_exit { Process.kill(:TERM, pid) }
 
   deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
@@ -289,6 +297,12 @@ task :device => :archive do
     $deployed_app_path = `#{cmd}`.strip
   else
     sh(cmd)
+  end
+
+  if repl_mode
+    # Launch the REPL.
+    kernel = File.join(App.config.datadir, "iPhoneOS", "kernel-armv7.bc")
+    sh "\"#{File.join(App.config.bindir, 'repl')}\" \"#{kernel}\" armv7-none-linux-androideabi 0.0.0.0 33333" # To run REPL, now, it need android triple.
   end
 end
 
