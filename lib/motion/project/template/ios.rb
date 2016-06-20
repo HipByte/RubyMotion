@@ -301,8 +301,11 @@ task :device => :archive do
   Signal.trap(:INT) { } if ENV['debug']
   cmd = "#{env} #{deploy} #{flags} \"#{device_id}\" \"#{App.config.archive}\""
   remote_arch = nil
+
   if ENV['install_only']
     $deployed_app_path = `#{cmd}`.strip
+  elsif ENV['debug']
+    system(cmd)
   else
     remote_arch = `#{cmd}`.strip
   end
