@@ -93,26 +93,53 @@ namespace :watch do
       App.fail 'The `payload=path/to/payload.json` option is required with `type=notification`.'
     end
 
+    payload = nil
+    if ENV['payload']
+      payload =  File.expand_path(ENV['payload'])
+      if !File.exist?(payload)
+        App.fail "The payload file `#{payload}` does not exist."
+      end
+    end
+
     unless ENV["skip_build"]
       Rake::Task["build:simulator"].invoke
     end
 
-    app = App.config.app_bundle('iPhoneSimulator')
-    sim = File.join(App.config.bindir, 'watch-sim')
-
-    command = "'#{sim}' '#{app}' -developer-dir '#{App.config.xcode_dir}'"
-    command << " -verbose #{App::VERBOSE ? 'YES' : 'NO'}"
-    command << " -start-suspended #{ENV['no_continue'] ? 'YES' : 'NO'}"
-    command << " -display #{ENV['display']}" if ENV['display']
-    command << " -type #{ENV['type']}" if ENV['type']
-    command << " -notification-payload '#{ENV['payload']}'" if ENV['payload']
-
-    if App::VERBOSE
-      puts command
+    kernel_path = nil
+    target_triple = nil
+    if watch_extension.type == :watchapp
+      kernel_path = File.join(App.config.datadir, '../../watchos/2.0', 'WatchSimulator', "kernel-i386.bc")
+      target_triple = "i386-apple-ios2.0.0"
     else
-      App.info 'Simulate', watch_extension.destination_bundle_path
+      kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
+      target_triple = "x86_64-apple-ios5.0.0"
     end
-    system(command)
+    app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
+
+    repl_launcher = Motion::Project::REPLLauncher.new({
+      "arguments" => ENV['args'],
+      "debug-mode" => !!ENV['debug'],
+      "start-suspended" => !!ENV['no_continue'],
+      "app-bundle-path" => app_bundle,
+      "xcode-path" => App.config.xcode_dir,
+      "device-name" => ENV["device_name"],
+      "watchkit-notification-payload" => payload,
+      "watchkit-launch-mode" => ENV['type'],
+      "display-type" => ENV['display'],
+      "kernel-path" => kernel_path,
+      "target-triple" => target_triple,
+      "local-port" => watch_extension.local_repl_port,
+      "device-hostname" => "0.0.0.0",
+      "sdk-version" => App.config.sdk_version,
+      "device-family" => App.config.device_family_ints[0],
+      "platform" => "WatchOSSimulator",
+      "verbose" => App::VERBOSE
+    })
+
+    at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
+    Signal.trap(:INT) { } if ENV['debug']
+    repl_launcher.launch
+    App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
     exit($?.exitstatus)
   end
 

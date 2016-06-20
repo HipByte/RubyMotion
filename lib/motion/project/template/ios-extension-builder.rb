@@ -232,9 +232,13 @@ extern "C" {
     void rb_define_global_const(const char *, void *);
     void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
+    void ruby_init_device_repl(void);
 EOS
       app_objs.each do |_, init_func|
         init_txt << "void #{init_func}(void *, void *);\n"
+      end
+      if config.development?
+        init_txt << "int rm_repl_port = #{config.local_repl_port(platform)};\n"
       end
       init_txt << <<EOS
 }
@@ -256,6 +260,9 @@ RubyMotionInit(int argc, char **argv)
 #endif
       void *self = rb_vm_top_self();
 EOS
+      if config.development?
+        init_txt << "ruby_init_device_repl();\n"
+      end
       init_txt << config.define_global_env_txt
 
       unless target_frameworks.empty?
