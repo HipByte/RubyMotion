@@ -32,6 +32,7 @@ App.template = :ios
 require 'motion/project'
 require 'motion/project/template/ios/config'
 require 'motion/project/template/ios/builder'
+require 'motion/project/repl_launcher'
 
 desc "Build the project, then run the simulator"
 task :default => :simulator
@@ -127,7 +128,6 @@ task :watch => 'watch:simulator'
 desc "Run the simulator"
 task :simulator do
   deployment_target = Motion::Util::Version.new(App.config.deployment_target)
-
   target = ENV['target']
   if target && Motion::Util::Version.new(target) < deployment_target
     App.fail "It is not possible to simulate an SDK version (#{target}) " \
@@ -135,42 +135,9 @@ task :simulator do
   end
   target ||= App.config.sdk_version
 
-  # May be overridden on Xcode <= 5 with the `device_family' option (see below)
-  #
-  # TODO This argument is required for the `sim` tool, but it's ignored for
-  #      Xcode >= 6. We should get rid of it at some point.
-  #
   family_int = App.config.device_family_ints[0]
-
-  xcode_version = Motion::Util::Version.new(App.config.xcode_version.first)
-  if xcode_version >= Motion::Util::Version.new('6')
-    if ENV['device_family'] || ENV['retina']
-      simctl = File.join(App.config.xcode_dir, 'Platforms/iPhoneSimulator.platform/Developer/usr/bin/simctl')
-      App.fail "Starting with Xcode 6 / iOS Simulator 8, the `device_family' " \
-               "and `retina' options are no longer valid. Instead, use the " \
-               "`device_name' option which takes the name of one of the " \
-               "configured device-sets found in Xcode -> Window -> Devices " \
-               "or under `Devices' in the output of: $ #{simctl} list"
-    end
-  else
-    if family = ENV['device_family']
-      family_int = App.config.device_family_int(family.downcase.intern)
-    end
-
-    retina = ENV['retina']
-    if retina && retina.strip.downcase == 'false' && family_int == 1 # iPhone only
-      ios_7 = Motion::Util::Version.new('7')
-      if Motion::Util::Version.new(target) >= ios_7
-        if deployment_target < ios_7
-          App.fail "In order to simulate on a non-retina device, please use " \
-                   "the `target' option to specify the simulated SDK version. " \
-                   "E.g.: rake target=#{deployment_target} retina=false"
-        else
-          App.fail "It is not possible to simulate on a non-retina device " \
-                   "when not deploying to iOS < 7."
-        end
-      end
-    end
+  if family = ENV['device_family']
+    family_int = App.config.device_family_int(family.downcase.intern)
   end
 
   if ENV['background_fetch']
@@ -185,7 +152,6 @@ task :simulator do
   unless ENV["skip_build"]
     Rake::Task["build:simulator"].invoke
   end
-  app = App.config.app_bundle('iPhoneSimulator')
 
   if ENV['TMUX']
     tmux_default_command = `tmux show-options -g default-command`.strip
@@ -213,22 +179,40 @@ END
     end
   end
 
-  device_name = ENV["device_name"]
-  simulate_device = App.config.device_family_string(device_name, family_int, target, retina)
+  target_triple = ''
+  kernel_path = ''
+  if App.config.archs['iPhoneSimulator'].include?('x86_64')
+    kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
+    target_triple = "x86_64-apple-ios7.0.0"
+  else
+    kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
+    target_triple = "i386-apple-ios5.0.0"
+  end
+  app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
 
-  # Launch the simulator.
-  xcode = App.config.xcode_dir
-  env = "RM_BUILT_EXECUTABLE=\"#{File.expand_path(App.config.app_bundle_executable('iPhoneSimulator'))}\""
-  env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
-  sim = File.join(App.config.bindir, 'ios/sim')
-  debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
-  app_args = (ENV['args'] or '')
-  App.info 'Simulate', app
+  repl_launcher = Motion::Project::REPLLauncher.new({
+    "arguments" => ENV['args'],
+    "debug-mode" => !!ENV['debug'],
+    "spec-mode" => App.config.spec_mode,
+    "start-suspended" => !!ENV['no_continue'],
+    "app-bundle-path" => app_bundle,
+    "xcode-path" => App.config.xcode_dir,
+    "device-name" => ENV["device_name"],
+    "background-fetch" => !!ENV['background_fetch'],
+    "kernel-path" => kernel_path,
+    "target-triple" => target_triple,
+    "device-port" => "33333",
+    "device-hostname" => "0.0.0.0",
+    "sdk-version" => target,
+    "device-family" => family_int,
+    "platform" => "iPhoneSimulator",
+    "verbose" => App::VERBOSE
+  })
+
+  App.info 'Simulate', app_bundle
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']
-  command = "#{env} #{sim} #{debug} #{family_int} \"#{simulate_device}\" #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
-  puts command if App::VERBOSE
-  system(command)
+  repl_launcher.launch
   App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
   exit($?.exitstatus)
 end
@@ -300,14 +284,27 @@ task :device => :archive do
 
     if remote_arch.include?('arm64') && App.config.archs['iPhoneOS'].include?('arm64')
       kernel_path = "kernel-arm64.bc"
-      target_triple = "arm64-apple-ios5.0.0"
+      target_triple = "arm64-apple-ios7.0.0"
     else
       kernel_path = "kernel-armv7.bc"
       target_triple = "armv7-apple-ios5.0.0"
     end
 
     kernel = File.join(App.config.datadir, "iPhoneOS", kernel_path)
-    sh "#{File.join(App.config.bindir, 'repl')} \"#{kernel}\" #{target_triple} 0.0.0.0 33333" # To run REPL, now, it need android triple.
+
+    repl_launcher = Motion::Project::REPLLauncher.new({
+      "arguments" => ENV['args'],
+      "debug-mode" => !!ENV['debug'],
+      "spec-mode" => App.config.spec_mode,
+      "kernel-path" => kernel,
+      "target-triple" => target_triple,
+      "device-port" => "33333",
+      "device-hostname" => "0.0.0.0",
+      "platform" => "iPhoneOS",
+      "verbose" => App::VERBOSE
+    })
+
+    repl_launcher.launch
   end
 end
 

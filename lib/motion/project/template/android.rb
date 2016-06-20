@@ -30,6 +30,7 @@ App.template = :android
 
 require 'motion/project'
 require 'motion/project/template/android/config'
+require 'motion/project/repl_launcher'
 
 desc "Create an application package file (.apk)"
 task :build do
@@ -740,7 +741,17 @@ def run_apk(mode)
           App.fail "Unrecognized device architecture `#{arch}' (expected arm or x86)."
       end
       # Launch the REPL.
-      sh "arch -#{repl_arch} \"#{App.config.bin_exec('repl')}\" \"#{App.config.kernel_path(arch)}\" #{target_triple} 0.0.0.0 #{local_tcp} #{$bs_files.join(' ')}"
+      repl_launcher = Motion::Project::REPLLauncher.new({
+        "kernel-path" => App.config.kernel_path(arch),
+        "target-triple" => target_triple,
+        "device-port" => local_tcp,
+        "device-hostname" => "0.0.0.0",
+        "platform" => "android",
+        "verbose" => App::VERBOSE,
+        "bs_files" => $bs_files
+      })
+
+      repl_launcher.launch
     end
   end
 end

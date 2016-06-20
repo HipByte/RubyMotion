@@ -32,6 +32,7 @@ App.template = :'tvos'
 require 'motion/project'
 require 'motion/project/template/tvos/config'
 require 'motion/project/template/tvos/builder'
+require 'motion/project/repl_launcher'
 
 desc "Build the project, then run the simulator"
 task :default => :simulator
@@ -91,7 +92,6 @@ task :simulator do
     Rake::Task["build:simulator"].invoke
   end
 
-  app = App.config.app_bundle('AppleTVSimulator')
 
   if ENV['TMUX']
     tmux_default_command = `tmux show-options -g default-command`.strip
@@ -111,19 +111,34 @@ END
   # TODO: Do not hardcode
   device_name = "Apple TV 1080p"
 
+  app_bundle = App.config.app_bundle('AppleTVSimulator')
+  target_triple = "x86_64-apple-ios9.1.0"
+  kernel_path = File.join(App.config.datadir, "AppleTVSimulator", "kernel-x86_64.bc")
+
   # Launch the simulator.
-  xcode = App.config.xcode_dir
-  env = " RM_BUILT_EXECUTABLE=\"#{File.expand_path(App.config.app_bundle_executable('AppleTVOS'))}\""
-  env << ' SIM_SPEC_MODE=1' if App.config.spec_mode
-  sim = File.join(App.config.bindir, 'ios/sim')
-  debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
-  app_args = (ENV['args'] or '')
-  App.info 'Simulate', app
+  repl_launcher = Motion::Project::REPLLauncher.new({
+    "arguments" => ENV['args'],
+    "debug-mode" => !!ENV['debug'],
+    "spec-mode" => App.config.spec_mode,
+    "start-suspended" => !!ENV['no_continue'],
+    "app-bundle-path" => app_bundle,
+    "xcode-path" => App.config.xcode_dir,
+    "device-name" => device_name,
+    "background-fetch" => !!ENV['background_fetch'],
+    "kernel-path" => kernel_path,
+    "target-triple" => target_triple,
+    "device-port" => "33333",
+    "device-hostname" => "0.0.0.0",
+    "sdk-version" => target,
+    "device-family" => "3",
+    "platform" => "AppleTVSimulator",
+    "verbose" => App::VERBOSE
+  })
+
+  App.info 'Simulate', app_bundle
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']
-  command = "#{env} #{sim} #{debug} 0 \"#{device_name}\" #{target} \"#{xcode}\" \"#{app}\" #{app_args}"
-  puts command if App::VERBOSE
-  system(command)
+  repl_launcher.launch
   App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
   exit($?.exitstatus)
 end
@@ -169,8 +184,13 @@ task :device => :archive do
     App.fail "Device ID `#{device_id}' not provisioned in profile `#{App.config.provisioning_profile}'"
   end
   env = "XCODE_DIR=\"#{App.config.xcode_dir}\""
+
+  repl_mode = false
   if ENV['debug']
     env << " RM_AVAILABLE_ARCHS='#{App.config.archs['AppleTVOS'].join(':')}'"
+  elsif !ENV['install_only']
+    env << " RM_ENABLE_REPL=true"
+    repl_mode = true
   end
 
   deploy = File.join(App.config.bindir, 'ios/deploy')
@@ -180,7 +200,26 @@ task :device => :archive do
   if ENV['install_only']
     $deployed_app_path = `#{cmd}`.strip
   else
-    sh(cmd)
+    remote_arch = `#{cmd}`.strip
+  end
+
+  if repl_mode
+    target_triple = "arm64-apple-ios7.0.0"
+    kernel = File.join(App.config.datadir, "AppleTVOS", "kernel-arm64.bc")
+
+    repl_launcher = Motion::Project::REPLLauncher.new({
+      "arguments" => ENV['args'],
+      "debug-mode" => !!ENV['debug'],
+      "spec-mode" => App.config.spec_mode,
+      "kernel-path" => kernel,
+      "target-triple" => target_triple,
+      "device-port" => "33333",
+      "device-hostname" => "0.0.0.0",
+      "platform" => "iPhoneOS",
+      "verbose" => App::VERBOSE
+    })
+
+    repl_launcher.launch
   end
 end
 

@@ -2,16 +2,16 @@
 
 # Copyright (c) 2012, HipByte SPRL and contributors
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this
 #    list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -31,6 +31,7 @@ App.template = :osx
 require 'motion/project'
 require 'motion/project/template/osx/config'
 require 'motion/project/template/osx/builder'
+require 'motion/project/repl_launcher'
 
 if Motion::Project::Config.starter?
   App.fail 'You are using RubyMotion Starter. OS X development is not supported in this release. If you would like to write Mac apps you can purchase a paid subscription.'
@@ -69,13 +70,31 @@ task :run do
     env << "REPL_SOCKET_PATH='#{App.config.app_sandbox_repl_socket_path}' "
   end
   sim = File.join(App.config.bindir, 'osx/sim')
-  debug = (ENV['debug'] ? 1 : (App.config.spec_mode ? '0' : '2'))
-  target = App.config.sdk_version
+  target =
   app_args = (ENV['args'] or '')
   App.info 'Run', exec
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']
-  system "#{env} #{sim} #{debug} #{target} \"#{exec}\" #{app_args}"
+
+  target_triple = "x86_64-apple-osx10.7.0"
+  kernel = File.join(App.config.datadir, "MacOSX", "kernel-x86_64.bc")
+
+  repl_launcher = Motion::Project::REPLLauncher.new({
+    "app-bundle-path" => exec,
+    "arguments" => ENV['args'],
+    "debug-mode" => !!ENV['debug'],
+    "spec-mode" => App.config.spec_mode,
+    "kernel-path" => kernel,
+    "target-triple" => target_triple,
+    "device-port" => "33334",
+    "device-hostname" => "0.0.0.0",
+    "platform" => "MacOSX",
+    "sdk-version" => App.config.sdk_version,
+    "verbose" => App::VERBOSE
+  })
+
+  repl_launcher.launch
+
   App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
   exit($?.exitstatus)
 end
