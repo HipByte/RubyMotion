@@ -95,13 +95,13 @@
 = RubyMotion 4.11 =
 
   * The toolchain has been upgraded to LLVM 3.7 for all platforms.
-  * [Android] Updated Android NDK to android-ndk-r11 version. Please update 
+  * [Android] Updated Android NDK to android-ndk-r11 version. Please update
     the Android NDK toolchain by using `motion android-setup' command.
   * [Android] Fixed a bug where Java interfaces that extend an interface
     (ex. `android.text.TextWatcher') would not be available in Ruby.
   * [iOS] RubyMotion Starter now targets iOS 9.3.
   * [iOS, watchOS] Fixed an issue where codesigning causes error with
-    "cannot read entitlement data" with WatchOS app, Extensions and Frameworks 
+    "cannot read entitlement data" with WatchOS app, Extensions and Frameworks
     after updated rake to 11.0.1+.
     Thanks to Taylor for the patch (pull request #241).
 
@@ -145,7 +145,7 @@
   * [Android] Fixed a bug when re-opening a class that was previously defined
     where the build system would generate an incorrect Java class.
   * [Android] Fixed an issue that could cause compilation error when invoking
-    `aapt' and using newer versions of support packages with an older Android 
+    `aapt' and using newer versions of support packages with an older Android
     api version.
   * [iOS, OSX, tvOS] Fixed issue where the REPL would not auto insert the
     suggested autocompletion result.
@@ -253,7 +253,7 @@
   * [iOS, OSX, tvOS, watchOS] Optimized recursive calling. 3 times faster.
   * [Android] Optimized the app executable size when a project has too many
     Ruby source files, by removing unnecessary internal code.
-  * [Android] Updated Android NDK to android-ndk-r10e version. Please update 
+  * [Android] Updated Android NDK to android-ndk-r10e version. Please update
     the Android NDK toolchain by using `motion android-setup' command.
   * [Android] Fixed a bug in `motion android-setup' which couldn't update the
     NDK if `~/.rubymotion-android/ndk' existed.
@@ -278,7 +278,7 @@
   * [iOS, OSX, tvOS, watchOS] Fixed a bug where BigDecimal#to_s would return
     an unexpected string.
   * [iOS, OSX, tvOS, watchOS] Added `:' and `::' modifier in Time#strftime().
-  * [iOS, OSX] Fixed a bug where it could not copy resource files properly from 
+  * [iOS, OSX] Fixed a bug where it could not copy resource files properly from
     the resources directory if it contained `resources' as the directory name,
     like `resources-XXX'. Thanks to Hwee-Boon Yar for the patch (pull request
     #233).
@@ -351,7 +351,7 @@
     correctly return its contents when called from Objective-C in some cases.
     This manifested in UIView#addConstraints not adding certain constraints.
   * [iOS, OSX] Fixed a problem which it would raise an exception in generating
-    BridgeSupport file for 3rd-party library. 
+    BridgeSupport file for 3rd-party library.
     The exception is "Received exception: addFile: Couldn't lookup file: ...".
   * [iOS] Fixed a bug where watchkit apps would have an incorrect identifier.
   * [OSX] Using the OSX 10.11 SDK requires running on OSX 10.11. An error will
@@ -373,9 +373,9 @@
   * [tvOS] Added initial support for Apple TV (simulator only). To create a new
     tvOS app, run 'motion create mytvapp --template=tvos'. (Xcode 7.1 is
     required).
-  * [iOS, OSX] Improved iOS 9 and OS X 10.11 support by fixing some wrong data 
+  * [iOS, OSX] Improved iOS 9 and OS X 10.11 support by fixing some wrong data
     types in BridgeSupport.
-  * [iOS, OSX] Fixed a problem which would cause duplicated symbols error when 
+  * [iOS, OSX] Fixed a problem which would cause duplicated symbols error when
     using Flurry sdk.
   * [iOS, OSX] Improved performance when converting Ruby Array to NSArray
     object. ~20% faster.
@@ -386,7 +386,7 @@
     with `rake profile'.
   * [iOS] Fixed a problem which it couldnt upload app which was built with
     Xcode 7 to iTunes store.
-  * [Android] Fixed a bug where String object could not be used as argument for 
+  * [Android] Fixed a bug where String object could not be used as argument for
     Object#{instance_variable_get, instance_variable_set,
     instance_variable_defined?} and Module#{attr, attr_accessor, attr_reader,
     attr_writer}.
@@ -431,10 +431,10 @@
   * [iOS] Improved iOS 9 ARM64 support.
   * [iOS] Fixed a problem where apps could not compile/link for iOS 9.
   * [iOS] Fixed a problem where `rake debug=1' could not launch the debugger
-    with Xcode 7. 
+    with Xcode 7.
   * [iOS, OSX] Fixed a bug where it would cause `Permission denied' error if
     resource files have read-only permission only when they will be copied into
-    app bundle. 
+    app bundle.
   * [Android] Added support for `def' expressions in the REPL.
   * [Android] Fixed build when `--trace' is passed to Rake.
   * [Android] Fixed a bug where passing blocks to methods in a loop could
@@ -448,7 +448,7 @@
     Settings > General > Profiles and selecting your certificate. Also, arm64
     is not supported with Xcode 7 at this point, so you will have to remove it
     from app.archs['iPhoneOS'] when doing device builds.
-  * [iOS, OSX] Fixed a bug where certain C structures could not be passed to a 
+  * [iOS, OSX] Fixed a bug where certain C structures could not be passed to a
     Ruby block from Objective-C code.
   * [iOS, OSX] Fixed a bug where broken value would be received when a
     Objective-C method returns a small structure on i386 architecture.
@@ -461,7 +461,7 @@
   * [Android] Added Time#to_f.
 
 = RubyMotion 3.12 =
-  
+
   * [Android] Added support for Android M (experimental). To target it, set
     `app.api_version' to `MNC'.
   * [Android] Improved Object#raise to accept an exception class or instance.
@@ -481,7 +481,7 @@
 
   * [iOS] Fixed a bug which UIInterfaceOrientation would cause link error when
     specify iOS 8.2 or below as deployment target.
-  * [iOS, OSX] Improved floating precision for 64-bit environment. 
+  * [iOS, OSX] Improved floating precision for 64-bit environment.
   * [iOS] Fixed a regression where the exception could not be handled on i386
     iOS simulator.
   * [iOS] Fixed a bug where watch apps could be rejected with iTunes Connect.
@@ -491,11 +491,11 @@
   * [iOS] Fixed a bug where watch apps were not able to localize.
   * [iOS, OSX] Fixed a bug where some GLKit structures could not be created.
   * [iOS] Fixed a bug where some GLKit structures could not be created.
-  * [iOS] Added support for enterprise certificate profiles. Thanks James 
+  * [iOS] Added support for enterprise certificate profiles. Thanks James
     Daniels for the patch. (pull request #64)
   * [iOS, OSX] Fixed a crash when generating ctags.
   * [iOS, OSX] Fixed a bug where it could not pass a pointer of structure into
-    into Ruby Block from Objective-C. 
+    into Ruby Block from Objective-C.
   * [OSX] Fixed a bug where GLKit inline functions could not be used on OS X.
   * [Android] Added Kernel#{block_given?,iterator?}.
   * [Android] Added Integer#upto.
@@ -591,7 +591,7 @@
   * [Android] Added support for API level 22. Removed support for very old
     versions of Android that are no longer supported in the SDK.
   * [Android] Added support to generate Ctags file via the `rake ctags' task.
-  * [Android] Fixed a bug where classes.dex would not be re-generated when a 
+  * [Android] Fixed a bug where classes.dex would not be re-generated when a
     resource file was changed. Thanks Eito Katagiri for the patch.
   * [Android] Fixed a bug where running specs would crash.
   * [iOS] Fix a bug where a build error would happen when building a project
@@ -756,7 +756,7 @@
     5 or more arguments will be called from Objective-C code in arm64 device.
   * [OSX] Updated Edit menu to include items generated by Xcode. Thanks to
     Hwee-Boon Yar for the patch (pull request #187).
-  * [Android] Introduced app.manifest, which makes it possible to directly 
+  * [Android] Introduced app.manifest, which makes it possible to directly
     manipulate the contents of the AndroidManifest.xml file from the Rakefile.
     Read the documentation in the "Providing Custom Values" section of the
     Android Project Management guide on the Rubymotion website. Thanks to
@@ -860,7 +860,7 @@
   * [iOS] Create a `UIViewController`, `UINavigationController`, and `UIWindow`
     in the default new application template.
   * [OSX] Only build for 64-bit (`x86_64`) by default.
-  * [iOS] Enabled arm64 support by default for iOS projects. 
+  * [iOS] Enabled arm64 support by default for iOS projects.
   * [iOS] Honour explicit `device_name` or `target` specified by user.
     Specifying both is disallowed, because a device is configured for a
     specific SDK.
