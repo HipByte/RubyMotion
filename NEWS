@@ -1,3 +1,97 @@
+= RubyMotion 4.12 =
+
+  * [iOS, OSX, watchOS, tvOS] Added support for iOS 10, tvOS 10, watchOS 3
+    and macOS 10.12 (experimental). You will need Xcode 8 (beta) for these.
+  * [tvOS, watchOS] Got rid of warning messages when compiling Ruby files.
+  * [iOS, OSX, watchOS, tvOS] Added BigDecimal#{dup, clone} to fix an error in
+    duplication.
+  * [iOS, OSX, watchOS, tvOS] Fixed a use-after-free bug when resolving cycle
+    references in Hash objects.
+  * [iOS, OSX, watchOS, tvOS] Fixed a use-after-free bug in String#<< method.
+  * [iOS, OSX, watchOS, tvOS] Fixed a use-after-free bug on 32-bit environment
+    when invoking an expression in an overridden `dealloc' method.
+  * [iOS, OSX, watchOS, tvOS] Fixed a buffer overrun bug when creating a
+    Regexp literal.
+  * [iOS, OSX, watchOS, tvOS] Fixed a buffer overrun bug when raising an
+    exception.
+  * [iOS, OSX, watchOS, tvOS] Fixed a buffer overrun bug when searching a
+    word in String methods.
+  * [iOS, OSX, watchOS, tvOS] Fixed a buffer overrun bug in String#%.
+  * [iOS, OSX, watchOS, tvOS] Fixed a buffer overflow bug in Bignum#to_s.
+  * [iOS, OSX, watchOS, tvOS] Improved dispatcher performance. ~25% faster.
+  * [iOS, OSX, watchOS, tvOS] Improved performance when creating instances.
+    ~15% faster.
+  * [iOS, OSX, watchOS, tvOS] Improved `new' performance in Proc and Pure Ruby
+    class which does not inherit a Cocoa class. ~2 times faster.
+  * [iOS, OSX, watchOS, tvOS] Improved Hash#{each, each_pair} performance.
+    7 times faster.
+  * [tvOS] Fixed an issue where it cannot search provisioning profile created by
+    Xcode for tvOS app.
+  * [iOS, OSX, watchOS, tvOS] Fixed an issue where dSYM files would not be
+    created if the executable was linked but no .rb file was compiled.
+  * [Android] Improved performance with 3 new features: literal fixnums,
+    optimized arithmetic selectors, and instance variable cache. To get
+    an advantage of these optimizations you only need to recompile your app.
+  * [Android] Improved compilation speed by using incremental DEX file builds.
+  * [Android] Improved compiling time for development by non-optimization.
+  * [Android] Improved `app.vendor_project' to now support a `:filter` value,
+    which can be set as an Array of regexp patterns, and be used to determine
+    which classes of a framework should be covered in the `.bridgesupport' file
+    (useful when vendoring a huge library and only needing a few classes).
+  * [Android] Updated Android NDK to android-ndk-r11c and SDK package version.
+    Please update the Android NDK toolchain by using `motion android-setup'.
+  * [Android] Got rid of warning messages when creating the `libpayload.so'
+    library, which appeared with the new Android NDK.
+  * [Android] Fixed a use-after-free bug when calling block methods.
+  * [Android] Fixed a bug where pure Ruby methods could not be overridden.
+  * [Android] Fixed various issues in Fixnum#!= to conform to the Ruby
+    specifications.
+  * [Android] Fixed various issues in Array.new and Array#{<<, concat, insert,
+    initialize, +, replace, values_at, inspect, to_s, <=>, zip, flatten,
+    flatten!} to conform to the Ruby specifications.
+  * [Android] Fixed various issues in Hash.[] and Hash#{inspect, to_s} to
+    conform to the Ruby specifications.
+  * [Android] Fixed various issues in Enumerable#{count, find_index, member?,
+    include?, select, find_all, first} to conform to the Ruby specifications.
+  * [Android] Fixed various issues in Time.at and Time#{+, -, usec} to conform
+    to the Ruby specifications.
+  * [Android] Fixed various issues in String#{chop, reverse, reverse!, strip,
+    strip!, rstrip, rstrip!} to conform to the Ruby specifications.
+  * [Android] Fixed various issues in `return', `break', Proc.new, Kernel#send
+    and Bignum methods to conform to the Ruby specifications.
+  * [Android] Changed default CPU architecture to `armv7' from `armv5te' in
+    order to avoid `java.lang.OutOfMemoryError: PushLocalFrame' which would
+    happen on some devices when launching an app.
+  * [Android] Fixed a bug where it would cause a crash when passing many
+    arguments into Array#{unshift, insert, values_at}.
+  * [Android] Fixed a bug where it would cause a crash if Array object has
+    many elements with Hash#delete_if.
+  * [Android] Fixed a bug which it would cause a crash if Hash object has many
+    elements with Array#{-, &, |, uniq, uniq!}.
+  * [Android] Fixed a bug which `return' does not return a value immediately at
+    Proc block.
+  * [Android] Fixed a bug where compiler would crash with splat arguments in
+    `case/when' expressions.
+  * [Android] Fixed a bug when vendoring a .jar file that includes a lot of
+    classes (ex. the latest version of Google Play Services).
+  * [Android] Added support for API 24 (experimental).
+  * [Android] Added Java JDK 8 supporting.
+  * [Android] Added Array#{assoc, rassoc, fetch, fill, rotate, rotate!, sort,
+    sort!, sort_by!, sample, shuffle, shuffle!} methods.
+  * [Android] Added Array.try_convert, String.try_convert, Hash.try_convert and
+    Array.[] methods.
+  * [Android] Added Hash#flatten method.
+  * [Android] Added String#{each_byte, bytes, bytesize} methods.
+  * [Android] Added Bignum#{coerce, div, size, remainder, fdiv, quo, magnitude}
+    methods.
+  * [Android] Added Enumerable#{sort, sort_by, zip} methods.
+  * [Android] Added Time#{sec, min, hour, day, mday, mon, month, year, wday,
+    ctime, asctime} methods.
+  * [Android] Added GC.start method.
+  * [Android] Added Kernel#set_vm_debug_logs(boolean) to enable or disable debug
+    logs programmatically.
+  * [Android] Added including Comparable module into String and Time class.
+
 = RubyMotion 4.11 =
 
   * The toolchain has been upgraded to LLVM 3.7 for all platforms.
