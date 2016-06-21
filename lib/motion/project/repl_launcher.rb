@@ -31,7 +31,7 @@ class REPLLauncher
     background-fetch kernel-path xcode-path target-triple device-hostname
     local-port remote-port uses-bs display-type platform device-name
     device-family app-bundle-path sdk-version bs_files watchkit-launch-mode
-    watchkit-notification-payload device-id reloading-path}
+    watchkit-notification-payload device-id}
 
   def initialize(opts)
     opts.each do |key, value|

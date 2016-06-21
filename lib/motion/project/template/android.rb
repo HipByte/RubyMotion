@@ -758,7 +758,6 @@ def run_apk(mode)
         "device-hostname" => "0.0.0.0",
         "platform" => "android",
         "verbose" => App::VERBOSE,
-        "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
         "bs_files" => $bs_files
       })
 

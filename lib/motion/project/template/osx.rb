@@ -93,7 +93,6 @@ task :run do
     "platform" => "MacOSX",
     "sdk-version" => App.config.sdk_version,
     "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
-    "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
     "verbose" => App::VERBOSE
   })
 

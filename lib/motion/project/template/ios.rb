@@ -134,7 +134,6 @@ namespace :watch do
       "device-family" => App.config.device_family_ints[0],
       "platform" => "WatchOSSimulator",
       "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
-      "reloading-path" => File.expand_path(File.join(watch_extension.path, 'app')),
       "verbose" => App::VERBOSE
     })
 
@@ -234,7 +233,6 @@ END
     "device-family" => family_int,
     "platform" => "iPhoneSimulator",
     "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
-    "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
     "verbose" => App::VERBOSE
   })
 
@@ -334,7 +332,6 @@ task :device => :archive do
       "device-id" => device_id,
       "app-bundle-path" => App.config.app_bundle('iPhoneOS'),
       "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
-      "reloading-path" => File.expand_path(File.join(App.config.project_dir, 'app')),
       "verbose" => App::VERBOSE
     })
 
