@@ -4,7 +4,7 @@ class PhotoEditingViewController < UIViewController
 
   def viewDidLoad
     super
-    
+
     self.view.backgroundColor = UIColor.whiteColor
 
     label = UILabel.alloc.init
