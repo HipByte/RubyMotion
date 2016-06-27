@@ -477,7 +477,7 @@ module Bacon
           end
         end
 
-        @error = if e.kind_of? Error
+        @error = if e.is_a? Error
           Counter[e.count_as] += 1
           "#{e.count_as.to_s.upcase} - #{e}"
         else
