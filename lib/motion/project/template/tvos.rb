@@ -253,4 +253,3 @@ namespace :crashlog do
     end
   end
 end
-
