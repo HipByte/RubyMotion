@@ -56,8 +56,7 @@ module Motion; module Project
       config.resources_dirs.flatten!
       config.resources_dirs.uniq!
 
-      # Locate SDK and compilers.
-      sdk = config.sdk(platform)
+      # Locate compilers.
       cc = config.locate_compiler(platform, 'clang')
       cxx = config.locate_compiler(platform, 'clang++')
 
@@ -236,7 +235,6 @@ EOS
         App.info 'Create', relative_path(File.dirname(main_exec))
         FileUtils.mkdir_p(File.dirname(main_exec))
       end
-      main_exec_created = false
       if !File.exist?(main_exec) \
           or File.mtime(config.project_file) > File.mtime(main_exec) \
           or objs.any? { |path, _| File.mtime(path) > File.mtime(main_exec) } \
@@ -259,8 +257,6 @@ EOS
           end
         end || ""
         sh "#{cxx} -o \"#{main_exec}\" #{objs_list} #{config.ldflags(platform)} -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs} -single_module -compatibility_version 1 -current_version 1 -undefined dynamic_lookup -dynamiclib -read_only_relocs suppress -dead_strip -install_name @rpath/#{config.name}.framework/#{config.name} -Xlinker -rpath -Xlinker @executable_path/Frameworks -Xlinker -rpath -Xlinker @loader_path/Frameworks"
-
-        main_exec_created = true
       end
 
       # Compile IB resources.

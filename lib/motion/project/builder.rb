@@ -52,8 +52,7 @@ module Motion; module Project;
       config.resources_dirs.flatten!
       config.resources_dirs.uniq!
 
-      # Locate SDK and compilers.
-      sdk = config.sdk(platform)
+      # Locate compilers.
       cc = config.locate_compiler(platform, 'clang')
       cxx = config.locate_compiler(platform, 'clang++')
 
@@ -661,7 +660,7 @@ EOS
           config.add_images_from_asset_bundles(platform)
           actool_compiled_files.delete(partial_info_plist)
         end
-        produced_resources = actool_compiled_files.map { |f| File.basename(f) }
+        actool_compiled_files.map { |f| File.basename(f) }
       end
     end
 

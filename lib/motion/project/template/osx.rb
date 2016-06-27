@@ -69,9 +69,6 @@ task :run do
   if App.config.needs_repl_sandbox_entitlements?
     env << "REPL_SOCKET_PATH='#{App.config.app_sandbox_repl_socket_path}' "
   end
-  sim = File.join(App.config.bindir, 'osx/sim')
-  target =
-  app_args = (ENV['args'] or '')
   App.info 'Run', exec
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
   Signal.trap(:INT) { } if ENV['debug']

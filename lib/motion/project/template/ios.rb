@@ -106,7 +106,6 @@ namespace :watch do
     end
 
     kernel_path = nil
-    target_triple = nil
     if watch_extension.type == :watchapp
       kernel_path = File.join(App.config.datadir, '../../watchos/2.0', 'WatchSimulator', "kernel-i386.bc")
       target_triple = "i386-apple-ios2.0.0"
@@ -310,7 +309,6 @@ task :device => :archive do
 
   if repl_mode
     kernel_path = nil
-    target_triple = nil
 
     if remote_arch.include?('arm64') && App.config.archs['iPhoneOS'].include?('arm64')
       kernel_path = "kernel-arm64.bc"

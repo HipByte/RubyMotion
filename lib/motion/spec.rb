@@ -699,7 +699,7 @@ class Proc
 
   def change?
     pre_result = yield
-    called = call
+    call
     post_result = yield
     pre_result != post_result
   end

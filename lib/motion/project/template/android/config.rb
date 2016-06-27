@@ -465,7 +465,7 @@ module Motion; module Project;
 
     def ctags_files
       ctags_files = vendored_bs_files + files.flatten
-      ctags_files += Dir.glob(File.join(versioned_datadir, 'BridgeSupport/*.bridgesupport'))
+      ctags_files + Dir.glob(File.join(versioned_datadir, 'BridgeSupport/*.bridgesupport'))
     end
 
     def ctags_config_file
