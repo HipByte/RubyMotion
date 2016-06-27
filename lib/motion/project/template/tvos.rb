@@ -27,7 +27,7 @@ require 'motion/project/app'
 require 'motion/util/version'
 
 App = Motion::Project::App
-App.template = :'tvos'
+App.template = :tvos
 
 require 'motion/project'
 require 'motion/project/template/tvos/config'
