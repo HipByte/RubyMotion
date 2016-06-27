@@ -126,7 +126,7 @@ module Bacon
     end
 
     def handle_summary
-      print ErrorLog  if Backtraces
+      print ErrorLog if Backtraces
       puts "%d specifications (%d requirements), %d failures, %d errors" %
         Counter.values_at(:specifications, :requirements, :failed, :errors)
     end
@@ -151,7 +151,7 @@ module Bacon
 
     def handle_summary
       puts "", "Finished in #{Time.now - @timer} seconds."
-      puts ErrorLog  if Backtraces
+      puts ErrorLog if Backtraces
       puts "%d tests, %d assertions, %d failures, %d errors" %
         Counter.values_at(:specifications, :requirements, :failed, :errors)
     end
@@ -204,7 +204,7 @@ module Bacon
 
     def handle_summary
       puts "", "Finished in #{Time.now - @timer} seconds."
-      puts ErrorLog  if Backtraces
+      puts ErrorLog if Backtraces
       puts "%d tests, %d assertions, %d failures, %d errors" %
         Counter.values_at(:specifications, :requirements, :failed, :errors)
     end
@@ -234,7 +234,7 @@ module Bacon
       else
         puts "not ok %d - %s: %s" %
           [@@count, @description, error]
-        puts ErrorLog.strip.gsub(/^/, '# ')  if Backtraces
+        puts ErrorLog.strip.gsub(/^/, '# ') if Backtraces
       end
 
       @@count += 1
@@ -261,11 +261,11 @@ module Bacon
         puts "ok - %s" % [@description]
       else
         puts "not ok - %s: %s" % [@description, error]
-        puts ErrorLog.strip.gsub(/^/, '# ')  if Backtraces
+        puts ErrorLog.strip.gsub(/^/, '# ') if Backtraces
       end
     end
 
-    def handle_summary;  end
+    def handle_summary; end
   end
 
   Outputs = {
@@ -610,7 +610,7 @@ module Bacon
     end
 
     def it(description, &block)
-      return  unless description =~ RestrictName
+      return unless description =~ RestrictName
       block ||= proc { should.flunk "not implemented" }
       Counter[:specifications] += 1
       @specifications << Specification.new(self, description, block, @before, @after)
@@ -706,12 +706,12 @@ end
 
 class Numeric
   def close?(to, delta)
-    (to.to_f - self).abs <= delta.to_f  rescue false
+    (to.to_f - self).abs <= delta.to_f rescue false
   end
 end
 
 class Object
-  def should(*args, &block)    Should.new(self).be(*args, &block)         end
+  def should(*args, &block) Should.new(self).be(*args, &block) end
 end
 
 module Kernel
@@ -726,7 +726,7 @@ end
 class Should
   # Kills ==, ===, =~, eql?, equal?, frozen?, instance_of?, is_a?,
   # kind_of?, nil?, respond_to?, tainted?
-  instance_methods.each { |name| undef_method name  if name =~ /\?|^\W+$/ }
+  instance_methods.each { |name| undef_method name if name =~ /\?|^\W+$/ }
 
   def initialize(object)
     @object = object
@@ -747,7 +747,7 @@ class Should
     if args.empty?
       self
     else
-      block = args.shift  unless block_given?
+      block = args.shift unless block_given?
       satisfy(*args, &block)
     end
   end
@@ -765,7 +765,7 @@ class Should
     r = yield(@object, *args)
     if Bacon::Counter[:depth] > 0
       Bacon::Counter[:requirements] += 1
-      raise Bacon::Error.new(:failed, description)  unless @negated ^ r
+      raise Bacon::Error.new(:failed, description) unless @negated ^ r
       r
     else
       @negated ? !r : !!r
@@ -773,7 +773,7 @@ class Should
   end
 
   def method_missing(name, *args, &block)
-    name = "#{name}?"  if name.to_s =~ /\w[^?]\z/
+    name = "#{name}?" if name.to_s =~ /\w[^?]\z/
 
     desc = @negated ? "not " : ""
     desc << @object.inspect << "." << name.to_s

@@ -95,7 +95,7 @@ namespace :watch do
 
     payload = nil
     if ENV['payload']
-      payload =  File.expand_path(ENV['payload'])
+      payload = File.expand_path(ENV['payload'])
       if !File.exist?(payload)
         App.fail "The payload file `#{payload}` does not exist."
       end
