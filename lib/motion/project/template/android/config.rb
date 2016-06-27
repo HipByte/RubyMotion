@@ -162,8 +162,8 @@ module Motion; module Project;
           activity['android:name'] = -> { main_activity }
           activity['android:label'] = -> { name }
           activity.add_child('intent-filter') do |filter|
-            filter.add_child('action', 'android:name' => 'android.intent.action.MAIN' )
-            filter.add_child('category', 'android:name' => 'android.intent.category.LAUNCHER' )
+            filter.add_child('action', 'android:name' => 'android.intent.action.MAIN')
+            filter.add_child('category', 'android:name' => 'android.intent.category.LAUNCHER')
           end
         end
       end
