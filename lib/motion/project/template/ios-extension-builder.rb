@@ -155,7 +155,7 @@ module Motion; module Project
             @compiler[job][arch].puts "#{asm}\n#{init_func}\n#{path}"
             @compiler[job][arch].gets # wait to finish compilation
 
-            if !File.exists?(asm)
+            if !File.exist?(asm)
               App.fail "File '#{rpath}' failed to compile"
             end
 

@@ -374,7 +374,7 @@ EOS
       native_lib_subpath = "#{libs_abi_subpath}/#{File.basename(native_lib_src)}"
       native_lib_path = "#{app_build_dir}/#{native_lib_subpath}"
       native_libs << native_lib_subpath
-      if !File.exists?(native_lib_path) \
+      if !File.exist?(native_lib_path) \
           or File.mtime(native_lib_src) > File.mtime(native_lib_path)
         App.info 'Create', native_lib_path
         sh "/usr/bin/install -p #{native_lib_src} #{File.dirname(native_lib_path)}"

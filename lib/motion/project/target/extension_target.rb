@@ -46,7 +46,7 @@ module Motion; module Project
       # Codesign bundled .app (Only for watchkit extensions)
       watchapp_dir = Dir["#{extension_dir}/*.app"].sort_by{ |f| File.mtime(f) }.last
       watchapp_dir = File.expand_path(watchapp_dir) unless watchapp_dir.nil?
-      if watchapp_dir && Dir.exists?(watchapp_dir)
+      if watchapp_dir && Dir.exist?(watchapp_dir)
         entitlements = File.join(watchapp_dir, "Entitlements.plist")
         codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(@config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
         system "#{codesign_cmd} -f -s \"#{@config.codesign_certificate}\" --entitlements \"#{entitlements}\" \"#{watchapp_dir}\""
