@@ -95,10 +95,10 @@ module Motion; module Project;
     register :android
 
     variable :sdk_path, :ndk_path, :package, :main_activity, :sub_activities,
-      :api_version, :target_api_version, :archs, :assets_dirs, :icon,
-      :logs_components, :version_code, :version_name, :permissions, :features,
-      :optional_features, :services, :application_class, :manifest, :theme,
-      :support_libraries
+             :api_version, :target_api_version, :archs, :assets_dirs, :icon,
+             :logs_components, :version_code, :version_name, :permissions, :features,
+             :optional_features, :services, :application_class, :manifest, :theme,
+             :support_libraries
 
     # Non-public.
     attr_accessor :vm_debug_logs, :libs

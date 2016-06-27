@@ -31,9 +31,9 @@ module Motion; module Project;
     register :osx
 
     variable :icon, :copyright, :category,
-        :embedded_frameworks, :external_frameworks,
-        :codesign_for_development, :codesign_for_release,
-        :eval_support
+             :embedded_frameworks, :external_frameworks,
+             :codesign_for_development, :codesign_for_release,
+             :eval_support
 
     def initialize(project_dir, build_mode)
       super

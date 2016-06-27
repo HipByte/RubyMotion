@@ -31,8 +31,8 @@ module Motion; module Project;
     register :ios
 
     variable :device_family, :interface_orientations, :background_modes,
-      :status_bar_style, :icons, :prerendered_icon, :fonts, :seed_id,
-      :provisioning_profile, :manifest_assets
+             :status_bar_style, :icons, :prerendered_icon, :fonts, :seed_id,
+             :provisioning_profile, :manifest_assets
 
     def initialize(project_dir, build_mode)
       super

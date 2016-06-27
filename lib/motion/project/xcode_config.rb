@@ -31,9 +31,9 @@ require 'socket'
 module Motion; module Project;
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
-      :weak_frameworks, :embedded_frameworks, :external_frameworks, :framework_search_paths,
-      :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class, :embed_dsym,
-      :version
+             :weak_frameworks, :embedded_frameworks, :external_frameworks, :framework_search_paths,
+             :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class, :embed_dsym,
+             :version
 
     def initialize(project_dir, build_mode)
       super
@@ -100,7 +100,7 @@ module Motion; module Project;
       # sdk_version
       platforms.each do |platform|
         sdk_path = File.join(platforms_dir, platform + '.platform',
-            "Developer/SDKs/#{platform}#{sdk_version}.sdk")
+                             "Developer/SDKs/#{platform}#{sdk_version}.sdk")
         unless File.exist?(sdk_path)
           App.fail "Can't locate #{platform} SDK #{sdk_version} at `#{sdk_path}'"
         end
@@ -197,7 +197,7 @@ module Motion; module Project;
 
     def sdk(platform)
       path = File.join(platform_dir(platform), 'Developer/SDKs',
-        platform + sdk_version + '.sdk')
+                       platform + sdk_version + '.sdk')
       escape_path(path)
     end
 
