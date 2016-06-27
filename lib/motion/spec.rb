@@ -176,7 +176,7 @@ module Bacon
 
     def handle_summary
       puts ""
-      puts "", ErrorLog  if Backtraces && ! ErrorLog.empty?
+      puts "", ErrorLog  if Backtraces && !ErrorLog.empty?
 
       duration = "%0.2f" % (Time.now - @timer)
       puts "", "Finished in #{duration} seconds."
