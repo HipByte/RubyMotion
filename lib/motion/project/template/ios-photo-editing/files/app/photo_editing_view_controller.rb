@@ -14,8 +14,8 @@ class PhotoEditingViewController < UIViewController
     label.setTranslatesAutoresizingMaskIntoConstraints(false)
     self.view.addSubview(label)
 
-    self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("|-[label]-|", options:0, metrics:nil, views:{"label" => label}))
-    self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-[label]-|", options:0, metrics:nil, views:{"label" => label}))
+    self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("|-[label]-|", options:0, metrics:nil, views:{ "label" => label }))
+    self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-[label]-|", options:0, metrics:nil, views:{ "label" => label }))
   end
 
   def didReceiveMemoryWarning

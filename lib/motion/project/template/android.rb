@@ -100,7 +100,7 @@ task :build do
     library_path = File.join(extras_path, library_relative_path)
     jar_path = File.join(library_path, library_config['jar'])
     if File.exist?(jar_path)
-      vendor_config = {:jar => jar_path}
+      vendor_config = { :jar => jar_path }
       if library_config.fetch('res', false)
         vendor_config[:manifest] = File.join(library_path, 'AndroidManifest.xml')
         vendor_config[:resources] = File.join(library_path, 'res')
@@ -421,7 +421,7 @@ EOS
         else
           # Export a new class.
           infs = md[3].split(',').map { |x| x.strip }
-          current_class = {:super => md[2], :methods => [], :interfaces => infs}
+          current_class = { :super => md[2], :methods => [], :interfaces => infs }
           java_classes[md[1]] = current_class
         end
       elsif md = line.match(/^\t(.+)$/)
