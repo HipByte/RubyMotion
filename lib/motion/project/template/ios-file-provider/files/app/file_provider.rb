@@ -25,7 +25,6 @@ class FileProvider < NSFileProviderExtension
     # TODO: get file size for file at <url> from model
 
     self.fileCoordinator.coordinateWritingItemAtURL(placeholderURL, options:0, error:nil, byAccessor: proc { |error|
-
         metadata = { NSURLFileSizeKey => fileSize }
         NSFileProviderExtension.writePlaceholderAtURL(placeholderURL, withMetadata:metadata, error:nil)
     }.weak!)
