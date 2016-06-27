@@ -471,7 +471,7 @@ EOS
   java_classes.each do |name, klass|
     klass_super = klass[:super]
     klass_super = 'java.lang.Object' if klass_super == '$blank$'
-    if !klass_super.include?('.') and !java_classes.has_key?(klass_super)
+    if !klass_super.include?('.') and !java_classes.key?(klass_super)
       # Super class does not exist, skipping...
       next
     end
@@ -518,7 +518,7 @@ EOS
     java_class_path = paths.join('/')
 
     class_name = File.basename(java_path, '.java')
-    if !java_classes.has_key?(class_name) and class_name != 'R'
+    if !java_classes.key?(class_name) and class_name != 'R'
       # This .java file is not referred in the classes map, so it must have been created in the past. We remove it as well as its associated .class file (if any).
       rm_rf java_path
       rm_rf java_class_path
