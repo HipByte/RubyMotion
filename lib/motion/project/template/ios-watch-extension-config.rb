@@ -57,7 +57,7 @@ module Motion; module Project;
     #
     def name
       @name = ENV['RM_TARGET_HOST_APP_NAME']
-      @name = @name + (watchV2? ? ' WatchKit Extension' : ' WatchKit 1 Extension')
+      @name += (watchV2? ? ' WatchKit Extension' : ' WatchKit 1 Extension')
     end
 
     def name=(name)
@@ -230,7 +230,7 @@ EOS
 
         if ENV['RM_TARGET_HOST_APP_NAME']
           @name = ENV['RM_TARGET_HOST_APP_NAME']
-          @name = @name + (watchV2? ? ' WatchKit App' : ' WatchKit 1 App')
+          @name += (watchV2? ? ' WatchKit App' : ' WatchKit 1 App')
         end
         @version = ENV['RM_TARGET_HOST_APP_VERSION']
         @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
