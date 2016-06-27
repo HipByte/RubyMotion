@@ -87,7 +87,7 @@ module Motion; module Project;
     end
 
     # Assigns the launch image information, found in the `Info.plist` generated
-    # by compiling the asset bundles, to the `info_plist`’s `UILaunchImages`.
+    # by compiling the asset bundles, to the `info_plist`'s `UILaunchImages`.
     #
     # @return [void]
     #
