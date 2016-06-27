@@ -291,8 +291,11 @@ module Bacon
     attr_reader :description
 
     def initialize(context, description, block, before_filters, after_filters)
-      @context, @description, @block = context, description, block
-      @before_filters, @after_filters = before_filters.dup, after_filters.dup
+      @context = context
+      @description = description
+      @block = block
+      @before_filters = before_filters.dup
+      @after_filters = after_filters.dup
 
       @postponed_blocks_count = 0
       @ran_spec_block = false
@@ -412,7 +415,8 @@ module Bacon
         NSObject.cancelPreviousPerformRequestsWithTarget(self, selector:'postponed_change_block_timeout_exceeded', object:nil)
       end
       remove_observer!
-      block, @postponed_block = @postponed_block, nil
+      block = @postponed_block
+      @postponed_block = nil
       run_postponed_block(block)
     end
 
@@ -559,7 +563,8 @@ module Bacon
 
     def initialize(name, before = nil, after = nil, &block)
       @name = name
-      @before, @after = (before ? before.dup : []), (after ? after.dup : [])
+      @before = (before ? before.dup : [])
+      @after = (after ? after.dup : [])
       @block = block
       @specifications = []
       @current_specification_index = 0
