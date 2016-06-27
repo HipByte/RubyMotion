@@ -698,7 +698,7 @@ class Proc
       call
       return false
     }
-    return true
+    true
   end
 
   def change?

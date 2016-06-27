@@ -50,7 +50,7 @@ module Motion; module Project;
         end
       end
 
-      return false
+      false
     end
 
     def run
@@ -86,7 +86,7 @@ module Motion; module Project;
         end
       end
 
-      return dependency
+      dependency
     end
 
     class Constant < Ripper::SexpBuilder

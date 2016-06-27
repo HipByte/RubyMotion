@@ -45,7 +45,7 @@ module Motion; module Util
         return lhs <=> rhs
       end
 
-      return 0
+      0
     end
   end
 end; end

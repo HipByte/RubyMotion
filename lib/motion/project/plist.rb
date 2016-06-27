@@ -36,7 +36,7 @@ module Motion
 EOS
         cat_element(plist, str, 1)
         str << "</plist>\n"
-        return str
+        str
       end
 
       def indent_line(line, indent)
