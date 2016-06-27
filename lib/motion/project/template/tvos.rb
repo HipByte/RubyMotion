@@ -92,7 +92,6 @@ task :simulator do
     Rake::Task["build:simulator"].invoke
   end
 
-
   if ENV['TMUX']
     tmux_default_command = `tmux show-options -g default-command`.strip
     unless tmux_default_command.include?("reattach-to-user-namespace")

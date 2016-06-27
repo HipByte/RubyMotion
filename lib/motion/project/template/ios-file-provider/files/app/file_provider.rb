@@ -6,7 +6,6 @@ class FileProvider < NSFileProviderExtension
     fileCoordinator
   end
 
-
   def init
     super
     self.fileCoordinator.coordinateWritingItemAtURL(self.documentStorageURL, options:0, error:nil, byAccessor: proc { |newURL|
@@ -51,7 +50,6 @@ class FileProvider < NSFileProviderExtension
       completionHandler.call(fileError)
     end
   end
-
 
   def itemChangedAtURL(url)
     # Called at some point after the file has changed; the provider may then trigger an upload

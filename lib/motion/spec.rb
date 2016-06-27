@@ -666,7 +666,6 @@ module Bacon
   end
 end
 
-
 class Object
   def true?; false; end
   def false?; false; end
@@ -710,7 +709,6 @@ class Numeric
     (to.to_f - self).abs <= delta.to_f  rescue false
   end
 end
-
 
 class Object
   def should(*args, &block)    Should.new(self).be(*args, &block)         end
