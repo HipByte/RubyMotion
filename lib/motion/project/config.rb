@@ -208,9 +208,10 @@ module Motion; module Project
 
     def opt_level
       @opt_level ||= case @build_mode
-        when :development; 0
-        when :release; 3
-        else; 0
+        when :release
+          3
+        else
+          0
       end
     end
 
