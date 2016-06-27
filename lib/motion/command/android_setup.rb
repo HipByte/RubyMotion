@@ -141,7 +141,7 @@ module Motion; class Command
          puts "Installed SDK is up-to-date."
       else
          puts "Updating SDK..."
-        system("\"#{android_executable}\" update sdk --all --no-ui --filter #{packages_list.join(',')}")
+         system("\"#{android_executable}\" update sdk --all --no-ui --filter #{packages_list.join(',')}")
       end
     end
 
