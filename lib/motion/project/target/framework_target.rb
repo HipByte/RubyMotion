@@ -77,4 +77,4 @@ module Motion; module Project
       `#{cmd}`.strip.split("\n")
     end
   end
-end;end
+end; end
