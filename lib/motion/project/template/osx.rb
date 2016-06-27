@@ -71,7 +71,7 @@ task :run do
   end
   App.info 'Run', exec
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the process crashes and leaves the terminal without echo.
-  Signal.trap(:INT) { } if ENV['debug']
+  Signal.trap(:INT) {} if ENV['debug']
 
   if App.config.archs["MacOSX"].include?("x86_64")
     kernel = File.join(App.config.datadir, "MacOSX", "kernel-x86_64.bc")

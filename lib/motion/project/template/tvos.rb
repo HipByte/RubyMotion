@@ -137,7 +137,7 @@ END
 
   App.info 'Simulate', app_bundle
   at_exit { system("stty echo") } if $stdout.tty? # Just in case the simulator launcher crashes and leaves the terminal without echo.
-  Signal.trap(:INT) { } if ENV['debug']
+  Signal.trap(:INT) {} if ENV['debug']
   repl_launcher.launch
   App.config.print_crash_message if $?.exitstatus != 0 && !App.config.spec_mode
   exit($?.exitstatus)
@@ -195,7 +195,7 @@ task :device => :archive do
 
   deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
-  Signal.trap(:INT) { } if ENV['debug']
+  Signal.trap(:INT) {} if ENV['debug']
   cmd = "#{env} #{deploy} #{flags} -tvos \"#{device_id}\" \"#{App.config.archive}\""
   if ENV['install_only']
     $deployed_app_path = `#{cmd}`.strip

@@ -127,7 +127,7 @@ module Motion; module Project;
         # module A; end
         when :class, :module
           klass = get_full_const_path(sexp[1])
-          register_referred_constants(parents, klass.dup.tap {|a| a.pop})
+          register_referred_constants(parents, klass.dup.tap { |a| a.pop })
           parents.concat(klass)
           @defined << parents.join('::')
           if sexp[0] == :class

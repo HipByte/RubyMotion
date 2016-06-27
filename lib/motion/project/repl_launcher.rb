@@ -57,7 +57,7 @@ class REPLLauncher
         args << " --#{key}"
       elsif value
         if key == "bs_files"
-          args << value.map { |v| " --uses-bs \"#{File.expand_path(v)}\""}.join('')
+          args << value.map { |v| " --uses-bs \"#{File.expand_path(v)}\"" }.join('')
         else
           args << " --#{key} \"#{value}\""
         end

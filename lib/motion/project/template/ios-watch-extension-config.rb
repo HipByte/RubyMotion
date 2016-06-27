@@ -73,7 +73,7 @@ module Motion; module Project;
     # TODO datadir should not depend on the template name
     def supported_versions
       if watchV2?
-        @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'watchos', '*')).select{|path| File.directory?(path)}.map do |path|
+        @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'watchos', '*')).select{ |path| File.directory?(path) }.map do |path|
           File.basename path
         end
       else

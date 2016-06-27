@@ -282,7 +282,7 @@ module Motion; module Project;
 
     # TODO datadir should not depend on the template name
     def supported_versions
-      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'ios', '*')).select{|path| File.directory?(path)}.map do |path|
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'ios', '*')).select{ |path| File.directory?(path) }.map do |path|
         File.basename path
       end
     end

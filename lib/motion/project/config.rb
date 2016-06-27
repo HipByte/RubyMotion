@@ -146,7 +146,7 @@ module Motion; module Project
     end
 
     def supported_versions
-      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', template.to_s, '[1-9]*')).select{|path| File.directory?(path)}.map do |path|
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', template.to_s, '[1-9]*')).select{ |path| File.directory?(path) }.map do |path|
         File.basename path
       end
     end

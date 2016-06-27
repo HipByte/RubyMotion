@@ -678,7 +678,7 @@ def run_apk(mode)
       App.info 'Debug', App.config.apk_path
       start_activity(activity_path, mode)
       at_exit { system("/bin/stty echo") } # make sure we set terminal echo back in case ndk-gdb messes it up
-      trap('INT') { } # do nothing on ^C, since we wand ndk-gdb to handle it
+      trap('INT') {} # do nothing on ^C, since we wand ndk-gdb to handle it
       line = "\"#{App.config.ndk_path}/ndk-gdb\" #{adb_mode_flag(mode)} --adb=\"#{adb_path}\" -x \"#{App.config.motiondir}/lib/motion/project/template/android/gdb.setup\""
       line << " --verbose" if Rake.application.options.trace
       sh line

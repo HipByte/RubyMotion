@@ -634,7 +634,7 @@ module Bacon
       # FIXME: fix RM-879 and RM-806
       unless Platform.android?
         (parent_context = self).methods(false).each {|e|
-          class<<context; self end.send(:define_method, e) {|*args| parent_context.send(e, *args)}
+          class<<context; self end.send(:define_method, e) { |*args| parent_context.send(e, *args) }
         }
       end
       context
