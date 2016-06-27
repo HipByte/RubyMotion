@@ -115,7 +115,7 @@ module Motion; module Project;
       end
 
       # embedded_frameworks
-      %w{ embedded_frameworks external_frameworks }.each do |attr|
+      %w( embedded_frameworks external_frameworks ).each do |attr|
         value = send(attr)
         if !(value.is_a?(Array) and value.all? { |x| File.exist?(x) and File.extname(x) == '.framework' })
           App.fail "app.#{attr} should be an array of framework paths"

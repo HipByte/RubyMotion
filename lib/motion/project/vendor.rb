@@ -316,7 +316,7 @@ EOS
 
       # Unset environment variables that could potentially make the build
       # to fail.
-      %w{CC CXX CFLAGS CXXFLAGS LDFLAGS}.each { |f| ENV[f] &&= nil }
+      %w(CC CXX CFLAGS CXXFLAGS LDFLAGS).each { |f| ENV[f] &&= nil }
 
       # Build project into a build directory. We delete the build directory
       # each time because Xcode is too stupid to be trusted to use the

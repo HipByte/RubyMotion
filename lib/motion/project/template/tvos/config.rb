@@ -57,7 +57,7 @@ module Motion; module Project;
     end
 
     def platforms
-      %W{AppleTVSimulator AppleTVOS}
+      %W(AppleTVSimulator AppleTVOS)
     end
 
     def local_platform

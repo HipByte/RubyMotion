@@ -456,7 +456,7 @@ module Motion; module Project;
       @logs_components ||= begin
         ary = []
         ary << package_path + ':I'
-        %w{AndroidRuntime chromium dalvikvm Bundle art}.each do |comp|
+        %w(AndroidRuntime chromium dalvikvm Bundle art).each do |comp|
           ary << comp + ':E'
         end
         ary

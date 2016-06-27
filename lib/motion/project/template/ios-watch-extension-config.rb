@@ -82,7 +82,7 @@ module Motion; module Project;
     end
 
     def platforms
-      watchV2? ? %W{WatchSimulator WatchOS} : %W{iPhoneSimulator iPhoneOS}
+      watchV2? ? %W(WatchSimulator WatchOS) : %W(iPhoneSimulator iPhoneOS)
     end
 
     def local_platform
