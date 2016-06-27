@@ -618,9 +618,9 @@ module Bacon
 
     def should(*args, &block)
       if Counter[:depth]==0
-        it('should '+args.first,&block)
+        it('should '+args.first, &block)
       else
-        super(*args,&block)
+        super(*args, &block)
       end
     end
 

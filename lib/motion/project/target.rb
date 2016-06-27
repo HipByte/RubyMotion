@@ -133,7 +133,7 @@ module Motion; module Project
     def system(command)
       env = environment_variables
       if App::VERBOSE
-        env_description = env.map { |k,v| "#{k}='#{v}'" }.join(' ')
+        env_description = env.map { |k, v| "#{k}='#{v}'" }.join(' ')
         puts "cd '#{@full_path}' && env #{env_description} #{command}"
       end
       if use_gemfile?

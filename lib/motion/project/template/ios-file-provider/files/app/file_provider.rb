@@ -11,7 +11,7 @@ class FileProvider < NSFileProviderExtension
     super
     self.fileCoordinator.coordinateWritingItemAtURL(self.documentStorageURL, options:0, error:nil, byAccessor: proc { |newURL|
         error = Pointer.new(:object)
-        NSFileManager.defaultManager.createDirectoryAtURL(newURL,withIntermediateDirectories(true, attributes:nil, error:error))
+        NSFileManager.defaultManager.createDirectoryAtURL(newURL, withIntermediateDirectories(true, attributes:nil, error:error))
     }.weak!)
     self
   end
@@ -43,7 +43,7 @@ class FileProvider < NSFileProviderExtension
     # TODO: get the contents of file at <url> from model
 
     self.fileCoordinator.coordinateWritingItemAtURL(url, options:0, error:error, byAccessor: proc { |newURL|
-        fileData.writeToURL(newURL,options(0, error:fileError))
+        fileData.writeToURL(newURL, options(0, error:fileError))
     })
     if error
       completionHandler.call(error)
@@ -65,7 +65,7 @@ class FileProvider < NSFileProviderExtension
     # Care should be taken that the corresponding placeholder file stays behind after the content file has been deleted.
 
     self.fileCoordinator.coordinateWritingItemAtURL(url, options:NSFileCoordinatorWritingForDeleting, error:nil, byAccessor: proc { |newURL|
-      NSFileManager.defaultManager.removeItemAtURL(newURL,error:nil)
+      NSFileManager.defaultManager.removeItemAtURL(newURL, error:nil)
     })
     self.providePlaceholderAtURL(url, completionHandler:nil)
   end

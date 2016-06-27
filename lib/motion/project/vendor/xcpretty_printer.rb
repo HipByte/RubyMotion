@@ -63,7 +63,7 @@ module Motion; module Project; class Vendor;
     end
 
     def print_run_script(text)
-      format("Script", "'#{text.lines.first.shellsplit[1..-2].join(' ').gsub('\ ',' ')}'")
+      format("Script", "'#{text.lines.first.shellsplit[1..-2].join(' ').gsub('\ ', ' ')}'")
     end
 
     def print_linking(text)
