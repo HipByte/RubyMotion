@@ -330,7 +330,7 @@ EOS
       if !File.exist?(main_exec) \
           or File.mtime(config.project_file) > File.mtime(main_exec) \
           or objs.any? { |path, _| File.mtime(path) > File.mtime(main_exec) } \
-	  or File.mtime(main_o) > File.mtime(main_exec) \
+          or File.mtime(main_o) > File.mtime(main_exec) \
           or vendor_libs.any? { |lib| File.mtime(lib) > File.mtime(main_exec) } \
           or File.mtime(librubymotion) > File.mtime(main_exec)
         App.info 'Link', main_exec
