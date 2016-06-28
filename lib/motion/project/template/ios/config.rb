@@ -334,7 +334,7 @@ EOS
 
     def device_retina_xcode5_string(family, target, retina)
       retina4_string = begin
-        if (target >= '7.0' && App.config.archs['iPhoneSimulator'].include?("x86_64"))
+        if target >= '7.0' && App.config.archs['iPhoneSimulator'].include?("x86_64")
           " Retina (4-inch 64-bit)"
         else
           " Retina (4-inch)"

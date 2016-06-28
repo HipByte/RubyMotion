@@ -29,7 +29,7 @@ class FileProvider < NSFileProviderExtension
         NSFileProviderExtension.writePlaceholderAtURL(placeholderURL, withMetadata:metadata, error:nil)
     }.weak!)
 
-    completionHandler.call(nil) if (completionHandler)
+    completionHandler.call(nil) if completionHandler
   end
 
   def startProvidingItemAtURL(url, completionHandler:completionHandler)
