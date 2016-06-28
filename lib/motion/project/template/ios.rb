@@ -369,10 +369,8 @@ desc "Same as profile:simulator"
 task :profile => ['profile:simulator']
 
 def profiler_templates
-  if App.config.xcode_version[0] >= '6.0'
-    App.config.profiler_known_templates.map do |template_path|
-      File.basename(template_path, File.extname(template_path))
-    end
+  App.config.profiler_known_templates.map do |template_path|
+    File.basename(template_path, File.extname(template_path))
   end
 end
 

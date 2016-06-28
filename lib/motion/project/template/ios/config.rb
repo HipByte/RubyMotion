@@ -260,12 +260,10 @@ EOS
     end
 
     def cflag_version_min(platform)
-      flag = " -miphoneos-version-min=#{deployment_target}"
       if platform == "iPhoneSimulator"
-        ver = xcode_version[0].match(/(\d+)/)
-        if ver[0].to_i >= 5
-          flag = " -mios-simulator-version-min=#{deployment_target}"
-        end
+        flag = " -miphoneos-version-min=#{deployment_target}"
+      else
+        flag = " -mios-simulator-version-min=#{deployment_target}"
       end
       flag
     end
@@ -309,52 +307,7 @@ EOS
           "iPad"
       end
 
-      ver = xcode_version[0].match(/(\d+)/)[0].to_i
-      if ver >= 6
-        (device_name.nil?) ? device + device_retina_xcode6_string(family, target, retina) : device_name
-      elsif ver == 5
-        device + device_retina_xcode5_string(family, target, retina)
-      else
-        device + device_retina_xcode4_string(family, target, retina)
-      end
-    end
-
-    def device_retina_xcode4_string(family, target, retina)
-      case retina
-      when 'true'
-        (family == 1 and target >= '6.0') ? ' (Retina 4-inch)' : ' (Retina)'
-      when '3.5'
-        ' (Retina 3.5-inch)'
-      when '4'
-        ' (Retina 4-inch)'
-      else
-        ''
-      end
-    end
-
-    def device_retina_xcode5_string(family, target, retina)
-      retina4_string = begin
-        if target >= '7.0' && App.config.archs['iPhoneSimulator'].include?("x86_64")
-          " Retina (4-inch 64-bit)"
-        else
-          " Retina (4-inch)"
-        end
-      end
-
-      case retina
-      when 'true'
-        (family == 1 and target >= '6.0') ? retina4_string : ' Retina'
-      when '3.5'
-        ' Retina (3.5-inch)'
-      when '4'
-        ' Retina (4-inch)'
-      else
-        if target < '7.0'
-          ''
-        else
-          (family == 1) ? retina4_string : ''
-        end
-      end
+      (device_name.nil?) ? device + device_retina_xcode6_string(family, target, retina) : device_name
     end
 
     def device_retina_xcode6_string(family, target, retina)

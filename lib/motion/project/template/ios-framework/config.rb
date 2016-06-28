@@ -91,12 +91,10 @@ module Motion; module Project;
     end
 
     def cflag_version_min(platform)
-      flag = " -miphoneos-version-min=#{deployment_target}"
       if platform == "iPhoneSimulator"
-        ver = xcode_version[0].match(/(\d+)/)
-        if ver[0].to_i >= 5
-          flag = " -mios-simulator-version-min=#{deployment_target}"
-        end
+        flag = " -mios-simulator-version-min=#{deployment_target}"
+      else
+        flag = " -miphoneos-version-min=#{deployment_target}"
       end
       flag
     end
@@ -140,15 +138,7 @@ module Motion; module Project;
           "iPad"
       end
 
-      ver = xcode_version[0].match(/(\d+)/)
-      case ver[0].to_i
-      when 6
-        (device_name.nil?) ? device + device_retina_xcode6_string(family, target, retina) : device_name
-      when 5
-        device + device_retina_xcode5_string(family, target, retina)
-      else
-        device + device_retina_xcode4_string(family, target, retina)
-      end
+      (device_name.nil?) ? device + device_retina_xcode6_string(family, target, retina) : device_name
     end
 
     def device_family_ints
