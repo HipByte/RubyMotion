@@ -107,12 +107,12 @@ module Motion; module Project;
 
     def ldflags(platform)
       ldflags = super
-      ldflags << " -fobjc-arc" if deployment_target < '5.0'
+      ldflags << " -fobjc-arc" if Util::Version.new(deployment_target) < Util::Version.new('5.0')
       ldflags
     end
 
     def bridgesupport_flags
-      extra_flags = (osx_host_version >= Util::Version.new('10.7') && sdk_version < '7.0') ? '--no-64-bit' : ''
+      extra_flags = (osx_host_version >= Util::Version.new('10.7') && Util::Version.new(sdk_version) < Util::Version.new('7.0')) ? '--no-64-bit' : ''
       "--format complete #{extra_flags}"
     end
 
