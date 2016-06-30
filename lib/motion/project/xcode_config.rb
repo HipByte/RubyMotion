@@ -365,8 +365,8 @@ module Motion; module Project;
         else
           App.fail("Invalid Instruments template path or name.")
         end
-        unless xcode_dir.downcase.include?("xcode-beta.app")
-          # workaround for RM-599, RM-672 and RM-832. Xcode 6.x beta doesn't need this workaround
+        unless template_path.include?(File.expand_path("#{xcode_dir}/.."))
+          # workaround for RM-599, RM-672 and RM-832.
           template_path = File.expand_path("#{xcode_dir}/../Applications/Instruments.app/Contents/Resources/templates/#{template_path}.tracetemplate")
         end
         optional_data['XrayTemplatePath'] = template_path
