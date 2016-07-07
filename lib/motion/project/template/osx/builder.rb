@@ -111,5 +111,13 @@ module Motion; module Project
         sh(command)
       end
     end
+
+    def embed_provisioning_profile(config, bundle)
+      if config.provisioning_profile
+        bundle_provision = File.join(bundle, "embedded.provisionprofile")
+        App.info 'Copy', bundle_provision
+        FileUtils.cp config.provisioning_profile, bundle_provision
+      end
+    end
   end
 end; end
