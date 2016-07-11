@@ -36,12 +36,10 @@ if Motion::Project::App.template == nil
   require 'motion/project/template/ios'
 end
 
-unless Motion::Project::Config.starter? # TODO
-  unless ENV['RM_TARGET_BUILD']
-    # Check for updates.
-    motion_bin_path = File.join(File.dirname(__FILE__), '../../bin/motion')
-    system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
-  end
+unless ENV['RM_TARGET_BUILD']
+  # Check for updates.
+  motion_bin_path = File.join(File.dirname(__FILE__), '../../bin/motion')
+  system("/usr/bin/ruby \"#{motion_bin_path}\" update --check")
 end
 
 desc "Clear local build objects"
