@@ -445,7 +445,7 @@ module Motion; module Project;
               else
                 ''
               end
-            sh "#{bin_exec('android/gen_bridge_metadata')} -o \"#{bs_file}\" #{filter_args} \"#{jar_file}\""
+            sh "\"#{bin_exec('android/gen_bridge_metadata')}\" -o \"#{bs_file}\" #{filter_args} \"#{jar_file}\""
           end
           bs_file
         end

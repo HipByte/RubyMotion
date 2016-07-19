@@ -195,7 +195,7 @@ task :build do
     end
 
     r_classes = Dir.glob(classes_dir + '/**/R\$*[a-z]*.class').map { |c| "'#{c}'" }
-    sh "RUBYOPT='' #{App.config.bin_exec('android/gen_bridge_metadata')} #{r_classes.join(' ')} -o \"#{r_bs}\" "
+    sh "RUBYOPT='' \"#{App.config.bin_exec('android/gen_bridge_metadata')}\" #{r_classes.join(' ')} -o \"#{r_bs}\" "
 
     classes_changed = true
   end
@@ -546,7 +546,7 @@ EOS
       or classes_changed \
       or vendored_jars.any? { |x| File.mtime(x) > File.mtime(dex_classes) }
     App.info 'Create', dex_classes
-    sh "\"#{App.config.build_tools_dir}/dx\" --dex --no-strict --incremental --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.join(' ')}"
+    sh "\"#{App.config.build_tools_dir}/dx\" --dex --no-strict --incremental --output \"#{dex_classes}\" \"#{classes_dir}\" \"#{App.config.sdk_path}/tools/support/annotations.jar\" #{vendored_jars.compact.map{ |x| "'#{x}'" }.join(' ')}"
   end
 
   keystore = nil
