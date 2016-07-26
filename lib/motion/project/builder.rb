@@ -28,7 +28,7 @@ require 'motion/project/paralel_builder'
 require 'motion/project/dependency'
 require 'motion/project/experimental_dependency'
 
-module Motion; module Project;
+module Motion; module Project
   class Builder
     include Rake::DSL if Object.const_defined?(:Rake) && Rake.const_defined?(:DSL)
 

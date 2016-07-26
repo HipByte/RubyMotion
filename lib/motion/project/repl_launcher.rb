@@ -25,7 +25,7 @@
 
 require 'motion/project/app'
 
-module Motion; module Project;
+module Motion; module Project
 class REPLLauncher
   VALID_VARS = %w(verbose arguments debug-mode spec-mode start-suspended
                   background-fetch kernel-path xcode-path target-triple device-hostname

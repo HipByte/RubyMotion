@@ -26,7 +26,7 @@
 require 'motion/project/template/ios-extension-config'
 require 'motion/project/template/ios/config'
 
-module Motion; module Project;
+module Motion; module Project
   class IOSWatchExtensionConfig < IOSExtensionConfig
     register :'ios-extension'
 

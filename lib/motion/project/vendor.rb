@@ -25,7 +25,7 @@
 
 require 'pathname'
 
-module Motion; module Project;
+module Motion; module Project
   class Vendor
     include Rake::DSL if Rake.const_defined?(:DSL)
 

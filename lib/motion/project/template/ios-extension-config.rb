@@ -26,7 +26,7 @@
 require 'motion/project/xcode_config'
 require 'motion/util/version'
 
-module Motion; module Project;
+module Motion; module Project
   class IOSExtensionConfig < XcodeConfig
     register :'ios-extension'
 

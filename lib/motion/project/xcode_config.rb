@@ -28,7 +28,7 @@ require 'motion/util/code_sign'
 require 'motion/project/target'
 require 'socket'
 
-module Motion; module Project;
+module Motion; module Project
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
              :weak_frameworks, :embedded_frameworks, :external_frameworks, :framework_search_paths,

@@ -25,7 +25,7 @@
 
 require 'socket'
 
-module Motion; module Project;
+module Motion; module Project
 
   class AndroidManifest < Hash
 
