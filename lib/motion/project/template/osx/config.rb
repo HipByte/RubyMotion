@@ -107,6 +107,7 @@ module Motion; module Project
       if needs_repl_sandbox_entitlements?
         files = (dict['com.apple.security.temporary-exception.files.absolute-path.read-only'] ||= [])
         files << datadir('librubymotion-repl.dylib')
+        dict['com.apple.security.network.server'] = true
       end
       Motion::PropertyList.to_s(dict)
     end
