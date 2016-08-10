@@ -44,8 +44,6 @@ module Motion; module Project
                       "CoreGraphics", "ApplicationServices", "AudioToolbox",
                       "AudioUnit", "CoreData", "CoreAudio", "CoreFoundation",
                       "CFNetwork"]
-      # In 10.7, CoreGraphics is a subframework of ApplicationServices
-      @frameworks << 'CoreGraphics' if deployment_target != "10.7"
       @codesign_for_development = false
       @codesign_for_release = true
       @eval_support = false
