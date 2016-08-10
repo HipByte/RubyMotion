@@ -174,7 +174,10 @@ module Motion; module Project
     # @return [String] the lowest OS version that this target will support.
     #
     def deployment_target
-      @deployment_target ||= osx_host_version.segments.first(2).join('.')
+      @deployment_target ||= [
+          Util::Version.new(osx_host_version.segments.first(2).join('.')),
+          Util::Version.new(sdk_version)
+        ].min.to_s
     end
 
     def sdk(platform)
@@ -189,9 +192,11 @@ module Motion; module Project
     end
 
     def supported_sdk_versions(versions)
-      versions.reverse.find { |vers|
-        Util::Version.new(deployment_target) <= Util::Version.new(vers) && File.exist?(datadir(vers))
-      }
+      versions.map { |vers|
+        Util::Version.new(vers)
+      }.sort.reverse.find { |vers|
+        File.exist?(datadir(vers.to_s))
+      }.to_s
     end
 
     def main_cpp_file_txt(spec_objs)
