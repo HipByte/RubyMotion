@@ -111,7 +111,7 @@ module Motion; module Project
         App.fail "Deployment target `#{deployment_target}' must be equal or lesser than SDK version `#{sdk_version}'"
       end
       unless File.exist?(datadir)
-        App.fail "iOS deployment target #{deployment_target} is not supported by this version of RubyMotion"
+        App.fail "Deployment target #{deployment_target} is not supported by this version of RubyMotion"
       end
 
       # embedded_frameworks
@@ -139,7 +139,7 @@ module Motion; module Project
           File.basename(path).scan(/#{deploy_platform}(.*)\.sdk/)[0][0]
         end
         if versions.size == 0
-          App.fail "Can't find an iOS SDK in `#{platforms_dir}'"
+          App.fail "Can't find any SDK in `#{platforms_dir}'"
         end
         supported_version = supported_sdk_versions(versions)
         unless supported_version
