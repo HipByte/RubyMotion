@@ -174,10 +174,12 @@ module Motion; module Project
     # @return [String] the lowest OS version that this target will support.
     #
     def deployment_target
-      @deployment_target ||= [
+      @deployment_target ||= begin
+        [
           Util::Version.new(osx_host_version.segments.first(2).join('.')),
           Util::Version.new(sdk_version)
         ].min.to_s
+      end
     end
 
     def sdk(platform)
