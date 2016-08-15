@@ -261,9 +261,9 @@ EOS
 
     def cflag_version_min(platform)
       if platform == "iPhoneSimulator"
-        flag = " -miphoneos-version-min=#{deployment_target}"
-      else
         flag = " -mios-simulator-version-min=#{deployment_target}"
+      else
+        flag = " -miphoneos-version-min=#{deployment_target}"
       end
       flag
     end
