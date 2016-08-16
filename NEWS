@@ -1,3 +1,40 @@
+= RubyMotion 4.13 =
+
+  * [iOS, OSX, watchOS, tvOS] Added better support for Xcode 8 beta.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug where ENV#inspect would always be an
+    empty hash.
+  * [iOS, tvOS] Fixed a bug where SIM_STDOUT_PATH/SIM_STDERR_PATH do not work
+    if the path of the project contained spaces.
+  * [iOS] Fixed an issue where apps would sometimes fail to install in the iOS
+    simulator.
+  * [OSX] Dropped support for OS X 10.7 and 10.8.
+  * [OSX] Removed debug log which would be displayed with (command + mouse over).
+  * [OSX] Fixed REPL connection for sandboxed apps.
+  * [OSX] Fixed an issue where deployment target would be incorrectly set when
+    running on OS X 10.12 and using Xcode 7.
+  * [watchOS] Removed debug log which would be displayed in REPL.
+  * [Android] Added `undef' method.
+  * [Android] Added BigDecimal and ENV.
+  * [Android] Added Kernel.{Array, String, Integer, Float} methods.
+  * [Android] Added Kernel#<=> and Fixnum#quo methods.
+  * [Android] Added String#upto method.
+  * [Android] Added Symbol#{slice, size} methods.
+  * [Android] Added Object#remove_instance_variable method.
+  * [Android] Changed base class of Time to java.util.Calendar instead of
+    java.util.Date to handle time zone properly.
+  * [Android] Added Time.{mktime, local, utc, gm} methods.
+  * [Android] Added Time#{zone, yday, gmtoff, gmt_offset, utc_offset, getgm,
+    getutc, gmtime, utc, localtime, getlocal, nsec, subsec, tv_sec, tv_usec,
+    tv_nsec, utc?, gmt?, sunday?, monday?, tuesday?, wednesday?, thursday?,
+    friday?, saturday?, isdst, dst?} methods.
+  * [Android] Added Module#{remove_method, const_defined?, remove_const,
+    remove_class_variable} methods.
+  * [Android] Fixed various issues in Module#{to_s, alias_method, undef_method}
+    to conform to the Ruby specifications.
+  * [Android] Fixed various issues in Kernel#sleep and Range#{each, include?,
+    member?, ===} to conform to the Ruby specifications.
+  * [Android] Fixed a bug where Module#ancestors would cause a crash on Module.
+
 = RubyMotion 4.12 =
 
   * [iOS, OSX, watchOS, tvOS] Added support for iOS 10, tvOS 10, watchOS 3
