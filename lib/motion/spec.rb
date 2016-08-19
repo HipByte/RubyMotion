@@ -472,7 +472,7 @@ module Bacon
           }
           ErrorLog << "\n"
         else
-          if defined?(NSException)
+          unless Platform.android?
             # Pure NSException.
             ErrorLog << "#{e.name}: #{e.reason}\n"
           else
