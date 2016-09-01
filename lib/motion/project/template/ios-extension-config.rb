@@ -34,6 +34,8 @@ module Motion; module Project
 
     def initialize(project_dir, build_mode)
       super
+      @version = ENV['RM_TARGET_HOST_APP_VERSION']
+      @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
       @frameworks = ['UIKit', 'Foundation', 'CoreGraphics', 'CoreFoundation',
                      'CFNetwork', 'CoreAudio']
       @device_family = :iphone
