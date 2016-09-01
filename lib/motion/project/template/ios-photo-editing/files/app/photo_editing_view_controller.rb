@@ -43,7 +43,7 @@ class PhotoEditingViewController < UIViewController
 
     # Render and provide output on a background queue.
 
-    Dispatch::Queue.concurrent {
+    Dispatch::Queue.concurrent.async {
       # Create editing output from the editing input.
       output = PHContentEditingOutput.alloc.initWithContentEditingInput(self.input)
 
@@ -57,6 +57,10 @@ class PhotoEditingViewController < UIViewController
 
       # Clean up temporary files, etc.
     }
+  end
+
+  def shouldShowCancelConfirmation
+    false
   end
 
   def cancelContentEditing
