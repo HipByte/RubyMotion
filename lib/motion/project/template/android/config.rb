@@ -325,8 +325,6 @@ module Motion; module Project
       # NDK does not provide headers for versions of Android with no native
       # API changes (ex. 10 and 11 are the same as 9).
       case api_version
-        when '6', '7'
-          '5'
         when '10', '11'
           '9'
         when '22'
