@@ -353,6 +353,7 @@ module Bacon
         view     = view(label_or_view)
         from, to = _extract_start_and_end_points(view, options)
         duration = options[:duration] || Functional.default_duration
+        duration = 0.75 if duration < 0.75
 
         EventDispatcher.dispatch(duration) do
           _event_generator.sendFlickWithStartPoint(from, endPoint:to, duration:duration)
