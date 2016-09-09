@@ -516,7 +516,7 @@ EOS
     end
 
     def supported_sdk_versions(versions)
-      versions.reverse.find { |vers| File.exist?(datadir(vers)) }
+      versions.sort { |x, y| y.to_i <=> x.to_i }.find { |vers| File.exist?(datadir(vers)) }
     end
 
     def main_cpp_file_txt(spec_objs)

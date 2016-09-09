@@ -197,7 +197,7 @@ module Motion; module Project
     end
 
     def supported_sdk_versions(versions)
-      versions.reverse.find { |vers| File.exist?(datadir(vers)) }
+      versions.sort { |x, y| y.to_i <=> x.to_i }.find { |vers| File.exist?(datadir(vers)) }
     end
   end
 end; end
