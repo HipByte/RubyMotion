@@ -25,6 +25,7 @@
 
 require 'pathname'
 require 'motion/project/builder'
+require 'motion/project/experimental_dependency'
 
 module Motion; module Project
   class Builder
@@ -165,7 +166,8 @@ module Motion; module Project
 
       # Resolve file dependencies.
       if config.detect_dependencies == true
-        config.dependencies = Dependency.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
+        klass = ENV['experimental_dependency'] ? ExperimentalDependency : Dependency
+        config.dependencies = klass.new(config.files - config.exclude_from_detect_dependencies, config.dependencies).run
       end
 
       parallel = ParallelBuilder.new(objs_build_dir, build_file)
