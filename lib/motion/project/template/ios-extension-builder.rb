@@ -343,9 +343,21 @@ EOS
             "-stdlib=libc++"
           end
         end || ""
+
+        # Some entitlements are needed for the simulator (e.g. HealthKit) but
+        # instead of signing the app we include them as a section in the
+        # executable like Xcode does.
+        entitlements = ''
+        if config.entitlements.any? && platform.include?('Simulator')
+          build_dir = config.versionized_build_dir(platform)
+          entitlements = File.join(build_dir, "Entitlements.plist")
+          File.open(entitlements, 'w') { |io| io.write(config.entitlements_data) }
+          entitlements = "-Xlinker -sectcreate -Xlinker __TEXT -Xlinker __entitlements -Xlinker \"#{entitlements}\""
+        end
+
         # Use the `-no_implicit_dylibs` linker option to hide the fact that it
         # links against `libextension.dylib` which contains `NSExtensionMain`.
-        sh "#{cxx} -o \"#{main_exec}\" #{objs_list}  -fobjc-link-runtime -fapplication-extension -Xlinker -no_implicit_dylibs #{config.ldflags(platform)} -L\"#{File.join(datadir, platform)}\" -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
+        sh "#{cxx} -o \"#{main_exec}\" #{entitlements} #{objs_list}  -fobjc-link-runtime -fapplication-extension -Xlinker -no_implicit_dylibs #{config.ldflags(platform)} -L\"#{File.join(datadir, platform)}\" -lrubymotion-static -lobjc -licucore #{linker_option} #{framework_search_paths} #{frameworks} #{weak_frameworks} #{config.libs.join(' ')} #{vendor_libs}"
         main_exec_created = true
       end
 
@@ -363,18 +375,19 @@ EOS
           end
         end
       end
-      system "killall ibtoold"
 
       preserve_resources = []
 
       # Compile Asset Catalog bundles.
       assets_bundles = config.assets_bundles
       unless assets_bundles.empty?
-        app_icons_asset_bundle = config.app_icons_asset_bundle
-        if app_icons_asset_bundle
-          app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
-          app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
-                              "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
+        if config.respond_to? :app_icons_asset_bundle
+          app_icons_asset_bundle = config.app_icons_asset_bundle
+          if app_icons_asset_bundle
+            app_icons_info_plist_path = config.app_icons_info_plist_path(platform)
+            app_icons_options = "--output-partial-info-plist \"#{app_icons_info_plist_path}\" " \
+                                "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
+          end
         end
 
         App.info 'Compile', assets_bundles.join(", ")
