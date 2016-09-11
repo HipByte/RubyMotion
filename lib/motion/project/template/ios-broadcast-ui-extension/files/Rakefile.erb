@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = '<%= name %>'
+  app.frameworks << 'ReplayKit'
+  app.info_plist['NSExtension'] = {
+    'NSExtensionAttributes' => {
+      'NSExtensionActivationRule' => {
+        'NSExtensionActivationSupportsReplayKitStreaming' => true
+      },
+    },
+    # Use 'NSExtensionPrincipalClass' if you want to setup the UI in code
+    'NSExtensionPrincipalClass' => 'BroadcastViewController',
+    'NSExtensionPointIdentifier' => 'com.apple.broadcast-services'
+  }
+end

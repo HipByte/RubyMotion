@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = '<%= name %>'
+  app.frameworks << "Intents"
+  app.info_plist['NSExtension'] = {
+    'NSExtensionAttributes' => {
+      'IntentsRestrictedWhileLocked' => [],
+      'IntentsSupported' => %w(
+        INSendMessageIntent
+        INSearchForMessagesIntent
+        INSetMessageAttributeIntent
+      )
+    },
+    'NSExtensionPrincipalClass' => 'IntentHandler',
+    'NSExtensionPointIdentifier' => 'com.apple.intents-service'
+  }
+end

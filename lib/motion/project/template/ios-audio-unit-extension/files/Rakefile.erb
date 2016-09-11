@@ -1,0 +1,62 @@
+# -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
+
+# For more information about building AudioUnit extensions, read the App
+# Extension Programming Guide:
+# https://developer.apple.com/library/content/documentation/General/Conceptual/ExtensibilityPG/AudioUnit.html#//apple_ref/doc/uid/TP40014214-CH22-SW1
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = '<%= name %>'
+  app.frameworks << 'CoreAudioKit'
+  app.frameworks << 'AudioToolbox'
+  app.info_plist['NSExtension'] = {
+    'NSExtensionAttributes' => {
+      'AudioComponents' => [
+        {
+          'name' => '<%= name %>',
+          'description' => '<%= name %>',
+          'factoryFunction' => 'AudioUnitViewController',
+          'sandboxSafe' => true,
+          'version' => 67072,
+
+          # A four character code that identifies the manufacturer of the audio unit
+          'manufacturer' => '1234',
+
+          # A four character code that identifies the subtype of the audio unit
+          'subtype' => '5678',
+
+          # There are 4 types of AudioUnit extensions. Uncomment the one you
+          # want to build:
+
+          # Instrument
+          # 'tags' => ['Synthesizer'],
+          # 'type' => 'aumu',
+
+          # Generator
+          # 'tags' => [],
+          # 'type' => 'augn',
+
+          # Effect
+          # 'tags' => ['Effects'],
+          # 'type' => 'aufx',
+
+          # Music Effect
+          # 'tags' => ['Effects', 'MIDI'],
+          # 'type' => 'aumu',
+        },
+      ],
+    },
+    'NSExtensionPrincipalClass' => 'AudioUnitViewController',
+    'NSExtensionPointIdentifier' => 'com.apple.AudioUnit-UI'
+  }
+
+  app.entitlements['inter-app-audio'] = true
+end

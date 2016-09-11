@@ -1,0 +1,19 @@
+# -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project/template/ios-extension'
+
+begin
+  require 'bundler'
+  Bundler.require
+rescue LoadError
+end
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = '<%= name %>'
+  app.frameworks << 'Messages'
+  app.info_plist['NSExtension'] = {
+    'NSExtensionPrincipalClass' => 'MessagesViewController',
+    'NSExtensionPointIdentifier' => 'com.apple.message-payload-provider'
+  }
+end
