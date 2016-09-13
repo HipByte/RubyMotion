@@ -34,18 +34,16 @@ module Motion; class Command
       Motion::Project::Template.all_templates.keys
     end
 
-    def self.templates_description
-      all_templates.map do |x|
-        x == DefaultTemplate ? "#{x} (default)" : x
-      end.join(', ')
-    end
-
     self.summary = 'Create a new project.'
 
     # Override getter so that we fetch the template names as late as possible.
     def self.description
-      "Create a new RubyMotion project from one of the " \
-      "following templates: #{templates_description}."
+      desc = "Create a new RubyMotion project from one of the following templates: \n"
+      all_templates.each do |x|
+        template = (x == DefaultTemplate) ? "#{x} (default)" : x
+        desc << "  * #{template}\n"
+      end
+      desc
     end
 
     self.arguments = 'APP-NAME'
