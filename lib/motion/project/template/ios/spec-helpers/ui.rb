@@ -197,6 +197,7 @@ module Bacon
           end
 
           # Remove window and ensure a new one will be created on the next run.
+          app.keyWindow.hidden = true
           window.removeFromSuperview
           proper_wait(0.3) # give objects a chance to do their cleanup, otherwise sometimes a segfault will occur
           @window = nil
