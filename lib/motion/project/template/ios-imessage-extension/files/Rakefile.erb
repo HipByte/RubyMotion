@@ -12,7 +12,9 @@ Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = '<%= name %>'
   app.frameworks << 'Messages'
-  app.info_plist['MSMessagesExtensionStoreIconName'] = 'iMessage App Icon'
+  app.icon_name = 'iMessage App Icon'
+  app.product_type = 'com.apple.product-type.app-extension.messages'
+  app.info_plist['MSMessagesExtensionStoreIconName'] = app.icon_name
   app.info_plist['NSExtension'] = {
     'NSExtensionPrincipalClass' => 'MessagesViewController',
     'NSExtensionPointIdentifier' => 'com.apple.message-payload-provider'

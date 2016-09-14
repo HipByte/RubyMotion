@@ -390,6 +390,10 @@ EOS
           end
         end
 
+        extra_option = '--output-partial-info-plist /tmp/assetcatalog_generated_info.plist'
+        extra_option << " --app-icon '#{config.icon_name}'" unless config.icon_name.empty?
+        extra_option << " --product-type #{config.product_type}" unless config.product_type.empty?
+
         App.info 'Compile', assets_bundles.join(", ")
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
@@ -397,7 +401,7 @@ EOS
               "--notices --warnings --platform #{config.deploy_platform.downcase} " \
               "--minimum-deployment-target #{config.deployment_target} " \
               "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
-              "#{app_icons_options} --compress-pngs --compile \"#{app_resources_dir}\" " \
+              "#{app_icons_options} --compress-pngs #{extra_option} --compile \"#{app_resources_dir}\" " \
               "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
         $stderr.puts(cmd) if App::VERBOSE
         actool_output = `#{cmd} 2>&1`

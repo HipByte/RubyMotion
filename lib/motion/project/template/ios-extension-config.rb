@@ -30,7 +30,7 @@ module Motion; module Project
   class IOSExtensionConfig < XcodeConfig
     register :'ios-extension'
 
-    variable :device_family, :provisioning_profile, :icons, :manifest_assets
+    variable :device_family, :provisioning_profile, :icons, :manifest_assets, :icon_name, :product_type
 
     def initialize(project_dir, build_mode)
       super
@@ -41,6 +41,8 @@ module Motion; module Project
       @device_family = :iphone
       @icons = []
       @manifest_assets = []
+      @icon_name = ''
+      @product_type = ''
     end
 
     def platforms; ['iPhoneSimulator', 'iPhoneOS']; end
