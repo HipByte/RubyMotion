@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rake'
-# Enable 'ib' gem if you want to use storyboard.
-# gem 'ib'
+# Disable 'ib' gem if you want to setup the UI in code
+gem 'ib'
 
 # Add your dependencies here:

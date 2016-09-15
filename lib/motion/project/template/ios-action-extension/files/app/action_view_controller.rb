@@ -1,8 +1,7 @@
 class ActionViewController < UIViewController
-  # Enable 'IB' if you want to use storyboard.
-  # extend IB
-
-  attr_accessor :imageView
+  # Disable 'IB' if you want to setup the UI in code
+  extend IB
+  outlet :imageView, UIImageView
 
   def initWithNibName(nibNameOrNil, bundle:nibBundleOrNil)
     super
