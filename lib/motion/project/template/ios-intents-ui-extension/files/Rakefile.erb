@@ -18,9 +18,9 @@ Motion::Project::App.setup do |app|
         'INSendMessageIntent'
       ]
     },
-    # Use 'NSExtensionPrincipalClass' if you want to setup the UI in code
-    # 'NSExtensionPrincipalClass' => 'IntentViewController',
-    'NSExtensionMainStoryboard' => 'MainInterface',
+    'NSExtensionPrincipalClass' => 'IntentViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.intents-ui-service'
   }
 end

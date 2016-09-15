@@ -18,6 +18,8 @@ Motion::Project::App.setup do |app|
       "PHSupportedMediaTypes" => ["Image"]
     },
     'NSExtensionPrincipalClass' => 'PhotoEditingViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.photo-editing'
   }
 end

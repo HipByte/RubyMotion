@@ -18,8 +18,9 @@ Motion::Project::App.setup do |app|
         'NSExtensionActivationSupportsReplayKitStreaming' => true
       },
     },
-    # Use 'NSExtensionPrincipalClass' if you want to setup the UI in code
     'NSExtensionPrincipalClass' => 'BroadcastViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.broadcast-services'
   }
 end

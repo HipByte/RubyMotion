@@ -17,6 +17,8 @@ Motion::Project::App.setup do |app|
   app.info_plist['MSMessagesExtensionStoreIconName'] = app.icon_name
   app.info_plist['NSExtension'] = {
     'NSExtensionPrincipalClass' => 'MessagesViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.message-payload-provider'
   }
 end

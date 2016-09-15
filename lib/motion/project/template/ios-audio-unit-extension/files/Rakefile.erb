@@ -55,6 +55,8 @@ Motion::Project::App.setup do |app|
       ],
     },
     'NSExtensionPrincipalClass' => 'AudioUnitViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.AudioUnit-UI'
   }
 

@@ -23,6 +23,8 @@ Motion::Project::App.setup do |app|
       },
     },
     'NSExtensionPrincipalClass' => 'ShareViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.share-services'
   }
 end

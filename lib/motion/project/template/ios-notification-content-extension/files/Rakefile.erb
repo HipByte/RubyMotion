@@ -19,6 +19,8 @@ Motion::Project::App.setup do |app|
       'UNNotificationExtensionInitialContentSizeRatio' => '1'
     },
     'NSExtensionPrincipalClass' => 'MessageViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.usernotifications.content-extension'
   }
 end

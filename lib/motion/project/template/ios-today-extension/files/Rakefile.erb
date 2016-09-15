@@ -14,6 +14,8 @@ Motion::Project::App.setup do |app|
   app.frameworks << "NotificationCenter"
   app.info_plist['NSExtension'] = {
     'NSExtensionPrincipalClass' => 'TodayViewController',
+    # Use 'NSExtensionMainStoryboard' instead of 'NSExtensionPrincipalClass' if you want to use storyboard.
+    # 'NSExtensionMainStoryboard' => 'MainInterface',
     'NSExtensionPointIdentifier' => 'com.apple.widget-extension'
   }
 end
