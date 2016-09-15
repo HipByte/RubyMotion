@@ -2,8 +2,6 @@ class AudioUnitViewController < AUViewController
   # Enable 'IB' if you want to use storyboard.
   # extend IB
 
-  attr_accessor :audioUnit
-
   def viewDidLoad
     super
 
