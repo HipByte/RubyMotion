@@ -1,4 +1,7 @@
 class MessagesViewController < MSMessagesAppViewController
+  # Enable 'IB' if you want to use storyboard.
+  # extend IB
+
   def viewDidLoad
     self.view.backgroundColor = UIColor.redColor
 

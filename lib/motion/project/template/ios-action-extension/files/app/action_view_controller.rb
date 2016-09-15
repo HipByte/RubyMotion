@@ -1,4 +1,6 @@
 class ActionViewController < UIViewController
+  # Enable 'IB' if you want to use storyboard.
+  # extend IB
 
   attr_accessor :imageView
 

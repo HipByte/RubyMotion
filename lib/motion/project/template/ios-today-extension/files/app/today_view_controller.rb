@@ -1,4 +1,6 @@
 class TodayViewController < UIViewController
+  # Enable 'IB' if you want to use storyboard.
+  # extend IB
 
   def viewDidLoad
     super

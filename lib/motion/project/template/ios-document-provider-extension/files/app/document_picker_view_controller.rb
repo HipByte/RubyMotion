@@ -1,4 +1,6 @@
 class DocumentPickerViewController < UIDocumentPickerExtensionViewController
+  # Enable 'IB' if you want to use storyboard.
+  # extend IB
 
   def openDocument
     documentURL = self.documentStorageURL.URLByAppendingPathComponent("Untitled.txt")

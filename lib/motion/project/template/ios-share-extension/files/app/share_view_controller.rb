@@ -1,4 +1,6 @@
 class ShareViewController < SLComposeServiceViewController
+  # Enable 'IB' if you want to use storyboard.
+  # extend IB
 
   def isContentValid
     # Do validation of contentText and/or NSExtensionContext attachments here

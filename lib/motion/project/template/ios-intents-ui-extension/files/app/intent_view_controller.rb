@@ -6,6 +6,8 @@
 # "Send a message using <myApp>"
 
 class IntentViewController < UIViewController
+  # Enable 'IB' if you want to use storyboard.
+  # extend IB
 
   def viewDidLoad
     self.view.backgroundColor = UIColor.greenColor
