@@ -16,8 +16,6 @@ class AudioUnitViewController < AUViewController
 
     self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("|-[label]-|", options:0, metrics:nil, views:{ "label" => label }))
     self.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-[label]-|", options:0, metrics:nil, views:{ "label" => label }))
-
-    return if !audioUnit
   end
 
   def createAudioUnitWithComponentDescription(desc, error:error)
