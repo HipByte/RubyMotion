@@ -12,7 +12,7 @@ Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = '<%= name %>'
   app.info_plist['NSExtension'] = {
-    "NSExtensionPointIdentifier" => "com.apple.Safari.content-blocker",
-    "NSExtensionPrincipalClass" => "ContentBlockerRequestHandler"
+    'NSExtensionPrincipalClass' => 'ContentBlockerRequestHandler',
+    'NSExtensionPointIdentifier' => 'com.apple.Safari.content-blocker'
   }
 end
