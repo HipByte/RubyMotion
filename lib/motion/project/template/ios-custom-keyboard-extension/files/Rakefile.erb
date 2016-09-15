@@ -12,13 +12,13 @@ Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
   app.name = '<%= name %>'
   app.info_plist['NSExtension'] = {
-    "NSExtensionAttributes" => {
-      "IsASCIICapable" => false,
-      "PrefersRightToLeft" => false,
-      "PrimaryLanguage" => "en-US",
-      "RequestsOpenAccess" => false
+    'NSExtensionAttributes' => {
+      'IsASCIICapable' => false,
+      'PrefersRightToLeft' => false,
+      'PrimaryLanguage' => 'en-US',
+      'RequestsOpenAccess' => false
     },
-    "NSExtensionPointIdentifier" => "com.apple.keyboard-service",
-    "NSExtensionPrincipalClass" => "KeyboardViewController"
+    'NSExtensionPrincipalClass' => 'KeyboardViewController',
+    'NSExtensionPointIdentifier' => 'com.apple.keyboard-service'
   }
 end

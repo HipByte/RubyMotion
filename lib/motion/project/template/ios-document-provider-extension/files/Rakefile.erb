@@ -13,14 +13,14 @@ Motion::Project::App.setup do |app|
   app.name = '<%= name %>'
   app.info_plist['NSExtension'] = {
     'NSExtensionAttributes' => {
-      "UIDocumentPickerModes" => [
-        "UIDocumentPickerModeImport",
-        "UIDocumentPickerModeOpen",
-        "UIDocumentPickerModeExportToService",
-        "UIDocumentPickerModeMoveToService"
+      'UIDocumentPickerModes' => [
+        'UIDocumentPickerModeImport',
+        'UIDocumentPickerModeOpen',
+        'UIDocumentPickerModeExportToService',
+        'UIDocumentPickerModeMoveToService'
       ],
-      "UIDocumentPickerSupportedFileTypes" => [
-        "public.content"
+      'UIDocumentPickerSupportedFileTypes' => [
+        'public.content'
       ]
     },
     'NSExtensionPrincipalClass' => 'DocumentPickerViewController',
