@@ -1,3 +1,29 @@
+= RubyMotion 4.14 =
+
+  * The toolchain has been upgraded to LLVM 3.8 for all platforms for Xcode 8.
+  * [iOS, OSX, watchOS, tvOS] Added better support for Xcode 8.
+  * [iOS, OSX, watchOS, tvOS] Added support for iOS 10.1, watchOS 3.1. You will
+    need Xcode 8.1 (beta) for these.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug where it would trigger an assertion
+    when it will call an objective-c method which has long method signature.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug where structure value cannot be
+    received as an argument at Ruby method if the method would be called from
+    objective-c.
+  * [iOS, OSX, watchOS, tvOS] Fixed a buffer overflow bug in where launching
+    the debugger.
+  * [iOS, OSX, watchOS, tvOS] Fixed a problem which cannot build the app which
+    uses 3rd-party libraries if you have used Ruby which was installed by rvm.
+  * [iOS] RubyMotion Starter now targets iOS 10.0.
+  * [iOS] Added support for iOS 10 extensions. To see the list of supported
+    extensions run `motion create'.
+  * [iOS] Fixed a regression which can't launch an app on Simulator in Xcode
+    if it would switch Xcode path using `app.xcode_path'.
+  * [iOS] Extension targets will now have the same `app.version` and
+    `app.short_version` as their containing apps by default.
+  * [Android] Updated Android NDK to android-ndk-r12b version. Please update
+    the Android NDK toolchain by using `motion android-setup' command.
+  * [Android] Dropped API 8 supporting.
+
 = RubyMotion 4.13 =
 
   * [iOS, OSX, watchOS, tvOS] Added better support for Xcode 8 beta.
