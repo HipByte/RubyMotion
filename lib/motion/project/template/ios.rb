@@ -455,8 +455,7 @@ namespace :crashlog do
     system(cmd)
 
     # Open the latest generated one.
-    logs = Dir.glob(File.join(crash_reports_dir, "#{App.config.name}-*")) # For iOS 10
-    logs = Dir.glob(File.join(crash_reports_dir, "#{App.config.name}_*")) if logs.empty?
+    logs = Dir.glob(File.join(crash_reports_dir, "#{App.config.name}{_,-}*"))
     unless logs.empty?
       sh "/usr/bin/open -a Console \"#{logs.last}\""
     end
