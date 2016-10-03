@@ -1,4 +1,4 @@
-class NotificationViewController
+class NotificationViewController < UIViewController
   # Enable 'IB' if you want to use storyboard.
   # extend IB
 

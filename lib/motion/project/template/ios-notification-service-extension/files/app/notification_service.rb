@@ -1,4 +1,4 @@
-class NotificationService
+class NotificationService < UNNotificationServiceExtension
 
   attr_accessor :contentHandler, :bestAttemptContent
 
