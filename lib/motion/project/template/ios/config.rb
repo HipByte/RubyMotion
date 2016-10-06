@@ -317,7 +317,12 @@ EOS
       when '4'
         ' 5s'
       else
-        (family == 1) ? ' 6s' : ' Air 2'
+        return ' Air 2' unless family == 1
+        if Util::Version.new(xcode_version[0]) < Util::Version.new('7.0')
+          ' 6'
+        else
+          ' 6s'
+        end
       end
     end
 
