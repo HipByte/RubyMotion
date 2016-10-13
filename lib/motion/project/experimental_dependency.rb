@@ -27,9 +27,9 @@ module Motion; module Project
   class ExperimentalDependency
     begin
       require 'ripper'
-    rescue LoadError
-      $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '../../ripper18')))
-      require 'ripper'
+    rescue LoadError => err
+      App.warn("Please use newer Ruby instead of Ruby v1.8.x for build process.")
+      raise err
     end
 
     @file_paths = []
