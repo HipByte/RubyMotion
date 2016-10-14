@@ -327,8 +327,8 @@ module Motion; module Project
       case api_version
         when '10', '11'
           '9'
-        when '22'
-          '21'
+        when '20'
+          '19'
         when 'N'
           '24'
         else
