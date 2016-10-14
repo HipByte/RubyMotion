@@ -94,7 +94,7 @@ module Motion; module Project
     def deploy_platform; raise; end
 
     def validate
-      # Xcode version
+      App.fail "OS X 10.9 or greater is required" if osx_host_version < Util::Version.new('10.9')
       App.fail "Xcode 6.x or greater is required" if Util::Version.new(xcode_version[0]) < Util::Version.new('6.0')
 
       # sdk_version
