@@ -289,7 +289,6 @@ task :device => :archive do
   if ENV['debug']
     env << " RM_AVAILABLE_ARCHS='#{App.config.archs['iPhoneOS'].join(':')}'"
   elsif !ENV['install_only']
-    env << " RM_ENABLE_REPL=true"
     repl_mode = true
   end
 
