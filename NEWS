@@ -1,3 +1,47 @@
+= RubyMotion 4.15 =
+
+  * `motion update` command will exit with code 0 if there is no update.
+  * [iOS, OSX, watchOS, tvOS] Added better support for Xcode 8.1.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug that could cause a deadlock if `eval'
+    was evaluated in the REPL.
+  * [iOS, OSX, tvOS] Fixed a bug where the wrong Boxed object would be returned
+    from an Objective-C method if structure declaration has a float type in
+    last member.
+  * [iOS, OSX, tvOS] Fixed a bug where the wrong Boxed object would be returned
+    from an Objective-C method if structure declaration has a float array type.
+  * [iOS, watchOS] Fixed a bug where it wouldn't resolve framework dependencies
+    in iOS extension, iOS framework and WatchKit extension for watchOS projects.
+  * [iOS, tvOS] Improved error description when deploying an app to a device.
+  * [iOS, tvOS] Fixed a problem where it wouldn't display log messages in
+    device with `rake device' and `motion device-console'.
+  * [iOS, tvOS] Fixed a buffer overflow bug when handling device log messages
+    with `rake device' and `motion device-console'.
+  * [iOS, tvOS] Fixed a problem where `rake crashlog:device' wouldn't display
+    the crash log from device since iOS/tvOS 10.
+  * [iOS, tvOS] Fixed a bug where Exception#bactrace would not show the proper
+    line number in backtrace messages on device.
+  * [iOS] RubyMotion Starter now targets iOS 10.1.
+  * [iOS] Fixed the templates for notification-content and notification-service
+    extensions.
+  * [iOS] Fixed a problem where an app could not be run on device if Wi-Fi sync
+    option was enabled in the Summary of iTunes device backup configuration.
+  * [iOS] Fixed a bug where custom debug commands (ex. `pro', `pri') would not
+    work on device.
+  * [iOS] Fixed a problem where the debugger would not automatically run an app
+    on a device with `rake device debug=1'.
+  * [iOS] Fixed a problem where an app could not be launched on iOS Simulator
+    with Xcode 7.2 or below.
+  * [iOS, tvOS, watchOS, Android] Fixed a problem where an app on the device
+    will continue running when terminate REPL with ^C.
+  * [watchOS] Fixed a bug where the MapKit framework in WatchKit extension was
+    not being imported by default.
+  * [OSX] Fixed crash when launching document-based applications via rake.
+  * [OSX, watchOS, Android] Fixed a bug where REPL won't be terminated with ^D.
+  * [Android] Added support for API 25 (experimental).
+  * [Android] Updated Android NDK to android-ndk-r13 version. Please update the
+    Android NDK toolchain by using `motion android-setup' command.
+  * [Android] Added String#== method.
+
 = RubyMotion 4.14 =
 
   * The toolchain has been upgraded to LLVM 3.8 for all platforms for Xcode 8.
