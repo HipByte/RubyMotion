@@ -373,11 +373,13 @@ EOS
     def device_id
       @device_id ||= begin
         deploy = File.join(App.config.bindir, 'ios/deploy')
-        device_id = `#{deploy} -D`.strip
-        if device_id.empty?
+        devices = `\"#{deploy}\" -D`.strip.split(/\n/)
+        if devices.empty?
           App.fail "Can't find an iOS device connected on USB"
+        elsif devices.size > 1
+          App.fail "Multiple devices found on USB. Disconnect all but one and try again."
         end
-        device_id
+        devices[0]
       end
     end
 
