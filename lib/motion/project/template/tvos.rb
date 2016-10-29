@@ -174,8 +174,6 @@ namespace :spec do
   end
 end
 
-$deployed_app_path = nil
-
 desc "Deploy on the device"
 task :device => :archive do
   App.info 'Deploy', App.config.archive
@@ -196,11 +194,7 @@ task :device => :archive do
   flags = Rake.application.options.trace ? '-d' : ''
   Signal.trap(:INT) {} if ENV['debug']
   cmd = "#{env} #{deploy} #{flags} -tvos \"#{device_id}\" \"#{App.config.archive}\""
-  if ENV['install_only']
-    $deployed_app_path = `#{cmd}`.strip
-  else
-    `#{cmd}`
-  end
+  system(cmd)
 
   if repl_mode
     target_triple = "arm64-apple-ios7.0.0"
