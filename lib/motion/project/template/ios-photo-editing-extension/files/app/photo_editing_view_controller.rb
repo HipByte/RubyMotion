@@ -2,8 +2,6 @@ class PhotoEditingViewController < UIViewController
   # Enable 'IB' if you want to use storyboard.
   # extend IB
 
-  attr_accessor :input
-
   def viewDidLoad
     super
 
@@ -37,7 +35,7 @@ class PhotoEditingViewController < UIViewController
     # Present content for editing, and keep the contentEditingInput for use when closing the edit session.
     # If you returned YES from canHandleAdjustmentData:, contentEditingInput has the original image and adjustment data.
     # If you returned NO, the contentEditingInput has past edits "baked in".
-    self.input = contentEditingInput
+    @input = contentEditingInput
   end
 
   def finishContentEditingWithCompletionHandler(completionHandler)
@@ -47,7 +45,7 @@ class PhotoEditingViewController < UIViewController
 
     Dispatch::Queue.concurrent.async {
       # Create editing output from the editing input.
-      output = PHContentEditingOutput.alloc.initWithContentEditingInput(self.input)
+      output = PHContentEditingOutput.alloc.initWithContentEditingInput(@input)
 
       # Provide new adjustments and render output to given location.
       # output.adjustmentData = <#new adjustment data#>;

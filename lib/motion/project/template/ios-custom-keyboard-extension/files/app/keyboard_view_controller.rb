@@ -1,7 +1,5 @@
 class KeyboardViewController < UIInputViewController
 
-  attr_accessor :nextKeyboardButton
-
   def updateViewConstraints
     super
     # Add custom view sizing constraints here
@@ -11,18 +9,18 @@ class KeyboardViewController < UIInputViewController
     super
 
     # Perform custom UI setup here
-    self.nextKeyboardButton = UIButton.buttonWithType(UIButtonTypeSystem)
+    @nextKeyboardButton = UIButton.buttonWithType(UIButtonTypeSystem)
 
-    self.nextKeyboardButton.setTitle(NSLocalizedString("Next Keyboard", "Title for 'Next Keyboard' button"), forState:UIControlStateNormal)
-    self.nextKeyboardButton.sizeToFit
-    self.nextKeyboardButton.translatesAutoresizingMaskIntoConstraints = false
+    @nextKeyboardButton.setTitle(NSLocalizedString("Next Keyboard", "Title for 'Next Keyboard' button"), forState:UIControlStateNormal)
+    @nextKeyboardButton.sizeToFit
+    @nextKeyboardButton.translatesAutoresizingMaskIntoConstraints = false
 
-    self.nextKeyboardButton.addTarget(self, action:"advanceToNextInputMode", forControlEvents:UIControlEventTouchUpInside)
+    @nextKeyboardButton.addTarget(self, action:"advanceToNextInputMode", forControlEvents:UIControlEventTouchUpInside)
 
-    self.view.addSubview(self.nextKeyboardButton)
+    self.view.addSubview(@nextKeyboardButton)
 
-    nextKeyboardButtonLeftSideConstraint = NSLayoutConstraint.constraintWithItem(self.nextKeyboardButton, attribute:NSLayoutAttributeLeft, relatedBy:NSLayoutRelationEqual, toItem:self.view, attribute:NSLayoutAttributeLeft, multiplier:1.0, constant:0.0)
-    nextKeyboardButtonBottomConstraint = NSLayoutConstraint.constraintWithItem(self.nextKeyboardButton, attribute:NSLayoutAttributeBottom, relatedBy:NSLayoutRelationEqual, toItem:self.view, attribute:NSLayoutAttributeBottom, multiplier:1.0, constant:0.0)
+    nextKeyboardButtonLeftSideConstraint = NSLayoutConstraint.constraintWithItem(@nextKeyboardButton, attribute:NSLayoutAttributeLeft, relatedBy:NSLayoutRelationEqual, toItem:self.view, attribute:NSLayoutAttributeLeft, multiplier:1.0, constant:0.0)
+    nextKeyboardButtonBottomConstraint = NSLayoutConstraint.constraintWithItem(@nextKeyboardButton, attribute:NSLayoutAttributeBottom, relatedBy:NSLayoutRelationEqual, toItem:self.view, attribute:NSLayoutAttributeBottom, multiplier:1.0, constant:0.0)
     self.view.addConstraints([nextKeyboardButtonLeftSideConstraint, nextKeyboardButtonBottomConstraint])
   end
 
@@ -44,7 +42,7 @@ class KeyboardViewController < UIInputViewController
     else
         textColor = UIColor.blackColor
     end
-    self.nextKeyboardButton.setTitleColor(textColor, forState:UIControlStateNormal)
+    @nextKeyboardButton.setTitleColor(textColor, forState:UIControlStateNormal)
   end
 
 end
