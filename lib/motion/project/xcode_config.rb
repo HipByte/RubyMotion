@@ -359,9 +359,9 @@ module Motion; module Project
           template_path = template
         elsif !builtin_templates.grep(/#{template}/i).empty?
           template = template.downcase
-          template_path = profiler_known_templates.find do |path|
-            File.basename(path, File.extname(path)).downcase == template
-          end
+          template_path = profiler_known_templates.map { |path| File.basename(path, File.extname(path)) }.find { |path|
+            path.downcase == template
+          }
         else
           App.fail("Invalid Instruments template path or name.")
         end
