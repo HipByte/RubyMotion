@@ -111,7 +111,6 @@ END
   device_name = "Apple TV 1080p"
 
   app_bundle = App.config.app_bundle('AppleTVSimulator')
-  target_triple = "x86_64-apple-ios9.1.0"
   kernel_path = File.join(App.config.datadir, "AppleTVSimulator", "kernel-x86_64.bc")
 
   # Launch the simulator.
@@ -125,7 +124,6 @@ END
     "device-name" => device_name,
     "background-fetch" => !!ENV['background_fetch'],
     "kernel-path" => kernel_path,
-    "target-triple" => target_triple,
     "local-port" => App.config.local_repl_port('AppleTVSimulator'),
     "device-hostname" => "0.0.0.0",
     "sdk-version" => target,
@@ -197,7 +195,6 @@ task :device => :archive do
   system(cmd)
 
   if repl_mode
-    target_triple = "arm64-apple-ios7.0.0"
     kernel = File.join(App.config.datadir, "AppleTVOS", "kernel-arm64.bc")
 
     repl_launcher = Motion::Project::REPLLauncher.new({
@@ -205,7 +202,6 @@ task :device => :archive do
       "debug-mode" => !!ENV['debug'],
       "spec-mode" => App.config.spec_mode,
       "kernel-path" => kernel,
-      "target-triple" => target_triple,
       "local-port" => TCPServer.new('localhost', 0).addr[1],
       "remote-port" => App.config.local_repl_port('AppleTVOS'),
       "device-hostname" => "0.0.0.0",

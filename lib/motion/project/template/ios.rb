@@ -107,11 +107,10 @@ namespace :watch do
 
     kernel_path = nil
     if watch_extension.type == :watchapp
-      kernel_path = File.join(App.config.datadir, '../../watchos/2.0', 'WatchSimulator', "kernel-i386.bc")
-      target_triple = "i386-apple-ios2.0.0"
+      # TODO : Should use valid kernel file in WatchSimulator.
+      kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
     else
       kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
-      target_triple = "x86_64-apple-ios5.0.0"
     end
     app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
 
@@ -126,7 +125,6 @@ namespace :watch do
       "watchkit-launch-mode" => ENV['type'],
       "display-type" => ENV['display'],
       "kernel-path" => kernel_path,
-      "target-triple" => target_triple,
       "local-port" => watch_extension.local_repl_port,
       "device-hostname" => "0.0.0.0",
       "sdk-version" => App.config.sdk_version,
