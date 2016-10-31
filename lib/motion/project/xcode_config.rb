@@ -363,9 +363,8 @@ module Motion; module Project
             path.downcase == tmp
           }
           template_path = File.expand_path("#{xcode_dir}/../Applications/Instruments.app/Contents/Resources/templates/#{template}.tracetemplate")
-        else
-          App.fail("Invalid Instruments template path or name.")
         end
+        App.fail("Invalid Instruments template path or name.") unless File.exist?(template_path)
         optional_data['XrayTemplatePath'] = template_path
       end
 
