@@ -96,7 +96,8 @@ module Motion; module Project
         'CFBundlePrimaryIcon' => "App Icon - Small"
       }
       plist['TVTopShelfImage'] = {
-        'TVTopShelfPrimaryImage' => "Top Shelf Image"
+        'TVTopShelfPrimaryImage' => "Top Shelf Image",
+        'TVTopShelfPrimaryImageWide' => "Top Shelf Image Wide"
       }
       plist['UILaunchImages'] = [
         {
