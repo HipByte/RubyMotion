@@ -110,7 +110,11 @@ namespace :watch do
       # TODO : Should use valid kernel file in WatchSimulator.
       kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
     else
-      kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
+      if App.config.archs['iPhoneSimulator'].include?('x86_64')
+        kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
+      else
+        kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
+      end
     end
     app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
 
