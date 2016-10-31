@@ -358,16 +358,13 @@ module Motion; module Project
         if File.exist?(template)
           template_path = template
         elsif !builtin_templates.grep(/#{template}/i).empty?
-          template = template.downcase
-          template_path = profiler_known_templates.map { |path| File.basename(path, File.extname(path)) }.find { |path|
-            path.downcase == template
+          tmp = template.downcase
+          template = profiler_known_templates.find { |path|
+            path.downcase == tmp
           }
+          template_path = File.expand_path("#{xcode_dir}/../Applications/Instruments.app/Contents/Resources/templates/#{template}.tracetemplate")
         else
           App.fail("Invalid Instruments template path or name.")
-        end
-        unless template_path.include?(File.expand_path("#{xcode_dir}/.."))
-          # workaround for RM-599, RM-672 and RM-832.
-          template_path = File.expand_path("#{xcode_dir}/../Applications/Instruments.app/Contents/Resources/templates/#{template_path}.tracetemplate")
         end
         optional_data['XrayTemplatePath'] = template_path
       end
@@ -404,7 +401,9 @@ module Motion; module Project
       start = list.index('Known Templates:') + 1
       list = list[start..-1]
       # Only interested in the template (file base) names
-      list.map { |line| line.sub(/^\s*"/, '').sub(/",*$/, '') }
+      list.map { |line| line.sub(/^\s*"/, '').sub(/",*$/, '') }.map { |path|
+        File.basename(path, File.extname(path))
+      }
     end
 
     def profiler_config_device_identifier(device_name, target)

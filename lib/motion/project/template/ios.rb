@@ -368,9 +368,7 @@ desc "Same as profile:simulator"
 task :profile => ['profile:simulator']
 
 def profiler_templates
-  App.config.profiler_known_templates.map do |template_path|
-    File.basename(template_path, File.extname(template_path))
-  end
+  App.config.profiler_known_templates
 end
 
 namespace :profile do
