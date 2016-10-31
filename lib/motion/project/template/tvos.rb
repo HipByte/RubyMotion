@@ -235,8 +235,7 @@ namespace :crashlog do
     deploy = File.join(App.config.bindir, 'ios/deploy')
     env = "XCODE_DIR=\"#{App.config.xcode_dir}\" CRASH_REPORTS_DIR=\"#{crash_reports_dir}\""
     flags = Rake.application.options.trace ? '-d' : ''
-    cmd = "#{env} #{deploy} -l #{flags} \"#{device_id}\" \"#{App.config.archive}\""
-    system(cmd)
+    `#{env} #{deploy} -l #{flags} \"#{device_id}\" \"#{App.config.archive}\"`
 
     # Open the latest generated one.
     logs = Dir.glob(File.join(crash_reports_dir, "#{App.config.name}{_,-}*"))
