@@ -197,17 +197,6 @@ END
     end
   end
 
-  # Cleanup the simulator application sandbox, to avoid having old resource files there.
-  if ENV['clean']
-    sim_apps = File.expand_path("~/Library/Application Support/iPhone Simulator/#{target}/Applications")
-    Dir.glob("#{sim_apps}/**/*.app").each do |app_bundle|
-      if File.basename(app_bundle) == File.basename(app)
-        rm_rf File.dirname(app_bundle)
-        break
-      end
-    end
-  end
-
   if App.config.archs['iPhoneSimulator'].include?('x86_64')
     kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
   else
