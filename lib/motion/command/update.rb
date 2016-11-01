@@ -128,7 +128,7 @@ module Motion; class Command
       resp = curl("-s -d \"product=rubymotion\" -d \"current_software_version=#{product_version}\" -d \"wanted_software_version=#{@wanted_software_version}\" -d \"license_key=#{read_license_key}\" -d \"pre=#{@prerelease_mode ? 'true' : 'false'}\" https://secure.rubymotion.com/update_software")
       unless resp.match(/^http:/)
         if resp == 'Software is up to date'
-          puts resp
+          $stderr.puts resp
           return
         end
         die resp
