@@ -247,13 +247,11 @@ EOS
     private
 
     def build_dir(platform)
-      @build_dir ||= begin
-        path = "build-#{platform}"
-        unless File.writable?(Dir.pwd)
-          path = File.join(Builder.common_build_dir, @path, path)
-        end
-        path
+      path = "build-#{platform}"
+      unless File.writable?(Dir.pwd)
+        path = File.join(Builder.common_build_dir, @path, path)
       end
+      path
     end
 
     def project_dir
