@@ -293,13 +293,13 @@ module Bacon
       def view(label)
         return label if label.is_a?(UIView)
         UIApplication.sharedApplication.keyWindow.viewByName(label) ||
-          raise(Bacon::Error.new(:error, "Unable to find a view with label `#{label}'"))
+          raise(Bacon::Error.new(:errors, "Unable to find a view with label `#{label}'"))
       end
 
       def views(view_class)
         views = UIApplication.sharedApplication.keyWindow.viewsByClass(view_class)
         if views.empty?
-          raise(Bacon::Error.new(:error, "Unable to find any view of class `#{view_class.name}'"))
+          raise(Bacon::Error.new(:errors, "Unable to find any view of class `#{view_class.name}'"))
         end
         views
       end
