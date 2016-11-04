@@ -19,7 +19,7 @@ module Bacon
     raise NameError, "no such context: #{name.inspect}"
   }
 
-  RestrictName    = //  unless defined? RestrictName
+  RestrictName    = ENV['filter'] ? Regexp.new(ENV['filter']) : //  unless defined? RestrictName
   RestrictContext = //  unless defined? RestrictContext
 
   Backtraces = true  unless defined? Backtraces
