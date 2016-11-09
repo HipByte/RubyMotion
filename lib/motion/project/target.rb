@@ -131,21 +131,22 @@ module Motion; module Project
     # @return [Boolean] Whether or not the command exited with a succes status.
     #
     def system(command)
-      env = environment_variables
-      if App::VERBOSE
-        env_description = env.map { |k, v| "#{k}='#{v}'" }.join(' ')
-        puts "cd '#{@full_path}' && env #{env_description} #{command}"
-      end
-      if use_gemfile?
-        Bundler.with_clean_env do
-          Dir.chdir(@full_path) do
-            super(env, command)
-          end
+      system_proc = proc do
+        env = environment_variables
+        if App::VERBOSE
+          env_description = env.map { |k, v| "#{k}='#{v}'" }.join(' ')
+          puts "cd '#{@full_path}' && env #{env_description} #{command}"
         end
-      else
+
         Dir.chdir(@full_path) do
           super(env, command)
         end
+      end
+
+      if use_gemfile?
+        Bundler.with_clean_env(&system_proc)
+      else
+        system_proc.call
       end
     end
 
