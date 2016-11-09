@@ -191,8 +191,7 @@ task :device => :archive do
   deploy = File.join(App.config.bindir, 'ios/deploy')
   flags = Rake.application.options.trace ? '-d' : ''
   Signal.trap(:INT) {} if ENV['debug']
-  cmd = "#{env} #{deploy} #{flags} -tvos \"#{device_id}\" \"#{App.config.archive}\""
-  system(cmd)
+  `#{env} #{deploy} #{flags} -tvos \"#{device_id}\" \"#{App.config.archive}\"`
 
   if repl_mode
     kernel = File.join(App.config.datadir, "AppleTVOS", "kernel-arm64.bc")
