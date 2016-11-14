@@ -32,17 +32,7 @@ module Motion; module Project
     def initialize(*)
       super
       @device_family = :tv
-      # @frameworks = ['WatchKit', 'Foundation']
     end
-
-    # def name
-    #   @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit Extension'
-    # end
-
-    # def name=(name)
-    #   App.fail 'You cannot give a Watch application a custom name, it will ' \
-    #            'automatically be named after the host application.'
-    # end
 
     # TODO datadir should not depend on the template name
     def datadir(target=deployment_target)
@@ -70,17 +60,6 @@ module Motion; module Project
     def provisioning_profile(name = /tvOS\s?Team Provisioning Profile/)
       super(name)
     end
-
-    # @return [String] The bundle identifier of the watch extension based on the
-    #         bundle identifier of the host application.
-    #
-    # def identifier
-    #   if watchV2?
-    #     ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitapp.watchkitextension'
-    #   else
-    #     ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitextension'
-    #   end
-    # end
 
     # @see {XcodeConfig#merged_info_plist}
     #
