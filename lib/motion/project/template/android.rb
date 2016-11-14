@@ -433,7 +433,9 @@ EOS
         add_method = false
         if method_line.include?('{')
           # A method definition (ex. a constructor), always include it.
-          add_method = true
+          if !current_class[:methods].include?(method_line)
+            add_method = true
+          end
         else
           # Strip 'public native X' (where X is the return type).
           ary = method_line.split(/\s+/)
