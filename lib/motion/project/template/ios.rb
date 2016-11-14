@@ -121,7 +121,7 @@ namespace :watch do
       "watchkit-launch-mode" => ENV['type'],
       "display-type" => ENV['display'],
       "kernel-path" => kernel_path,
-      "local-port" => watch_extension.local_repl_port,
+      "local-port" => watch_extension.local_repl_port('WatchSimulator'),
       "device-hostname" => "0.0.0.0",
       "sdk-version" => App.config.sdk_version,
       "device-family" => App.config.device_family_ints[0],

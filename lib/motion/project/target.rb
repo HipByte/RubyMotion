@@ -77,17 +77,15 @@ module Motion; module Project
 
     # @return [String] The path to the platform + configuration based directory.
     #
-    def build_dir
-      @build_dir ||= begin
-        target = @config.development? ? "*-Development" : "*-Release"
-        build_path = File.join(@path, 'build', target)
-        Dir[build_path].sort_by{ |f| File.mtime(f) }.last
-      end
+    def build_dir(platform)
+      target = @config.development? ? "#{platform}-*-Development" : "#{platform}-*-Release"
+      build_path = File.join(@path, 'build', target)
+      Dir[build_path].sort_by{ |f| File.mtime(f) }.last
     end
 
-    def local_repl_port
+    def local_repl_port(platform)
       @local_repl_port ||= begin
-        ports_file = File.join(build_dir, 'repl_ports.txt')
+        ports_file = File.join(build_dir(platform), 'repl_ports.txt')
         if File.exist?(ports_file)
           File.read(ports_file)
         else

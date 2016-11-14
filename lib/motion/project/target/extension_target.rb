@@ -64,7 +64,7 @@ module Motion; module Project
 
     def src_extension_path
       @src_extension_path ||= begin
-        path = File.join(build_dir, '*.appex')
+        path = File.join(build_dir(@platform), '*.appex')
         Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end

@@ -28,6 +28,15 @@ require 'motion/project/target'
 module Motion; module Project
   class WatchTarget < Target
     def copy_products(platform)
+      @watchos_platform = begin
+        case platform
+        when 'iPhoneSimulator'
+          'WatchSimulator'
+        when 'iPhoneOS'
+          'WatchOS'
+        end
+      end
+
       src_path = src_watchapp_path
       dest_path = destination_dir
       FileUtils.mkdir_p(File.join(@config.app_bundle(platform), 'Watch'))
@@ -63,7 +72,7 @@ module Motion; module Project
 
     def src_watchapp_path
       @src_watchapp_path ||= begin
-        path = File.join(build_dir, '*.app')
+        path = File.join(build_dir(@watchos_platform), '*.app')
         Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end

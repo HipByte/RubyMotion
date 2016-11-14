@@ -55,7 +55,7 @@ module Motion; module Project
 
     def framework_path
       @framework_path ||= begin
-        path = File.join(build_dir, '*.framework')
+        path = File.join(build_dir(@platform), '*.framework')
         Dir[path].sort_by{ |f| File.mtime(f) }.last
       end
     end
