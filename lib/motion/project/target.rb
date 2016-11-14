@@ -79,7 +79,8 @@ module Motion; module Project
     #
     def build_dir
       @build_dir ||= begin
-        build_path = File.join(@path, 'build', '*')
+        target = @config.development? ? "*-Development" : "*-Release"
+        build_path = File.join(@path, 'build', target)
         Dir[build_path].sort_by{ |f| File.mtime(f) }.last
       end
     end
