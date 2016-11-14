@@ -41,6 +41,10 @@ task :build => ['build:simulator', 'build:device']
 
 namespace :build do
   def pre_build_actions(platform)
+    unless App.config.watchV2?
+      App.fail "No longer support WatchOS v1 apps because to submitted to the App Store must be apps built with the watchOS 2 SDK or later. Please use 'ios-watch-app' template for WatchOS apps."
+    end
+
     unless ENV['RM_TARGET_BUILD']
       App.fail "Watch app targets must be built from an application project"
     end
