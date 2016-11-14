@@ -76,10 +76,6 @@ module Motion; module Project
       'WatchOS'
     end
 
-    def watchV2?
-      ENV['WATCHV2'] == "1"
-    end
-
     # @return [String] The bundle identifier of the watch extension based on the
     #         bundle identifier of the host application.
     #
@@ -204,10 +200,6 @@ EOS
         end
         @version = ENV['RM_TARGET_HOST_APP_VERSION']
         @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
-      end
-
-      def watchV2?
-        @extension_config.watchV2?
       end
 
       def sdk_version
