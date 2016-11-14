@@ -105,17 +105,9 @@ namespace :watch do
       Rake::Task["build:simulator"].invoke
     end
 
-    kernel_path = nil
-    if watch_extension.type == :watchapp
-      # TODO : Should use valid kernel file in WatchSimulator.
-      kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
-    else
-      if App.config.archs['iPhoneSimulator'].include?('x86_64')
-        kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-x86_64.bc")
-      else
-        kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
-      end
-    end
+    # TODO : Should use valid kernel file in WatchSimulator.
+    kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
+
     app_bundle = File.expand_path(App.config.app_bundle('iPhoneSimulator'))
 
     repl_launcher = Motion::Project::REPLLauncher.new({

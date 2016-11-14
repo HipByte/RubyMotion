@@ -73,17 +73,15 @@ namespace :build do
 
   desc "Build the simulator version"
   task :simulator do
-    platform = App.config.watchV2? ? 'WatchSimulator' : 'iPhoneSimulator'
-    pre_build_actions(platform)
-    App.build(platform)
+    pre_build_actions('WatchSimulator')
+    App.build('WatchSimulator')
   end
 
   desc "Build the device version"
   task :device do
-    platform = App.config.watchV2? ? 'WatchOS' : 'iPhoneOS'
-    pre_build_actions(platform)
-    App.build(platform)
-    App.codesign(platform)
+    pre_build_actions('WatchOS')
+    App.build('WatchOS')
+    App.codesign('WatchOS')
   end
 end
 

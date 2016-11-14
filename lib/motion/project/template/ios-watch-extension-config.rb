@@ -38,17 +38,8 @@ module Motion; module Project
       @frameworks = ['WatchKit', 'UIKit', 'Foundation', 'CoreGraphics',
                      'CoreFoundation', 'MapKit']
 
-      if watchV2?
-        @deployment_target = '2.0'
-      elsif ENV['RM_TARGET_DEPLOYMENT_TARGET']
-        # FIXME: iTunnes requires '8.2' as MinimumOSVersion for WatchKit V1 apps
-        host_deployment_version = Util::Version.new(ENV['RM_TARGET_DEPLOYMENT_TARGET'])
-        if host_deployment_version > Util::Version.new('8.2')
-          @deployment_target = ENV['RM_TARGET_DEPLOYMENT_TARGET']
-        else
-          @deployment_target = '8.2'
-        end
-      end
+      @deployment_target = '2.0'
+
       ENV.delete('RM_TARGET_DEPLOYMENT_TARGET')
     end
 
@@ -56,8 +47,7 @@ module Motion; module Project
     #         of the host application.
     #
     def name
-      @name = ENV['RM_TARGET_HOST_APP_NAME']
-      @name += (watchV2? ? ' WatchKit Extension' : ' WatchKit 1 Extension')
+      @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit Extension'
     end
 
     def name=(name)
@@ -67,30 +57,26 @@ module Motion; module Project
 
     # TODO datadir should not depend on the template name
     def datadir(target=deployment_target)
-      watchV2? ? File.join(motiondir, 'data', 'watchos', target) : super
+      File.join(motiondir, 'data', 'watchos', target)
     end
 
     # TODO datadir should not depend on the template name
     def supported_versions
-      if watchV2?
-        @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'watchos', '*')).select{ |path| File.directory?(path) }.map do |path|
-          File.basename path
-        end
-      else
-        super
+      @supported_versions ||= Dir.glob(File.join(motiondir, 'data', 'watchos', '*')).select{ |path| File.directory?(path) }.map do |path|
+        File.basename path
       end
     end
 
     def platforms
-      watchV2? ? %w(WatchSimulator WatchOS) : %w(iPhoneSimulator iPhoneOS)
+      %w(WatchSimulator WatchOS)
     end
 
     def local_platform
-      watchV2? ? 'WatchSimulator' : 'iPhoneSimulator'
+      'WatchSimulator'
     end
 
     def deploy_platform
-      watchV2? ? 'WatchOS' : 'iPhoneOS'
+      'WatchOS'
     end
 
     def watchV2?
@@ -101,11 +87,7 @@ module Motion; module Project
     #         bundle identifier of the host application.
     #
     def identifier
-      if watchV2?
-        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitapp.watchkitextension'
-      else
-        ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitextension'
-      end
+      ENV['RM_TARGET_HOST_APP_IDENTIFIER'] + '.watchkitapp.watchkitextension'
     end
 
     # @see {XcodeConfig#merged_info_plist}
@@ -117,14 +99,10 @@ module Motion; module Project
       plist.delete('CFBundleIconFiles')
       plist.delete('LSApplicationCategoryType')
       plist.delete('UISupportedInterfaceOrientations')
-      if watchV2?
-        plist['WKExtensionDelegateClassName'] = 'ExtensionDelegate'
-        plist['MinimumOSVersion'] = deployment_target
-        plist['UIDeviceFamily'] = [4]
-        plist['CFBundleSupportedPlatforms'] = ['WatchOS']
-      else
-        plist['UIRequiredDeviceCapabilities'] = ['watch-companion']
-      end
+      plist['WKExtensionDelegateClassName'] = 'ExtensionDelegate'
+      plist['MinimumOSVersion'] = deployment_target
+      plist['UIDeviceFamily'] = [4]
+      plist['CFBundleSupportedPlatforms'] = ['WatchOS']
       plist.merge({
         'RemoteInterfacePrincipalClass' => 'InterfaceController',
         'NSExtension' => {
@@ -184,11 +162,7 @@ EOS
     end
 
     def app_bundle(platform)
-      if watchV2?
-        File.join(watch_app_config.app_bundle(platform), 'PlugIns', bundle_name + '.appex')
-      else
-        super
-      end
+      File.join(watch_app_config.app_bundle(platform), 'PlugIns', bundle_name + '.appex')
     end
 
     def cflags(platform, cplusplus)
@@ -229,8 +203,7 @@ EOS
         @extension_config = extension_config
 
         if ENV['RM_TARGET_HOST_APP_NAME']
-          @name = ENV['RM_TARGET_HOST_APP_NAME']
-          @name += (watchV2? ? ' WatchKit App' : ' WatchKit 1 App')
+          @name = ENV['RM_TARGET_HOST_APP_NAME'] + ' WatchKit App'
         end
         @version = ENV['RM_TARGET_HOST_APP_VERSION']
         @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
@@ -249,7 +222,7 @@ EOS
       end
 
       def deploy_platform
-        watchV2? ? 'WatchOS' : 'iPhoneOS'
+        'WatchOS'
       end
 
       # Ensure that we also compile assets with `actool` for the watch.
@@ -280,14 +253,9 @@ EOS
         plist['CFBundleDisplayName'] = ENV['RM_TARGET_HOST_APP_NAME']
         plist['WKWatchKitApp'] = true
         plist['WKCompanionAppBundleIdentifier'] = ENV['RM_TARGET_HOST_APP_IDENTIFIER']
-        if watchV2?
-          plist['UIDeviceFamily'] = [4]
-          plist['MinimumOSVersion'] = deployment_target
-          plist['CFBundleSupportedPlatforms'] = ['WatchOS']
-        else
-          plist['UIDeviceFamily'] = [4]
-          plist['MinimumOSVersion'] = '8.2'
-        end
+        plist['UIDeviceFamily'] = [4]
+        plist['MinimumOSVersion'] = deployment_target
+        plist['CFBundleSupportedPlatforms'] = ['WatchOS']
         plist['UISupportedInterfaceOrientations'] = ['UIInterfaceOrientationPortrait', 'UIInterfaceOrientationPortraitUpsideDown']
         plist.delete('UIAppFonts')
         plist.delete('LSApplicationCategoryType')
@@ -304,11 +272,7 @@ EOS
       #         build directory.
       #
       def app_bundle(platform)
-        if watchV2?
-          File.join(versionized_build_dir(platform), bundle_name + '.app')
-        else
-          File.join(@extension_config.app_bundle(platform), bundle_filename)
-        end
+        File.join(versionized_build_dir(platform), bundle_name + '.app')
       end
 
       # @return [String] The path to the SockPuppet application executable that
