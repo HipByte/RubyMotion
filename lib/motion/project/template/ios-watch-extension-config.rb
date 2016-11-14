@@ -37,9 +37,6 @@ module Motion; module Project
       @short_version = ENV['RM_TARGET_HOST_APP_SHORT_VERSION']
       @frameworks = ['WatchKit', 'UIKit', 'Foundation', 'CoreGraphics',
                      'CoreFoundation', 'MapKit']
-
-      @deployment_target = '2.0'
-
       ENV.delete('RM_TARGET_DEPLOYMENT_TARGET')
     end
 
