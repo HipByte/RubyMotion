@@ -69,7 +69,6 @@ module Motion; module Project
       archs = config.archs[platform]
 
       ruby = File.join(config.bindir, 'ruby')
-      @nfd = File.join(config.bindir, 'nfd')
 
       if config.spec_mode and (config.spec_files - config.spec_core_files).empty?
         App.fail "No spec files in `#{config.specs_dir}'"
