@@ -278,7 +278,7 @@ EOS
       #         names at runtime.
       #
       def escaped_storyboard_module_name
-        @extension_config.bundle_name.gsub(" ", "_")
+        ENV['RM_TARGET_HOST_APP_NAME'] + "_Extension"
       end
     end
   end
