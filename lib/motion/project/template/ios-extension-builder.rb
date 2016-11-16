@@ -375,7 +375,7 @@ EOS
         end
       end
       # for RM-1016
-      system "killall ibtoold"
+      system "killall ibtoold 2> /dev/null"
 
       preserve_resources = []
 

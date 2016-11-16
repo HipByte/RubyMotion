@@ -57,7 +57,7 @@ module Motion; module Project
         end
       end
       # for RM-1016
-      system "killall ibtoold"
+      system "killall ibtoold 2> /dev/null"
 
       # Copy localization files
       Dir.glob('watch_app/**/*.strings').each do |res_path|
