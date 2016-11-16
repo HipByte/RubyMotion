@@ -47,12 +47,12 @@ module Motion; module Project
       ibtool = File.join(config.xcode_dir, '/usr/bin/ibtool')
       Dir.glob("watch_app/**/Interface.storyboard").each do |storyboard|
         if Util::Version.new(config.xcode_version[0]) >= Util::Version.new('7.0')
-          sh "'#{ibtool}' --errors --warnings --notices --target-device watch --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '/tmp' #{storyboard}"
-          sh "'#{ibtool}' --errors --warnings --notices --target-device watch --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --link '#{File.join(config.app_bundle(platform), 'Base.lproj')}' '/tmp/Interface.storyboardc'"
+          sh "'#{ibtool}' --errors --warnings --notices --target-device watch --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.deployment_target} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '/tmp' #{storyboard}"
+          sh "'#{ibtool}' --errors --warnings --notices --target-device watch --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.deployment_target} --link '#{File.join(config.app_bundle(platform), 'Base.lproj')}' '/tmp/Interface.storyboardc'"
         else
           compilation_directory = File.join(config.app_bundle(platform), File.dirname(sanitize_destination_path(storyboard)))
           FileUtils.mkdir_p(compilation_directory)
-          sh "'#{ibtool}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.sdk_version} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{compilation_directory}' #{storyboard}"
+          sh "'#{ibtool}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.deployment_target} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{compilation_directory}' #{storyboard}"
         end
       end
 
