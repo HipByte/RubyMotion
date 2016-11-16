@@ -55,6 +55,8 @@ module Motion; module Project
           sh "'#{ibtool}' --errors --warnings --notices --module #{config.escaped_storyboard_module_name} --minimum-deployment-target #{config.deployment_target} --output-partial-info-plist /tmp/Interface-SBPartialInfo.plist --auto-activate-custom-fonts --output-format human-readable-text --compilation-directory '#{compilation_directory}' #{storyboard}"
         end
       end
+      # for RM-1016
+      system "killall ibtoold"
 
       # Copy localization files
       Dir.glob('watch_app/**/*.strings').each do |res_path|

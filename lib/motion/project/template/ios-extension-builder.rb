@@ -374,6 +374,8 @@ EOS
           end
         end
       end
+      # for RM-1016
+      system "killall ibtoold"
 
       preserve_resources = []
 
