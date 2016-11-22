@@ -220,18 +220,12 @@ module Motion; module Project
 #import <Foundation/Foundation.h>
 
 extern "C" {
-    void ruby_sysinit(int *, char ***);
     void ruby_init(void);
     void ruby_init_loadpath(void);
     void ruby_script(const char *);
-    void ruby_set_argv(int, char **);
-    void rb_vm_init_compiler(void);
-    void rb_vm_init_jit(void);
-    void rb_vm_aot_feature_provide(const char *, void *);
     void *rb_vm_top_self(void);
     void rb_define_global_const(const char *, void *);
     void rb_rb2oc_exc_handler(void);
-    void rb_exit(int);
     void ruby_init_device_repl(void);
 EOS
       app_objs.each do |_, init_func|
