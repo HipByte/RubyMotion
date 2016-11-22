@@ -302,8 +302,6 @@ module Motion; module Project
 #include <dlfcn.h>
 
 extern "C" {
-    void rb_define_global_const(const char *, void *);
-    void rb_rb2oc_exc_handler(void);
     void rb_exit(int);
     void RubyMotionInit(int argc, char **argv);
     int NSExtensionMain(int argc, char **argv);
