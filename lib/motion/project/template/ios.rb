@@ -84,9 +84,9 @@ namespace :watch do
       File.exist?(File.join(target.path, 'watch_app'))
     end
     unless watch_extension
-      App.fail 'You can only use this task with a WatchKit application ' \
+      App.fail 'You can only use this task with a watchOS application ' \
                'configured. To configure one use ' \
-               '`app.target \'path/to/MyWatchApp\', :extension`.'
+               '`app.target \'path/to/MyWatchApp\', :watchapp`.'
     end
 
     if ENV['type'] && ENV['type'].downcase == 'notification' && ENV['payload'].nil?
