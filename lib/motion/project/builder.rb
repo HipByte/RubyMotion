@@ -24,7 +24,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require 'thread'
-require 'motion/project/paralel_builder'
+require 'motion/project/parallel_builder'
 require 'motion/project/dependency'
 require 'motion/project/experimental_dependency'
 
