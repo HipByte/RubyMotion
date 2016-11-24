@@ -105,6 +105,11 @@ namespace :watch do
       Rake::Task["build:simulator"].invoke
     end
 
+    # FIXME
+    #   This is workaround for RM-1154.
+    #   Need to fix "Failed to configure DTXConnection for XPC Debugging in the Simulator" properly.
+    system("killall 'Simulator (Watch)' 2> /dev/null")
+
     # TODO : Should use valid kernel file in WatchSimulator.
     kernel_path = File.join(App.config.datadir, 'iPhoneSimulator', "kernel-i386.bc")
 
