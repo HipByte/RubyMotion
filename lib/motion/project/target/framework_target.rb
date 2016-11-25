@@ -38,7 +38,7 @@ module Motion; module Project
         FileUtils.cp_r(src_path, dest_framework_dir)
       end
 
-      # Since Xcode 8, it require a codesining to load framework even if it run an app on Simulator
+      # Since Xcode 8, it require a code signing to load framework even if it run an app on Simulator
       codesign(platform) if Util::Version.new(@config.xcode_version[0]) >= Util::Version.new("8.0")
     end
 

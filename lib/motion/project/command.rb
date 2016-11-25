@@ -33,7 +33,7 @@ module Motion; module Project
 
     class << self
       # This is lifted straight from CLAide, but adjusted slightly because
-      # the Class#name method is overriden in the old (deprecated) API below.
+      # the Class#name method is overridden in the old (deprecated) API below.
       def command
         @command ||= __name__.split('::').last.gsub(/[A-Z]+[a-z]*/) do |part|
           part.downcase << '-'

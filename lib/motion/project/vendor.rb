@@ -145,7 +145,7 @@ EOS
 
         App.info 'Compile', File.join(@path, srcfile)
         FileUtils.mkdir_p File.dirname(objfile)
-        # Always append the user's clfags *after* ours, so that the user gets a
+        # Always append the user's cflags *after* ours, so that the user gets a
         # chance to override settings that we set. E.g. `-fno-modules`.
         sh "#{compiler} #{@config.cflags(platform, cplusplus)} #{cflags} -I. -include \"#{pch}\" -c \"#{srcfile}\" -o \"#{objfile}\""
       end
