@@ -30,6 +30,8 @@ require 'fileutils'
 
 module Motion; module Project
   class Template
+    DefaultTemplate = 'ios'
+
     # for ERB
     attr_reader :name
 
@@ -77,6 +79,13 @@ module Motion; module Project
       end
     end
 
+    def self.all_templates_description
+      all_templates.keys.map do |t|
+        template = (t == DefaultTemplate) ? "#{t} (default)" : t
+        "  * #{template}\n"
+      end.join('')
+    end
+
     # TODO This seems to be unused.
     Templates = Paths.map { |path| Dir.glob(path + '/*') }.flatten.select { |x| !x.match(/^\./) and File.directory?(x) }.map { |x| File.basename(x) }
 
@@ -92,9 +101,11 @@ module Motion; module Project
 
       @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
-        raise InformativeError, "Cannot find template `#{@template_name}' in " \
-                                "#{Paths.join(' or ')}. Available templates: " \
-                                "#{self.class.all_templates.keys.join(', ')}"
+        desc = "Cannot find template `#{@template_name}' in:\n\n"
+        desc << Paths.map { |x|  "  * #{x}\n" }.join('')
+        desc << "\nAvailable templates:\n\n"
+        desc << self.class.all_templates_description
+        raise InformativeError, desc
       end
 
       unless app_name.match(/^[\w\s-]+$/)

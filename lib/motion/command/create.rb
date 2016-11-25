@@ -28,8 +28,6 @@ require 'motion/project/template'
 
 module Motion; class Command
   class Create < Command
-    DefaultTemplate = 'ios'
-
     def self.all_templates
       Motion::Project::Template.all_templates.keys
     end
@@ -38,11 +36,8 @@ module Motion; class Command
 
     # Override getter so that we fetch the template names as late as possible.
     def self.description
-      desc = "Create a new RubyMotion project from one of the following templates: \n"
-      all_templates.each do |x|
-        template = (x == DefaultTemplate) ? "#{x} (default)" : x
-        desc << "  * #{template}\n"
-      end
+      desc = "Create a new RubyMotion project from one of the following templates: \n\n"
+      desc << Motion::Project::Template.all_templates_description
       desc
     end
 
@@ -55,7 +50,7 @@ module Motion; class Command
     end
 
     def initialize(argv)
-      @template = argv.option('template') || DefaultTemplate
+      @template = argv.option('template') || Motion::Project::Template::DefaultTemplate
       @app_name = argv.shift_argument
       super
     end
