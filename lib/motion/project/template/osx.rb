@@ -122,19 +122,15 @@ task :static do
   App.build('MacOSX', :static => true)
 end
 
-OSX_INSTRUMENTS_TEMPLATES = [
-  'Allocations', 'Leaks', 'Zombies',
-  'GC Monitor', 'Activity Monitor', 'Time Profiler', 'Multicore',
-  'Dispatch', 'System Trace', 'Event Profiler', 'Counters',
-  'File Activity', 'Core Data', 'UI Recorder', 'Sudden Termination',
-  'Cocoa Layout'
-]
+def profiler_templates
+  App.config.profiler_known_templates
+end
 
 namespace :profile do
   %w(development release).each do |mode|
     desc "Run a #{mode} build through Instruments"
     task mode => "build:#{mode}" do
-      plist = App.config.profiler_config_plist('MacOSX', "-NSDocumentRevisionsDebugMode YES #{ENV['args']}", ENV['template'], OSX_INSTRUMENTS_TEMPLATES)
+      plist = App.config.profiler_config_plist('MacOSX', "-NSDocumentRevisionsDebugMode YES #{ENV['args']}", ENV['template'], profiler_templates)
       App.profile('MacOSX', plist)
     end
   end
@@ -142,7 +138,7 @@ namespace :profile do
   desc 'List all built-in OS X Instruments templates'
   task :templates do
     puts "Built-in OS X Instruments templates:"
-    OSX_INSTRUMENTS_TEMPLATES.each do |template|
+    profiler_templates.each do |template|
       puts "* #{template}"
     end
   end
