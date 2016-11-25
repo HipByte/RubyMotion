@@ -36,7 +36,7 @@ class REPLLauncher
   def initialize(opts)
     opts.each do |key, value|
       unless VALID_VARS.include?(key.to_s)
-        App.fail("Invalid option for jit-bridge: `#{key.to_s}'")
+        App.fail("Invalid option for jit-bridge: `#{key}'")
       end
     end
     @opts = opts

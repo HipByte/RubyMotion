@@ -259,7 +259,7 @@ EOS
     end
 
     def gen_method(prefix)
-      method = "#{prefix}_#{@type.to_s}".intern
+      method = "#{prefix}_#{@type}".intern
       raise "Invalid vendor project type: #{@type}" unless respond_to?(method)
       method
     end
