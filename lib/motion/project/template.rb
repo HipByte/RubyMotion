@@ -102,7 +102,7 @@ module Motion; module Project
       @template_directory = self.class.all_templates[@template_name]
       unless @template_directory
         desc = "Cannot find template `#{@template_name}' in:\n\n"
-        desc << Paths.map { |x|  "  * #{x}\n" }.join('')
+        desc << Paths.map { |x| "  * #{x}\n" }.join('')
         desc << "\nAvailable templates:\n\n"
         desc << self.class.all_templates_description
         raise InformativeError, desc
