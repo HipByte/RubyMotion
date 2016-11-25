@@ -258,12 +258,7 @@ task :build do
       end
     end
 
-    ruby_objs = app_objs = parallel.objects
-    spec_objs = []
-    if App.config.spec_mode
-      app_objs = ruby_objs[0...App.config.ordered_build_files.size]
-      spec_objs = ruby_objs[-(App.config.spec_files.size)..-1]
-    end
+    ruby_objs = parallel.objects
 
     FileUtils.touch(objs_build_dir) if ruby_objs_changed
 
@@ -734,14 +729,12 @@ def run_apk(mode)
       sh "\"#{adb_path}\" #{adb_mode_flag(mode)} forward tcp:#{local_tcp} tcp:#{remote_tcp}"
       # Determine architecture of device.
       arch = `\"#{adb_path}\" #{adb_mode_flag(mode)} shell getprop ro.product.cpu.abi`.strip
-      repl_arch = 'i386'
       case arch
         when 'x86'
         when /^armeabi/
           arch = 'armv5te'
         when 'arm64-v8a'
           if App.config.archs.include?(arch)
-            repl_arch = 'x86_64'
           elsif App.config.archs.include?('armv7')
             arch = 'armv7'
           else

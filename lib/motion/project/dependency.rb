@@ -108,7 +108,7 @@ module Motion; module Project
       end
 
       def on_var_ref(args)
-        type, name, position = args
+        type, name, _position = args
         if type == :@const
           @referred << name
           return [:referred, name]
@@ -116,7 +116,7 @@ module Motion; module Project
       end
 
       def on_const_path_ref(parent, args)
-        type, name, position = args
+        type, name, _position = args
         if type == :@const
           @referred << name
           if parent && parent[0] == :referred
@@ -127,7 +127,7 @@ module Motion; module Project
       end
 
       def on_assign(const, *args)
-        type, name, position = const
+        type, name, _position = const
         if type == :@const
           @defined << name
           return [:defined, name]
@@ -143,7 +143,7 @@ module Motion; module Project
       end
 
       def handle_module_class_event(const, *args)
-        type, name, position = const
+        type, name, _position = const
         if type == :@const
           @defined << name
           @referred.delete(name)

@@ -418,7 +418,8 @@ EOS
     def launch_image_metadata(path)
       filename = File.basename(path, File.extname(path))
       filename_components = filename.split(/-|@|~/)
-      name = filename_components.shift
+      filename_components.shift
+
       scale = (filename_components.find { |c| c =~ /\dx/ } || 1).to_i
       orientation = filename_components.find { |c| c =~ /Portrait|PortraitUpsideDown|Landscape|LandscapeLeft|LandscapeRight/ } || 'Portrait'
       expected_height = filename_components.find { |c| c =~ /\d+h/ }
