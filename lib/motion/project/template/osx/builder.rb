@@ -49,7 +49,7 @@ module Motion; module Project
     # @param [OSXConfig] config
     #        The configuration for this build.
     #
-    # @param [String] config
+    # @param [String] platform
     #        The platform for which to build, which in this case should always
     #        be `MacOSX`.
     #
