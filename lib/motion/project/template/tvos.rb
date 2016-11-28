@@ -192,6 +192,9 @@ task :device => :archive do
   flags = Rake.application.options.trace ? '-d' : ''
   Signal.trap(:INT) {} if ENV['debug']
   `#{env} #{deploy} #{flags} -tvos \"#{device_id}\" \"#{App.config.archive}\"`
+  unless $?.success?
+    App.fail "Failed to install app to device."
+  end
 
   if repl_mode
     kernel = File.join(App.config.datadir, "AppleTVOS", "kernel-arm64.bc")

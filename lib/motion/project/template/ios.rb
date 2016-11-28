@@ -293,6 +293,9 @@ task :device => :archive do
   else
     remote_arch = `#{cmd}`.strip
   end
+  if !$?.success? && !ENV['debug']
+    App.fail "Failed to install app to device."
+  end
 
   if repl_mode
     kernel_path = nil
