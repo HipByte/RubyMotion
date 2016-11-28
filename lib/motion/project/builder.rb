@@ -658,6 +658,10 @@ EOS
       end
     end
 
+    def relative_path(path)
+      path
+    end
+
     class << self
       def common_build_dir
         dir = File.expand_path("~/Library/RubyMotion/build")
