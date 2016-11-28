@@ -210,6 +210,7 @@ task :device => :archive do
       "platform" => "iPhoneOS",
       "device-id" => device_id,
       "app-bundle-path" => App.config.app_bundle('AppleTVOS'),
+      "xcode-path" => App.config.xcode_dir,
       "bs_files" => [App.config.bridgesupport_files, App.config.vendor_projects.map(&:bs_files)].flatten,
       "verbose" => App::VERBOSE
     })

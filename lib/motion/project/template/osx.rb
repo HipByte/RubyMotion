@@ -80,6 +80,7 @@ task :run do
 
   repl_launcher = Motion::Project::REPLLauncher.new({
     "app-bundle-path" => exec,
+    "xcode-path" => App.config.xcode_dir,
     "arguments" => ENV['args'],
     "debug-mode" => !!ENV['debug'],
     "spec-mode" => App.config.spec_mode,
