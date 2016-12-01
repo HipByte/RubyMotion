@@ -1,3 +1,59 @@
+= RubyMotion 4.16 =
+
+  * Introduced the `filter' option to `rake spec', which can be used to filter
+    the specs that should be run using a regex.
+    Example: rake spec filter="can retrieve users"
+    Thanks to Pablo Alcalde for the patch (pull request #246).
+  * [iOS, OSX, watchOS, tvOS] Added support for Xcode 8.2 beta.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug where 3rd-party libraries could not
+    be built with `rake build'.
+  * [iOS, OSX, watchOS, tvOS] Fixed a bug which it would cause a compile error
+    with 32bit app when a method which returns a structure value was called if
+    the structure has only one float field.
+  * [iOS, OSX, watchOS] Fixed an error when compiling 32-bit binary when
+    compiling a Ruby method which overrides an Objective-C method which returns
+    a structure value.
+  * [iOS, watchOS, tvOS] Fixed a bug where `eval()' was available in
+    application code.
+  * [iOS, tvOS] Fixed a bug in `motion device-console' and `rake device' when
+    some devices are connected via USB.
+  * [tvOS, watchOS] Fixed a bug where `rake clean' wouldn't remove the build
+    directories in 3rd-party libraries.
+  * [iOS] Fixed a regression where ibtool would cause an error if extension and
+    container app has storyboard files.
+  * [iOS] Fixed a problem in `rake profile template="..."'.
+  * [iOS] Fixed an issue when running specs where if a view was not found using
+    the helper method `view(label)' it would not be included in the error count.
+    Thanks to Pablo Alcalde for the patch (pull request #244).
+  * [iOS] Fixed an issue where an extension's Gemfile was not being
+    automatically installed when compiling its parent application.
+  * [iOS] Fixed an issue where the wrong extension bundle could be copied to
+    the resulting app if there was no change to the extension between builds.
+  * [tvOS] Fixed a problem which it could not submit app to AppStore.
+  * [watchOS] Removed watchOS v1 (WatchKit extension) app because to submitted
+    to the App Store must be apps built with the watchOS 2 SDK or later.
+    Please use 'ios-watch-app' template for WatchOS apps.
+  * [watchOS] Changed default deployment target value to latest SDK version. If
+    you need, please specify deployment target using `app.deployment_target' in
+    Rakefile of watchOS app.
+  * [watchOS] Fixed a problem which debug log wouldn't be displayed properly
+    with `rake watch'.
+  * [watchOS] Fixed a problem which `rake ib' on watchOS app project causes an
+    error if customized a deployment target.
+  * [watchOS] Fixed a trivial problem in `rake watch skip_build=true'.
+  * [watchOS] Fixed a bug which a structure value couldn't be passed into a
+    method as the argument and couldn't be retrieved from method as returned
+    value (such as MKCoordinateRegion/NSRange value).
+  * [watchOS] Got rid of warning messages when compiling Ruby files for device.
+  * [OSX] Fixed a problem which it wouldn't be able to compile OS X app without
+    installing Xcode command line tools.
+  * [OSX] Fixed a bug where `rake profile:templates' displayed the invalid
+    instruments templates.
+  * [Android] Updated Android NDK to android-ndk-r13b version. Please update
+    the Android NDK toolchain by using `motion android-setup' command.
+  * [Android] Fixed a compilation error if the same Ruby subclass of a Java
+    class was defined in two different files.
+
 = RubyMotion 4.15 =
 
   * `motion update` command will exit with code 0 if there is no update.
@@ -35,6 +91,8 @@
     will continue running when terminate REPL with ^C.
   * [watchOS] Fixed a bug where the MapKit framework in WatchKit extension was
     not being imported by default.
+  * [watchOS] Fixed a bug which `rake watch display=regular|compact' would not
+    launch proper watchOS simulator.
   * [OSX] Fixed crash when launching document-based applications via rake.
   * [OSX, watchOS, Android] Fixed a bug where REPL won't be terminated with ^D.
   * [Android] Added support for API 25 (experimental).
