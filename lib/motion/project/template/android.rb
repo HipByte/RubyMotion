@@ -775,7 +775,7 @@ namespace 'emulator' do
   end
 
   task :build do
-    App.config.archs << 'x86' unless App.config.archs.include?('x86')
+    App.config.archs = ['x86'] # Build x86 binary only for emulator
     Rake::Task["build"].invoke
   end
 end
