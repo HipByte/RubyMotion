@@ -221,8 +221,9 @@ module Motion; module Project
     end
 
     def package
-      #Legalize package names so they don't include '-'
-      @package ||= 'com.yourcompany' + '.' + name.downcase.gsub(/\s/, '').gsub('-', '_')
+      # Legalize package names so they don't include /[^a-zA-Z0-9_]/
+      # See https://developer.android.com/guide/topics/manifest/manifest-element.html
+      @package ||= 'com.yourcompany' + '.' + name.downcase.gsub(/\s/, '').gsub(/[^a-zA-Z0-9_]/, '_')
     end
 
     def package_path
