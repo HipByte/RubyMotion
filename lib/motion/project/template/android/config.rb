@@ -221,7 +221,8 @@ module Motion; module Project
     end
 
     def package
-      @package ||= 'com.yourcompany' + '.' + name.downcase.gsub(/\s/, '')
+      #Legalize package names so they don't include '-'
+      @package ||= 'com.yourcompany' + '.' + name.downcase.gsub(/\s/, '').gsub('-', '_')
     end
 
     def package_path
