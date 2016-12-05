@@ -223,6 +223,7 @@ module Motion; module Project
     def package
       # Legalize package names so they don't include /[^a-zA-Z0-9_]/
       # See https://developer.android.com/guide/topics/manifest/manifest-element.html
+      App.fail "Please use only ASCII letters in `app.name'." unless name.ascii_only?
       @package ||= 'com.yourcompany' + '.' + name.downcase.gsub(/\s/, '').gsub(/[^a-zA-Z0-9_]/, '_')
     end
 
