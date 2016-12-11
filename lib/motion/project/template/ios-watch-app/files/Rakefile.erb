@@ -10,6 +10,21 @@ end
 
 Motion::Project::App.setup do |app|
   # Use `rake config' to see complete project settings.
+
+  # Configration for Complication
+  app.frameworks << 'ClockKit'
+  app.info_plist['CLKComplicationPrincipalClass'] = 'ComplicationController'
+  app.info_plist['CLKComplicationDefaultImagesAssetName'] = 'Complication'
+  app.info_plist['CLKComplicationSupportedFamilies'] = %w(
+    CLKComplicationFamilyModularSmall
+    CLKComplicationFamilyModularLarge
+    CLKComplicationFamilyUtilitarianSmall
+    CLKComplicationFamilyUtilitarianSmallFlat
+    CLKComplicationFamilyUtilitarianLarge
+    CLKComplicationFamilyCircularSmall
+    CLKComplicationFamilyExtraLarge
+  )
+  app.info_plist['WKExtensionDelegateClassName'] = 'ExtensionDelegate'
 end
 
 require 'ib/tasks'
