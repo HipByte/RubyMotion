@@ -385,6 +385,14 @@ EOS
           end
         end
 
+        target_device = config.device_family
+
+        if platform.start_with?("Watch")
+          target_device = :watch
+          asset_name = config.info_plist['CLKComplicationDefaultImagesAssetName']
+          app_icons_options = " --complication #{asset_name}" if asset_name
+        end
+
         extra_option = '--output-partial-info-plist /tmp/assetcatalog_generated_info.plist'
         extra_option << " --app-icon '#{config.icon_name}'" unless config.icon_name.empty?
         extra_option << " --product-type #{config.product_type}" unless config.product_type.empty?
@@ -395,7 +403,7 @@ EOS
         cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
               "--notices --warnings --platform #{config.deploy_platform.downcase} " \
               "--minimum-deployment-target #{config.deployment_target} " \
-              "#{Array(config.device_family).map { |d| "--target-device #{d}" }.join(' ')} " \
+              "#{Array(target_device).map { |d| "--target-device #{d}" }.join(' ')} " \
               "#{app_icons_options} --compress-pngs #{extra_option} --compile \"#{app_resources_dir}\" " \
               "\"#{assets_bundles.map { |f| File.expand_path(f) }.join('" "')}\""
         $stderr.puts(cmd) if App::VERBOSE
