@@ -630,7 +630,7 @@ EOS
           app_icon_and_launch_image_options << " --app-icon 'App Icon & Top Shelf Image'"
         end
 
-        App.info 'Compile', relative_path(assets_bundles.join(", "))
+        App.info 'Compile', assets_bundles.map { |x| relative_path(x) }.join(", ")
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
         cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
