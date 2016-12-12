@@ -289,7 +289,7 @@ EOS
                               "--app-icon \"#{config.app_icon_name_from_asset_bundle}\""
         end
 
-        App.info 'Compile', assets_bundles.join(", ")
+        App.info 'Compile', assets_bundles.map { |x| relative_path(x) }.join(", ")
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
         cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
