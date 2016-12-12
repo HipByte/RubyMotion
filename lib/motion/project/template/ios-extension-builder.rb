@@ -397,7 +397,7 @@ EOS
         extra_option << " --app-icon '#{config.icon_name}'" unless config.icon_name.empty?
         extra_option << " --product-type #{config.product_type}" unless config.product_type.empty?
 
-        App.info 'Compile', assets_bundles.join(", ")
+        App.info 'Compile', assets_bundles.map { |x| relative_path(x) }.join(", ")
         app_resources_dir = File.expand_path(config.app_resources_dir(platform))
         FileUtils.mkdir_p(app_resources_dir)
         cmd = "\"#{config.xcode_dir}/usr/bin/actool\" --output-format human-readable-text " \
