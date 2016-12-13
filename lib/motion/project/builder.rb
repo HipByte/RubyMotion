@@ -461,7 +461,7 @@ EOS
       FileUtils.mkdir_p(app_resources_dir)
       reserved_app_bundle_files = [
         '_CodeSignature/CodeResources', 'CodeResources', 'embedded.mobileprovision',
-        'Info.plist', 'PkgInfo',
+        'Info.plist', 'Entitlements.plist', 'PkgInfo',
         convert_filesystem_encoding(config.name)
       ]
       resources_exclude_extnames = ['.xib', '.storyboard', '.xcdatamodeld',
