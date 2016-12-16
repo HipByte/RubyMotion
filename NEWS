@@ -1,3 +1,17 @@
+= RubyMotion 4.17 =
+
+  * Fixed some memory leaks in REPL.
+  * [iOS] RubyMotion Starter now targets iOS 10.2.
+  * [iOS] Got rid of warning message when building iOS extensions for the
+    device.
+  * [watchOS] Added support watchOS complications in the watch app template.
+  * [watchOS] Fixed a bug where image assets could not be used in watchOS
+    extensions.
+  * [Android] Fixed a problem where a build error would be triggered if
+    `app.name' included uncommon characters.
+    Thanks to Hwee-Boon Yar for the patch (pull request #248).
+  * [Android] Improve build time slightly for emulator.
+
 = RubyMotion 4.16 =
 
   * Introduced the `filter' option to `rake spec', which can be used to filter
