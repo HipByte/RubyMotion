@@ -350,9 +350,12 @@ EOS
           when :audio then 'audio'
           when :location then 'location'
           when :voip then 'voip'
+          when :fetch then 'fetch'
+          when :remote_notification then 'remote-notification'
           when :newsstand_content then 'newsstand-content'
           when :external_accessory then 'external-accessory'
           when :bluetooth_central then 'bluetooth-central'
+          when :bluetooth_peripheral then 'bluetooth-peripheral'
           else
             App.fail "Unknown background_modes value: `#{mode}'"
         end
