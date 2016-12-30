@@ -481,13 +481,12 @@ module Bacon
           end
         end
 
+        Counter[:errors] += 1
         @error = if e.is_a? Error
-          Counter[e.count_as] += 1
-          "#{e.count_as.to_s.upcase} - #{e}"
-        else
-          Counter[:errors] += 1
-          "ERROR: #{e.class} - #{e}"
-        end
+                   "#{e.count_as.to_s.upcase} - #{e}"
+                 else
+                   "ERROR: #{e.class} - #{e}"
+                 end
       end
     end
   end
