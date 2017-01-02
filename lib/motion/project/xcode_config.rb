@@ -32,7 +32,7 @@ module Motion; module Project
   class XcodeConfig < Config
     variable :xcode_dir, :sdk_version, :deployment_target, :frameworks,
              :weak_frameworks, :embedded_frameworks, :external_frameworks, :framework_search_paths,
-             :libs, :identifier, :codesign_certificate, :short_version, :entitlements, :delegate_class, :embed_dsym,
+             :libs, :identifier, :codesign_certificate, :codesign_disable_timestamp, :short_version, :entitlements, :delegate_class, :embed_dsym,
              :version
 
     def initialize(project_dir, build_mode)
@@ -53,6 +53,7 @@ module Motion; module Project
       @embed_dsym = (development? ? true : false)
       @vendor_projects = []
       @version = '1.0'
+      @codesign_disable_timestamp = false
     end
 
     def xcode_dir=(xcode_dir)
