@@ -53,7 +53,7 @@ module Motion; module Project
       @embed_dsym = (development? ? true : false)
       @vendor_projects = []
       @version = '1.0'
-      @codesign_disable_timestamp = false
+      @codesign_disable_timestamp = (development? ? true : false)
     end
 
     def xcode_dir=(xcode_dir)
