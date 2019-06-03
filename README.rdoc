@@ -1,4 +1,4 @@
-==[!] This project has been moved here: http://github.com/amirrajan/rubymotion-applied. Report bugs and contribute to the projects specified in the README.md within the rubymotion-applied repository.==
+==[!] This project has been moved here: http://github.com/amirrajan/rubymotion-applied. Report bugs and contribute to the projects specified in the README.md within the rubymotion-applied repository.
 
 
 = RubyMotion
