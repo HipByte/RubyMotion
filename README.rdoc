@@ -1,3 +1,6 @@
+**[!] This project has been moved [here](http://github.com/amirrajan/rubymotion-applied). Report bugs and contribute to the projects specified in the README.md within the rubymotion-applied repository.**
+
+
 = RubyMotion
 
 RubyMotion is a commercial toolchain for iOS, OS X and Android development using the
