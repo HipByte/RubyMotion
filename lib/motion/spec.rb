@@ -436,11 +436,11 @@ module Bacon
     end
 
     def finish_spec
+      run_after_filters
       if !@exception_occurred && Counter[:requirements] == @number_of_requirements_before
         # the specification did not contain any requirements, so it flunked
         execute_block { raise Error.new(:missing, "empty specification: #{@context.name} #{@description}") }
       end
-      run_after_filters
       exit_spec unless postponed?
     end
 
