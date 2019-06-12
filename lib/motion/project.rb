@@ -86,3 +86,7 @@ task :__local_crashlog do
     sh "/usr/bin/open -a Console \"#{logs.last}\""
   end
 end
+
+def spec_mode?
+  Rake.application.top_level_tasks.include? 'spec'
+end
