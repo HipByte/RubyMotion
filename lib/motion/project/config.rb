@@ -273,10 +273,24 @@ module Motion; module Project
         # Project specs.
         specs = Dir.glob(File.join(specs_dir, '**', '*.rb')) - helpers
         if files_filter = ENV['files']
-          # Filter specs we want to run. A filter can be either the basename of a spec file or its path.
+          # Filter specs we want to run. A filter can be either the basename of a spec file, its path, or a folder of spec files.
           files_filter = files_filter.split(',')
           files_filter.map! { |x| File.exist?(x) ? File.expand_path(x) : x }
-          specs.delete_if { |x| [File.expand_path(x), File.basename(x, '.rb'), File.basename(x, '_spec.rb')].none? { |p| files_filter.include?(p) } }
+          # Remove spec files that don't match
+          specs.delete_if do |x|
+            # spec files can match the entire path, or with or withour ".rb" or "_spec.rb"
+            [File.expand_path(x), File.basename(x, '.rb'), File.basename(x, '_spec.rb')].none? do |p|
+              files_filter.any? do |f|
+                if File.directory?(f)
+                  # If the filter is a folder, check to see if the file is in that folder
+                  p.index(f) == 0
+                else
+                  # Otherwise the names should match
+                  f == p
+                end
+              end
+            end
+          end
         end
         spec_core_files + helpers + specs
       end
