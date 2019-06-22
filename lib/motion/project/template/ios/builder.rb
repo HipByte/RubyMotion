@@ -72,7 +72,7 @@ module Motion; module Project
       # Copy the provisioning profile.
       bundle_provision = File.join(bundle_path, "embedded.mobileprovision")
       App.info 'Create', bundle_provision
-      FileUtils.cp config.provisioning_profile, bundle_provision
+      FileUtils.cp File.expand_path(config.provisioning_profile), bundle_provision
 
       # Codesign.
       codesign_cmd = "CODESIGN_ALLOCATE=\"#{File.join(config.xcode_dir, 'Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate')}\" /usr/bin/codesign"
