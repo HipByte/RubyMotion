@@ -107,6 +107,7 @@ module Motion; module Project
         command = "/usr/bin/codesign --force --sign '#{config.codesign_certificate}' "
         command << "--deep " if deep
         command << "--entitlements '#{entitlements_path}' " if entitlements_path
+        command << "--timestamp=none " if config.codesign_disable_timestamp
         command << "'#{bundle}'"
         sh(command)
       end
