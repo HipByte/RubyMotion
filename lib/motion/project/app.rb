@@ -71,7 +71,16 @@ module Motion; module Project
       end
 
       def setup(&block)
-        config.setup_blocks << block
+        config_without_setup.setup_blocks << block
+        config
+      end
+
+      def pre_setup(&block)
+        config_without_setup.pre_setup_blocks << block
+      end
+
+      def post_setup(&block)
+        config_without_setup.post_setup_blocks << block
       end
 
       def build(platform, opts={})

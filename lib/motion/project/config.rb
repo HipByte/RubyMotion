@@ -79,7 +79,8 @@ module Motion; module Project
 
     def initialize(project_dir, build_mode)
       @project_dir = project_dir
-      @files = Dir.glob(File.join(project_dir, 'app/**/*.rb'))
+      @files = []
+      @app_dir = 'app'
       @build_mode = build_mode
       @name = 'Untitled'
       @resources_dirs = [File.join(project_dir, 'resources')]
@@ -112,16 +113,51 @@ module Motion; module Project
       map
     end
 
+    def pre_setup_blocks
+      @pre_setup_blocks ||= []
+    end
+
     def setup_blocks
       @setup_blocks ||= []
     end
 
+    def post_setup_blocks
+      @post_setup_blocks ||= []
+    end
+
     def setup
+      should_validate = false
+
+      if @pre_setup_blocks
+        @pre_setup_blocks.each { |b| b.call(self) }
+        should_validate = true
+        @pre_setup_blocks = nil
+      end
+
+      if @app_dir
+        Dir.glob(File.join(project_dir, "#{@app_dir}/**/*.rb")).each do |app_file|
+          @files << app_file unless @files.include?(app_file)
+        end
+        should_validate = true
+        @app_dir = nil
+      end
+
       if @setup_blocks
         @setup_blocks.each { |b| b.call(self) }
+        should_validate = true
         @setup_blocks = nil
+      end
+
+      if @post_setup_blocks
+        @post_setup_blocks.each { |b| b.call(self) }
+        should_validate = true
+        @post_setup_blocks = nil
+      end
+
+      if should_validate
         validate
       end
+
       self
     end
 
